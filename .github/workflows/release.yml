@@ -20,8 +20,6 @@ jobs:
       run: dotnet build --configuration Release
     - name: Pack with dotnet
       run: dotnet pack /home/runner/work/nacos-sdk-csharp/nacos-sdk-csharp/nacos-sdk-csharp.sln -o /home/runner/work/nugetpkgs -c Release --no-build
-    - name: list temp
-      run: ls /home/runner/work/nugetpkgs
     - name: Upload artifact
       uses: actions/upload-artifact@v1
       with:
@@ -38,10 +36,10 @@ jobs:
           uses: actions/download-artifact@v1
           with:
             name: nugetpkgs
+        - name: list nugetpkgs
+          run: ls nugetpkgs
         - name: Release
           run: |
-            ls
-            ls nugetpkgs
             for file in nugetpkgs/*.nupkg
             do
               dotnet nuget push $file -k ${{ secrets.NUGET_API_KEY }} --skip-duplicate -s https://www.nuget.org/api/v2/package
