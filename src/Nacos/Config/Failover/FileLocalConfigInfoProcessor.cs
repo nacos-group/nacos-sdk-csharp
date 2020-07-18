@@ -1,81 +1,91 @@
 ﻿namespace Nacos
 {
     using System.IO;
+    using System;
     using System.Text;
     using System.Threading.Tasks;
 
     public class FileLocalConfigInfoProcessor : ILocalConfigInfoProcessor
     {
-        private readonly string _failover_base = Path.Combine(Directory.GetCurrentDirectory(), "nacos-data", "data");
-        private readonly string _snapshot_base = Path.Combine(Directory.GetCurrentDirectory(), "nacos-data", "snapshot");
+        private readonly string failover_base = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal), "nacos", "config");
 
-        public async Task<string> GetFailoverAsync(string dataId, string group, string tenant)
+        private readonly string snapshot_base = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal), "nacos", "config");
+
+        public async Task<string> GetFailoverAsync(string serverName, string dataId, string group, string tenant)
+        {
+            FileInfo file = GetFailoverFile(serverName, dataId, group, tenant);
+
+            if (!file.Exists)
+            {
+                return null;
+            }
+
+            using (FileStream fs = new FileStream(file.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                byte[] readByte = new byte[fs.Length];
+                await fs.ReadAsync(readByte, 0, readByte.Length);
+                string readStr = Encoding.UTF8.GetString(readByte);
+                fs.Close();
+                return readStr;
+            }
+        }
+
+        private FileInfo GetFailoverFile(string serverName, string dataId, string group, string tenant)
         {
             string failoverFile;
+            failoverFile = Path.Combine(snapshot_base, serverName + "_nacos");
             if (!string.IsNullOrEmpty(tenant))
             {
-                failoverFile = Path.Combine(_snapshot_base, "config-data-tenant", tenant, group);
+                failoverFile = Path.Combine(failoverFile, "config-data-tenant", tenant, group, dataId);
             }
             else
             {
-                failoverFile = Path.Combine(_snapshot_base, "config-data", group);
+                failoverFile = Path.Combine(failoverFile, "config-data", group, dataId);
             }
 
-            var file = new FileInfo(failoverFile + dataId);
-
-            if (!file.Exists)
-            {
-                return null;
-            }
-
-            using (FileStream fs = new FileStream(file.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            {
-                byte[] readByte = new byte[fs.Length];
-                await fs.ReadAsync(readByte, 0, readByte.Length);
-                string readStr = Encoding.UTF8.GetString(readByte);
-                fs.Close();
-                return readStr;
-            }
-        }
-
-        public async Task<string> GetSnapshotAync(string dataId, string group, string tenant)
-        {
-            FileInfo file = GetSnapshotFile(dataId, group, tenant);
-
-            if (!file.Exists)
-            {
-                return null;
-            }
-
-            using (FileStream fs = new FileStream(file.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            {
-                byte[] readByte = new byte[fs.Length];
-                await fs.ReadAsync(readByte, 0, readByte.Length);
-                string readStr = Encoding.UTF8.GetString(readByte);
-                fs.Close();
-                return readStr;
-            }
-        }
-
-        private FileInfo GetSnapshotFile(string dataId, string group, string tenant)
-        {
-            string snapshotFile;
-            if (!string.IsNullOrEmpty(tenant))
-            {
-                snapshotFile = Path.Combine(_snapshot_base, "snapshot-tenant", tenant, group);
-            }
-            else
-            {
-                snapshotFile = Path.Combine(_snapshot_base, "snapshot", group);
-            }
-
-            var file = new FileInfo(snapshotFile + dataId);
+            var file = new FileInfo(failoverFile);
             return file;
         }
 
-        public async Task SaveSnapshotAsync(string dataId, string group, string tenant, string config)
+        public async Task<string> GetSnapshotAync(string name, string dataId, string group, string tenant)
         {
-            FileInfo snapshotFile = GetSnapshotFile(dataId, group, tenant);
+            FileInfo file = GetSnapshotFile(name, dataId, group, tenant);
+
+            if (!file.Exists)
+            {
+                return null;
+            }
+
+            using (FileStream fs = new FileStream(file.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                byte[] readByte = new byte[fs.Length];
+                await fs.ReadAsync(readByte, 0, readByte.Length);
+                string readStr = Encoding.UTF8.GetString(readByte);
+                fs.Close();
+                return readStr;
+            }
+        }
+
+        private FileInfo GetSnapshotFile(string envName, string dataId, string group, string tenant)
+        {
+            string snapshotFile;
+            snapshotFile = Path.Combine(snapshot_base, envName + "_nacos");
+            if (!string.IsNullOrEmpty(tenant))
+            {
+                snapshotFile = Path.Combine(snapshotFile, "snapshot-tenant", tenant, group, dataId);
+            }
+            else
+            {
+                snapshotFile = Path.Combine(snapshotFile, "snapshot", group, dataId);
+            }
+
+            var file = new FileInfo(snapshotFile);
+            return file;
+        }
+
+        public async Task SaveSnapshotAsync(string envName, string dataId, string group, string tenant, string config)
+        {
+            FileInfo snapshotFile = GetSnapshotFile(envName, dataId, group, tenant);
             if (string.IsNullOrEmpty(config))
             {
                 if (snapshotFile.Exists)

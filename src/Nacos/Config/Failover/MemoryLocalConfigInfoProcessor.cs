@@ -17,7 +17,7 @@
             return $"{tenant}-{group}-{dataId}";
         }
 
-        public async Task<string> GetFailoverAsync(string dataId, string group, string tenant)
+        public async Task<string> GetFailoverAsync(string serverName, string dataId, string group, string tenant)
         {
             var cacheKey = GetCacheKey(dataId, group, tenant);
 
@@ -26,7 +26,7 @@
             return await Task.FromResult(config);
         }
 
-        public async Task<string> GetSnapshotAync(string dataId, string group, string tenant)
+        public async Task<string> GetSnapshotAync(string name, string dataId, string group, string tenant)
         {
             var cacheKey = GetCacheKey(dataId, group, tenant);
 
@@ -35,7 +35,7 @@
             return await Task.FromResult(config);
         }
 
-        public async Task SaveSnapshotAsync(string dataId, string group, string tenant, string config)
+        public async Task SaveSnapshotAsync(string envName, string dataId, string group, string tenant, string config)
         {
             var cacheKey = GetCacheKey(dataId, group, tenant);
 
