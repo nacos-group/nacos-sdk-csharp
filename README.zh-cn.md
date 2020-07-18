@@ -1,36 +1,37 @@
-# nacos-sdk-csharp 　　　　　   　　   　　　[中文](./README.zh-cn.md)
+# nacos-sdk-csharp 　　　　   　　　　   　　[English](./README.md)
 
-csharp(dotnet core) implementation of [nacos](https://nacos.io/) OpenAPI.
+基于C#(dotnet core)实现 [nacos](https://nacos.io/) OpenAPI 的非官方版本
 
 ![](https://img.shields.io/nuget/v/nacos-sdk-csharp-unofficial.svg)
 
 ![](./media/prj.png)
 
-## CI Build Status
+## CI构建状态
 
 | Platform | Build Server | Master Status  |
 |--------- |------------- |---------|
-| Github Action   | Linux/Windows |![nacos-sdk-csharp CI](https://github.com/nacos-group/nacos-sdk-csharp/workflows/nacos-sdk-csharp%20CI/badge.svg)
+| Github Action   | Linux/OSX |![nacos-sdk-csharp CI](https://github.com/catcherwong/nacos-sdk-csharp/workflows/nacos-sdk-csharp%20CI/badge.svg)
+ |
 
-## Installation
+## 安装Nuget包
 
 ```bash
 dotnet add package nacos-sdk-csharp-unofficial
 ```
 
-## Features
+## 功能特性
 
-- Basic OpenApi Usages
-- Integrate ASP.NET Core Configuration System
-- Service Registration and Discovery With ASP.NET Core
-- Integrate With Aliyun ACM
+- 基本的Open Api接口封装
+- 集成ASP.NET Core的配置系统
+- 简易ASP.NET Core的服务注册和发现
+- 和阿里云应用配置管理(Application Configuration Management，简称 ACM)集成使用
 - ...
 
-## Basic Usage
+## 简易用法
 
-### Simple Configuration Usage
+### 配置
 
-1. Configure in `Program.cs`
+1. 在 `Program.cs` 进行如下配置
 
 ```cs
 public static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -48,7 +49,7 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
         })
 ```
 
-2. Modify `appsettings.json`
+2. 修改 `appsettings.json`
 
 ```JSON
 {
@@ -67,7 +68,7 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
 }
 ```
 
-3. Use via .NET Core's Way
+3. 用原生的.NET Core方式来读取Nacos配置
 
 ```cs
 [ApiController]
@@ -104,11 +105,11 @@ public class ConfigController : ControllerBase
 }
 ```
 
-### Service Registration and Discovery
+### 服务注册和发现
 
-1. Service Registration
+1. 服务注册
 
-Configure in `Program.cs`
+在 `Program.cs` 中配置
 
 ```cs
 public class Startup
@@ -134,7 +135,7 @@ public class Startup
 }
 ```
 
-Modify `appsettings.json`
+修改 `appsettings.json`
 
 ```JSON
 "nacos": {
@@ -146,7 +147,7 @@ Modify `appsettings.json`
   }
 ```
 
-2. Service Discovery
+2. 服务发现
 
 ```cs
 [Route("api/[controller]")]
@@ -163,8 +164,8 @@ public class ValuesController : ControllerBase
     [HttpGet("test")]
     public async Task<IActionResult> Test()
     {        
-        // need to know the service name.
-        // at this time only support random way.
+        // 这里需要知道被调用方的服务名
+        // 目前获取服务地址是随机的方式，后续会加入更多负载算法.
         var baseUrl = await _serverManager.GetServerAsync("App2");
                     
         if(string.IsNullOrWhiteSpace(baseUrl))

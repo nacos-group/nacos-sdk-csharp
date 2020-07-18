@@ -1,0 +1,46 @@
+name: nacos-sdk-csharp CI
+
+on:
+    push:
+      branches:
+      - master
+      - release/*
+
+jobs:
+  windows:    
+    name: windows
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.200
+    - name: Build with dotnet
+      run: dotnet build --configuration Release
+      
+  linux:    
+    name: linux
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.200
+    - name: Build with dotnet
+      run: dotnet build --configuration Release
+    - name: Pack with dotnet
+      run: dotnet pack /home/runner/work/nacos-sdk-csharp/nacos-sdk-csharp/nacos-sdk-csharp.sln -o /home/runner/work -c Release --no-build
+    - name: list temp
+      run: ls /home/runner/work
+    # should config Nuget_key  
+    #- name: Push to nuget
+    #  run: |
+    #    for file in /home/runner/work/*.nupkg
+    #    do
+    #      dotnet nuget push $file -k ${{ secrets.Nuget_Key }} --skip-duplicate -s https://www.nuget.org/api/v2/package
+    #    done  
+
+  

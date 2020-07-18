@@ -1,0 +1,101 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.156
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{C473C3A7-1B44-4E1F-83C0-745AD0566FE9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{8176B7FC-151E-4EFF-A693-F60A39109595}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nacos", "src\Nacos\Nacos.csproj", "{6D3AEDBE-B3CF-4CF8-94ED-49E347D740CE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nacos.Tests", "tests\Nacos.Tests\Nacos.Tests.csproj", "{F4B027C1-BBCB-450F-BC4D-76F05F2FB3EB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nacos.AspNetCore", "src\Nacos.AspNetCore\Nacos.AspNetCore.csproj", "{52E524B7-960D-4FB0-AD79-FF3A4395B613}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{25B1A184-1541-4F4E-A151-24A47CC08F34}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "App1", "samples\App1\App1.csproj", "{60EDEA1E-549B-44EA-8954-FA2AB85966A8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "App2", "samples\App2\App2.csproj", "{2D5914EC-97B4-4AAD-BCBA-6F9FF00F2AAE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "App3", "samples\App3\App3.csproj", "{17A6F76B-FEC2-419A-8C68-416032D3FBA1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nacos.Microsoft.Extensions.Configuration", "src\Nacos.Microsoft.Extensions.Configuration\Nacos.Microsoft.Extensions.Configuration.csproj", "{0E5305FF-6ADA-42E7-A5D1-C576E185F932}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MsConfigApp", "samples\MsConfigApp\MsConfigApp.csproj", "{D8A28493-0320-4C40-8EBB-0D0AE5015307}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nacos.Microsoft.Extensions.Configuration.Tests", "tests\Nacos.Microsoft.Extensions.Configuration.Tests\Nacos.Microsoft.Extensions.Configuration.Tests.csproj", "{11BEE2DE-B793-4868-B65C-FF915125A7DD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6D3AEDBE-B3CF-4CF8-94ED-49E347D740CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D3AEDBE-B3CF-4CF8-94ED-49E347D740CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D3AEDBE-B3CF-4CF8-94ED-49E347D740CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D3AEDBE-B3CF-4CF8-94ED-49E347D740CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4B027C1-BBCB-450F-BC4D-76F05F2FB3EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4B027C1-BBCB-450F-BC4D-76F05F2FB3EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4B027C1-BBCB-450F-BC4D-76F05F2FB3EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4B027C1-BBCB-450F-BC4D-76F05F2FB3EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52E524B7-960D-4FB0-AD79-FF3A4395B613}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52E524B7-960D-4FB0-AD79-FF3A4395B613}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52E524B7-960D-4FB0-AD79-FF3A4395B613}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52E524B7-960D-4FB0-AD79-FF3A4395B613}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60EDEA1E-549B-44EA-8954-FA2AB85966A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60EDEA1E-549B-44EA-8954-FA2AB85966A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60EDEA1E-549B-44EA-8954-FA2AB85966A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60EDEA1E-549B-44EA-8954-FA2AB85966A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D5914EC-97B4-4AAD-BCBA-6F9FF00F2AAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D5914EC-97B4-4AAD-BCBA-6F9FF00F2AAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D5914EC-97B4-4AAD-BCBA-6F9FF00F2AAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D5914EC-97B4-4AAD-BCBA-6F9FF00F2AAE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17A6F76B-FEC2-419A-8C68-416032D3FBA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17A6F76B-FEC2-419A-8C68-416032D3FBA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17A6F76B-FEC2-419A-8C68-416032D3FBA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17A6F76B-FEC2-419A-8C68-416032D3FBA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E5305FF-6ADA-42E7-A5D1-C576E185F932}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E5305FF-6ADA-42E7-A5D1-C576E185F932}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E5305FF-6ADA-42E7-A5D1-C576E185F932}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E5305FF-6ADA-42E7-A5D1-C576E185F932}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8A28493-0320-4C40-8EBB-0D0AE5015307}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8A28493-0320-4C40-8EBB-0D0AE5015307}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8A28493-0320-4C40-8EBB-0D0AE5015307}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8A28493-0320-4C40-8EBB-0D0AE5015307}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11BEE2DE-B793-4868-B65C-FF915125A7DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11BEE2DE-B793-4868-B65C-FF915125A7DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11BEE2DE-B793-4868-B65C-FF915125A7DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11BEE2DE-B793-4868-B65C-FF915125A7DD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6D3AEDBE-B3CF-4CF8-94ED-49E347D740CE} = {C473C3A7-1B44-4E1F-83C0-745AD0566FE9}
+		{F4B027C1-BBCB-450F-BC4D-76F05F2FB3EB} = {8176B7FC-151E-4EFF-A693-F60A39109595}
+		{52E524B7-960D-4FB0-AD79-FF3A4395B613} = {C473C3A7-1B44-4E1F-83C0-745AD0566FE9}
+		{60EDEA1E-549B-44EA-8954-FA2AB85966A8} = {25B1A184-1541-4F4E-A151-24A47CC08F34}
+		{2D5914EC-97B4-4AAD-BCBA-6F9FF00F2AAE} = {25B1A184-1541-4F4E-A151-24A47CC08F34}
+		{17A6F76B-FEC2-419A-8C68-416032D3FBA1} = {25B1A184-1541-4F4E-A151-24A47CC08F34}
+		{0E5305FF-6ADA-42E7-A5D1-C576E185F932} = {C473C3A7-1B44-4E1F-83C0-745AD0566FE9}
+		{D8A28493-0320-4C40-8EBB-0D0AE5015307} = {25B1A184-1541-4F4E-A151-24A47CC08F34}
+		{11BEE2DE-B793-4868-B65C-FF915125A7DD} = {8176B7FC-151E-4EFF-A693-F60A39109595}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A1C5215E-0E70-4C04-B21E-5209BCF32472}
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		Policies = $0
+		$0.DotNetNamingPolicy = $1
+		$1.DirectoryNamespaceAssociation = PrefixedHierarchical
+		$0.TextStylePolicy = $2
+		$2.FileWidth = 80
+		$2.TabsToSpaces = True
+		$2.scope = text/plain
+		$0.VersionControlPolicy = $3
+		description = nacos sdk csharp
+	EndGlobalSection
+EndGlobal
