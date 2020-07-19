@@ -16,7 +16,7 @@
         {
             _logger = loggerFactory.CreateLogger<NacosMsConfigClient>();
             _options = options;
-            _processor = new MemoryLocalConfigInfoProcessor();
+            _processor = new FileLocalConfigInfoProcessor();
 
             _httpAgent = new MsConfigServerHttpAgent(_options);
 

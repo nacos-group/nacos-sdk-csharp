@@ -34,11 +34,11 @@
             request.CheckParam();
 
             // read from local cache at first
-            var config = await GetProcessor().GetFailoverAsync(request.DataId, request.Group, request.Tenant);
+            var config = await GetProcessor().GetFailoverAsync(GetAgent().GetName(), request.DataId, request.Group, request.Tenant);
 
             if (!string.IsNullOrWhiteSpace(config))
             {
-                _logger.LogInformation($"[get-config] get failover ok, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, config ={config}");
+                _logger.LogInformation($"[get-config] get failover ok, envname={GetAgent().GetName()}, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, config ={config}");
                 return config;
             }
 
@@ -53,17 +53,17 @@
                     throw;
                 }
 
-                _logger.LogWarning($"[get-config] get from server error, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, msg={ex.Message}");
+                _logger.LogWarning($"[get-config] get from server error, envname={GetAgent().GetName()}, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, msg={ex.Message}");
             }
 
             if (!string.IsNullOrWhiteSpace(config))
             {
-                _logger.LogInformation($"[get-config] content from server {config}, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}");
-                await GetProcessor().SaveSnapshotAsync(request.DataId, request.Group, request.Tenant, config);
+                _logger.LogInformation($"[get-config] content from server {config}, envname={GetAgent().GetName()}, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}");
+                await GetProcessor().SaveSnapshotAsync(GetAgent().GetName(), request.DataId, request.Group, request.Tenant, config);
                 return config;
             }
 
-            config = await GetProcessor().GetSnapshotAync(request.DataId, request.Group, request.Tenant);
+            config = await GetProcessor().GetSnapshotAync(GetAgent().GetName(), request.DataId, request.Group, request.Tenant);
 
             return config;
         }
@@ -78,7 +78,7 @@
                     var result = await responseMessage.Content.ReadAsStringAsync();
                     return result;
                 case System.Net.HttpStatusCode.NotFound:
-                    await GetProcessor().SaveSnapshotAsync(request.DataId, request.Group, request.Tenant, null);
+                    await GetProcessor().SaveSnapshotAsync(GetAgent().GetName(), request.DataId, request.Group, request.Tenant, null);
                     return null;
                 case System.Net.HttpStatusCode.Forbidden:
                     throw new NacosException(ConstValue.NO_RIGHT, $"Insufficient privilege.");
@@ -225,7 +225,7 @@
             var request = (AddListenerRequest)requestInfo;
 
             // read the last config
-            var lastConfig = await GetProcessor().GetSnapshotAync(request.DataId, request.Group, request.Tenant);
+            var lastConfig = await GetProcessor().GetSnapshotAync(GetAgent().GetName(), request.DataId, request.Group, request.Tenant);
             request.Content = lastConfig;
 
             try
@@ -274,7 +274,7 @@
                 });
 
                 // update local cache
-                await GetProcessor().SaveSnapshotAsync(request.DataId, request.Group, request.Tenant, config);
+                await GetProcessor().SaveSnapshotAsync(GetAgent().GetName(), request.DataId, request.Group, request.Tenant, config);
 
                 // callback
                 foreach (var cb in request.Callbacks)

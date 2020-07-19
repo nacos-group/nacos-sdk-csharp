@@ -84,7 +84,7 @@
                 .ConfigureHttpClient(httpClientAction)
                 .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseProxy = false });
 
-            services.TryAddSingleton<ILocalConfigInfoProcessor, MemoryLocalConfigInfoProcessor>();
+            services.TryAddSingleton<ILocalConfigInfoProcessor, FileLocalConfigInfoProcessor>();
             services.TryAddSingleton<Nacos.Config.Http.IHttpAgent, Nacos.Config.Http.ServerHttpAgent>();
             services.AddSingleton<INacosConfigClient, NacosConfigClient>();
             services.AddSingleton<INacosNamingClient, NacosNamingClient>();
