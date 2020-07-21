@@ -1,9 +1,9 @@
-name: Release
+name: Release_Stable
 
 on:
     push:
-      branches:
-      - master
+      tags:
+        - **
 
 jobs:
   build_artifact:    
@@ -19,7 +19,7 @@ jobs:
     - name: Build with dotnet
       run: dotnet build --configuration Release
     - name: Pack with dotnet
-      run: dotnet pack /home/runner/work/nacos-sdk-csharp/nacos-sdk-csharp/nacos-sdk-csharp.sln --version-suffix `date +%Y%m%d%H%M%S` -o /home/runner/work/nugetpkgs -c Release --no-build
+      run: dotnet pack /home/runner/work/nacos-sdk-csharp/nacos-sdk-csharp/nacos-sdk-csharp.sln -o /home/runner/work/nugetpkgs -c Release --no-build
     - name: Upload artifact
       uses: actions/upload-artifact@v1
       with:

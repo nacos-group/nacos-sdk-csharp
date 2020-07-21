@@ -4,9 +4,9 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>nacos-sdk-csharp.Extensions.Configuration</PackageId>
-    <PackageVersion>$(NugetVersion)</PackageVersion>
-    <Authors>Catcher Wong</Authors>
-    <Owners>Catcher Wong</Owners>
+    <VersionPrefix>$(NugetVersion)</VersionPrefix>
+    <VersionSuffix></VersionSuffix>
+    <Authors>nacos-sdk-csharp Contributors</Authors>
     <Description>nacos csharp sdk</Description>
     <PackageTags>nacos,csharp,sdk,msconfig</PackageTags>
     <PackageProjectUrl>https://github.com/nacos-group/nacos-sdk-csharp</PackageProjectUrl>
