@@ -3,8 +3,8 @@ name: Release_Stable
 on:
     push:
       tags:
-        - **
-
+          - '**'
+          
 jobs:
   build_artifact:    
     name: Build and upload artifact
