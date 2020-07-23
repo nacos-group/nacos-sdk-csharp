@@ -43,7 +43,8 @@
                     {
                         // it seems that nacos don't return the scheme
                         // so here use http only.
-                        Url = $"http://{x.Ip}:{x.Port}"
+                        Url = $"http://{x.Ip}:{x.Port}",
+                        Weight = x.Weight
                     }).ToList();
 
                     return list;
