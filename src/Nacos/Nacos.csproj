@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageId>nacos-sdk-csharp</PackageId>
+    <PackageId>nacos-sdk-csharp-unofficial</PackageId>
     <VersionPrefix>$(NugetVersion)</VersionPrefix>
     <VersionSuffix></VersionSuffix>
     <Authors>nacos-sdk-csharp Contributors</Authors>
@@ -13,7 +13,6 @@
     <RepositoryUrl>https://github.com/nacos-group/nacos-sdk-csharp</RepositoryUrl>
     <ProjectUrl>https://github.com/nacos-group/nacos-sdk-csharp</ProjectUrl>
     <PackageReleaseNotes>
-      1. Init.
     </PackageReleaseNotes>
   </PropertyGroup>
 
