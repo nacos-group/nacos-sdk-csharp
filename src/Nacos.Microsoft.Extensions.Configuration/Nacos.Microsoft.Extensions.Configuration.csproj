@@ -12,8 +12,8 @@
     <PackageProjectUrl>https://github.com/nacos-group/nacos-sdk-csharp</PackageProjectUrl>
     <RepositoryUrl>https://github.com/nacos-group/nacos-sdk-csharp</RepositoryUrl>
     <ProjectUrl>https://github.com/nacos-group/nacos-sdk-csharp</ProjectUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReleaseNotes>
-      1. init.
     </PackageReleaseNotes>
   </PropertyGroup>
 
