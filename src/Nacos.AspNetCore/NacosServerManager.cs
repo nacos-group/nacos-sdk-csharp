@@ -27,15 +27,38 @@
 
         public async Task<string> GetServerAsync(string serviceName)
         {
-            var cached = await _provider.GetAsync(serviceName, async () =>
+            return await GetServerInnerAsync(serviceName, null, null, null);
+        }
+
+        public async Task<string> GetServerAsync(string serviceName, string groupName)
+        {
+            return await GetServerInnerAsync(serviceName, groupName, null, null);
+        }
+
+        public async Task<string> GetServerAsync(string serviceName, string groupName, string clusters)
+        {
+            return await GetServerInnerAsync(serviceName, groupName, clusters, null);
+        }
+
+        public async Task<string> GetServerAsync(string serviceName, string groupName, string clusters, string namespaceId)
+        {
+            return await GetServerInnerAsync(serviceName, groupName, clusters, namespaceId);
+        }
+
+        private async Task<string> GetServerInnerAsync(string serviceName, string groupName, string clusters, string namespaceId)
+        {
+            var cachedKey = $"{serviceName}-{groupName}-{clusters}-{namespaceId}";
+
+            var cached = await _provider.GetAsync(cachedKey, async () =>
             {
                 var serviceInstances = await _client.ListInstancesAsync(new ListInstancesRequest
                 {
                     ServiceName = serviceName,
+                    GroupName = groupName,
+                    Clusters = clusters,
+                    NamespaceId = namespaceId,
                     HealthyOnly = true,
                 });
-
-                var baseUrl = string.Empty;
 
                 if (serviceInstances != null && serviceInstances.Hosts != null && serviceInstances.Hosts.Any())
                 {
