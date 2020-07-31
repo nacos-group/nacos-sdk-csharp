@@ -87,5 +87,54 @@
                 return null;
             }
         }
+
+
+
+        /// <summary>
+        /// 获取该服务的Host列表
+        /// </summary>
+        /// <param name="serviceName">服务名</param>
+        /// <returns>Host列表</returns>
+        public async Task<List<Host>> GetServerListAsync(string serviceName)
+        {
+            return await GetServerListInnerAsync(serviceName, null, null, null);
+        }
+
+        public async Task<List<Host>> GetServerListAsync(string serviceName, string groupName)
+        {
+            return await GetServerListInnerAsync(serviceName, groupName, null, null);
+        }
+
+        public async Task<List<Host>> GetServerListAsync(string serviceName, string groupName, string clusters)
+        {
+            return await GetServerListInnerAsync(serviceName, groupName, clusters, null);
+        }
+
+        public async Task<List<Host>> GetServerListAsync(string serviceName, string groupName, string clusters, string namespaceId)
+        {
+            return await GetServerListInnerAsync(serviceName, groupName, clusters, namespaceId);
+        }
+
+        private async Task<List<Host>> GetServerListInnerAsync(string serviceName, string groupName, string clusters, string namespaceId)
+        {
+            var cachedKey = $"{serviceName}-{groupName}-{clusters}-{namespaceId}";
+
+            var cached = await _provider.GetAsync(cachedKey, async () =>
+            {
+                var serviceInstances = await _client.ListInstancesAsync(new ListInstancesRequest
+                {
+                    ServiceName = serviceName,
+                    GroupName = groupName,
+                    Clusters = clusters,
+                    NamespaceId = namespaceId,
+                    HealthyOnly = true,
+                });
+
+                if (serviceInstances?.Hosts == null || !serviceInstances.Hosts.Any())
+                    return null;
+                return serviceInstances.Hosts.ToList();
+            }, TimeSpan.FromSeconds(10));
+            return cached.HasValue ? cached.Value : null;
+        }
     }
 }
