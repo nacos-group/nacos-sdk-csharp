@@ -91,10 +91,10 @@
 
 
         /// <summary>
-        /// 获取该服务的Host列表
+        /// Get the Host list of the service named serviceName
         /// </summary>
-        /// <param name="serviceName">服务名</param>
-        /// <returns>Host列表</returns>
+        /// <param name="serviceName">ServiceName</param>
+        /// <returns>Host list</returns>
         public async Task<List<Host>> GetServerListAsync(string serviceName)
         {
             return await GetServerListInnerAsync(serviceName, null, null, null);
