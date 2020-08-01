@@ -10,10 +10,10 @@
         LBStrategyName Name { get; }
 
         /// <summary>
-        /// Get instance
+        /// Get host
         /// </summary>
-        /// <param name="list">server list</param>
-        /// <returns>The instance</returns>
-        string GetInstance(List<NacosServer> list);
+        /// <param name="list">host list</param>
+        /// <returns>The Host</returns>
+        Host GetHost(List<Host> list);
     }
 }
