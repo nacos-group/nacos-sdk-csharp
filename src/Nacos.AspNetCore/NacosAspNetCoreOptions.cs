@@ -49,6 +49,12 @@
         public string Ip { get; set; }
 
         /// <summary>
+        /// Select an IP that matches the prefix as the service registration IP
+        /// like the config of spring.cloud.inetutils.preferred-networks
+        /// </summary>
+        public string PreferredNetworks { get; set; }
+
+        /// <summary>
         /// the port of this instance
         /// </summary>
         public int Port { get; set; }

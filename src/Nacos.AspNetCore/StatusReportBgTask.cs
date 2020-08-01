@@ -210,19 +210,23 @@
 
             try
             {
-                IPHostEntry ipHost = Dns.GetHostEntry(Dns.GetHostName());
-
                 foreach (var ipAddr in Dns.GetHostAddresses(Dns.GetHostName()))
                 {
-                    if (ipAddr.AddressFamily.ToString() == "InterNetwork")
+                    if (ipAddr.AddressFamily.ToString() != "InterNetwork") continue;
+                    if (string.IsNullOrEmpty(_options.PreferredNetworks))
                     {
                         instanceIp = ipAddr.ToString();
                         break;
                     }
+
+                    if (!ipAddr.ToString().StartsWith(_options.PreferredNetworks)) continue;
+                    instanceIp = ipAddr.ToString();
+                    break;
                 }
             }
             catch
             {
+                // ignored
             }
 
             return instanceIp;
