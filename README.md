@@ -2,15 +2,9 @@
 
 csharp(dotnet core) implementation of [nacos](https://nacos.io/) OpenAPI.
 
-![](https://img.shields.io/nuget/v/nacos-sdk-csharp-unofficial.svg)
+![Build](https://github.com/nacos-group/nacos-sdk-csharp/workflows/Build/badge.svg) ![Release](https://github.com/nacos-group/nacos-sdk-csharp/workflows/Release/badge.svg) ![](https://img.shields.io/nuget/v/nacos-sdk-csharp-unofficial.svg)  ![](https://img.shields.io/nuget/vpre/nacos-sdk-csharp-unofficial.svg) ![](https://img.shields.io/nuget/dt/nacos-sdk-csharp-unofficial) ![](https://img.shields.io/github/license/nacos-group/nacos-sdk-csharp)
 
 ![](./media/prj.png)
-
-## CI Build Status
-
-| Platform | Build Server | Master Status  |
-|--------- |------------- |---------|
-| Github Action   | Linux/Windows |![nacos-sdk-csharp CI](https://github.com/nacos-group/nacos-sdk-csharp/workflows/nacos-sdk-csharp%20CI/badge.svg)
 
 ## Installation
 
