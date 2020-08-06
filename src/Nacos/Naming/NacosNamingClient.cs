@@ -5,6 +5,10 @@
     using Nacos.Exceptions;
     using Nacos.Utilities;
     using System;
+    using System.IO;
+    using System.Threading;
+    using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Net.Http;
     using System.Threading.Tasks;
 
@@ -13,6 +17,19 @@
         private readonly ILogger _logger;
         private readonly NacosOptions _options;
         private readonly Nacos.Naming.Http.NamingProxy _proxy;
+        public BeatReactor _beatReactor;
+
+        public HostReactor _hostReactor;
+
+        private volatile bool closed = false;
+
+        private volatile bool flag = false;
+
+        public event Action MyEvent;
+
+        public bool Count = false;
+        public readonly ConcurrentDictionary<string, List<Listener>> ObserverMap = new ConcurrentDictionary<string, List<Listener>>();
+        public readonly BlockingCollection<ServiceInfo> ChangedServices = new BlockingCollection<ServiceInfo>(boundedCapacity: 10);
 
         public NacosNamingClient(
             ILoggerFactory loggerFactory,
@@ -22,6 +39,9 @@
             _logger = loggerFactory.CreateLogger<NacosNamingClient>();
             _options = optionAccs.CurrentValue;
             _proxy = new Naming.Http.NamingProxy(loggerFactory, _options, clientFactory);
+            _beatReactor = new BeatReactor(loggerFactory);
+            _hostReactor = new HostReactor(loggerFactory, _options);
+            new Task(Running).Start();
         }
 
         #region Instance
@@ -33,10 +53,28 @@
 
             var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Post, RequestPathValue.INSTANCE, null, request.ToDict(), _options.DefaultTimeOut);
 
+            if (request.Ephemeral == true)
+            {
+                string groupedServiceName;
+                if (String.IsNullOrEmpty(request.GroupName))
+                {
+                    groupedServiceName = request.GroupName + "@@" + request.ServiceName;
+                }
+                else
+                {
+                    groupedServiceName = "DEFAULT_GROUP" + "@@" + request.ServiceName;
+                }
+
+                BeatInfo beatInfo = _beatReactor.BuildBeatInfo(groupedServiceName, request);
+
+                await _beatReactor.AddBeatInfo(request.ServiceName, beatInfo);
+            }
+
             switch (responseMessage.StatusCode)
             {
                 case System.Net.HttpStatusCode.OK:
                     var result = await responseMessage.Content.ReadAsStringAsync();
+                    Console.WriteLine("Hey" + result);
                     if (result.Equals("ok", StringComparison.OrdinalIgnoreCase))
                     {
                         return true;
@@ -446,5 +484,180 @@
             }
         }
         #endregion
+
+        public async Task<bool> AddListenerAsync(ServiceInfo serviceInfo, string clusters, Listener listener)
+        {
+            _logger.LogInformation("[LISTENER] adding " + serviceInfo.name + " with " + clusters + " to listener map");
+            List<Listener> observers = new List<Listener>();
+
+            observers.Add(listener);
+            string name = ServiceInfo.getKey(serviceInfo.name, clusters);
+            ObserverMap.AddOrUpdate(name, observers, (string name, List<Listener> observers) => observers);
+            while (!Count)
+            {
+                var request = new ListInstancesRequest
+                {
+                    ServiceName = serviceInfo.name,
+                    Callbacks = new List<Action<string>>
+                    {
+                        x => { Console.WriteLine(x); }
+                    }
+                };
+                ChangedServices.Add(serviceInfo);
+                await Notifier(request);
+            }
+
+            return true;
+        }
+
+        public Task ServiceIfChanged(string result)
+        {
+            var obj = result.ToObj<ServiceInfo>();
+            ServiceInfo oldService = null;
+            _hostReactor.ServiceInfoMap.TryGetValue(obj.getKey(), out oldService);
+            if (obj.Hosts == null)
+            {
+                flag = false;
+                return Task.CompletedTask;
+            }
+
+            if (oldService != null)
+            {
+                _hostReactor.ServiceInfoMap[obj.getKey()] = obj;
+                _hostReactor.ServiceInfoMap.TryGetValue(obj.getKey(), out oldService);
+                IDictionary<string, Host> oldHostMap = new ConcurrentDictionary<string, Host>();
+                foreach (var entry in oldService.Hosts)
+                {
+                    oldHostMap[entry.ToInetAddr()] = entry;
+                }
+
+                IDictionary<string, Host> newHostMap = new ConcurrentDictionary<string, Host>();
+                foreach (var entry in oldService.Hosts)
+                {
+                    newHostMap[entry.ToInetAddr()] = entry;
+                }
+
+                foreach (KeyValuePair<string, Host> entry in newHostMap)
+                {
+                    if (!oldHostMap.ContainsKey(entry.Key))
+                    {
+                        ChangedServices.Add(obj);
+                        File.AppendAllText("output.txt", "Service Changed" + System.Environment.NewLine);
+                        flag = true;
+                    }
+                    else
+                    {
+                        Host host1 = newHostMap[entry.Key];
+                        Host host2 = oldHostMap[entry.Key];
+                        if (host1.String() == host2.String())
+                        {
+                            flag = false;
+                        }
+                        else
+                        {
+                            ChangedServices.Add(obj);
+                            File.AppendAllText("output.txt", "Service Changed" + System.Environment.NewLine);
+                            flag = true;
+                            return Task.CompletedTask;
+                        }
+                    }
+                }
+
+                foreach (KeyValuePair<string, Host> entry in oldHostMap)
+                {
+                    if (!newHostMap.ContainsKey(entry.Key))
+                    {
+                        File.AppendAllText("output.txt", "Service Changed" + System.Environment.NewLine);
+                        ChangedServices.Add(obj);
+                        flag = true;
+                        return Task.CompletedTask;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+            }
+            else
+            {
+                _hostReactor.ServiceInfoMap[obj.getKey()] = obj;
+                flag = true;
+                return Task.CompletedTask;
+            }
+
+            return Task.CompletedTask;
+        }
+
+        private string BuildName(string tenant, string group, string dataId)
+        {
+            return $"{tenant}-{group}-{dataId}";
+        }
+
+        private async Task Notifier(ListInstancesRequest request)
+        {
+            try
+            {
+                if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
+
+                request.CheckParam();
+
+                var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Get, RequestPathValue.INSTANCE_LIST, null, request.ToDict(), _options.DefaultTimeOut);
+
+                switch (responseMessage.StatusCode)
+                {
+                    case System.Net.HttpStatusCode.OK:
+                        var result = await responseMessage.Content.ReadAsStringAsync();
+                        await ServiceIfChanged(result);
+                        if (flag)
+                        {
+                            if (MyEvent != null) MyEvent();
+                        }
+
+                        break;
+                    default:
+                        _logger.LogWarning($"[client.ListInstances] Query instance list of service failed {responseMessage.StatusCode.ToString()}");
+                        throw new NacosException((int)responseMessage.StatusCode, $"Query instance list of service failed {responseMessage.StatusCode.ToString()}");
+                }
+            }
+            catch (Exception ex)
+            {
+                // SetHealthServer(false);
+                _logger.LogError(ex, "[listener] error");
+            }
+        }
+
+        public void Running()
+        {
+            while (!closed)
+            {
+                ServiceInfo serviceInfo = null;
+                serviceInfo = ChangedServices.Take();
+                if (serviceInfo == null)
+                {
+                    continue;
+                }
+
+                try
+                {
+                    List<Listener> listeners = ObserverMap[serviceInfo.getKey()];
+                    if (listeners.Count != 0)
+                    {
+                        foreach (Listener listener in listeners)
+                        {
+                            List<Host> hosts = serviceInfo.Hosts;
+                            File.AppendAllText("Final.txt", "Listening the event");
+                            MyEvent += () => Console.WriteLine("We're doing something!");
+
+                            // listener.onEvent(new NamingEvent(serviceInfo.getName(), serviceInfo.getGroupName(),
+                            //     serviceInfo.getClusters(), hosts));
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    _logger.LogWarning("[NA] notify error for service: " + serviceInfo.name + ", clusters: " + serviceInfo.clusters, e);
+                }
+            }
+        }
     }
 }

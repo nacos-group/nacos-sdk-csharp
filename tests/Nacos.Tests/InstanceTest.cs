@@ -1,6 +1,8 @@
 ﻿namespace Nacos.Tests
 {
+    using System;
     using System.Threading.Tasks;
+    using System.Collections.Generic;
     using Xunit;
 
     public class InstanceTest : TestBase
@@ -12,11 +14,22 @@
             {
                 ServiceName = "testservice",
                 Ip = "192.168.0.74",
+                Ephemeral = true,
                 Port = 9999
             };
 
             var res = await _namingClient.RegisterInstanceAsync(request);
             Assert.True(res);
+        }
+
+        [Fact]
+        public async Task AddListener_Should_Succeed()
+        {
+            Listener listener = new Listener();
+            ServiceInfo serviceInfo = new ServiceInfo("nacos.test.3", "");
+            await _namingClient.AddListenerAsync(serviceInfo, "", listener);
+            await Task.Delay(100000);
+            Assert.True(true);
         }
 
         [Fact]

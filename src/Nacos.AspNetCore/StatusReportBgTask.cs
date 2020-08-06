@@ -54,7 +54,7 @@
                     await ReportAsync();
                     _reporting = false;
                 }, null, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(10));
-
+            Console.WriteLine(Task.CompletedTask);
             return Task.CompletedTask;
         }
 
@@ -65,6 +65,7 @@
             try
             {
                 // send heart beat will register instance
+                Console.WriteLine("Sending Heartbeat");
                 flag = await _client.SendHeartbeatAsync(new SendHeartbeatRequest
                 {
                     Ephemeral = false,

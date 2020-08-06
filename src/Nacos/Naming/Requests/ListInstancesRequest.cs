@@ -1,6 +1,7 @@
 ﻿namespace Nacos
 {
     using Nacos.Utilities;
+    using System;
     using System.Collections.Generic;
 
     public class ListInstancesRequest : BaseRequest
@@ -29,6 +30,8 @@
         /// Return healthy instance or not
         /// </summary>
         public bool? HealthyOnly { get; set; }
+
+        public List<Action<string>> Callbacks { get; set; } = new List<Action<string>>();
 
         public override void CheckParam()
         {
