@@ -53,7 +53,7 @@
         {
             try
             {
-                if ((DateTimeOffset.Now.ToUnixTimeSeconds() - _lastRefreshTime) < _tokenTtl - _tokenRefreshWindow)
+                if ((DateTimeOffset.Now.ToUnixTimeMilliseconds() - _lastRefreshTime) < _tokenTtl - _tokenRefreshWindow)
                 {
                     return true;
                 }
