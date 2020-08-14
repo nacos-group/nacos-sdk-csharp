@@ -7,6 +7,7 @@ namespace Nacos
     using Nacos.Exceptions;
     using Nacos.Utilities;
     using System;
+    using System.IO;
     using System.Net.Http;
     using System.Threading.Tasks;
 
@@ -15,7 +16,11 @@ namespace Nacos
         private readonly ILogger _logger;
         private readonly NacosOptions _options;
 
-        public IDictionary<string, ServiceInfo> ServiceInfoMap { get; } = new ConcurrentDictionary<string, ServiceInfo>();
+        public bool Flag { get; set; } = false;
+
+        public EventDispatcher _eventDispatcher;
+
+        public IDictionary<string, ServiceInfo> ServiceInfoMap { get; set; } = new ConcurrentDictionary<string, ServiceInfo>();
 
         public HostReactor(
             ILoggerFactory loggerFactory,
@@ -23,6 +28,7 @@ namespace Nacos
         {
             _logger = loggerFactory.CreateLogger<NacosNamingClient>();
             _options = optionAccs;
+            _eventDispatcher = new EventDispatcher(loggerFactory, _options);
         }
 
         private ServiceInfo GetServiceInfo0(String serviceName, String clusters)
@@ -47,6 +53,89 @@ namespace Nacos
             }
 
             return serviceObj;
+        }
+
+        public Task ProcessServiceJson(string result)
+        {
+            var obj = result.ToObj<ServiceInfo>();
+            ServiceInfo newService = obj;
+            ServiceInfo oldService = null;
+            ServiceInfoMap.TryGetValue(obj.getKey(), out oldService);
+            if (obj.Hosts == null)
+            {
+                Flag = false;
+                return Task.CompletedTask;
+            }
+
+            if (oldService != null)
+            {
+                // Updating the new service into the Map
+                ServiceInfoMap[obj.getKey()] = obj;
+                IDictionary<string, Host> oldHostMap = new ConcurrentDictionary<string, Host>();
+                foreach (var entry in oldService.Hosts)
+                {
+                    oldHostMap[entry.ToInetAddr()] = entry;
+                    File.AppendAllText("output.txt", "Old Host Id:" + " " + entry.InstanceId + "Host Weight" + entry.Weight + System.Environment.NewLine);
+                }
+
+                IDictionary<string, Host> newHostMap = new ConcurrentDictionary<string, Host>();
+                foreach (var entry in newService.Hosts)
+                {
+                    newHostMap[entry.ToInetAddr()] = entry;
+                    File.AppendAllText("output.txt", "New Host Id:" + " " + entry.InstanceId + "Host weight" + entry.Weight + System.Environment.NewLine);
+                }
+
+                foreach (KeyValuePair<string, Host> entry in newHostMap)
+                {
+                    if (!oldHostMap.ContainsKey(entry.Key))
+                    {
+                        _eventDispatcher.ServiceChanged(obj);
+                        File.AppendAllText("output.txt", "Service Changed" + System.Environment.NewLine);
+                        Flag = true;
+                    }
+                    else
+                    {
+                        Host host1 = newHostMap[entry.Key];
+                        Host host2 = oldHostMap[entry.Key];
+                        File.AppendAllText("output1.txt", "New Host Id:" + " " + host1.String() + System.Environment.NewLine);
+                        File.AppendAllText("output1.txt", "Old Host Id:" + " " + host2.String() + System.Environment.NewLine);
+                        if (host1.String() == host2.String())
+                        {
+                            Flag = false;
+                        }
+                        else
+                        {
+                            _eventDispatcher.ServiceChanged(obj);
+                            File.AppendAllText("output.txt", "Service Changed" + System.Environment.NewLine);
+                            Flag = true;
+                            return Task.CompletedTask;
+                        }
+                    }
+                }
+
+                foreach (KeyValuePair<string, Host> entry in oldHostMap)
+                {
+                    if (!newHostMap.ContainsKey(entry.Key))
+                    {
+                        File.AppendAllText("output.txt", "Service Changed" + System.Environment.NewLine);
+                        _eventDispatcher.ServiceChanged(obj);
+                        Flag = true;
+                        return Task.CompletedTask;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+            }
+            else
+            {
+                ServiceInfoMap[obj.getKey()] = obj;
+                Flag = true;
+                return Task.CompletedTask;
+            }
+
+            return Task.CompletedTask;
         }
     }
 }

@@ -28,7 +28,7 @@
             Listener listener = new Listener();
             ServiceInfo serviceInfo = new ServiceInfo("nacos.test.3", "");
             await _namingClient.AddListenerAsync(serviceInfo, "", listener);
-            await Task.Delay(100000);
+            await Task.Delay(10000000);
             Assert.True(true);
         }
 

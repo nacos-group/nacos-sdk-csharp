@@ -40,7 +40,7 @@
         /// <param name="serviceInfo">serviceInfo</param>
         /// <param name="clusters">clusters</param>
         /// <param name="listener">listener</param>
-        Task<bool> AddListenerAsync(ServiceInfo serviceInfo, string clusters, Listener listener);
+        Task AddListenerAsync(ServiceInfo serviceInfo, string clusters, Listener listener);
 
         // public void Subscribe(string serviceName, Listener listener);
 

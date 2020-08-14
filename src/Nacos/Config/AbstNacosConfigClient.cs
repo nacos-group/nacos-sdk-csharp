@@ -3,6 +3,7 @@
     using Microsoft.Extensions.Logging;
     using Nacos.Exceptions;
     using System;
+    using System.IO;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
@@ -159,6 +160,7 @@
             Timer timer = new Timer(
                 async x =>
             {
+                File.AppendAllText("file.txt", "Timer is called" + System.Environment.NewLine);
                 await PollingAsync(x);
 #if !DEBUG
             }, request, 0, _options.ListenInterval);

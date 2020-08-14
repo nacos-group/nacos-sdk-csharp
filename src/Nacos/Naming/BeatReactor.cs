@@ -34,7 +34,7 @@
         /// <param name="beatInfo">    beat information </param>
         public Task AddBeatInfo(string serviceName, BeatInfo beatInfo)
         {
-            _logger.LogInformation("[BEAT] adding beat: {} to beat map.", beatInfo);
+            _logger.LogInformation("[BEAT] adding beat: {0} to beat map.", beatInfo.ToString());
             string key = BuildKey(serviceName, beatInfo.ip, beatInfo.port);
             BeatInfo existBeat = null;
             Dom2Beat.TryGetValue(key, out existBeat);

@@ -21,15 +21,9 @@
 
         public HostReactor _hostReactor;
 
-        private volatile bool closed = false;
+        public EventDispatcher _eventDispatcher;
 
-        private volatile bool flag = false;
-
-        public event Action MyEvent;
-
-        public bool Count = false;
-        public readonly ConcurrentDictionary<string, List<Listener>> ObserverMap = new ConcurrentDictionary<string, List<Listener>>();
-        public readonly BlockingCollection<ServiceInfo> ChangedServices = new BlockingCollection<ServiceInfo>(boundedCapacity: 10);
+        public bool IsUpdate = false;
 
         public NacosNamingClient(
             ILoggerFactory loggerFactory,
@@ -40,8 +34,8 @@
             _options = optionAccs.CurrentValue;
             _proxy = new Naming.Http.NamingProxy(loggerFactory, _options, clientFactory);
             _beatReactor = new BeatReactor(loggerFactory);
+            _eventDispatcher = new EventDispatcher(loggerFactory, _options);
             _hostReactor = new HostReactor(loggerFactory, _options);
-            new Task(Running).Start();
         }
 
         #region Instance
@@ -485,112 +479,34 @@
         }
         #endregion
 
-        public async Task<bool> AddListenerAsync(ServiceInfo serviceInfo, string clusters, Listener listener)
+        public Task AddListenerAsync(ServiceInfo serviceInfo, string clusters, Listener listener)
         {
-            _logger.LogInformation("[LISTENER] adding " + serviceInfo.name + " with " + clusters + " to listener map");
+            _logger.LogInformation("[LISTENER] adding {0} with {1} to listener map", serviceInfo.name,  clusters);
             List<Listener> observers = new List<Listener>();
 
             observers.Add(listener);
             string name = ServiceInfo.getKey(serviceInfo.name, clusters);
-            ObserverMap.AddOrUpdate(name, observers, (string name, List<Listener> observers) => observers);
-            while (!Count)
+            _eventDispatcher.ObserverMap.AddOrUpdate(name, observers, (string name, List<Listener> observers) => observers);
+            var request = new ListInstancesRequest
             {
-                var request = new ListInstancesRequest
+                ServiceName = serviceInfo.name,
+                Callbacks = new List<Action<string>>
                 {
-                    ServiceName = serviceInfo.name,
-                    Callbacks = new List<Action<string>>
-                    {
-                        x => { Console.WriteLine(x); }
-                    }
-                };
-                ChangedServices.Add(serviceInfo);
+                    y => { Console.WriteLine(y); }
+                }
+            };
+            _eventDispatcher.ServiceChanged(serviceInfo);
+            Timer timer = new Timer(
+                async x =>
+            {
+                File.AppendAllText("output.txt", "Timer is called" + System.Environment.NewLine);
                 await Notifier(request);
-            }
-
-            return true;
-        }
-
-        public Task ServiceIfChanged(string result)
-        {
-            var obj = result.ToObj<ServiceInfo>();
-            ServiceInfo oldService = null;
-            _hostReactor.ServiceInfoMap.TryGetValue(obj.getKey(), out oldService);
-            if (obj.Hosts == null)
-            {
-                flag = false;
-                return Task.CompletedTask;
-            }
-
-            if (oldService != null)
-            {
-                _hostReactor.ServiceInfoMap[obj.getKey()] = obj;
-                _hostReactor.ServiceInfoMap.TryGetValue(obj.getKey(), out oldService);
-                IDictionary<string, Host> oldHostMap = new ConcurrentDictionary<string, Host>();
-                foreach (var entry in oldService.Hosts)
-                {
-                    oldHostMap[entry.ToInetAddr()] = entry;
-                }
-
-                IDictionary<string, Host> newHostMap = new ConcurrentDictionary<string, Host>();
-                foreach (var entry in oldService.Hosts)
-                {
-                    newHostMap[entry.ToInetAddr()] = entry;
-                }
-
-                foreach (KeyValuePair<string, Host> entry in newHostMap)
-                {
-                    if (!oldHostMap.ContainsKey(entry.Key))
-                    {
-                        ChangedServices.Add(obj);
-                        File.AppendAllText("output.txt", "Service Changed" + System.Environment.NewLine);
-                        flag = true;
-                    }
-                    else
-                    {
-                        Host host1 = newHostMap[entry.Key];
-                        Host host2 = oldHostMap[entry.Key];
-                        if (host1.String() == host2.String())
-                        {
-                            flag = false;
-                        }
-                        else
-                        {
-                            ChangedServices.Add(obj);
-                            File.AppendAllText("output.txt", "Service Changed" + System.Environment.NewLine);
-                            flag = true;
-                            return Task.CompletedTask;
-                        }
-                    }
-                }
-
-                foreach (KeyValuePair<string, Host> entry in oldHostMap)
-                {
-                    if (!newHostMap.ContainsKey(entry.Key))
-                    {
-                        File.AppendAllText("output.txt", "Service Changed" + System.Environment.NewLine);
-                        ChangedServices.Add(obj);
-                        flag = true;
-                        return Task.CompletedTask;
-                    }
-                    else
-                    {
-                        continue;
-                    }
-                }
-            }
-            else
-            {
-                _hostReactor.ServiceInfoMap[obj.getKey()] = obj;
-                flag = true;
-                return Task.CompletedTask;
-            }
-
+#if !DEBUG
+            }, request, 0, 10000);
+#else
+            }, request, 0, 10000);
+#endif
             return Task.CompletedTask;
-        }
-
-        private string BuildName(string tenant, string group, string dataId)
-        {
-            return $"{tenant}-{group}-{dataId}";
         }
 
         private async Task Notifier(ListInstancesRequest request)
@@ -607,10 +523,11 @@
                 {
                     case System.Net.HttpStatusCode.OK:
                         var result = await responseMessage.Content.ReadAsStringAsync();
-                        await ServiceIfChanged(result);
-                        if (flag)
+                        await _hostReactor.ProcessServiceJson(result);
+                        IsUpdate = _hostReactor.Flag;
+                        if (IsUpdate)
                         {
-                            if (MyEvent != null) MyEvent();
+                            File.AppendAllText("output1.txt", "Flag became true" + System.Environment.NewLine);
                         }
 
                         break;
@@ -623,40 +540,6 @@
             {
                 // SetHealthServer(false);
                 _logger.LogError(ex, "[listener] error");
-            }
-        }
-
-        public void Running()
-        {
-            while (!closed)
-            {
-                ServiceInfo serviceInfo = null;
-                serviceInfo = ChangedServices.Take();
-                if (serviceInfo == null)
-                {
-                    continue;
-                }
-
-                try
-                {
-                    List<Listener> listeners = ObserverMap[serviceInfo.getKey()];
-                    if (listeners.Count != 0)
-                    {
-                        foreach (Listener listener in listeners)
-                        {
-                            List<Host> hosts = serviceInfo.Hosts;
-                            File.AppendAllText("Final.txt", "Listening the event");
-                            MyEvent += () => Console.WriteLine("We're doing something!");
-
-                            // listener.onEvent(new NamingEvent(serviceInfo.getName(), serviceInfo.getGroupName(),
-                            //     serviceInfo.getClusters(), hosts));
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    _logger.LogWarning("[NA] notify error for service: " + serviceInfo.name + ", clusters: " + serviceInfo.clusters, e);
-                }
             }
         }
     }
