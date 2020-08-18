@@ -3,6 +3,7 @@
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using System;
+    using System.IO;
     using System.Threading;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
@@ -34,7 +35,7 @@
         /// <param name="beatInfo">    beat information </param>
         public Task AddBeatInfo(string serviceName, BeatInfo beatInfo)
         {
-            _logger.LogInformation("[BEAT] adding beat: {0} to beat map.", beatInfo.ToString());
+            _logger.LogInformation("[BEAT] adding beat: {0} to beat map.", beatInfo.ToJsonString());
             string key = BuildKey(serviceName, beatInfo.ip, beatInfo.port);
             BeatInfo existBeat = null;
             Dom2Beat.TryGetValue(key, out existBeat);
@@ -45,37 +46,39 @@
             }
 
             Dom2Beat[key] = beatInfo;
-            var count = 0;
             _timer = new Timer(
                 async x =>
                 {
-                    count = count + 1;
-                    if (count == 2)
-                    {
-                        _timer.Dispose();
-                    }
-
-                    await BeatTask(beatInfo);
-                }, null, TimeSpan.FromSeconds(0), TimeSpan.FromSeconds(10));
+                    File.AppendAllText("Final.txt", ":" + "Timer is called" + System.Environment.NewLine);
+                    await BeatTask(beatInfo, _timer);
+                }, null, 0, 10000);
 
             return Task.CompletedTask;
 
             // MetricsMonitor.Dom2BeatSizeMonitor.set(Dom2Beat.Count);
         }
 
-        private async Task BeatTask(BeatInfo beatInfo)
+        private async Task BeatTask(BeatInfo beatInfo, Timer timer)
         {
-            bool flag = false;
+            File.AppendAllText("Final.txt", ":" + "BeatInfo Flag: " + beatInfo.stopped.ToString() + System.Environment.NewLine);
+            if (beatInfo.stopped == true)
+            {
+                timer.Dispose();
+                return;
+            }
 
+            bool flag = false;
             try
             {
                 // send heart beat will register instance
+                File.AppendAllText("Final.txt", ":" + "Hearbeat sent" + System.Environment.NewLine);
                 flag = await _namingClient.SendHeartbeatAsync(new SendHeartbeatRequest
                 {
                     Ephemeral = true,
                     ServiceName = beatInfo.serviceName,
                     BeatInfo = beatInfo,
                 });
+                File.AppendAllText("Final.txt", ":" + "Flag:" + flag + System.Environment.NewLine);
             }
             catch (Exception ex)
             {
@@ -91,18 +94,18 @@
         /// <param name="serviceName"> service name </param>
         /// <param name="ip">          ip of beat information </param>
         /// <param name="port">        port of beat information </param>
-        public void RemoveBeatInfo(string serviceName, string ip, int port)
+        public Task RemoveBeatInfo(string serviceName, string ip, int port)
         {
-            _logger.LogInformation("[BEAT] removing beat: {}:{}:{} from beat map.", serviceName, ip, port);
+            _logger.LogInformation("[BEAT] removing beat: {0}:{1}:{2} from beat map.", serviceName, ip, port);
             BeatInfo beatInfo = null;
             Dom2Beat.TryGetValue(BuildKey(serviceName, ip, port), out beatInfo);
             Dom2Beat.Remove(BuildKey(serviceName, ip, port));
-            if (beatInfo == null)
+            if (beatInfo != null)
             {
-                return;
+                beatInfo.stopped = true;
             }
 
-            beatInfo.stopped = true;
+            return Task.CompletedTask;
 
             // MetricsMonitor.Dom2BeatSizeMonitor.set(Dom2Beat.Count);
         }

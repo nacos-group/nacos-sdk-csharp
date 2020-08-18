@@ -15,10 +15,10 @@ namespace Nacos
     {
         private readonly ILogger _logger;
         private readonly NacosOptions _options;
-        private volatile bool closed = false;
+        private bool closed = false;
         public readonly BlockingCollection<ServiceInfo> ChangedServices = new BlockingCollection<ServiceInfo>(boundedCapacity: 10);
 
-        public ConcurrentDictionary<string, List<Listener>> ObserverMap { get; set; } = new ConcurrentDictionary<string, List<Listener>>();
+        public ConcurrentDictionary<string, List<Action<IEvent>>> ObserverMap { get; set; } = new ConcurrentDictionary<string, List<Action<IEvent>>>();
 
         public EventDispatcher(
             ILoggerFactory loggerFactory,
@@ -42,23 +42,21 @@ namespace Nacos
 
                 try
                 {
-                    List<Listener> listeners = ObserverMap[serviceInfo.getKey()];
-                    File.AppendAllText("output2.txt", "Listeners Count" + listeners.Count + System.Environment.NewLine);
-                    if (listeners.Count != 0)
+                    File.AppendAllText("output3.txt", "Map Value" + ObserverMap[serviceInfo.getKey()].ToJsonString() + System.Environment.NewLine);
+                    List<Action<IEvent>> actions = ObserverMap[serviceInfo.getKey()];
+                    if (actions.Count != 0)
                     {
-                        foreach (Listener listener in listeners)
+                        foreach (Action<IEvent> action in actions)
                         {
                             List<Host> hosts = serviceInfo.Hosts;
                             File.AppendAllText("output2.txt", "Miracle happened :)" + System.Environment.NewLine);
-
-                            // listener.onEvent(new NamingEvent(serviceInfo.getName(), serviceInfo.getGroupName(),
-                            //     serviceInfo.getClusters(), hosts));
+                            action.Invoke(new NamingEvent(serviceInfo.name, serviceInfo.groupName, serviceInfo.clusters, hosts));
                         }
                     }
                 }
                 catch (Exception e)
                 {
-                    _logger.LogWarning("[NA] notify error for service: " + serviceInfo.name + ", clusters: " + serviceInfo.clusters, e);
+                    _logger.LogWarning(e, "[NA] notify error for service: {0}, clusters: {1}",  serviceInfo.name, serviceInfo.clusters);
                 }
             }
         }
@@ -70,6 +68,7 @@ namespace Nacos
                 return;
             }
 
+            File.AppendAllText("output2.txt", "Observer Count" + ObserverMap.Count + System.Environment.NewLine);
             ChangedServices.Add(serviceInfo);
         }
     }

@@ -1,5 +1,6 @@
 ﻿namespace Nacos
 {
+    using System;
     using System.Threading.Tasks;
 
     public interface INacosNamingClient
@@ -40,7 +41,7 @@
         /// <param name="serviceInfo">serviceInfo</param>
         /// <param name="clusters">clusters</param>
         /// <param name="listener">listener</param>
-        Task AddListenerAsync(ServiceInfo serviceInfo, string clusters, Listener listener);
+        Task AddListenerAsync(ServiceInfo serviceInfo, string clusters, Action<IEvent> listener);
 
         // public void Subscribe(string serviceName, Listener listener);
 

@@ -35,7 +35,7 @@
             _proxy = new Naming.Http.NamingProxy(loggerFactory, _options, clientFactory);
             _beatReactor = new BeatReactor(loggerFactory);
             _eventDispatcher = new EventDispatcher(loggerFactory, _options);
-            _hostReactor = new HostReactor(loggerFactory, _options);
+            _hostReactor = new HostReactor(loggerFactory, _options, _eventDispatcher);
         }
 
         #region Instance
@@ -90,6 +90,21 @@
             if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
 
             request.CheckParam();
+
+            if (request.Ephemeral == true)
+            {
+                string groupedServiceName;
+                if (String.IsNullOrEmpty(request.GroupName))
+                {
+                    groupedServiceName = request.GroupName + "@@" + request.ServiceName;
+                }
+                else
+                {
+                    groupedServiceName = "DEFAULT_GROUP" + "@@" + request.ServiceName;
+                }
+
+                await _beatReactor.RemoveBeatInfo(request.ServiceName, request.Ip, request.Port);
+            }
 
             var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Delete, RequestPathValue.INSTANCE, null, request.ToDict(), _options.DefaultTimeOut);
 
@@ -479,21 +494,17 @@
         }
         #endregion
 
-        public Task AddListenerAsync(ServiceInfo serviceInfo, string clusters, Listener listener)
+        public Task AddListenerAsync(ServiceInfo serviceInfo, string clusters, Action<IEvent> listener)
         {
             _logger.LogInformation("[LISTENER] adding {0} with {1} to listener map", serviceInfo.name,  clusters);
-            List<Listener> observers = new List<Listener>();
+            List<Action<IEvent>> observers = new List<Action<IEvent>>();
 
             observers.Add(listener);
             string name = ServiceInfo.getKey(serviceInfo.name, clusters);
-            _eventDispatcher.ObserverMap.AddOrUpdate(name, observers, (string name, List<Listener> observers) => observers);
+            _eventDispatcher.ObserverMap.AddOrUpdate(name, observers, (string name, List<Action<IEvent>> observers) => observers);
             var request = new ListInstancesRequest
             {
-                ServiceName = serviceInfo.name,
-                Callbacks = new List<Action<string>>
-                {
-                    y => { Console.WriteLine(y); }
-                }
+                ServiceName = serviceInfo.name
             };
             _eventDispatcher.ServiceChanged(serviceInfo);
             Timer timer = new Timer(

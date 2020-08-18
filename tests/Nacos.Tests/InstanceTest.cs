@@ -2,7 +2,8 @@
 {
     using System;
     using System.Threading.Tasks;
-    using System.Collections.Generic;
+    using Nacos.Utilities;
+    using System.IO;
     using Xunit;
 
     public class InstanceTest : TestBase
@@ -20,15 +21,47 @@
 
             var res = await _namingClient.RegisterInstanceAsync(request);
             Assert.True(res);
+            await Task.Delay(1000);
+
+            // await _namingClient.(rRequest);
+            await Task.Delay(10000);
         }
 
         [Fact]
         public async Task AddListener_Should_Succeed()
         {
-            Listener listener = new Listener();
-            ServiceInfo serviceInfo = new ServiceInfo("nacos.test.3", "");
-            await _namingClient.AddListenerAsync(serviceInfo, "", listener);
-            await Task.Delay(10000000);
+            Action<IEvent> action = x =>
+            {
+                var @event = x as NamingEvent;
+                File.AppendAllText("test.txt", "Action Taken " + @event.ToJsonString() + System.Environment.NewLine);
+            };
+
+            ServiceInfo serviceInfo = new ServiceInfo("testservice", "");
+            await _namingClient.AddListenerAsync(serviceInfo, "", action);
+
+            var requestA = new RegisterInstanceRequest
+            {
+                ServiceName = "testservice",
+                Ip = "192.168.0.74",
+                Ephemeral = true,
+                Port = 9999
+            };
+
+            var resA = await _namingClient.RegisterInstanceAsync(requestA);
+            await Task.Delay(5000);
+
+            var requestB = new RegisterInstanceRequest
+            {
+                ServiceName = "testservice",
+                Ip = "192.168.0.75",
+                Ephemeral = true,
+                Port = 9999
+            };
+
+            var resB = await _namingClient.RegisterInstanceAsync(requestB);
+            await Task.Delay(5000);
+
+            await Task.Delay(30000);
             Assert.True(true);
         }
 

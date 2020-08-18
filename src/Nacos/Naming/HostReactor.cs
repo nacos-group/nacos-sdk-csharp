@@ -24,11 +24,12 @@ namespace Nacos
 
         public HostReactor(
             ILoggerFactory loggerFactory,
-            NacosOptions optionAccs)
+            NacosOptions optionAccs,
+            EventDispatcher eventDispatcher)
         {
             _logger = loggerFactory.CreateLogger<NacosNamingClient>();
             _options = optionAccs;
-            _eventDispatcher = new EventDispatcher(loggerFactory, _options);
+            _eventDispatcher = eventDispatcher;
         }
 
         private ServiceInfo GetServiceInfo0(String serviceName, String clusters)
@@ -61,6 +62,7 @@ namespace Nacos
             ServiceInfo newService = obj;
             ServiceInfo oldService = null;
             ServiceInfoMap.TryGetValue(obj.getKey(), out oldService);
+            File.AppendAllText("output.txt", "Old Host Id:" + " " + oldService.ToJsonString() + System.Environment.NewLine);
             if (obj.Hosts == null)
             {
                 Flag = false;
@@ -131,8 +133,8 @@ namespace Nacos
             else
             {
                 ServiceInfoMap[obj.getKey()] = obj;
+                File.AppendAllText("output.txt", "Service Subscribe Called" + obj.ToJsonString() + System.Environment.NewLine);
                 Flag = true;
-                return Task.CompletedTask;
             }
 
             return Task.CompletedTask;
