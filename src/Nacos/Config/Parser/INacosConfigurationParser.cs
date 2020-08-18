@@ -1,4 +1,4 @@
-﻿namespace Nacos.Microsoft.Extensions.Configuration
+﻿namespace Nacos.Config
 {
     using System.Collections.Generic;
 

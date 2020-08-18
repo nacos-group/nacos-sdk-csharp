@@ -2,6 +2,7 @@
 {
     using global::Microsoft.Extensions.Configuration;
     using global::Microsoft.Extensions.Logging.Abstractions;
+    using Nacos.Config;
     using System;
 
     internal class NacosConfigurationProvider : ConfigurationProvider
@@ -16,7 +17,7 @@
         {
             _configurationSource = configurationSource;
 
-            _parser = configurationSource.NacosConfigurationParser ?? JsonConfigurationStringParser.Instance;
+            _parser = configurationSource.NacosConfigurationParser ?? DefaultJsonConfigurationStringParser.Instance;
 
             _client = new NacosMsConfigClient(NullLoggerFactory.Instance, new NacosOptions
             {
