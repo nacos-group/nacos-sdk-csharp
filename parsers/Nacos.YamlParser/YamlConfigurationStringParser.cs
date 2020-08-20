@@ -21,8 +21,10 @@
             _data.Clear();
             _context.Clear();
 
+            using var reader = new StringReader(input);
+
             var yaml = new YamlStream();
-            yaml.Load(new StreamReader(input, detectEncodingFromByteOrderMarks: true));
+            yaml.Load(reader);
 
             if (yaml.Documents.Any())
             {
