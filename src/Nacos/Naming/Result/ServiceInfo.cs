@@ -40,10 +40,44 @@ namespace Nacos
         {
             if (!string.IsNullOrEmpty(clusters))
             {
-                return name + "@@" + clusters;
+                return name + ConstValue.ServiceInfoSplitter + clusters;
             }
 
             return name;
+        }
+
+        public bool validate()
+        {
+            if (allIPs)
+            {
+                return true;
+            }
+
+            List<Host> validHosts = new List<Host>();
+            foreach (Host host in Hosts)
+            {
+                if (!host.Healthy)
+                {
+                    continue;
+                }
+
+                for (int i = 0; i < host.Weight; i++)
+                {
+                    validHosts.Add(host);
+                }
+            }
+
+            return true;
+        }
+
+        public static string getGroupedname(string groupName, string name)
+        {
+            if (!string.IsNullOrEmpty(groupName))
+            {
+                return groupName + ConstValue.ServiceInfoSplitter + name;
+            }
+
+            return ConstValue.DefaultGroup + ConstValue.ServiceInfoSplitter + name;
         }
     }
 }

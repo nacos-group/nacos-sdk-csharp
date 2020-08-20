@@ -8,7 +8,7 @@
 
         public string InstanceId { get; set; }
 
-        public string Healthy { get; set; }
+        public bool Healthy { get; set; } = true;
 
         public string Enabled { get; set; }
 
@@ -22,14 +22,14 @@
 
         public string Ip { get; set; }
 
-        public double Weight { get; set; }
+        public double Weight { get; set; } = 1;
 
         public string ToInetAddr()
         {
             return Ip + ":" + Port;
         }
 
-        public string String()
+        public string Tostring()
         {
             return "Instance{" + "instanceId='" + InstanceId + '\'' + ", ip='" + Ip + '\'' + ", port=" + Port + ", weight="
                     + Weight + ", healthy=" + Healthy + ", enabled=" + Enabled + ", ephemeral=" + Ephemeral

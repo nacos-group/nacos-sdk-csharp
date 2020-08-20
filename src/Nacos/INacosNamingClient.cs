@@ -38,12 +38,20 @@
         /// <summary>
         /// Query instance list of service1
         /// </summary>
-        /// <param name="serviceInfo">serviceInfo</param>
+        /// <param name="serviceName">serviceName</param>
+        /// <param name="groupName">groupName</param>
         /// <param name="clusters">clusters</param>
         /// <param name="listener">listener</param>
-        Task AddListenerAsync(ServiceInfo serviceInfo, string clusters, Action<IEvent> listener);
+        Task SubscribeAsync(string serviceName, string groupName, string clusters, Action<IEvent> listener);
 
-        // public void Subscribe(string serviceName, Listener listener);
+        /// <summary>
+        /// Query instance list of service1
+        /// </summary>
+        /// <param name="serviceName">serviceName</param>
+        /// <param name="groupName">groupName</param>
+        /// <param name="clusters">clusters</param>
+        /// <param name="listener">listener</param>
+        Task UnSubscribeAsync(string serviceName, string groupName, string clusters, Action<IEvent> listener);
 
         /// <summary>
         /// Query instance details of service

@@ -7,6 +7,7 @@
     using System;
     using System.IO;
     using System.Threading;
+    using System.Linq;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Net.Http;
@@ -33,7 +34,7 @@
             _logger = loggerFactory.CreateLogger<NacosNamingClient>();
             _options = optionAccs.CurrentValue;
             _proxy = new Naming.Http.NamingProxy(loggerFactory, _options, clientFactory);
-            _beatReactor = new BeatReactor(loggerFactory);
+            _beatReactor = new BeatReactor(loggerFactory, _proxy, _options);
             _eventDispatcher = new EventDispatcher(loggerFactory, _options);
             _hostReactor = new HostReactor(loggerFactory, _options, _eventDispatcher);
         }
@@ -49,18 +50,7 @@
 
             if (request.Ephemeral == true)
             {
-                string groupedServiceName;
-                if (String.IsNullOrEmpty(request.GroupName))
-                {
-                    groupedServiceName = request.GroupName + "@@" + request.ServiceName;
-                }
-                else
-                {
-                    groupedServiceName = "DEFAULT_GROUP" + "@@" + request.ServiceName;
-                }
-
-                BeatInfo beatInfo = _beatReactor.BuildBeatInfo(groupedServiceName, request);
-
+                BeatInfo beatInfo = _beatReactor.BuildBeatInfo(request.ServiceName, request);
                 await _beatReactor.AddBeatInfo(request.ServiceName, beatInfo);
             }
 
@@ -93,16 +83,6 @@
 
             if (request.Ephemeral == true)
             {
-                string groupedServiceName;
-                if (String.IsNullOrEmpty(request.GroupName))
-                {
-                    groupedServiceName = request.GroupName + "@@" + request.ServiceName;
-                }
-                else
-                {
-                    groupedServiceName = "DEFAULT_GROUP" + "@@" + request.ServiceName;
-                }
-
                 await _beatReactor.RemoveBeatInfo(request.ServiceName, request.Ip, request.Port);
             }
 
@@ -494,18 +474,29 @@
         }
         #endregion
 
-        public Task AddListenerAsync(ServiceInfo serviceInfo, string clusters, Action<IEvent> listener)
+        public Task SubscribeAsync(string serviceName, string groupName, string clusters, Action<IEvent> listener)
         {
-            _logger.LogInformation("[LISTENER] adding {0} with {1} to listener map", serviceInfo.name,  clusters);
+            _logger.LogInformation("[LISTENER] adding {0} with {1} to listener map", serviceName,  clusters);
             List<Action<IEvent>> observers = new List<Action<IEvent>>();
 
             observers.Add(listener);
-            string name = ServiceInfo.getKey(serviceInfo.name, clusters);
+            string groupedName;
+            if (String.IsNullOrEmpty(groupName))
+                {
+                    groupedName = ServiceInfo.getGroupedname(groupName, serviceName);
+                }
+                else
+                {
+                    groupedName = ServiceInfo.getGroupedname("", serviceName);
+                }
+
+            string name = ServiceInfo.getKey(groupedName, clusters);
             _eventDispatcher.ObserverMap.AddOrUpdate(name, observers, (string name, List<Action<IEvent>> observers) => observers);
             var request = new ListInstancesRequest
             {
-                ServiceName = serviceInfo.name
+                ServiceName = serviceName
             };
+            ServiceInfo serviceInfo = new ServiceInfo(groupedName, clusters);
             _eventDispatcher.ServiceChanged(serviceInfo);
             Timer timer = new Timer(
                 async x =>
@@ -552,6 +543,41 @@
                 // SetHealthServer(false);
                 _logger.LogError(ex, "[listener] error");
             }
+        }
+
+        public Task UnSubscribeAsync(string serviceName, string groupName, string clusters, Action<IEvent> listener)
+        {
+            _logger.LogInformation("[LISTENER] removing {0} with {1} from listener map", serviceName,  clusters);
+            string groupedName;
+            if (String.IsNullOrEmpty(groupName))
+                {
+                    groupedName = ServiceInfo.getGroupedname(groupName, serviceName);
+                }
+                else
+                {
+                    groupedName = ServiceInfo.getGroupedname("", serviceName);
+                }
+
+            List<Action<IEvent>> observers = null;
+            _eventDispatcher.ObserverMap.TryGetValue(ServiceInfo.getKey(groupedName, clusters), out observers);
+            if (observers != null && observers.Any())
+            {
+                foreach (Action<IEvent> observer in observers)
+                {
+                    if (observer == listener)
+                    {
+                        observers.Remove(observer);
+                    }
+                }
+
+
+                if (observers.Count == 0)
+                {
+                    _eventDispatcher.ObserverMap.TryRemove(ServiceInfo.getKey(groupedName, clusters), out var flag);
+                }
+            }
+
+            return Task.CompletedTask;
         }
     }
 }

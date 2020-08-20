@@ -65,7 +65,6 @@
             try
             {
                 // send heart beat will register instance
-                Console.WriteLine("Sending Heartbeat");
                 flag = await _client.SendHeartbeatAsync(new SendHeartbeatRequest
                 {
                     Ephemeral = false,

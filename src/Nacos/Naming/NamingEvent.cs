@@ -5,25 +5,26 @@ namespace Nacos
 
     public class NamingEvent : IEvent
     {
-        private String serviceName;
-        private String groupName;
+        public string ServiceName { get; set; }
 
-        private String clusters;
+        public string GroupName { get; set; }
 
-        private List<Host> instances;
+        public string Clusters { get; set; }
+
+        public List<Host> Instances { get; set; }
 
         public NamingEvent(String serviceName, List<Host> instances)
         {
-            this.serviceName = serviceName;
-            this.instances = instances;
+            this.ServiceName = serviceName;
+            this.Instances = instances;
         }
 
         public NamingEvent(String serviceName, String groupName, String clusters, List<Host> instances)
         {
-            this.serviceName = serviceName;
-            this.groupName = groupName;
-            this.clusters = clusters;
-            this.instances = instances;
+            this.ServiceName = serviceName;
+            this.GroupName = groupName;
+            this.Clusters = clusters;
+            this.Instances = instances;
         }
     }
 }

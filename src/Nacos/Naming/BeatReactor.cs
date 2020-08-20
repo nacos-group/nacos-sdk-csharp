@@ -18,14 +18,19 @@
     public class BeatReactor
     {
         private readonly ILogger _logger;
-        protected INacosNamingClient _namingClient;
+        private readonly NacosOptions _options;
+        private readonly Nacos.Naming.Http.NamingProxy _proxy;
         private Timer _timer;
         public readonly IDictionary<string, BeatInfo> Dom2Beat = new ConcurrentDictionary<string, BeatInfo>();
 
         public BeatReactor(
-            ILoggerFactory loggerFactory)
+            ILoggerFactory loggerFactory,
+            Nacos.Naming.Http.NamingProxy proxy,
+            NacosOptions optionAccs)
         {
             _logger = loggerFactory.CreateLogger<BeatReactor>();
+            _proxy = proxy;
+            _options = optionAccs;
         }
 
         /// <summary>
@@ -60,32 +65,59 @@
 
         private async Task BeatTask(BeatInfo beatInfo, Timer timer)
         {
-            File.AppendAllText("Final.txt", ":" + "BeatInfo Flag: " + beatInfo.stopped.ToString() + System.Environment.NewLine);
+            File.AppendAllText("Final.txt", ":" + "BeatInfo Stopped Flag: " + beatInfo.stopped.ToString() + System.Environment.NewLine);
             if (beatInfo.stopped == true)
             {
                 timer.Dispose();
                 return;
             }
 
-            bool flag = false;
             try
             {
                 // send heart beat will register instance
-                File.AppendAllText("Final.txt", ":" + "Hearbeat sent" + System.Environment.NewLine);
-                flag = await _namingClient.SendHeartbeatAsync(new SendHeartbeatRequest
+                var request = new SendHeartbeatRequest
                 {
                     Ephemeral = true,
                     ServiceName = beatInfo.serviceName,
                     BeatInfo = beatInfo,
-                });
-                File.AppendAllText("Final.txt", ":" + "Flag:" + flag + System.Environment.NewLine);
+                };
+
+                if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
+
+                request.CheckParam();
+
+                var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Put, RequestPathValue.INSTANCE_BEAT, null, request.ToDict(), _options.DefaultTimeOut);
+
+                switch (responseMessage.StatusCode)
+                {
+                    case System.Net.HttpStatusCode.OK:
+                        var result = await responseMessage.Content.ReadAsStringAsync();
+                        File.AppendAllText("Final.txt", ":" + "Hearbeat sent" + result.ToString() + System.Environment.NewLine);
+                        var jObj = Newtonsoft.Json.Linq.JObject.Parse(result);
+
+                        if (jObj.ContainsKey("code"))
+                        {
+                            int code = int.Parse(jObj["code"].ToString());
+
+                            var flag = code == 10200;
+
+                            if (!flag) _logger.LogWarning($"[client.SendHeartbeat] server return {result} ");
+                        }
+                        else
+                        {
+                            _logger.LogWarning($"[client.SendHeartbeat] server return {result} ");
+                        }
+
+                        break;
+                    default:
+                        _logger.LogWarning($"[client.SendHeartbeat] Send instance beat failed {responseMessage.StatusCode.ToString()}");
+                        throw new NacosException((int)responseMessage.StatusCode, $"Send instance beat failed {responseMessage.StatusCode.ToString()}");
+                }
             }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Send heart beat to Nacos error");
             }
-
-            _logger.LogDebug("report at {0}, status = {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), flag);
         }
 
         /// <summary>
@@ -123,13 +155,13 @@
         /// <summary>
         /// Build new beat information.
         /// </summary>
-        /// <param name="groupedServiceName"> service name with group name, format: ${groupName}@@${serviceName} </param>
+        /// <param name="serviceName"> service name with group name, format: ${groupName}@@${serviceName} </param>
         /// <param name="instance"> instance </param>
         /// <returns> new beat information </returns>
-        public BeatInfo BuildBeatInfo(string groupedServiceName, RegisterInstanceRequest instance)
+        public BeatInfo BuildBeatInfo(string serviceName, RegisterInstanceRequest instance)
         {
             BeatInfo beatInfo = new BeatInfo();
-            beatInfo.serviceName = groupedServiceName;
+            beatInfo.serviceName = serviceName;
             beatInfo.ip = instance.Ip;
             beatInfo.port = instance.Port;
             beatInfo.cluster = instance.ClusterName;
@@ -142,7 +174,7 @@
 
         public string BuildKey(string serviceName, string ip, int port)
         {
-            return serviceName + "#" + ip + "#" + port;
+            return serviceName + ConstValue.BeatInfoSplitter + ip + ConstValue.BeatInfoSplitter + port;
         }
     }
 }

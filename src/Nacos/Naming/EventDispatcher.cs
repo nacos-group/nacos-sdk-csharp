@@ -1,14 +1,13 @@
 namespace Nacos
 {
     using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Options;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using Nacos.Exceptions;
     using Nacos.Utilities;
     using System;
     using System.IO;
-    using System.Net.Http;
+    using System.Linq;
     using System.Threading.Tasks;
 
     public class EventDispatcher
@@ -16,6 +15,7 @@ namespace Nacos
         private readonly ILogger _logger;
         private readonly NacosOptions _options;
         private bool closed = false;
+
         public readonly BlockingCollection<ServiceInfo> ChangedServices = new BlockingCollection<ServiceInfo>(boundedCapacity: 10);
 
         public ConcurrentDictionary<string, List<Action<IEvent>>> ObserverMap { get; set; } = new ConcurrentDictionary<string, List<Action<IEvent>>>();
@@ -35,6 +35,7 @@ namespace Nacos
             {
                 ServiceInfo serviceInfo = null;
                 serviceInfo = ChangedServices.Take();
+                File.AppendAllText("output2.txt", "EventDispatcher ObserverMap Size:" + " " + ObserverMap.Count + System.Environment.NewLine);
                 if (serviceInfo == null)
                 {
                     continue;
@@ -42,15 +43,16 @@ namespace Nacos
 
                 try
                 {
-                    File.AppendAllText("output3.txt", "Map Value" + ObserverMap[serviceInfo.getKey()].ToJsonString() + System.Environment.NewLine);
-                    List<Action<IEvent>> actions = ObserverMap[serviceInfo.getKey()];
-                    if (actions.Count != 0)
+                    if (ObserverMap.TryGetValue(serviceInfo.getKey(), out var actions))
                     {
-                        foreach (Action<IEvent> action in actions)
+                        if (actions != null && actions.Any())
                         {
-                            List<Host> hosts = serviceInfo.Hosts;
-                            File.AppendAllText("output2.txt", "Miracle happened :)" + System.Environment.NewLine);
-                            action.Invoke(new NamingEvent(serviceInfo.name, serviceInfo.groupName, serviceInfo.clusters, hosts));
+                            foreach (Action<IEvent> action in actions)
+                            {
+                                List<Host> hosts = serviceInfo.Hosts;
+                                File.AppendAllText("output2.txt", "Listening Done :)" + System.Environment.NewLine);
+                                action.Invoke(new NamingEvent(serviceInfo.name, serviceInfo.groupName, serviceInfo.clusters, hosts));
+                            }
                         }
                     }
                 }
@@ -68,7 +70,6 @@ namespace Nacos
                 return;
             }
 
-            File.AppendAllText("output2.txt", "Observer Count" + ObserverMap.Count + System.Environment.NewLine);
             ChangedServices.Add(serviceInfo);
         }
     }

@@ -63,9 +63,10 @@ namespace Nacos
             ServiceInfo oldService = null;
             ServiceInfoMap.TryGetValue(obj.getKey(), out oldService);
             File.AppendAllText("output.txt", "Old Host Id:" + " " + oldService.ToJsonString() + System.Environment.NewLine);
-            if (obj.Hosts == null)
+            if (obj.Hosts == null || !newService.validate())
             {
                 Flag = false;
+                File.AppendAllText("output.txt", "Old Host Id is null" + " " + System.Environment.NewLine);
                 return Task.CompletedTask;
             }
 
@@ -77,14 +78,12 @@ namespace Nacos
                 foreach (var entry in oldService.Hosts)
                 {
                     oldHostMap[entry.ToInetAddr()] = entry;
-                    File.AppendAllText("output.txt", "Old Host Id:" + " " + entry.InstanceId + "Host Weight" + entry.Weight + System.Environment.NewLine);
                 }
 
                 IDictionary<string, Host> newHostMap = new ConcurrentDictionary<string, Host>();
                 foreach (var entry in newService.Hosts)
                 {
                     newHostMap[entry.ToInetAddr()] = entry;
-                    File.AppendAllText("output.txt", "New Host Id:" + " " + entry.InstanceId + "Host weight" + entry.Weight + System.Environment.NewLine);
                 }
 
                 foreach (KeyValuePair<string, Host> entry in newHostMap)
@@ -92,23 +91,24 @@ namespace Nacos
                     if (!oldHostMap.ContainsKey(entry.Key))
                     {
                         _eventDispatcher.ServiceChanged(obj);
-                        File.AppendAllText("output.txt", "Service Changed" + System.Environment.NewLine);
+                        File.AppendAllText("output1.txt", "Service Changed" + System.Environment.NewLine);
                         Flag = true;
                     }
                     else
                     {
                         Host host1 = newHostMap[entry.Key];
                         Host host2 = oldHostMap[entry.Key];
-                        File.AppendAllText("output1.txt", "New Host Id:" + " " + host1.String() + System.Environment.NewLine);
-                        File.AppendAllText("output1.txt", "Old Host Id:" + " " + host2.String() + System.Environment.NewLine);
-                        if (host1.String() == host2.String())
+                        File.AppendAllText("output1.txt", "Old Host Id:" + " " + host2.Tostring() + System.Environment.NewLine);
+                        File.AppendAllText("output1.txt", "New Host Id:" + " " + host1.Tostring() + System.Environment.NewLine);
+
+                        if (host1.Tostring() == host2.Tostring())
                         {
                             Flag = false;
                         }
                         else
                         {
                             _eventDispatcher.ServiceChanged(obj);
-                            File.AppendAllText("output.txt", "Service Changed" + System.Environment.NewLine);
+                            File.AppendAllText("output1.txt", "Service Changed" + System.Environment.NewLine);
                             Flag = true;
                             return Task.CompletedTask;
                         }
@@ -119,7 +119,7 @@ namespace Nacos
                 {
                     if (!newHostMap.ContainsKey(entry.Key))
                     {
-                        File.AppendAllText("output.txt", "Service Changed" + System.Environment.NewLine);
+                        File.AppendAllText("output1.txt", "Service Changed" + System.Environment.NewLine);
                         _eventDispatcher.ServiceChanged(obj);
                         Flag = true;
                         return Task.CompletedTask;
@@ -133,7 +133,7 @@ namespace Nacos
             else
             {
                 ServiceInfoMap[obj.getKey()] = obj;
-                File.AppendAllText("output.txt", "Service Subscribe Called" + obj.ToJsonString() + System.Environment.NewLine);
+                _eventDispatcher.ServiceChanged(obj);
                 Flag = true;
             }
 

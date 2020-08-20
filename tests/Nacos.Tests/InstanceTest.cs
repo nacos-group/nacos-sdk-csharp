@@ -28,17 +28,17 @@
         }
 
         [Fact]
-        public async Task AddListener_Should_Succeed()
+        public async Task SubscribeAsync_Should_Succeed()
         {
             Action<IEvent> action = x =>
             {
                 var @event = x as NamingEvent;
-                File.AppendAllText("test.txt", "Action Taken " + @event.ToJsonString() + System.Environment.NewLine);
+                File.AppendAllText("test.txt", "Action Taken " + System.Environment.NewLine);
             };
 
-            ServiceInfo serviceInfo = new ServiceInfo("testservice", "");
-            await _namingClient.AddListenerAsync(serviceInfo, "", action);
+            await _namingClient.SubscribeAsync("testservice", "", "", action);
 
+            await Task.Delay(10000);
             var requestA = new RegisterInstanceRequest
             {
                 ServiceName = "testservice",
