@@ -17,7 +17,7 @@
         {
             _configurationSource = configurationSource;
 
-            _parser = configurationSource.NacosConfigurationParser ?? DefaultJsonConfigurationStringParser.Instance;
+            _parser = configurationSource.NacosConfigurationParser;
 
             _client = new NacosMsConfigClient(NullLoggerFactory.Instance, new NacosOptions
             {
@@ -31,7 +31,7 @@
                 SecretKey = configurationSource.SecretKey,
                 Password = configurationSource.Password,
                 UserName = configurationSource.UserName,
-                ListenInterval = 5000
+                ListenInterval = 20000
             });
 
             _client.AddListenerAsync(new AddListenerRequest

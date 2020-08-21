@@ -58,7 +58,11 @@ namespace MsConfigApp
                      var serverAddresses = c.GetSection("NacosConfig:ServerAddresses").Get<List<string>>();
 
                      // read configuration from config files
-                     builder.AddNacosConfiguration(c.GetSection("NacosConfig"));
+                     // default is json
+                     // builder.AddNacosConfiguration(c.GetSection("NacosConfig"));
+                     // specify ini or yaml
+                     // builder.AddNacosConfiguration(c.GetSection("NacosConfig"), Nacos.IniParser.IniConfigurationStringParser.Instance);
+                     builder.AddNacosConfiguration(c.GetSection("NacosConfig"), Nacos.YamlParser.YamlConfigurationStringParser.Instance);
 
                      // hard code here
                      /*builder.AddNacosConfiguration(x =>
