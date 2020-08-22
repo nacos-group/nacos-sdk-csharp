@@ -1,14 +1,10 @@
 namespace Nacos
 {
     using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Options;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using Nacos.Exceptions;
     using Nacos.Utilities;
     using System;
-    using System.IO;
-    using System.Net.Http;
     using System.Threading.Tasks;
 
     public class HostReactor
@@ -62,11 +58,9 @@ namespace Nacos
             ServiceInfo newService = obj;
             ServiceInfo oldService = null;
             ServiceInfoMap.TryGetValue(obj.getKey(), out oldService);
-            File.AppendAllText("output.txt", "Old Host Id:" + " " + oldService.ToJsonString() + System.Environment.NewLine);
             if (obj.Hosts == null || !newService.validate())
             {
                 Flag = false;
-                File.AppendAllText("output.txt", "Old Host Id is null" + " " + System.Environment.NewLine);
                 return Task.CompletedTask;
             }
 
@@ -91,16 +85,12 @@ namespace Nacos
                     if (!oldHostMap.ContainsKey(entry.Key))
                     {
                         _eventDispatcher.ServiceChanged(obj);
-                        File.AppendAllText("output1.txt", "Service Changed" + System.Environment.NewLine);
                         Flag = true;
                     }
                     else
                     {
                         Host host1 = newHostMap[entry.Key];
                         Host host2 = oldHostMap[entry.Key];
-                        File.AppendAllText("output1.txt", "Old Host Id:" + " " + host2.Tostring() + System.Environment.NewLine);
-                        File.AppendAllText("output1.txt", "New Host Id:" + " " + host1.Tostring() + System.Environment.NewLine);
-
                         if (host1.Tostring() == host2.Tostring())
                         {
                             Flag = false;
@@ -108,7 +98,6 @@ namespace Nacos
                         else
                         {
                             _eventDispatcher.ServiceChanged(obj);
-                            File.AppendAllText("output1.txt", "Service Changed" + System.Environment.NewLine);
                             Flag = true;
                             return Task.CompletedTask;
                         }
@@ -119,7 +108,6 @@ namespace Nacos
                 {
                     if (!newHostMap.ContainsKey(entry.Key))
                     {
-                        File.AppendAllText("output1.txt", "Service Changed" + System.Environment.NewLine);
                         _eventDispatcher.ServiceChanged(obj);
                         Flag = true;
                         return Task.CompletedTask;

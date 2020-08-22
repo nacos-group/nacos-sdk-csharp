@@ -5,10 +5,7 @@
     using Nacos.Exceptions;
     using Nacos.Utilities;
     using System;
-    using System.IO;
     using System.Threading;
-    using System.Linq;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Net.Http;
     using System.Threading.Tasks;
@@ -58,7 +55,6 @@
             {
                 case System.Net.HttpStatusCode.OK:
                     var result = await responseMessage.Content.ReadAsStringAsync();
-                    Console.WriteLine("Hey" + result);
                     if (result.Equals("ok", StringComparison.OrdinalIgnoreCase))
                     {
                         return true;
@@ -501,7 +497,6 @@
             Timer timer = new Timer(
                 async x =>
             {
-                File.AppendAllText("output.txt", "Timer is called" + System.Environment.NewLine);
                 await Notifier(request);
 #if !DEBUG
             }, request, 0, 10000);
@@ -527,11 +522,6 @@
                         var result = await responseMessage.Content.ReadAsStringAsync();
                         await _hostReactor.ProcessServiceJson(result);
                         IsUpdate = _hostReactor.Flag;
-                        if (IsUpdate)
-                        {
-                            File.AppendAllText("output1.txt", "Flag became true" + System.Environment.NewLine);
-                        }
-
                         break;
                     default:
                         _logger.LogWarning($"[client.ListInstances] Query instance list of service failed {responseMessage.StatusCode.ToString()}");
@@ -559,17 +549,13 @@
                 }
 
             List<Action<IEvent>> observers = null;
-            _eventDispatcher.ObserverMap.TryGetValue(ServiceInfo.getKey(groupedName, clusters), out observers);
-            if (observers != null && observers.Any())
+            if (_eventDispatcher.ObserverMap.TryGetValue(ServiceInfo.getKey(groupedName, clusters), out observers))
             {
-                foreach (Action<IEvent> observer in observers)
+                bool is_removed = observers.Remove(listener);
+                if (!is_removed)
                 {
-                    if (observer == listener)
-                    {
-                        observers.Remove(observer);
-                    }
+                    throw new NacosException("System.InvalidOperationException : Collection was modified; enumeration operation may not execute.");
                 }
-
 
                 if (observers.Count == 0)
                 {

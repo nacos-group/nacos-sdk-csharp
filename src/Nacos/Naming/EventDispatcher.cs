@@ -3,10 +3,7 @@ namespace Nacos
     using Microsoft.Extensions.Logging;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using Nacos.Exceptions;
-    using Nacos.Utilities;
     using System;
-    using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
 
@@ -35,7 +32,6 @@ namespace Nacos
             {
                 ServiceInfo serviceInfo = null;
                 serviceInfo = ChangedServices.Take();
-                File.AppendAllText("output2.txt", "EventDispatcher ObserverMap Size:" + " " + ObserverMap.Count + System.Environment.NewLine);
                 if (serviceInfo == null)
                 {
                     continue;
@@ -50,7 +46,6 @@ namespace Nacos
                             foreach (Action<IEvent> action in actions)
                             {
                                 List<Host> hosts = serviceInfo.Hosts;
-                                File.AppendAllText("output2.txt", "Listening Done :)" + System.Environment.NewLine);
                                 action.Invoke(new NamingEvent(serviceInfo.name, serviceInfo.groupName, serviceInfo.clusters, hosts));
                             }
                         }

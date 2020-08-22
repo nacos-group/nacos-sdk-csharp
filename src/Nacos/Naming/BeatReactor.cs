@@ -1,9 +1,7 @@
 ﻿namespace Nacos
 {
     using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Options;
     using System;
-    using System.IO;
     using System.Threading;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
@@ -54,7 +52,6 @@
             _timer = new Timer(
                 async x =>
                 {
-                    File.AppendAllText("Final.txt", ":" + "Timer is called" + System.Environment.NewLine);
                     await BeatTask(beatInfo, _timer);
                 }, null, 0, 10000);
 
@@ -65,7 +62,6 @@
 
         private async Task BeatTask(BeatInfo beatInfo, Timer timer)
         {
-            File.AppendAllText("Final.txt", ":" + "BeatInfo Stopped Flag: " + beatInfo.stopped.ToString() + System.Environment.NewLine);
             if (beatInfo.stopped == true)
             {
                 timer.Dispose();
@@ -92,7 +88,6 @@
                 {
                     case System.Net.HttpStatusCode.OK:
                         var result = await responseMessage.Content.ReadAsStringAsync();
-                        File.AppendAllText("Final.txt", ":" + "Hearbeat sent" + result.ToString() + System.Environment.NewLine);
                         var jObj = Newtonsoft.Json.Linq.JObject.Parse(result);
 
                         if (jObj.ContainsKey("code"))
