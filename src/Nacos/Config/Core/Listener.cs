@@ -10,10 +10,6 @@
             this.Timer = timer;
         }
 
-        public Listener()
-        {
-        }
-
         public string Name { get; private set; }
 
         public Timer Timer { get; set; }

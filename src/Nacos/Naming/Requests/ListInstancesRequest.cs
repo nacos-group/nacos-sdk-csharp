@@ -31,8 +31,6 @@
         /// </summary>
         public bool? HealthyOnly { get; set; }
 
-        public List<Action<string>> Callbacks { get; set; } = new List<Action<string>>();
-
         public override void CheckParam()
         {
             ParamUtil.CheckServiceName(ServiceName);

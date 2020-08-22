@@ -29,7 +29,7 @@
             return Ip + ":" + Port;
         }
 
-        public string Tostring()
+        public override string ToString()
         {
             return "Instance{" + "instanceId='" + InstanceId + '\'' + ", ip='" + Ip + '\'' + ", port=" + Port + ", weight="
                     + Weight + ", healthy=" + Healthy + ", enabled=" + Enabled + ", ephemeral=" + Ephemeral

@@ -91,7 +91,7 @@ namespace Nacos
                     {
                         Host host1 = newHostMap[entry.Key];
                         Host host2 = oldHostMap[entry.Key];
-                        if (host1.Tostring() == host2.Tostring())
+                        if (host1.ToString() == host2.ToString())
                         {
                             Flag = false;
                         }

@@ -478,13 +478,13 @@
             observers.Add(listener);
             string groupedName;
             if (String.IsNullOrEmpty(groupName))
-                {
-                    groupedName = ServiceInfo.getGroupedname(groupName, serviceName);
-                }
-                else
-                {
-                    groupedName = ServiceInfo.getGroupedname("", serviceName);
-                }
+            {
+                groupedName = ServiceInfo.getGroupedname(groupName, serviceName);
+            }
+            else
+            {
+                groupedName = ServiceInfo.getGroupedname("", serviceName);
+            }
 
             string name = ServiceInfo.getKey(groupedName, clusters);
             _eventDispatcher.ObserverMap.AddOrUpdate(name, observers, (string name, List<Action<IEvent>> observers) => observers);
@@ -540,13 +540,13 @@
             _logger.LogInformation("[LISTENER] removing {0} with {1} from listener map", serviceName,  clusters);
             string groupedName;
             if (String.IsNullOrEmpty(groupName))
-                {
-                    groupedName = ServiceInfo.getGroupedname(groupName, serviceName);
-                }
-                else
-                {
-                    groupedName = ServiceInfo.getGroupedname("", serviceName);
-                }
+            {
+                groupedName = ServiceInfo.getGroupedname(groupName, serviceName);
+            }
+            else
+            {
+                groupedName = ServiceInfo.getGroupedname("", serviceName);
+            }
 
             List<Action<IEvent>> observers = null;
             if (_eventDispatcher.ObserverMap.TryGetValue(ServiceInfo.getKey(groupedName, clusters), out observers))
