@@ -1,4 +1,4 @@
-﻿namespace Nacos.Microsoft.Extensions.Configuration
+namespace Nacos.Microsoft.Extensions.Configuration
 {
     using Nacos.Config;
     using Nacos.Config.Http;
@@ -64,6 +64,8 @@
 
                 var requestUrl = GetUrl(currentServerAddr, path);
 
+                InjectSecurityInfo(requestMessage, paramValues);
+
                 if (paramValues != null && paramValues.Any())
                 {
                     if (httpMethod == HttpMethod.Post)
@@ -81,7 +83,7 @@
                 HttpAgentCommon.BuildHeader(requestMessage, headers);
                 HttpAgentCommon.BuildSpasHeaders(requestMessage, paramValues, _options.AccessKey, _options.SecretKey);
 
-                InjectSecurityInfo(requestMessage, paramValues);
+
 
                 var responseMessage = await client.SendAsync(requestMessage);
 
@@ -105,7 +107,10 @@
         {
             if (!string.IsNullOrWhiteSpace(_securityProxy.GetAccessToken()))
             {
-                requestMessage.Headers.TryAddWithoutValidation(ConstValue.ACCESS_TOKEN, _securityProxy.GetAccessToken());
+                if (!paramValues.ContainsKey(ConstValue.ACCESS_TOKEN))
+                {
+                    paramValues.Add(ConstValue.ACCESS_TOKEN, _securityProxy.GetAccessToken());
+                }
             }
 
             if (!string.IsNullOrWhiteSpace(_namespaceId) && paramValues != null && !paramValues.ContainsKey("tenant"))

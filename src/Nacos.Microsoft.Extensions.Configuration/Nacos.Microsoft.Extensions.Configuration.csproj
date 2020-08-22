@@ -3,17 +3,17 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageId>nacos-sdk-csharp.Extensions.Configuration</PackageId>
-    <PackageVersion>$(NugetVersion)</PackageVersion>
-    <Authors>Catcher Wong</Authors>
-    <Owners>Catcher Wong</Owners>
+    <PackageId>nacos-sdk-csharp-unofficial.Extensions.Configuration</PackageId>
+    <VersionPrefix>$(NugetVersion)</VersionPrefix>
+    <VersionSuffix></VersionSuffix>
+    <Authors>nacos-sdk-csharp Contributors</Authors>
     <Description>nacos csharp sdk</Description>
     <PackageTags>nacos,csharp,sdk,msconfig</PackageTags>
     <PackageProjectUrl>https://github.com/nacos-group/nacos-sdk-csharp</PackageProjectUrl>
     <RepositoryUrl>https://github.com/nacos-group/nacos-sdk-csharp</RepositoryUrl>
     <ProjectUrl>https://github.com/nacos-group/nacos-sdk-csharp</ProjectUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReleaseNotes>
-      1. init.
     </PackageReleaseNotes>
   </PropertyGroup>
 

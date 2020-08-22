@@ -282,7 +282,10 @@
         {
             if (!string.IsNullOrWhiteSpace(_securityProxy.GetAccessToken()))
             {
-                requestMessage.Headers.TryAddWithoutValidation(ConstValue.ACCESS_TOKEN, _securityProxy.GetAccessToken());
+                if (!paramValues.ContainsKey(ConstValue.ACCESS_TOKEN))
+                {
+                    paramValues.Add(ConstValue.ACCESS_TOKEN, _securityProxy.GetAccessToken());
+                }
             }
 
             paramValues.Add("app", AppDomain.CurrentDomain.FriendlyName);
