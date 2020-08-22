@@ -3,17 +3,17 @@
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
-    <PackageId>nacos-sdk-csharp.AspNetCore</PackageId>
-    <PackageVersion>$(NugetVersion)</PackageVersion>
-    <Authors>Catcher Wong</Authors>
-    <Owners>Catcher Wong</Owners>
+    <PackageId>nacos-sdk-csharp-unofficial.AspNetCore</PackageId>
+    <VersionPrefix>$(NugetVersion)</VersionPrefix>
+    <VersionSuffix></VersionSuffix>
+    <Authors>nacos-sdk-csharp Contributors</Authors>
     <Description>nacos csharp sdk</Description>
     <PackageTags>nacos,csharp,sdk</PackageTags>
     <PackageProjectUrl>https://github.com/nacos-group/nacos-sdk-csharp</PackageProjectUrl>
     <RepositoryUrl>https://github.com/nacos-group/nacos-sdk-csharp</RepositoryUrl>
     <ProjectUrl>https://github.com/nacos-group/nacos-sdk-csharp</ProjectUrl>
-    <PackageReleaseNotes>
-      1. Init.
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReleaseNotes>      
     </PackageReleaseNotes>
   </PropertyGroup>
 
