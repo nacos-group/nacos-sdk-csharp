@@ -27,7 +27,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MsConfigApp", "samples\MsCo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nacos.Microsoft.Extensions.Configuration.Tests", "tests\Nacos.Microsoft.Extensions.Configuration.Tests\Nacos.Microsoft.Extensions.Configuration.Tests.csproj", "{11BEE2DE-B793-4868-B65C-FF915125A7DD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nacos.AspNetCore.Tests", "tests\Nacos.AspNetCore.Tests\Nacos.AspNetCore.Tests.csproj", "{F3DD367A-6EF5-4188-9D28-6858AA2F60F9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nacos.AspNetCore.Tests", "tests\Nacos.AspNetCore.Tests\Nacos.AspNetCore.Tests.csproj", "{F3DD367A-6EF5-4188-9D28-6858AA2F60F9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "parsers", "parsers", "{CFFCAA8B-3562-420B-AA8B-C525CC1ECD78}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nacos.YamlParser", "parsers\Nacos.YamlParser\Nacos.YamlParser.csproj", "{94CF8EEE-3812-47C6-998F-9105EB092036}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nacos.IniParser", "parsers\Nacos.IniParser\Nacos.IniParser.csproj", "{CEE5E43E-F4E1-4E46-9B41-ABCBECDDEA63}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,6 +81,14 @@ Global
 		{F3DD367A-6EF5-4188-9D28-6858AA2F60F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F3DD367A-6EF5-4188-9D28-6858AA2F60F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F3DD367A-6EF5-4188-9D28-6858AA2F60F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94CF8EEE-3812-47C6-998F-9105EB092036}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94CF8EEE-3812-47C6-998F-9105EB092036}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94CF8EEE-3812-47C6-998F-9105EB092036}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94CF8EEE-3812-47C6-998F-9105EB092036}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CEE5E43E-F4E1-4E46-9B41-ABCBECDDEA63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEE5E43E-F4E1-4E46-9B41-ABCBECDDEA63}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEE5E43E-F4E1-4E46-9B41-ABCBECDDEA63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEE5E43E-F4E1-4E46-9B41-ABCBECDDEA63}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -90,6 +104,8 @@ Global
 		{D8A28493-0320-4C40-8EBB-0D0AE5015307} = {25B1A184-1541-4F4E-A151-24A47CC08F34}
 		{11BEE2DE-B793-4868-B65C-FF915125A7DD} = {8176B7FC-151E-4EFF-A693-F60A39109595}
 		{F3DD367A-6EF5-4188-9D28-6858AA2F60F9} = {8176B7FC-151E-4EFF-A693-F60A39109595}
+		{94CF8EEE-3812-47C6-998F-9105EB092036} = {CFFCAA8B-3562-420B-AA8B-C525CC1ECD78}
+		{CEE5E43E-F4E1-4E46-9B41-ABCBECDDEA63} = {CFFCAA8B-3562-420B-AA8B-C525CC1ECD78}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A1C5215E-0E70-4C04-B21E-5209BCF32472}
