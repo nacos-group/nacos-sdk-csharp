@@ -1,6 +1,7 @@
 ﻿namespace Nacos.Microsoft.Extensions.Configuration
 {
     using global::Microsoft.Extensions.Configuration;
+    using Nacos.Config;
     using System.Collections.Generic;
 
     public class NacosConfigurationSource : IConfigurationSource
