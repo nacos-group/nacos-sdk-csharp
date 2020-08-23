@@ -39,7 +39,7 @@ namespace Nacos
 
                 try
                 {
-                    if (ObserverMap.TryGetValue(serviceInfo.getKey(), out var actions))
+                    if (ObserverMap.TryGetValue(serviceInfo.GetKey(), out var actions))
                     {
                         if (actions != null && actions.Any())
                         {

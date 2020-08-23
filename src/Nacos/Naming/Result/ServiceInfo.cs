@@ -31,12 +31,12 @@ namespace Nacos
             this.clusters = clusters;
         }
 
-        public String getKey()
+        public String GetKey()
         {
-            return getKey(name, clusters);
+            return GetKey(name, clusters);
         }
 
-        public static string getKey(string name, string clusters)
+        public static string GetKey(string name, string clusters)
         {
             if (!string.IsNullOrEmpty(clusters))
             {
@@ -46,7 +46,7 @@ namespace Nacos
             return name;
         }
 
-        public bool validate()
+        public bool Validate()
         {
             if (allIPs)
             {
@@ -70,7 +70,7 @@ namespace Nacos
             return true;
         }
 
-        public static string getGroupedname(string groupName, string name)
+        public static string GetGroupedName(string groupName, string name)
         {
             if (!string.IsNullOrEmpty(groupName))
             {

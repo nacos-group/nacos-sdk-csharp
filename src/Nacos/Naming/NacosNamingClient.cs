@@ -1,4 +1,4 @@
-﻿namespace Nacos
+﻿﻿namespace Nacos
 {
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
@@ -21,6 +21,9 @@
 
         public EventDispatcher _eventDispatcher;
 
+        private Timer _timer;
+
+        public bool IsStopped = false;
         public bool IsUpdate = false;
 
         public NacosNamingClient(
@@ -479,14 +482,14 @@
             string groupedName;
             if (String.IsNullOrEmpty(groupName))
             {
-                groupedName = ServiceInfo.getGroupedname(groupName, serviceName);
+                groupedName = ServiceInfo.GetGroupedName(groupName, serviceName);
             }
             else
             {
-                groupedName = ServiceInfo.getGroupedname("", serviceName);
+                groupedName = ServiceInfo.GetGroupedName("", serviceName);
             }
 
-            string name = ServiceInfo.getKey(groupedName, clusters);
+            string name = ServiceInfo.GetKey(groupedName, clusters);
             _eventDispatcher.ObserverMap.AddOrUpdate(name, observers, (string name, List<Action<IEvent>> observers) => observers);
             var request = new ListInstancesRequest
             {
@@ -494,20 +497,23 @@
             };
             ServiceInfo serviceInfo = new ServiceInfo(groupedName, clusters);
             _eventDispatcher.ServiceChanged(serviceInfo);
-            Timer timer = new Timer(
+            _timer = new Timer(
                 async x =>
             {
-                await Notifier(request);
-#if !DEBUG
+                await Notifier(request, _timer);
             }, request, 0, 10000);
-#else
-            }, request, 0, 10000);
-#endif
+
             return Task.CompletedTask;
         }
 
-        private async Task Notifier(ListInstancesRequest request)
+        private async Task Notifier(ListInstancesRequest request, Timer timer)
         {
+            if (IsStopped == true)
+            {
+                timer.Dispose();
+                return;
+            }
+
             try
             {
                 if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
@@ -541,15 +547,15 @@
             string groupedName;
             if (String.IsNullOrEmpty(groupName))
             {
-                groupedName = ServiceInfo.getGroupedname(groupName, serviceName);
+                groupedName = ServiceInfo.GetGroupedName(groupName, serviceName);
             }
             else
             {
-                groupedName = ServiceInfo.getGroupedname("", serviceName);
+                groupedName = ServiceInfo.GetGroupedName("", serviceName);
             }
 
             List<Action<IEvent>> observers = null;
-            if (_eventDispatcher.ObserverMap.TryGetValue(ServiceInfo.getKey(groupedName, clusters), out observers))
+            if (_eventDispatcher.ObserverMap.TryGetValue(ServiceInfo.GetKey(groupedName, clusters), out observers))
             {
                 bool is_removed = observers.Remove(listener);
                 if (!is_removed)
@@ -559,11 +565,16 @@
 
                 if (observers.Count == 0)
                 {
-                    _eventDispatcher.ObserverMap.TryRemove(ServiceInfo.getKey(groupedName, clusters), out var flag);
+                    _eventDispatcher.ObserverMap.TryRemove(ServiceInfo.GetKey(groupedName, clusters), out var flag);
                 }
             }
 
             return Task.CompletedTask;
+        }
+
+        public void Shutdown()
+        {
+            IsStopped = true;
         }
     }
 }

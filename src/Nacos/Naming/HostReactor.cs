@@ -16,7 +16,7 @@ namespace Nacos
 
         public EventDispatcher _eventDispatcher;
 
-        public IDictionary<string, ServiceInfo> ServiceInfoMap { get; set; } = new ConcurrentDictionary<string, ServiceInfo>();
+        private IDictionary<string, ServiceInfo> ServiceInfoMap { get; set; } = new ConcurrentDictionary<string, ServiceInfo>();
 
         public HostReactor(
             ILoggerFactory loggerFactory,
@@ -30,7 +30,7 @@ namespace Nacos
 
         private ServiceInfo GetServiceInfo0(String serviceName, String clusters)
         {
-            String key = ServiceInfo.getKey(serviceName, clusters);
+            String key = ServiceInfo.GetKey(serviceName, clusters);
             ServiceInfo serviceObj = null;
             ServiceInfoMap.TryGetValue(key, out serviceObj);
             return serviceObj;
@@ -38,7 +38,7 @@ namespace Nacos
 
         public ServiceInfo GetServiceInfo(string serviceName, string clusters)
         {
-            string key = ServiceInfo.getKey(serviceName, clusters);
+            string key = ServiceInfo.GetKey(serviceName, clusters);
 
             ServiceInfo serviceObj = GetServiceInfo0(serviceName, clusters);
 
@@ -46,7 +46,7 @@ namespace Nacos
             {
                 serviceObj = new ServiceInfo(serviceName, clusters);
 
-                ServiceInfoMap[serviceObj.getKey()] = serviceObj;
+                ServiceInfoMap[serviceObj.GetKey()] = serviceObj;
             }
 
             return serviceObj;
@@ -57,8 +57,8 @@ namespace Nacos
             var obj = result.ToObj<ServiceInfo>();
             ServiceInfo newService = obj;
             ServiceInfo oldService = null;
-            ServiceInfoMap.TryGetValue(obj.getKey(), out oldService);
-            if (obj.Hosts == null || !newService.validate())
+            ServiceInfoMap.TryGetValue(obj.GetKey(), out oldService);
+            if (obj.Hosts == null || !newService.Validate())
             {
                 Flag = false;
                 return Task.CompletedTask;
@@ -67,7 +67,7 @@ namespace Nacos
             if (oldService != null)
             {
                 // Updating the new service into the Map
-                ServiceInfoMap[obj.getKey()] = obj;
+                ServiceInfoMap[obj.GetKey()] = obj;
                 IDictionary<string, Host> oldHostMap = new ConcurrentDictionary<string, Host>();
                 foreach (var entry in oldService.Hosts)
                 {
@@ -120,7 +120,7 @@ namespace Nacos
             }
             else
             {
-                ServiceInfoMap[obj.getKey()] = obj;
+                ServiceInfoMap[obj.GetKey()] = obj;
                 _eventDispatcher.ServiceChanged(obj);
                 Flag = true;
             }
