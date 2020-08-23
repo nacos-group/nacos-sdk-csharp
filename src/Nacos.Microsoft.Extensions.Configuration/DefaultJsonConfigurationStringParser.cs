@@ -3,6 +3,7 @@
 namespace Nacos.Microsoft.Extensions.Configuration
 {
     using global::Microsoft.Extensions.Configuration;
+    using Nacos.Config;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using System;
@@ -11,13 +12,13 @@ namespace Nacos.Microsoft.Extensions.Configuration
     using System.IO;
     using System.Linq;
 
-    internal class JsonConfigurationStringParser : INacosConfigurationParser
+    internal class DefaultJsonConfigurationStringParser : INacosConfigurationParser
     {
-        private JsonConfigurationStringParser()
+        private DefaultJsonConfigurationStringParser()
         {
         }
 
-        internal static JsonConfigurationStringParser Instance = new JsonConfigurationStringParser();
+        internal static DefaultJsonConfigurationStringParser Instance = new DefaultJsonConfigurationStringParser();
 
         private readonly IDictionary<string, string> _data = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         private readonly Stack<string> _context = new Stack<string>();
@@ -26,7 +27,7 @@ namespace Nacos.Microsoft.Extensions.Configuration
         private JsonTextReader _reader;
 
         public IDictionary<string, string> Parse(string input)
-            => new JsonConfigurationStringParser().ParseString(input);
+            => new DefaultJsonConfigurationStringParser().ParseString(input);
 
         private IDictionary<string, string> ParseString(string input)
         {

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -20,6 +20,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\parsers\Nacos.IniParser\Nacos.IniParser.csproj" />
+    <ProjectReference Include="..\..\parsers\Nacos.YamlParser\Nacos.YamlParser.csproj" />
     <ProjectReference Include="..\..\src\Nacos.Microsoft.Extensions.Configuration\Nacos.Microsoft.Extensions.Configuration.csproj" />
   </ItemGroup>
 

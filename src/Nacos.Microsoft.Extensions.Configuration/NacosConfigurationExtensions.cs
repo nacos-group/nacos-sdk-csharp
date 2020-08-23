@@ -1,5 +1,6 @@
 ﻿namespace Microsoft.Extensions.Configuration
 {
+    using Nacos.Config;
     using Nacos.Microsoft.Extensions.Configuration;
     using System;
 
@@ -36,9 +37,12 @@
         /// </summary>
         /// <param name="builder">IConfigurationBuilder</param>
         /// <param name="configuration">Configuration binding nacos configuration source</param>
+        /// <param name="parser">The parser.</param>
         /// <returns>IConfigurationBuilder</returns>
         public static IConfigurationBuilder AddNacosConfiguration(
-           this IConfigurationBuilder builder, IConfiguration configuration)
+           this IConfigurationBuilder builder,
+           IConfiguration configuration,
+           INacosConfigurationParser parser = null)
         {
             if (builder == null)
             {
@@ -51,8 +55,8 @@
             }
 
             var source = new NacosConfigurationSource();
-
             configuration.Bind(source);
+            source.NacosConfigurationParser = parser ?? DefaultJsonConfigurationStringParser.Instance;
 
             return builder.Add(source);
         }
