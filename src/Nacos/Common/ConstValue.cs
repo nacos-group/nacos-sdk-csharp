@@ -23,6 +23,16 @@
         public const string DefaultGroup = "DEFAULT_GROUP";
 
         /// <summary>
+        /// ServiceInfoSplitter
+        /// </summary>
+        public const string ServiceInfoSplitter = "@@";
+
+        /// <summary>
+        /// BeatInfoSplitter
+        /// </summary>
+        public const string BeatInfoSplitter = "#";
+
+        /// <summary>
         /// default long pulling timeout
         /// </summary>
         public const int LongPullingTimeout = 30;

@@ -1,10 +1,12 @@
-﻿namespace Nacos
+﻿﻿namespace Nacos
 {
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Nacos.Exceptions;
     using Nacos.Utilities;
     using System;
+    using System.Threading;
+    using System.Collections.Generic;
     using System.Net.Http;
     using System.Threading.Tasks;
 
@@ -13,6 +15,16 @@
         private readonly ILogger _logger;
         private readonly NacosOptions _options;
         private readonly Nacos.Naming.Http.NamingProxy _proxy;
+        public BeatReactor _beatReactor;
+
+        public HostReactor _hostReactor;
+
+        public EventDispatcher _eventDispatcher;
+
+        private Timer _timer;
+
+        public bool IsStopped = false;
+        public bool IsUpdate = false;
 
         public NacosNamingClient(
             ILoggerFactory loggerFactory,
@@ -22,6 +34,9 @@
             _logger = loggerFactory.CreateLogger<NacosNamingClient>();
             _options = optionAccs.CurrentValue;
             _proxy = new Naming.Http.NamingProxy(loggerFactory, _options, clientFactory);
+            _beatReactor = new BeatReactor(loggerFactory, _proxy, _options);
+            _eventDispatcher = new EventDispatcher(loggerFactory, _options);
+            _hostReactor = new HostReactor(loggerFactory, _options, _eventDispatcher);
         }
 
         #region Instance
@@ -32,6 +47,12 @@
             request.CheckParam();
 
             var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Post, RequestPathValue.INSTANCE, null, request.ToDict(), _options.DefaultTimeOut);
+
+            if (request.Ephemeral == true)
+            {
+                BeatInfo beatInfo = _beatReactor.BuildBeatInfo(request.ServiceName, request);
+                await _beatReactor.AddBeatInfo(request.ServiceName, beatInfo);
+            }
 
             switch (responseMessage.StatusCode)
             {
@@ -58,6 +79,11 @@
             if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
 
             request.CheckParam();
+
+            if (request.Ephemeral == true)
+            {
+                await _beatReactor.RemoveBeatInfo(request.ServiceName, request.Ip, request.Port);
+            }
 
             var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Delete, RequestPathValue.INSTANCE, null, request.ToDict(), _options.DefaultTimeOut);
 
@@ -446,5 +472,109 @@
             }
         }
         #endregion
+
+        public Task SubscribeAsync(string serviceName, string groupName, string clusters, Action<IEvent> listener)
+        {
+            _logger.LogInformation("[LISTENER] adding {0} with {1} to listener map", serviceName,  clusters);
+            List<Action<IEvent>> observers = new List<Action<IEvent>>();
+
+            observers.Add(listener);
+            string groupedName;
+            if (String.IsNullOrEmpty(groupName))
+            {
+                groupedName = ServiceInfo.GetGroupedName(groupName, serviceName);
+            }
+            else
+            {
+                groupedName = ServiceInfo.GetGroupedName("", serviceName);
+            }
+
+            string name = ServiceInfo.GetKey(groupedName, clusters);
+            _eventDispatcher.ObserverMap.AddOrUpdate(name, observers, (string name, List<Action<IEvent>> observers) => observers);
+            var request = new ListInstancesRequest
+            {
+                ServiceName = serviceName
+            };
+            ServiceInfo serviceInfo = new ServiceInfo(groupedName, clusters);
+            _eventDispatcher.ServiceChanged(serviceInfo);
+            _timer = new Timer(
+                async x =>
+            {
+                await Notifier(request, _timer);
+            }, request, 0, 10000);
+
+            return Task.CompletedTask;
+        }
+
+        private async Task Notifier(ListInstancesRequest request, Timer timer)
+        {
+            if (IsStopped == true)
+            {
+                timer.Dispose();
+                return;
+            }
+
+            try
+            {
+                if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
+
+                request.CheckParam();
+
+                var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Get, RequestPathValue.INSTANCE_LIST, null, request.ToDict(), _options.DefaultTimeOut);
+
+                switch (responseMessage.StatusCode)
+                {
+                    case System.Net.HttpStatusCode.OK:
+                        var result = await responseMessage.Content.ReadAsStringAsync();
+                        await _hostReactor.ProcessServiceJson(result);
+                        IsUpdate = _hostReactor.Flag;
+                        break;
+                    default:
+                        _logger.LogWarning($"[client.ListInstances] Query instance list of service failed {responseMessage.StatusCode.ToString()}");
+                        throw new NacosException((int)responseMessage.StatusCode, $"Query instance list of service failed {responseMessage.StatusCode.ToString()}");
+                }
+            }
+            catch (Exception ex)
+            {
+                // SetHealthServer(false);
+                _logger.LogError(ex, "[listener] error");
+            }
+        }
+
+        public Task UnSubscribeAsync(string serviceName, string groupName, string clusters, Action<IEvent> listener)
+        {
+            _logger.LogInformation("[LISTENER] removing {0} with {1} from listener map", serviceName,  clusters);
+            string groupedName;
+            if (String.IsNullOrEmpty(groupName))
+            {
+                groupedName = ServiceInfo.GetGroupedName(groupName, serviceName);
+            }
+            else
+            {
+                groupedName = ServiceInfo.GetGroupedName("", serviceName);
+            }
+
+            List<Action<IEvent>> observers = null;
+            if (_eventDispatcher.ObserverMap.TryGetValue(ServiceInfo.GetKey(groupedName, clusters), out observers))
+            {
+                bool is_removed = observers.Remove(listener);
+                if (!is_removed)
+                {
+                    throw new NacosException("System.InvalidOperationException : Collection was modified; enumeration operation may not execute.");
+                }
+
+                if (observers.Count == 0)
+                {
+                    _eventDispatcher.ObserverMap.TryRemove(ServiceInfo.GetKey(groupedName, clusters), out var flag);
+                }
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public void Shutdown()
+        {
+            IsStopped = true;
+        }
     }
 }

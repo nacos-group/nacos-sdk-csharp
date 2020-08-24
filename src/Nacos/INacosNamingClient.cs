@@ -1,5 +1,6 @@
 ﻿namespace Nacos
 {
+    using System;
     using System.Threading.Tasks;
 
     public interface INacosNamingClient
@@ -33,6 +34,24 @@
         /// <param name="request">request</param>
         /// <returns>ListInstancesResult</returns>
         Task<ListInstancesResult> ListInstancesAsync(ListInstancesRequest request);
+
+        /// <summary>
+        /// Query instance list of service1
+        /// </summary>
+        /// <param name="serviceName">serviceName</param>
+        /// <param name="groupName">groupName</param>
+        /// <param name="clusters">clusters</param>
+        /// <param name="listener">listener</param>
+        Task SubscribeAsync(string serviceName, string groupName, string clusters, Action<IEvent> listener);
+
+        /// <summary>
+        /// Query instance list of service1
+        /// </summary>
+        /// <param name="serviceName">serviceName</param>
+        /// <param name="groupName">groupName</param>
+        /// <param name="clusters">clusters</param>
+        /// <param name="listener">listener</param>
+        Task UnSubscribeAsync(string serviceName, string groupName, string clusters, Action<IEvent> listener);
 
         /// <summary>
         /// Query instance details of service

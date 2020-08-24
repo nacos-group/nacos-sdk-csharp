@@ -54,7 +54,6 @@
                     await ReportAsync();
                     _reporting = false;
                 }, null, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(10));
-
             return Task.CompletedTask;
         }
 

@@ -6,6 +6,8 @@
     {
         public string Dom { get; set; }
 
+        public string Name { get; set; }
+
         public int CacheMillis { get; set; }
 
         public string UseSpecifiedURL { get; set; }

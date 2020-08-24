@@ -1,6 +1,7 @@
 ﻿namespace Nacos
 {
     using Nacos.Utilities;
+    using System;
     using System.Collections.Generic;
 
     public class ListInstancesRequest : BaseRequest

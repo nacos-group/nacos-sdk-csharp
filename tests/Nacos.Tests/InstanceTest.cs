@@ -1,5 +1,6 @@
 ﻿namespace Nacos.Tests
 {
+    using System;
     using System.Threading.Tasks;
     using Xunit;
 
@@ -12,11 +13,91 @@
             {
                 ServiceName = "testservice",
                 Ip = "192.168.0.74",
+                Ephemeral = true,
                 Port = 9999
             };
 
             var res = await _namingClient.RegisterInstanceAsync(request);
             Assert.True(res);
+            await Task.Delay(1000);
+
+            // await _namingClient.(rRequest);
+            await Task.Delay(10000);
+        }
+
+        [Fact]
+        public async Task SubscribeUnsubscribeAsync_Should_Succeed()
+        {
+            Action<IEvent> action = x =>
+            {
+                var @event = x as NamingEvent;
+            };
+
+            var requestA = new RegisterInstanceRequest
+            {
+                ServiceName = "testservice",
+                Ip = "192.168.0.74",
+                Ephemeral = true,
+                Port = 9999
+            };
+
+            await _namingClient.SubscribeAsync("testservice", "", "", action);
+            await Task.Delay(10000);
+
+            var resA = await _namingClient.RegisterInstanceAsync(requestA);
+            await Task.Delay(5000);
+
+            var requestB = new RegisterInstanceRequest
+            {
+                ServiceName = "testservice",
+                Ip = "192.168.0.75",
+                Ephemeral = true,
+                Port = 9999
+            };
+
+            var resB = await _namingClient.RegisterInstanceAsync(requestB);
+            await Task.Delay(5000);
+
+            await _namingClient.UnSubscribeAsync("testservice", "", "", action);
+            await Task.Delay(10000);
+
+            var requestC = new RegisterInstanceRequest
+            {
+                ServiceName = "testservice",
+                Ip = "192.168.0.76",
+                Ephemeral = true,
+                Port = 9999
+            };
+
+            var resC = await _namingClient.RegisterInstanceAsync(requestC);
+            await Task.Delay(5000);
+            Assert.True(true);
+        }
+
+        [Fact]
+        public async Task AddRemoveBeatAsync_Should_Succeed()
+        {
+            var request = new RegisterInstanceRequest
+            {
+                ServiceName = "testservice",
+                Ip = "192.168.0.74",
+                Ephemeral = true,
+                Port = 9999
+            };
+
+            var resA = await _namingClient.RegisterInstanceAsync(request);
+            await Task.Delay(10000);
+
+            var requestA = new RemoveInstanceRequest
+            {
+                ServiceName = "testservice",
+                Ip = "192.168.0.74",
+                Ephemeral = true,
+                Port = 9999
+            };
+            var resB = await _namingClient.RemoveInstanceAsync(requestA);
+            await Task.Delay(10000);
+            Assert.True(true);
         }
 
         [Fact]
@@ -26,6 +107,7 @@
             {
                 ServiceName = "testservice",
                 Ip = "192.168.0.74",
+                Ephemeral = true,
                 Port = 9999
             };
 
