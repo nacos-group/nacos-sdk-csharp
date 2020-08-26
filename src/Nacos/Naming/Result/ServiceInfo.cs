@@ -1,8 +1,6 @@
 namespace Nacos
 {
-    using System;
     using System.Collections.Generic;
-    using Nacos.Utilities;
 
     public class ServiceInfo
     {
@@ -13,7 +11,6 @@ namespace Nacos
 
         public long cacheMillis { get; set; } = 1000L;
 
-        // public List<GetInstanceResult> hosts { get; set; } = new ArrayList<GetInstanceResult>();
         public long lastRefTime { get; set; } = 0L;
 
         public string checksum { get; set; } = "";
@@ -22,7 +19,6 @@ namespace Nacos
 
         public bool allIPs { get; set; } = false;
 
-        // public int ipCount { get; } = hosts.Count();
         public string clusters { get; set; }
 
         public ServiceInfo(string serviceName, string clusters)
@@ -31,7 +27,12 @@ namespace Nacos
             this.clusters = clusters;
         }
 
-        public String GetKey()
+        public int IpCount()
+        {
+            return Hosts.Count;
+        }
+
+        public string GetKey()
         {
             return GetKey(name, clusters);
         }
@@ -72,12 +73,9 @@ namespace Nacos
 
         public static string GetGroupedName(string groupName, string name)
         {
-            if (!string.IsNullOrEmpty(groupName))
-            {
-                return groupName + ConstValue.ServiceInfoSplitter + name;
-            }
-
-            return ConstValue.DefaultGroup + ConstValue.ServiceInfoSplitter + name;
+            return !string.IsNullOrEmpty(groupName)
+                ? groupName + ConstValue.ServiceInfoSplitter + name
+                : ConstValue.DefaultGroup + ConstValue.ServiceInfoSplitter + name;
         }
     }
 }

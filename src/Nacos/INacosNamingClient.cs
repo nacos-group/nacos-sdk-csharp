@@ -1,6 +1,7 @@
 ﻿namespace Nacos
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
 
     public interface INacosNamingClient
@@ -34,24 +35,6 @@
         /// <param name="request">request</param>
         /// <returns>ListInstancesResult</returns>
         Task<ListInstancesResult> ListInstancesAsync(ListInstancesRequest request);
-
-        /// <summary>
-        /// Query instance list of service1
-        /// </summary>
-        /// <param name="serviceName">serviceName</param>
-        /// <param name="groupName">groupName</param>
-        /// <param name="clusters">clusters</param>
-        /// <param name="listener">listener</param>
-        Task SubscribeAsync(string serviceName, string groupName, string clusters, Action<IEvent> listener);
-
-        /// <summary>
-        /// Query instance list of service1
-        /// </summary>
-        /// <param name="serviceName">serviceName</param>
-        /// <param name="groupName">groupName</param>
-        /// <param name="clusters">clusters</param>
-        /// <param name="listener">listener</param>
-        Task UnSubscribeAsync(string serviceName, string groupName, string clusters, Action<IEvent> listener);
 
         /// <summary>
         /// Query instance details of service
@@ -152,6 +135,26 @@
         /// </summary>
         /// <returns>GetMetricsResult</returns>
         Task<GetMetricsResult> GetMetricsAsync();
+        #endregion
+
+        #region Subscribe/UnSubscribe
+
+        Task SubscribeAsync(string serviceName, Action<IEvent> listener);
+
+        Task SubscribeAsync(string serviceName, string groupName, Action<IEvent> listener);
+
+        Task SubscribeAsync(string serviceName, List<string> clusters, Action<IEvent> listener);
+
+        Task SubscribeAsync(string serviceName, string groupName, List<string> clusters, Action<IEvent> listener);
+
+        Task UnSubscribeAsync(string serviceName, Action<IEvent> listener);
+
+        Task UnSubscribeAsync(string serviceName, string groupName, Action<IEvent> listener);
+
+        Task UnSubscribeAsync(string serviceName, List<string> clusters, Action<IEvent> listener);
+
+        Task UnSubscribeAsync(string serviceName, string groupName, List<string> clusters, Action<IEvent> listener); 
+
         #endregion
     }
 }
