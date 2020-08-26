@@ -139,21 +139,77 @@
 
         #region Subscribe/UnSubscribe
 
+        /// <summary>
+        /// Subscribe the service
+        /// </summary>
+        /// <param name="serviceName">service name</param>
+        /// <param name="listener">listener</param>
+        /// <returns>Task</returns>
         Task SubscribeAsync(string serviceName, Action<IEvent> listener);
 
+        /// <summary>
+        /// Subscribe the service
+        /// </summary>
+        /// <param name="serviceName">service name</param>
+        /// <param name="groupName">group name</param>
+        /// <param name="listener">listener</param>
+        /// <returns>Task</returns>
         Task SubscribeAsync(string serviceName, string groupName, Action<IEvent> listener);
 
+        /// <summary>
+        /// Subscribe the service
+        /// </summary>
+        /// <param name="serviceName">service name</param>
+        /// <param name="clusters">clusters</param>
+        /// <param name="listener">listener</param>
+        /// <returns>Task</returns>
         Task SubscribeAsync(string serviceName, List<string> clusters, Action<IEvent> listener);
 
+        /// <summary>
+        /// Subscribe the service
+        /// </summary>
+        /// <param name="serviceName">service name</param>
+        /// <param name="groupName">group name</param>
+        /// <param name="clusters">clusters</param>
+        /// <param name="listener">listener</param>
+        /// <returns>Task</returns>
         Task SubscribeAsync(string serviceName, string groupName, List<string> clusters, Action<IEvent> listener);
 
+        /// <summary>
+        /// Unsubscribe the service
+        /// </summary>
+        /// <param name="serviceName">service name</param>
+        /// <param name="listener">listener</param>
+        /// <returns>Task</returns>
         Task UnSubscribeAsync(string serviceName, Action<IEvent> listener);
 
+        /// <summary>
+        /// Unsubscribe the service
+        /// </summary>
+        /// <param name="serviceName">service name</param>
+        /// <param name="groupName">group name</param>
+        /// <param name="listener">listener</param>
+        /// <returns>Task</returns>
         Task UnSubscribeAsync(string serviceName, string groupName, Action<IEvent> listener);
 
+        /// <summary>
+        /// Unsubscribe the service
+        /// </summary>
+        /// <param name="serviceName">service name</param>
+        /// <param name="clusters">clusters</param>
+        /// <param name="listener">listener</param>
+        /// <returns>Task</returns>
         Task UnSubscribeAsync(string serviceName, List<string> clusters, Action<IEvent> listener);
 
-        Task UnSubscribeAsync(string serviceName, string groupName, List<string> clusters, Action<IEvent> listener); 
+        /// <summary>
+        /// Unsubscribe the service
+        /// </summary>
+        /// <param name="serviceName">service name</param>
+        /// <param name="groupName">group name</param>
+        /// <param name="clusters">clusters</param>
+        /// <param name="listener">listener</param>
+        /// <returns>Task</returns>
+        Task UnSubscribeAsync(string serviceName, string groupName, List<string> clusters, Action<IEvent> listener);
 
         #endregion
     }
