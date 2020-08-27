@@ -167,10 +167,14 @@
             if (cmdArgs != null && cmdArgs.Any())
             {
                 var cmd = cmdArgs.FirstOrDefault(x => x.StartsWith("--urls", StringComparison.OrdinalIgnoreCase));
-                address = cmd.Split('=')[1];
 
-                var url = ReplaceAddress(address);
-                return new Uri(url);
+                if (!string.IsNullOrWhiteSpace(cmd))
+                {
+                    address = cmd.Split('=')[1];
+
+                    var url = ReplaceAddress(address);
+                    return new Uri(url);
+                }
             }
 
             // 5. current ip address third
