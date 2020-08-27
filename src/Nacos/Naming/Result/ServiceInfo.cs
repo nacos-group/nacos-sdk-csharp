@@ -21,6 +21,10 @@ namespace Nacos
 
         public string clusters { get; set; }
 
+        public ServiceInfo()
+        {
+        }
+
         public ServiceInfo(string serviceName, string clusters)
         {
             this.name = serviceName;
@@ -45,6 +49,11 @@ namespace Nacos
             }
 
             return name;
+        }
+
+        public string GetKeyEncoded()
+        {
+            return GetKey(System.Net.WebUtility.UrlEncode(name), clusters);
         }
 
         public bool Validate()

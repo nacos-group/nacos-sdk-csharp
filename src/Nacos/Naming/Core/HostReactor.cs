@@ -22,8 +22,8 @@ namespace Nacos
         private readonly EventDispatcher _eventDispatcher;
         private readonly NamingProxy _proxy;
         private readonly NacosOptions _options;
+        private readonly PushReceiver _pushReceiver;
 
-        // private readonly PushReveiver _pushReveiver;
         public HostReactor(
             ILoggerFactory loggerFactory,
             EventDispatcher eventDispatcher,
@@ -37,7 +37,7 @@ namespace Nacos
 
             // At this time, push receiver using udp way, it's not stable and nacos server
             // has limititation on different clients, c# was not support, so disable here.
-            // _pushReveiver = new PushReceiver(loggerFactory, this);
+            _pushReceiver = new PushReceiver(loggerFactory, this);
             Task.Factory.StartNew(
                 async () => await UpdateTask());
         }
@@ -201,9 +201,7 @@ namespace Nacos
         {
             try
             {
-                // disable upd
-                // var port = _pushReveiver.GetUdpPort();
-                var port = 0;
+                var port = _pushReceiver.GetUdpPort();
                 var result = await QueryListAsync(serviceName, clusters, port, false);
 
                 if (!string.IsNullOrWhiteSpace(result))
