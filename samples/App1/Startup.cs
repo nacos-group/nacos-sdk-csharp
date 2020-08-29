@@ -34,8 +34,6 @@
             {
                 endpoints.MapControllers();
             });
-
-            /*app.UseNacosAspNetCore();*/
         }
     }
 }
