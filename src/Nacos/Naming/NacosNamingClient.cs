@@ -16,12 +16,9 @@
         private readonly NacosOptions _options;
         private readonly Nacos.Naming.Http.NamingProxy _proxy;
         public BeatReactor _beatReactor;
-
         public HostReactor _hostReactor;
-
         public EventDispatcher _eventDispatcher;
 
-        private Timer _timer;
 
         public bool IsStopped = false;
         public bool IsUpdate = false;
@@ -35,8 +32,8 @@
             _options = optionAccs.CurrentValue;
             _proxy = new Naming.Http.NamingProxy(loggerFactory, _options, clientFactory);
             _beatReactor = new BeatReactor(loggerFactory, _proxy, _options);
-            _eventDispatcher = new EventDispatcher(loggerFactory, _options);
-            _hostReactor = new HostReactor(loggerFactory, _options, _eventDispatcher);
+            _eventDispatcher = new EventDispatcher(loggerFactory);
+            _hostReactor = new HostReactor(loggerFactory, _eventDispatcher, _proxy, _options);
         }
 
         #region Instance
@@ -46,13 +43,13 @@
 
             request.CheckParam();
 
-            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Post, RequestPathValue.INSTANCE, null, request.ToDict(), _options.DefaultTimeOut);
-
-            if (request.Ephemeral == true)
+            if (request.Ephemeral.HasValue && request.Ephemeral.Value)
             {
                 BeatInfo beatInfo = _beatReactor.BuildBeatInfo(request.ServiceName, request);
-                await _beatReactor.AddBeatInfo(request.ServiceName, beatInfo);
+                await _beatReactor.AddBeatInfo(GetGroupedName(request.ServiceName, request.GroupName), beatInfo);
             }
+
+            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Post, RequestPathValue.INSTANCE, null, request.ToDict(), _options.DefaultTimeOut);
 
             switch (responseMessage.StatusCode)
             {
@@ -473,103 +470,51 @@
         }
         #endregion
 
-        public Task SubscribeAsync(string serviceName, string groupName, string clusters, Action<IEvent> listener)
+        public async Task SubscribeAsync(string serviceName, Action<IEvent> listener)
         {
-            _logger.LogInformation("[LISTENER] adding {0} with {1} to listener map", serviceName,  clusters);
-            List<Action<IEvent>> observers = new List<Action<IEvent>>();
+            await SubscribeAsync(serviceName, new List<string>(), listener);
+        }
 
-            observers.Add(listener);
-            string groupedName;
-            if (String.IsNullOrEmpty(groupName))
-            {
-                groupedName = ServiceInfo.GetGroupedName(groupName, serviceName);
-            }
-            else
-            {
-                groupedName = ServiceInfo.GetGroupedName("", serviceName);
-            }
+        public async Task SubscribeAsync(string serviceName, string groupName, Action<IEvent> listener)
+        {
+            await SubscribeAsync(serviceName, groupName, new List<string>(), listener);
+        }
 
-            string name = ServiceInfo.GetKey(groupedName, clusters);
-            _eventDispatcher.ObserverMap.AddOrUpdate(name, observers, (string name, List<Action<IEvent>> observers) => observers);
-            var request = new ListInstancesRequest
-            {
-                ServiceName = serviceName
-            };
-            ServiceInfo serviceInfo = new ServiceInfo(groupedName, clusters);
-            _eventDispatcher.ServiceChanged(serviceInfo);
-            _timer = new Timer(
-                async x =>
-            {
-                await Notifier(request, _timer);
-            }, request, 0, 10000);
+        public async Task SubscribeAsync(string serviceName, List<string> clusters, Action<IEvent> listener)
+        {
+            await SubscribeAsync(serviceName, ConstValue.DefaultGroup, clusters, listener);
+        }
 
+        public async Task SubscribeAsync(string serviceName, string groupName, List<string> clusters, Action<IEvent> listener)
+        {
+            var cluster = string.Join(",", clusters);
+            _eventDispatcher.AddListener(await _hostReactor.GetServiceInfo(GetGroupedName(serviceName, groupName), cluster), cluster, listener);
+        }
+
+        public Task UnSubscribeAsync(string serviceName, Action<IEvent> listener)
+        {
+            return UnSubscribeAsync(serviceName, new List<string>(), listener);
+        }
+
+        public Task UnSubscribeAsync(string serviceName, string groupName, Action<IEvent> listener)
+        {
+            return UnSubscribeAsync(serviceName, groupName, new List<string>(), listener);
+        }
+
+        public Task UnSubscribeAsync(string serviceName, List<string> clusters, Action<IEvent> listener)
+        {
+            return UnSubscribeAsync(serviceName, ConstValue.DefaultGroup, clusters, listener);
+        }
+
+        public Task UnSubscribeAsync(string serviceName, string groupName, List<string> clusters, Action<IEvent> listener)
+        {
+            _eventDispatcher.RemoveListener(GetGroupedName(serviceName, groupName), string.Join(",", clusters), listener);
             return Task.CompletedTask;
         }
 
-        private async Task Notifier(ListInstancesRequest request, Timer timer)
+        private string GetGroupedName(string serviceName, string groupName)
         {
-            if (IsStopped == true)
-            {
-                timer.Dispose();
-                return;
-            }
-
-            try
-            {
-                if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
-
-                request.CheckParam();
-
-                var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Get, RequestPathValue.INSTANCE_LIST, null, request.ToDict(), _options.DefaultTimeOut);
-
-                switch (responseMessage.StatusCode)
-                {
-                    case System.Net.HttpStatusCode.OK:
-                        var result = await responseMessage.Content.ReadAsStringAsync();
-                        await _hostReactor.ProcessServiceJson(result);
-                        IsUpdate = _hostReactor.Flag;
-                        break;
-                    default:
-                        _logger.LogWarning($"[client.ListInstances] Query instance list of service failed {responseMessage.StatusCode.ToString()}");
-                        throw new NacosException((int)responseMessage.StatusCode, $"Query instance list of service failed {responseMessage.StatusCode.ToString()}");
-                }
-            }
-            catch (Exception ex)
-            {
-                // SetHealthServer(false);
-                _logger.LogError(ex, "[listener] error");
-            }
-        }
-
-        public Task UnSubscribeAsync(string serviceName, string groupName, string clusters, Action<IEvent> listener)
-        {
-            _logger.LogInformation("[LISTENER] removing {0} with {1} from listener map", serviceName,  clusters);
-            string groupedName;
-            if (String.IsNullOrEmpty(groupName))
-            {
-                groupedName = ServiceInfo.GetGroupedName(groupName, serviceName);
-            }
-            else
-            {
-                groupedName = ServiceInfo.GetGroupedName("", serviceName);
-            }
-
-            List<Action<IEvent>> observers = null;
-            if (_eventDispatcher.ObserverMap.TryGetValue(ServiceInfo.GetKey(groupedName, clusters), out observers))
-            {
-                bool is_removed = observers.Remove(listener);
-                if (!is_removed)
-                {
-                    throw new NacosException("System.InvalidOperationException : Collection was modified; enumeration operation may not execute.");
-                }
-
-                if (observers.Count == 0)
-                {
-                    _eventDispatcher.ObserverMap.TryRemove(ServiceInfo.GetKey(groupedName, clusters), out var flag);
-                }
-            }
-
-            return Task.CompletedTask;
+            return groupName + ConstValue.ServiceInfoSplitter + serviceName;
         }
 
         public void Shutdown()

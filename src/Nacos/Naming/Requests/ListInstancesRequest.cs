@@ -31,6 +31,10 @@
         /// </summary>
         public bool? HealthyOnly { get; set; }
 
+        public int UdpPort { get; set; }
+
+        public string ClientIp { get; set; }
+
         public override void CheckParam()
         {
             ParamUtil.CheckServiceName(ServiceName);
@@ -41,6 +45,7 @@
             var dict = new Dictionary<string, string>
             {
                 { "serviceName", ServiceName },
+                { "udpPort", UdpPort.ToString() },
             };
 
             if (!string.IsNullOrWhiteSpace(NamespaceId))
@@ -54,6 +59,9 @@
 
             if (HealthyOnly.HasValue)
                 dict.Add("healthyOnly", HealthyOnly.Value.ToString());
+
+            if (!string.IsNullOrWhiteSpace(ClientIp))
+                dict.Add("clientIP", ClientIp);
 
             return dict;
         }

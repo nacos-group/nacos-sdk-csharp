@@ -9,8 +9,9 @@
 
         /// <summary>
         /// nacos csharp client version
+        /// public const string ClientVersion = "Nacos-Java-Client:v1.3.0";
         /// </summary>
-        public const string ClientVersion = "Nacos-CSharp-Client-v0.2.7";
+        public const string ClientVersion = "Nacos-CSharp-Client:v0.3.0";
 
         /// <summary>
         /// nacos request module
@@ -82,11 +83,12 @@
         /// </summary>
         public const int OVER_THRESHOLD = 503;
 
-        public static string ENV_LIST_KEY = "envList";
-
-        public static string ALL_IPS = "000--00-ALL_IPS--00--000";
-
         public static string FAILOVER_SWITCH = "00-00---000-VIPSRV_FAILOVER_SWITCH-000---00-00";
+        public static string ALL_IPS = "000--00-ALL_IPS--00--000";
+        public static string ENV_CONFIGS = "00-00---000-ENV_CONFIGS-000---00-00";
+        public static string VIPCLIENT_CONFIG = "vipclient.properties";
+        public static string ALL_HOSTS = "00-00---000-ALL_HOSTS-000---00-00";
+        public static string ENV_LIST_KEY = "envList";
 
         public static string DEFAULT_NAMESPACE_ID = "public";
 

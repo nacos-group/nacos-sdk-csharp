@@ -41,7 +41,7 @@
                 Port = 9999
             };
 
-            await _namingClient.SubscribeAsync("testservice", "", "", action);
+            await _namingClient.SubscribeAsync("testservice", "", action);
             await Task.Delay(10000);
 
             var resA = await _namingClient.RegisterInstanceAsync(requestA);
@@ -58,7 +58,7 @@
             var resB = await _namingClient.RegisterInstanceAsync(requestB);
             await Task.Delay(5000);
 
-            await _namingClient.UnSubscribeAsync("testservice", "", "", action);
+            await _namingClient.UnSubscribeAsync("testservice", "", action);
             await Task.Delay(10000);
 
             var requestC = new RegisterInstanceRequest
