@@ -107,7 +107,7 @@
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Unregistering from Nacos");
+            _logger.LogWarning("Unregistering from Nacos, serviceName={0}", _options.ServiceName);
 
             var removeRequest = new RemoveInstanceRequest
             {

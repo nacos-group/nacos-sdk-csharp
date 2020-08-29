@@ -29,7 +29,7 @@
                 options.UseInMemory("nacos.aspnetcore");
             });
 
-            services.AddSingleton<INacosServerManager, NacosServerManager>();
+            services.TryAddSingleton<INacosServerManager, NacosServerManager>();
 
             // load balance strategies
             services.AddSingleton<ILBStrategy, WeightRandomLBStrategy>();
@@ -61,7 +61,7 @@
                 options.UseInMemory("nacos.aspnetcore");
             });
 
-            services.AddSingleton<INacosServerManager, NacosServerManager>();
+            services.TryAddSingleton<INacosServerManager, NacosServerManager>();
 
             // load balance strategies
             services.AddSingleton<ILBStrategy, WeightRandomLBStrategy>();

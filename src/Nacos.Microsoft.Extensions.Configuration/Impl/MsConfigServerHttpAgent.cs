@@ -83,8 +83,6 @@ namespace Nacos.Microsoft.Extensions.Configuration
                 HttpAgentCommon.BuildHeader(requestMessage, headers);
                 HttpAgentCommon.BuildSpasHeaders(requestMessage, paramValues, _options.AccessKey, _options.SecretKey);
 
-
-
                 var responseMessage = await client.SendAsync(requestMessage);
 
                 if (responseMessage.StatusCode == System.Net.HttpStatusCode.InternalServerError
