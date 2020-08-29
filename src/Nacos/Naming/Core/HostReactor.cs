@@ -1,7 +1,6 @@
 namespace Nacos
 {
     using Microsoft.Extensions.Logging;
-    using Nacos.Exceptions;
     using Nacos.Naming.Http;
     using Nacos.Utilities;
     using System;
@@ -9,7 +8,6 @@ namespace Nacos
     using System.Linq;
     using System.Net;
     using System.Net.Http;
-    using System.Threading;
     using System.Threading.Tasks;
 
     public class HostReactor
@@ -22,7 +20,7 @@ namespace Nacos
         private readonly EventDispatcher _eventDispatcher;
         private readonly NamingProxy _proxy;
         private readonly NacosOptions _options;
-        private readonly PushReceiver _pushReceiver;
+        /*private readonly PushReceiver _pushReceiver;*/
 
         public HostReactor(
             ILoggerFactory loggerFactory,
@@ -37,7 +35,7 @@ namespace Nacos
 
             // At this time, push receiver using udp way, it's not stable and nacos server
             // has limititation on different clients, c# was not support, so disable here.
-            _pushReceiver = new PushReceiver(loggerFactory, this);
+            // _pushReceiver = new PushReceiver(loggerFactory, this);
             Task.Factory.StartNew(
                 async () => await UpdateTask());
         }
@@ -201,7 +199,9 @@ namespace Nacos
         {
             try
             {
-                var port = _pushReceiver.GetUdpPort();
+                // disable upd
+                // var port = _pushReveiver.GetUdpPort();
+                var port = 0;
                 var result = await QueryListAsync(serviceName, clusters, port, false);
 
                 if (!string.IsNullOrWhiteSpace(result))
