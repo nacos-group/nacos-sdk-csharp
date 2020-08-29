@@ -7,6 +7,7 @@
     using Microsoft.Extensions.Options;
     using Newtonsoft.Json;
     using System;
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -20,6 +21,7 @@
         private Timer _timer;
         private bool _reporting;
         private Uri uri = null;
+        private SendHeartbeatRequest beatRequest = null;
 
         public StatusReportBgTask(
             ILoggerFactory loggerFactory,
@@ -38,6 +40,37 @@
             uri = UriTool.GetUri(_features, _options);
 
             _logger.LogInformation("Report instance ({0}:{1}) status....", uri.Host, uri.Port);
+
+            var metadata = new Dictionary<string, string>()
+            {
+                { PreservedMetadataKeys.REGISTER_SOURCE, "ASPNET_CORE" }
+            };
+
+            foreach (var item in _options.Metadata)
+            {
+                if (!metadata.ContainsKey(item.Key))
+                {
+                    metadata.TryAdd(item.Key, item.Value);
+                }
+            }
+
+            beatRequest = new SendHeartbeatRequest
+            {
+                Ephemeral = true,
+                ServiceName = _options.ServiceName,
+                GroupName = _options.GroupName,
+                BeatInfo = new BeatInfo
+                {
+                    ip = uri.Host,
+                    port = uri.Port,
+                    serviceName = _options.ServiceName,
+                    scheduled = true,
+                    weight = _options.Weight,
+                    cluster = _options.ClusterName,
+                    metadata = metadata,
+                },
+                NameSpaceId = _options.Namespace
+            };
 
             _timer = new Timer(
                 async x =>
@@ -62,23 +95,7 @@
             try
             {
                 // send heart beat will register instance
-                flag = await _client.SendHeartbeatAsync(new SendHeartbeatRequest
-                {
-                    Ephemeral = true,
-                    ServiceName = _options.ServiceName,
-                    GroupName = _options.GroupName,
-                    BeatInfo = new BeatInfo
-                    {
-                        ip = uri.Host,
-                        port = uri.Port,
-                        serviceName = _options.ServiceName,
-                        scheduled = true,
-                        weight = _options.Weight,
-                        cluster = _options.ClusterName,
-                        metadata = _options.Metadata,
-                    },
-                    NameSpaceId = _options.Namespace
-                });
+                flag = await _client.SendHeartbeatAsync(beatRequest);
             }
             catch (Exception ex)
             {

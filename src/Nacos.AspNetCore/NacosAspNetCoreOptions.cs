@@ -62,7 +62,7 @@
         /// <summary>
         /// the metadata of this instance
         /// </summary>
-        public Dictionary<string, string> Metadata { get; set; }
+        public Dictionary<string, string> Metadata { get; set; } = new Dictionary<string, string>();
 
         /// <summary>
         /// Load Balance Strategy
