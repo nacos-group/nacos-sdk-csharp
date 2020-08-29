@@ -1,16 +1,14 @@
 ﻿namespace Nacos.AspNetCore
 {
-    using System;
-    using System.Linq;
-    using System.Net;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Microsoft.AspNetCore.Hosting.Server;
-    using Microsoft.AspNetCore.Hosting.Server.Features;
     using Microsoft.AspNetCore.Http.Features;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
+    using Newtonsoft.Json;
+    using System;
+    using System.Threading;
+    using System.Threading.Tasks;
 
     public class StatusReportBgTask : IHostedService, IDisposable
     {
@@ -37,7 +35,7 @@
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            uri = GetUri(_features, _options);
+            uri = UriTool.GetUri(_features, _options);
 
             _logger.LogInformation("Report instance ({0}:{1}) status....", uri.Host, uri.Port);
 
@@ -66,7 +64,7 @@
                 // send heart beat will register instance
                 flag = await _client.SendHeartbeatAsync(new SendHeartbeatRequest
                 {
-                    Ephemeral = false,
+                    Ephemeral = true,
                     ServiceName = _options.ServiceName,
                     GroupName = _options.GroupName,
                     BeatInfo = new BeatInfo
@@ -102,15 +100,16 @@
                 GroupName = _options.GroupName,
                 NamespaceId = _options.Namespace,
                 ClusterName = _options.ClusterName,
-                Ephemeral = false
+                Ephemeral = true
             };
 
             for (int i = 0; i < 3; i++)
             {
                 try
                 {
+                    _logger.LogWarning("begin to remove instance, {0}", JsonConvert.SerializeObject(removeRequest));
                     var flag = await _client.RemoveInstanceAsync(removeRequest);
-                    _logger.LogDebug("remove instance, status = {0}", flag);
+                    _logger.LogWarning("remove instance, status = {0}", flag);
                     break;
                 }
                 catch (Exception ex)
@@ -125,110 +124,6 @@
         public void Dispose()
         {
             _timer?.Dispose();
-        }
-
-        private Uri GetUri(IFeatureCollection features, NacosAspNetCoreOptions config)
-        {
-            var port = config.Port <= 0 ? 80 : config.Port;
-
-            // 1. config
-            if (!string.IsNullOrWhiteSpace(config.Ip))
-            {
-                // it seems that nacos don't return the scheme
-                // so here use http only.
-                return new Uri($"http://{config.Ip}:{port}");
-            }
-
-            var address = string.Empty;
-
-            // 2. IServerAddressesFeature
-            if (features != null)
-            {
-                var addresses = features.Get<IServerAddressesFeature>();
-                address = addresses?.Addresses?.FirstOrDefault();
-
-                if (address != null)
-                {
-                    var url = ReplaceAddress(address);
-                    return new Uri(url);
-                }
-            }
-
-            // 3. ASPNETCORE_URLS
-            address = Environment.GetEnvironmentVariable("ASPNETCORE_URLS");
-            if (!string.IsNullOrWhiteSpace(address))
-            {
-                var url = ReplaceAddress(address);
-                return new Uri(url);
-            }
-
-            // 4. --urls
-            var cmdArgs = Environment.GetCommandLineArgs();
-            if (cmdArgs != null && cmdArgs.Any())
-            {
-                var cmd = cmdArgs.FirstOrDefault(x => x.StartsWith("--urls", StringComparison.OrdinalIgnoreCase));
-                address = cmd.Split('=')[1];
-
-                var url = ReplaceAddress(address);
-                return new Uri(url);
-            }
-
-            // 5. current ip address third
-            address = $"http://{GetCurrentIp()}:{port}";
-
-            return new Uri(address);
-        }
-
-        private string ReplaceAddress(string address)
-        {
-            var ip = GetCurrentIp();
-
-            if (address.Contains("*"))
-            {
-                address = address.Replace("*", ip);
-            }
-            else if (address.Contains("+"))
-            {
-                address = address.Replace("+", ip);
-            }
-            else if (address.Contains("localhost", StringComparison.OrdinalIgnoreCase))
-            {
-                address = address.Replace("localhost", ip, StringComparison.OrdinalIgnoreCase);
-            }
-            else if (address.Contains("0.0.0.0", StringComparison.OrdinalIgnoreCase))
-            {
-                address = address.Replace("0.0.0.0", ip, StringComparison.OrdinalIgnoreCase);
-            }
-
-            return address;
-        }
-
-        private string GetCurrentIp()
-        {
-            var instanceIp = "127.0.0.1";
-
-            try
-            {
-                foreach (var ipAddr in Dns.GetHostAddresses(Dns.GetHostName()))
-                {
-                    if (ipAddr.AddressFamily.ToString() != "InterNetwork") continue;
-                    if (string.IsNullOrEmpty(_options.PreferredNetworks))
-                    {
-                        instanceIp = ipAddr.ToString();
-                        break;
-                    }
-
-                    if (!ipAddr.ToString().StartsWith(_options.PreferredNetworks)) continue;
-                    instanceIp = ipAddr.ToString();
-                    break;
-                }
-            }
-            catch
-            {
-                // ignored
-            }
-
-            return instanceIp;
         }
     }
 }
