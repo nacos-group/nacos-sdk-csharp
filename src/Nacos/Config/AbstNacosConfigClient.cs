@@ -46,13 +46,12 @@
             {
                 config = await DoGetConfigAsync(request);
             }
-            catch (NacosException ex)
+            catch (NacosException e) when (e.ErrorCode == ConstValue.NO_RIGHT)
             {
-                if (ex.ErrorCode == ConstValue.NO_RIGHT)
-                {
-                    throw;
-                }
-
+                throw;
+            }
+            catch (Exception ex)
+            {
                 _logger.LogWarning($"[get-config] get from server error, envname={GetAgent().GetName()}, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, msg={ex.Message}");
             }
 
