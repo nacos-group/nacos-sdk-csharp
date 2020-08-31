@@ -15,8 +15,20 @@
 
         public Host GetHost(List<Host> list)
         {
+            var tmp = list.Select(x => new LbKv
+            {
+                // aliyun sae, the instanceid returns empty string
+                // when the instanceid is empty, create a new one, but the group was missed.
+                InstanceId = string.IsNullOrWhiteSpace(x.InstanceId) ? $"{x.Ip}#{x.Port}#{x.ClusterName}#{x.ServiceName}" : x.InstanceId,
+                Weight = x.Weight
+            }).GroupBy(x => x.InstanceId).Select(x => new LbKv
+            {
+                InstanceId = x.Key,
+                Weight = x.Max(y => y.Weight)
+            }).ToList();
+
             // <instanceid, weight>
-            var dic = list.ToDictionary(k => k.InstanceId, v => (int)v.Weight);
+            var dic = tmp.ToDictionary(k => k.InstanceId, v => (int)v.Weight);
 
             var srcInstanceIdList = dic.Keys.ToList();
             var tagInstanceIdList = new List<string>();
@@ -40,7 +52,19 @@
                 _pos++;
             }
 
-            return list.First(x => x.InstanceId.Equals(instanceId, StringComparison.OrdinalIgnoreCase));
+            var instance = list.FirstOrDefault(x => x.InstanceId.Equals(instanceId));
+
+            if (instance == null)
+            {
+                var arr = instanceId.Split("#");
+                var ip = arr[0];
+                int.TryParse(arr[1], out var port);
+                var cluster = arr[2];
+
+                instance = list.First(x => x.Ip.Equals(ip) && x.Port == port && x.ClusterName.Equals(cluster));
+            }
+
+            return instance;
         }
     }
 }

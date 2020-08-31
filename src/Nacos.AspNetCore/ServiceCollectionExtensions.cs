@@ -26,7 +26,11 @@
 
             services.AddEasyCaching(options =>
             {
-                options.UseInMemory("nacos.aspnetcore");
+                options.UseInMemory(
+                    config =>
+                    {
+                        config.MaxRdSecond = 0;
+                    }, "nacos.aspnetcore");
             });
 
             services.TryAddSingleton<INacosServerManager, NacosServerManager>();
@@ -58,7 +62,11 @@
 
             services.AddEasyCaching(options =>
             {
-                options.UseInMemory("nacos.aspnetcore");
+                options.UseInMemory(
+                   config =>
+                   {
+                       config.MaxRdSecond = 0;
+                   }, "nacos.aspnetcore");
             });
 
             services.TryAddSingleton<INacosServerManager, NacosServerManager>();
