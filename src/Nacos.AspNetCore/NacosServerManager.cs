@@ -104,7 +104,7 @@
                 if (serviceInstances?.Hosts == null || !serviceInstances.Hosts.Any())
                     return null;
                 return serviceInstances.Hosts.ToList();
-            }, TimeSpan.FromSeconds(10));
+            }, TimeSpan.FromSeconds(8));
 
             return cached.HasValue ? cached.Value : null;
         }
