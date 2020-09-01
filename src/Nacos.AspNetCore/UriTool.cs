@@ -5,6 +5,8 @@
     using System;
     using System.Linq;
     using System.Net;
+    using System.Net.NetworkInformation;
+    using System.Net.Sockets;
 
     internal static class UriTool
     {
@@ -94,18 +96,27 @@
 
             try
             {
-                foreach (var ipAddr in Dns.GetHostAddresses(Dns.GetHostName()))
-                {
-                    if (ipAddr.AddressFamily.ToString() != "InterNetwork") continue;
-                    if (string.IsNullOrEmpty(preferredNetworks))
-                    {
-                        instanceIp = ipAddr.ToString();
-                        break;
-                    }
+                var nics = NetworkInterface.GetAllNetworkInterfaces().Where(network => network.OperationalStatus == OperationalStatus.Up);
 
-                    if (!ipAddr.ToString().StartsWith(preferredNetworks)) continue;
-                    instanceIp = ipAddr.ToString();
-                    break;
+                foreach (var nic in nics)
+                {
+                    var ip = nic.GetIPProperties();
+                    var ipCollection = ip.UnicastAddresses;
+                    foreach (var ipadd in ipCollection)
+                    {
+                        if (!IPAddress.IsLoopback(ipadd.Address) && ipadd.Address.AddressFamily == AddressFamily.InterNetwork)
+                        {
+                            if (string.IsNullOrEmpty(preferredNetworks))
+                            {
+                                instanceIp = ipadd.Address.ToString();
+                                break;
+                            }
+
+                            if (!ipadd.ToString().StartsWith(preferredNetworks)) continue;
+                            instanceIp = ipadd.ToString();
+                            break;
+                        }
+                    }
                 }
             }
             catch
