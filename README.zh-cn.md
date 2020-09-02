@@ -1,6 +1,6 @@
 # nacos-sdk-csharp 　　　　   　　　　   　　[English](./README.md)
 
-基于C#(dotnet core)实现 [nacos](https://nacos.io/) OpenAPI 的非官方版本
+基于C#(dotnet core)实现 [nacos](https://nacos.io/) OpenAPI 的官方版本
 
 ![](https://img.shields.io/nuget/v/nacos-sdk-csharp-unofficial.svg)
 
