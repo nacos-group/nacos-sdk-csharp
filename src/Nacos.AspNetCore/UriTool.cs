@@ -96,26 +96,25 @@
 
             try
             {
-                var nics = NetworkInterface.GetAllNetworkInterfaces().Where(network => network.OperationalStatus == OperationalStatus.Up);
+                // 获取可用网卡
+                var nics = NetworkInterface.GetAllNetworkInterfaces()?.Where(network => network.OperationalStatus == OperationalStatus.Up);
 
-                foreach (var nic in nics)
+                // 获取所有可用网卡IP信息
+                var ipCollection = nics?.Select(x => x.GetIPProperties())?.SelectMany(x => x.UnicastAddresses);
+
+                foreach (var ipadd in ipCollection)
                 {
-                    var ip = nic.GetIPProperties();
-                    var ipCollection = ip.UnicastAddresses;
-                    foreach (var ipadd in ipCollection)
+                    if (!IPAddress.IsLoopback(ipadd.Address) && ipadd.Address.AddressFamily == AddressFamily.InterNetwork)
                     {
-                        if (!IPAddress.IsLoopback(ipadd.Address) && ipadd.Address.AddressFamily == AddressFamily.InterNetwork)
+                        if (string.IsNullOrEmpty(preferredNetworks))
                         {
-                            if (string.IsNullOrEmpty(preferredNetworks))
-                            {
-                                instanceIp = ipadd.Address.ToString();
-                                break;
-                            }
-
-                            if (!ipadd.ToString().StartsWith(preferredNetworks)) continue;
-                            instanceIp = ipadd.ToString();
+                            instanceIp = ipadd.Address.ToString();
                             break;
                         }
+
+                        if (!ipadd.ToString().StartsWith(preferredNetworks)) continue;
+                        instanceIp = ipadd.ToString();
+                        break;
                     }
                 }
             }
