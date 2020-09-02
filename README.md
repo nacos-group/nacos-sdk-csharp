@@ -8,8 +8,14 @@ csharp(dotnet core) implementation of [nacos](https://nacos.io/) OpenAPI.
 
 ## Installation
 
+Choose a package that you need.
+
 ```bash
 dotnet add package nacos-sdk-csharp-unofficial
+dotnet add package nacos-sdk-csharp-unofficial.AspNetCore
+dotnet add package nacos-sdk-csharp-unofficial.Extensions.Configuration
+dotnet add package nacos-sdk-csharp-unofficial.YamlParser
+dotnet add package nacos-sdk-csharp-unofficial.IniParser
 ```
 
 ## Features
@@ -33,8 +39,12 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
         {
             var c = builder.Build();
 
-            // read configuration from config files
+           // read configuration from config files
+            // it will use default json parser to parse the configuration store in nacos server.
             builder.AddNacosConfiguration(c.GetSection("NacosConfig"));
+            // you also can specify ini or yaml parser as well.
+            // builder.AddNacosConfiguration(c.GetSection("NacosConfig"), Nacos.IniParser.IniConfigurationStringParser.Instance);
+            // builder.AddNacosConfiguration(c.GetSection("NacosConfig"), Nacos.YamlParser.YamlConfigurationStringParser.Instance);
         })
         .ConfigureWebHostDefaults(webBuilder =>
         {
@@ -136,7 +146,21 @@ Modify `appsettings.json`
     "DefaultTimeOut": 15000,
     "Namespace": "",
     "ListenInterval": 1000,
-    "ServiceName": "App1"
+    "ServiceName": "App1",
+    "ClusterName": "",
+    "GroupName": "",
+    "Weight": 100,
+    "PreferredNetworks": "", // select an IP that matches the prefix as the service registration IP
+    "UserName": "test2",
+    "Password": "123456",
+    "AccessKey": "",
+    "SecretKey": "",
+    "EndPoint": "sub-domain.aliyun.com:8080",
+    "LBStrategy": "WeightRandom", //WeightRandom WeightRoundRobin
+    "Metadata": {
+      "aa": "bb",
+      "cc": "dd"
+    }
   }
 ```
 
@@ -158,7 +182,7 @@ public class ValuesController : ControllerBase
     public async Task<IActionResult> Test()
     {        
         // need to know the service name.
-        // at this time only support random way.
+        // support WeightRandom and WeightRoundRobin.
         var baseUrl = await _serverManager.GetServerAsync("App2");
                     
         if(string.IsNullOrWhiteSpace(baseUrl))

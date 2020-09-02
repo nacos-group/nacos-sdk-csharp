@@ -2,21 +2,20 @@
 
 基于C#(dotnet core)实现 [nacos](https://nacos.io/) OpenAPI 的官方版本
 
-![](https://img.shields.io/nuget/v/nacos-sdk-csharp-unofficial.svg)
+![Build](https://github.com/nacos-group/nacos-sdk-csharp/workflows/Build/badge.svg) ![Release](https://github.com/nacos-group/nacos-sdk-csharp/workflows/Release/badge.svg) ![](https://img.shields.io/nuget/v/nacos-sdk-csharp-unofficial.svg)  ![](https://img.shields.io/nuget/vpre/nacos-sdk-csharp-unofficial.svg) ![](https://img.shields.io/nuget/dt/nacos-sdk-csharp-unofficial) ![](https://img.shields.io/github/license/nacos-group/nacos-sdk-csharp)
 
 ![](./media/prj.png)
 
-## CI构建状态
-
-| Platform | Build Server | Master Status  |
-|--------- |------------- |---------|
-| Github Action   | Linux/OSX |![nacos-sdk-csharp CI](https://github.com/catcherwong/nacos-sdk-csharp/workflows/nacos-sdk-csharp%20CI/badge.svg)
- |
-
 ## 安装Nuget包
+
+选择您需要的包。
 
 ```bash
 dotnet add package nacos-sdk-csharp-unofficial
+dotnet add package nacos-sdk-csharp-unofficial.AspNetCore
+dotnet add package nacos-sdk-csharp-unofficial.Extensions.Configuration
+dotnet add package nacos-sdk-csharp-unofficial.YamlParser
+dotnet add package nacos-sdk-csharp-unofficial.IniParser
 ```
 
 ## 功能特性
@@ -40,8 +39,12 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
         {
             var c = builder.Build();
 
-            // read configuration from config files
+            // 从配置文件读取Nacos相关配置
+            // 默认会使用JSON解析器来解析存在Nacos Server的配置
             builder.AddNacosConfiguration(c.GetSection("NacosConfig"));
+            // 也可以按需使用ini或yaml的解析器
+            // builder.AddNacosConfiguration(c.GetSection("NacosConfig"), Nacos.IniParser.IniConfigurationStringParser.Instance);
+            // builder.AddNacosConfiguration(c.GetSection("NacosConfig"), Nacos.YamlParser.YamlConfigurationStringParser.Instance);
         })
         .ConfigureWebHostDefaults(webBuilder =>
         {
@@ -143,7 +146,21 @@ public class Startup
     "DefaultTimeOut": 15000,
     "Namespace": "",
     "ListenInterval": 1000,
-    "ServiceName": "App1"
+    "ServiceName": "App1",
+    "ClusterName": "",
+    "GroupName": "",
+    "Weight": 100,
+    "PreferredNetworks": "", // select an IP that matches the prefix as the service registration IP
+    "UserName": "test2",
+    "Password": "123456",
+    "AccessKey": "",
+    "SecretKey": "",
+    "EndPoint": "sub-domain.aliyun.com:8080",
+    "LBStrategy": "WeightRandom", //WeightRandom WeightRoundRobin
+    "Metadata": {
+      "aa": "bb",
+      "cc": "dd"
+    }
   }
 ```
 
@@ -165,7 +182,7 @@ public class ValuesController : ControllerBase
     public async Task<IActionResult> Test()
     {        
         // 这里需要知道被调用方的服务名
-        // 目前获取服务地址是随机的方式，后续会加入更多负载算法.
+        // 支持加权随机和加权轮询
         var baseUrl = await _serverManager.GetServerAsync("App2");
                     
         if(string.IsNullOrWhiteSpace(baseUrl))
