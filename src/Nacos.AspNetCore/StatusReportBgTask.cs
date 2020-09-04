@@ -20,8 +20,8 @@
 
         private Timer _timer;
         private bool _reporting;
-        private Uri uri = null;
-        private SendHeartbeatRequest beatRequest = null;
+        private IEnumerable<Uri> uris = null;
+        private List<SendHeartbeatRequest> beatRequests = new List<SendHeartbeatRequest>();
 
         public StatusReportBgTask(
             ILoggerFactory loggerFactory,
@@ -37,40 +37,45 @@
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            uri = UriTool.GetUri(_features, _options);
+            uris = UriTool.GetUri(_features, _options);
 
-            _logger.LogInformation("Report instance ({0}:{1}) status....", uri.Host, uri.Port);
-
-            var metadata = new Dictionary<string, string>()
+            foreach (var uri in uris)
             {
-                { PreservedMetadataKeys.REGISTER_SOURCE, "ASPNET_CORE" }
-            };
+                _logger.LogInformation("Report instance ({0}:{1}) status....", uri.Host, uri.Port);
 
-            foreach (var item in _options.Metadata)
-            {
-                if (!metadata.ContainsKey(item.Key))
+                var metadata = new Dictionary<string, string>()
                 {
-                    metadata.TryAdd(item.Key, item.Value);
+                    { PreservedMetadataKeys.REGISTER_SOURCE, "ASPNET_CORE" }
+                };
+
+                foreach (var item in _options.Metadata)
+                {
+                    if (!metadata.ContainsKey(item.Key))
+                    {
+                        metadata.TryAdd(item.Key, item.Value);
+                    }
                 }
-            }
 
-            beatRequest = new SendHeartbeatRequest
-            {
-                Ephemeral = true,
-                ServiceName = _options.ServiceName,
-                GroupName = _options.GroupName,
-                BeatInfo = new BeatInfo
+                var beatRequest = new SendHeartbeatRequest
                 {
-                    ip = uri.Host,
-                    port = uri.Port,
-                    serviceName = _options.ServiceName,
-                    scheduled = true,
-                    weight = _options.Weight,
-                    cluster = _options.ClusterName,
-                    metadata = metadata,
-                },
-                NameSpaceId = _options.Namespace
-            };
+                    Ephemeral = true,
+                    ServiceName = _options.ServiceName,
+                    GroupName = _options.GroupName,
+                    BeatInfo = new BeatInfo
+                    {
+                        ip = uri.Host,
+                        port = uri.Port,
+                        serviceName = _options.ServiceName,
+                        scheduled = true,
+                        weight = _options.Weight,
+                        cluster = _options.ClusterName,
+                        metadata = metadata,
+                    },
+                    NameSpaceId = _options.Namespace
+                };
+
+                beatRequests.Add(beatRequest);
+            }
 
             _timer = new Timer(
                 async x =>
@@ -85,53 +90,60 @@
                     await ReportAsync();
                     _reporting = false;
                 }, null, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(10));
+
             return Task.CompletedTask;
         }
 
         private async Task ReportAsync()
         {
-            bool flag = false;
-
-            try
+            foreach (var beatRequest in beatRequests)
             {
-                // send heart beat will register instance
-                flag = await _client.SendHeartbeatAsync(beatRequest);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Send heart beat to Nacos error");
-            }
+                bool flag = false;
 
-            _logger.LogDebug("report at {0}, status = {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), flag);
+                try
+                {
+                    // send heart beat will register instance
+                    flag = await _client.SendHeartbeatAsync(beatRequest);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, $"{beatRequest.BeatInfo.ip}:{beatRequest.BeatInfo.port} Send heart beat to Nacos error");
+                }
+
+                _logger.LogDebug("host = {0} report at {1}, status = {2}", $"{beatRequest.BeatInfo.ip}:{beatRequest.BeatInfo.port}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"), flag);
+            }
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
             _logger.LogWarning("Unregistering from Nacos, serviceName={0}", _options.ServiceName);
 
-            var removeRequest = new RemoveInstanceRequest
+            foreach (var uri in uris)
             {
-                ServiceName = _options.ServiceName,
-                Ip = uri.Host,
-                Port = uri.Port,
-                GroupName = _options.GroupName,
-                NamespaceId = _options.Namespace,
-                ClusterName = _options.ClusterName,
-                Ephemeral = true
-            };
+                var removeRequest = new RemoveInstanceRequest
+                {
+                    ServiceName = _options.ServiceName,
+                    Ip = uri.Host,
+                    Port = uri.Port,
+                    GroupName = _options.GroupName,
+                    NamespaceId = _options.Namespace,
+                    ClusterName = _options.ClusterName,
+                    Ephemeral = true
+                };
 
-            for (int i = 0; i < 3; i++)
-            {
-                try
+                for (int i = 0; i < 3; i++)
                 {
-                    _logger.LogWarning("begin to remove instance, {0}", JsonConvert.SerializeObject(removeRequest));
-                    var flag = await _client.RemoveInstanceAsync(removeRequest);
-                    _logger.LogWarning("remove instance, status = {0}", flag);
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Unregistering error, count = {0}", i + 1);
+                    try
+                    {
+                        _logger.LogWarning("begin to remove instance, {0}", JsonConvert.SerializeObject(removeRequest));
+                        var flag = await _client.RemoveInstanceAsync(removeRequest);
+                        _logger.LogWarning("remove instance, status = {0}", flag);
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Unregistering error, count = {0}", i + 1);
+                    }
                 }
             }
 
