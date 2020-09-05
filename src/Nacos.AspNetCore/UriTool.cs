@@ -3,6 +3,7 @@
     using Microsoft.AspNetCore.Hosting.Server.Features;
     using Microsoft.AspNetCore.Http.Features;
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Net;
     using System.Net.NetworkInformation;
@@ -10,8 +11,9 @@
 
     internal static class UriTool
     {
-        public static Uri GetUri(IFeatureCollection features, NacosAspNetCoreOptions config)
+        public static IEnumerable<Uri> GetUri(IFeatureCollection features, NacosAspNetCoreOptions config)
         {
+            var splitChars = new char[] { ',', ';' };
             var port = config.Port <= 0 ? 80 : config.Port;
 
             // 1. config
@@ -19,7 +21,7 @@
             {
                 // it seems that nacos don't return the scheme
                 // so here use http only.
-                return new Uri($"http://{config.Ip}:{port}");
+                return new List<Uri> { new Uri($"http://{config.Ip}:{port}") };
             }
 
             var address = string.Empty;
@@ -28,12 +30,18 @@
             if (features != null)
             {
                 var addresses = features.Get<IServerAddressesFeature>();
-                address = addresses?.Addresses?.FirstOrDefault();
+                var addressCollection = addresses?.Addresses;
 
-                if (address != null)
+                if (addressCollection != null && addressCollection.Any())
                 {
-                    var url = ReplaceAddress(address, config.PreferredNetworks);
-                    return new Uri(url);
+                    var uris = new List<Uri>();
+                    foreach (var item in addressCollection)
+                    {
+                        var url = ReplaceAddress(item, config.PreferredNetworks);
+                        uris.Add(new Uri(url));
+                    }
+
+                    return uris;
                 }
             }
 
@@ -42,7 +50,8 @@
             if (!string.IsNullOrWhiteSpace(address))
             {
                 var url = ReplaceAddress(address, config.PreferredNetworks);
-                return new Uri(url);
+
+                return url.Split(splitChars).Select(x => new Uri(x));
             }
 
             // 4. --urls
@@ -56,14 +65,15 @@
                     address = cmd.Split('=')[1];
 
                     var url = ReplaceAddress(address, config.PreferredNetworks);
-                    return new Uri(url);
+
+                    return url.Split(splitChars).Select(x => new Uri(x));
                 }
             }
 
             // 5. current ip address third
             address = $"http://{GetCurrentIp(config.PreferredNetworks)}:{port}";
 
-            return new Uri(address);
+            return new List<Uri> { new Uri(address) };
         }
 
         private static string ReplaceAddress(string address, string preferredNetworks)
@@ -96,26 +106,25 @@
 
             try
             {
-                var nics = NetworkInterface.GetAllNetworkInterfaces().Where(network => network.OperationalStatus == OperationalStatus.Up);
+                // 获取可用网卡
+                var nics = NetworkInterface.GetAllNetworkInterfaces()?.Where(network => network.OperationalStatus == OperationalStatus.Up);
 
-                foreach (var nic in nics)
+                // 获取所有可用网卡IP信息
+                var ipCollection = nics?.Select(x => x.GetIPProperties())?.SelectMany(x => x.UnicastAddresses);
+
+                foreach (var ipadd in ipCollection)
                 {
-                    var ip = nic.GetIPProperties();
-                    var ipCollection = ip.UnicastAddresses;
-                    foreach (var ipadd in ipCollection)
+                    if (!IPAddress.IsLoopback(ipadd.Address) && ipadd.Address.AddressFamily == AddressFamily.InterNetwork)
                     {
-                        if (!IPAddress.IsLoopback(ipadd.Address) && ipadd.Address.AddressFamily == AddressFamily.InterNetwork)
+                        if (string.IsNullOrEmpty(preferredNetworks))
                         {
-                            if (string.IsNullOrEmpty(preferredNetworks))
-                            {
-                                instanceIp = ipadd.Address.ToString();
-                                break;
-                            }
-
-                            if (!ipadd.ToString().StartsWith(preferredNetworks)) continue;
-                            instanceIp = ipadd.ToString();
+                            instanceIp = ipadd.Address.ToString();
                             break;
                         }
+
+                        if (!ipadd.ToString().StartsWith(preferredNetworks)) continue;
+                        instanceIp = ipadd.ToString();
+                        break;
                     }
                 }
             }
