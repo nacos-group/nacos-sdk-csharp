@@ -122,8 +122,8 @@
                             break;
                         }
 
-                        if (!ipadd.ToString().StartsWith(preferredNetworks)) continue;
-                        instanceIp = ipadd.ToString();
+                        if (!ipadd.Address.ToString().StartsWith(preferredNetworks)) continue;
+                        instanceIp = ipadd.Address.ToString();
                         break;
                     }
                 }
