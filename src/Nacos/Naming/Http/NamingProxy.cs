@@ -288,7 +288,7 @@
                 }
             }
 
-            paramValues.Add("app", AppDomain.CurrentDomain.FriendlyName);
+            paramValues["app"] = AppDomain.CurrentDomain.FriendlyName;
             if (string.IsNullOrWhiteSpace(_options.AccessKey)
                 && string.IsNullOrWhiteSpace(_options.SecretKey))
                 return;
@@ -298,9 +298,9 @@
                 : DateTimeOffset.Now.ToUnixTimeSeconds().ToString();
 
             string signature = Utilities.HashUtil.GetHMACSHA1(signData, _options.SecretKey);
-            paramValues.Add("signature", signature);
-            paramValues.Add("data", signData);
-            paramValues.Add("ak", _options.AccessKey);
+            paramValues["signature"] = signature;
+            paramValues["data"] = signData;
+            paramValues["ak"] = _options.AccessKey;
         }
 
         public void Dispose()
