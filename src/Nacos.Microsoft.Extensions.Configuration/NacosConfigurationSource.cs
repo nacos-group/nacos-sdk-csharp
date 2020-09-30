@@ -11,19 +11,28 @@
         /// </summary>
         public List<string> ServerAddresses { get; set; }
 
+
+        /// <summary>
+        /// The configuration listeners
+        /// </summary>
+        public List<ConfigListener> Listeners { get; set; }
+
         /// <summary>
         /// Determines if the Nacos Server is optional
         /// </summary>
+        [System.Obsolete("please use Listeners to configure")]
         public bool Optional { get; set; }
 
         /// <summary>
         /// Configuration ID
         /// </summary>
+        [System.Obsolete("please use Listeners to configure")]
         public string DataId { get; set; }
 
         /// <summary>
         /// Configuration group
         /// </summary>
+        [System.Obsolete("please use Listeners to configure")]
         public string Group { get; set; }
 
         /// <summary>

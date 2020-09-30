@@ -35,6 +35,8 @@
         {
             string id = Guid.NewGuid().ToString("N");
 
+            _logger.LogInformation($"==========={_configuration["all"]}======");
+
             _logger.LogInformation($"============== begin {id} =====================");
 
             var conn = _configuration.GetConnectionString("Default");
@@ -52,8 +54,6 @@
             var str3 = Newtonsoft.Json.JsonConvert.SerializeObject(_mSettings);
             _logger.LogInformation($"{id} IOptionsMonitor = {str3}");
 
-            _logger.LogInformation($"===============================================");
-            _logger.LogInformation($"===============================================");
             _logger.LogInformation($"===============================================");
 
             return "ok";
