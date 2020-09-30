@@ -13,7 +13,7 @@
 
 
         /// <summary>
-        /// 要监听的配置列表
+        /// The configuration listeners
         /// </summary>
         public List<ConfigListener> Listeners { get; set; }
 
