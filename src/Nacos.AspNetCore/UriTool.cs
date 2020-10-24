@@ -24,6 +24,12 @@
                 return new List<Uri> { new Uri($"http://{config.Ip}:{port}") };
             }
 
+            // 1.1. Ip is null && Port has value
+            if (string.IsNullOrWhiteSpace(config.Ip) && port != 80)
+            {
+                return new List<Uri> { new Uri($"http://{GetCurrentIp(config.PreferredNetworks)}:{port}") };
+            }
+
             var address = string.Empty;
 
             // 2. IServerAddressesFeature
