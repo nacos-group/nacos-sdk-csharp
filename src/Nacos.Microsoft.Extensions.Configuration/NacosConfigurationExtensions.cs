@@ -29,6 +29,8 @@
 
             action(source);
 
+            source.NacosConfigurationParser ??= DefaultJsonConfigurationStringParser.Instance;
+
             return builder.Add(source);
         }
 
