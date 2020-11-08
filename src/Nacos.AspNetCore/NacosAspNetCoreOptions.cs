@@ -60,6 +60,11 @@
         public int Port { get; set; }
 
         /// <summary>
+        /// if you just want to subscribe, but don't want to register your service, set it to false.
+        /// </summary>
+        public bool RegisterEnabled { get; set; } = true;
+
+        /// <summary>
         /// the metadata of this instance
         /// </summary>
         public Dictionary<string, string> Metadata { get; set; } = new Dictionary<string, string>();
