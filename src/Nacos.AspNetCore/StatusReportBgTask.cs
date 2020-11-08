@@ -37,6 +37,12 @@
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
+            if (!_options.RegisterEnabled)
+            {
+                _logger.LogInformation("setting RegisterEnabled to false, will not register to nacos");
+                return Task.CompletedTask;
+            }
+
             uris = UriTool.GetUri(_features, _options);
 
             foreach (var uri in uris)
@@ -116,38 +122,41 @@
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
-            _logger.LogWarning("Unregistering from Nacos, serviceName={0}", _options.ServiceName);
-
-            foreach (var uri in uris)
+            if (_options.RegisterEnabled)
             {
-                var removeRequest = new RemoveInstanceRequest
-                {
-                    ServiceName = _options.ServiceName,
-                    Ip = uri.Host,
-                    Port = uri.Port,
-                    GroupName = _options.GroupName,
-                    NamespaceId = _options.Namespace,
-                    ClusterName = _options.ClusterName,
-                    Ephemeral = true
-                };
+                _logger.LogWarning("Unregistering from Nacos, serviceName={0}", _options.ServiceName);
 
-                for (int i = 0; i < 3; i++)
+                foreach (var uri in uris)
                 {
-                    try
+                    var removeRequest = new RemoveInstanceRequest
                     {
-                        _logger.LogWarning("begin to remove instance, {0}", JsonConvert.SerializeObject(removeRequest));
-                        var flag = await _client.RemoveInstanceAsync(removeRequest);
-                        _logger.LogWarning("remove instance, status = {0}", flag);
-                        break;
-                    }
-                    catch (Exception ex)
+                        ServiceName = _options.ServiceName,
+                        Ip = uri.Host,
+                        Port = uri.Port,
+                        GroupName = _options.GroupName,
+                        NamespaceId = _options.Namespace,
+                        ClusterName = _options.ClusterName,
+                        Ephemeral = true
+                    };
+
+                    for (int i = 0; i < 3; i++)
                     {
-                        _logger.LogError(ex, "Unregistering error, count = {0}", i + 1);
+                        try
+                        {
+                            _logger.LogWarning("begin to remove instance, {0}", JsonConvert.SerializeObject(removeRequest));
+                            var flag = await _client.RemoveInstanceAsync(removeRequest);
+                            _logger.LogWarning("remove instance, status = {0}", flag);
+                            break;
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Unregistering error, count = {0}", i + 1);
+                        }
                     }
                 }
-            }
 
-            _timer?.Change(Timeout.Infinite, 0);
+                _timer?.Change(Timeout.Infinite, 0);
+            }
         }
 
         public void Dispose()
