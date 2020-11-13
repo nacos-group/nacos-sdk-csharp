@@ -2,7 +2,7 @@
   <Import Project="../../build/version.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
     <PackageId>nacos-sdk-csharp-unofficial.AspNetCore</PackageId>
     <VersionPrefix>$(NugetVersion)</VersionPrefix>
     <VersionSuffix></VersionSuffix>
@@ -30,7 +30,13 @@
     <None Include="../../LICENSE" Pack="true" Visible="false" PackagePath="" />
   </ItemGroup>
 
-  <ItemGroup>
+ <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="5.0.0" />
+    <PackageReference Include="EasyCaching.InMemory" Version="0.8.9" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="3.1.0" />
     <PackageReference Include="EasyCaching.InMemory" Version="0.8.9" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />

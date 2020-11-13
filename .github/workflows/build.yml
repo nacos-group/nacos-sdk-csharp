@@ -11,7 +11,7 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.200
+        dotnet-version: 5.0.x
     - name: Build with dotnet
       run: dotnet build --configuration Release
       
@@ -24,6 +24,6 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.200
+        dotnet-version: 5.0.x
     - name: Build with dotnet
       run: dotnet build --configuration Release
