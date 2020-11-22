@@ -4,6 +4,7 @@
     using global::Microsoft.Extensions.Logging.Abstractions;
     using Nacos.Config;
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -16,11 +17,13 @@
 
         private readonly INacosConfigClient _client;
 
+        private readonly ConcurrentDictionary<string, string> _configDict;
+
         public NacosConfigurationProvider(NacosConfigurationSource configurationSource)
         {
             _configurationSource = configurationSource;
-
             _parser = configurationSource.NacosConfigurationParser;
+            _configDict = new ConcurrentDictionary<string, string>();
 
             _client = new NacosMsConfigClient(NullLoggerFactory.Instance, new NacosOptions
             {
@@ -50,7 +53,7 @@
                         Tenant = configurationSource.Tenant,
                         Callbacks = new System.Collections.Generic.List<Action<string>>
                         {
-                            x => CallBackReload(x, item.Optional)
+                            x => CallBackReload($"{configurationSource.Tenant}#{item.Group}#{item.DataId}", x, item.Optional)
                         }
                     }));
                 }
@@ -67,35 +70,32 @@
                     Tenant = _configurationSource.Tenant,
                     Callbacks = new System.Collections.Generic.List<Action<string>>
                     {
-                        x => CallBackReload(x, _configurationSource.Optional)
+                        x => CallBackReload($"{_configurationSource.Tenant}#{_configurationSource.Group}#{_configurationSource.DataId}", x, _configurationSource.Optional)
                     }
 #pragma warning restore CS0618
                 });
             }
         }
 
-        private void CallBackReload(string val, bool optional)
+        private void CallBackReload(string key, string val, bool optional)
         {
             try
             {
-                var data = _parser.Parse(val);
+                _configDict[key] = val;
 
-                var tmpData = new Dictionary<string, string>();
+                var nData = new Dictionary<string, string>();
 
-                foreach (var item in Data)
+                foreach (var dict in _configDict)
                 {
-                    tmpData.Add(item.Key, item.Value);
-                }
+                    var data = _parser.Parse(dict.Value);
 
-                foreach (var item in data)
-                {
-                    if (tmpData.ContainsKey(item.Key))
+                    foreach (var item in data)
                     {
-                        tmpData[item.Key] = item.Value;
+                        nData.Add(item.Key, item.Value);
                     }
                 }
 
-                Data = tmpData;
+                Data = nData;
                 OnReload();
             }
             catch (Exception ex)
@@ -127,6 +127,8 @@
                                 Tenant = _configurationSource.Tenant
                             }).ConfigureAwait(false).GetAwaiter().GetResult();
 
+                            _configDict.AddOrUpdate($"{_configurationSource.Tenant}#{listener.Group}#{listener.DataId}", config, (x, y) => config);
+
                             var data = _parser.Parse(config);
 
                             foreach (var item in data)
@@ -157,6 +159,8 @@
                             Group = _configurationSource.Group,
                             Tenant = _configurationSource.Tenant
                         }).ConfigureAwait(false).GetAwaiter().GetResult();
+
+                        _configDict.AddOrUpdate($"{_configurationSource.Tenant}#{_configurationSource.Group}#{_configurationSource.DataId}", config, (x, y) => config);
 
                         var data = _parser.Parse(config);
 
