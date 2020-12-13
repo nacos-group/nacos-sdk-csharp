@@ -158,6 +158,8 @@
             services.TryAddSingleton<ILocalConfigInfoProcessor, MemoryLocalConfigInfoProcessor>();
             services.TryAddSingleton<Nacos.Config.Http.IHttpAgent, Nacos.Config.Http.ServerHttpAgent>();
             services.AddSingleton<INacosConfigClient, NacosConfigClient>();
+            services.AddSingleton<INacosConfigClient, Nacos.Config.GrpcConfigClient>();
+            services.AddSingleton<INacosConfigClientFactory, NacosConfigClientFactory>();
 
             return services;
         }
@@ -182,6 +184,8 @@
             services.TryAddSingleton<ILocalConfigInfoProcessor, MemoryLocalConfigInfoProcessor>();
             services.TryAddSingleton<Nacos.Config.Http.IHttpAgent, Nacos.Config.Http.ServerHttpAgent>();
             services.AddSingleton<INacosConfigClient, NacosConfigClient>();
+            services.AddSingleton<INacosConfigClient, Nacos.Config.GrpcConfigClient>();
+            services.AddSingleton<INacosConfigClientFactory, NacosConfigClientFactory>();
 
             return services;
         }

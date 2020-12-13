@@ -20,6 +20,8 @@
         protected List<Listener> listeners;
         protected bool isHealthServer = true;
 
+        public string Name => "http";
+
         public abstract Config.Http.IHttpAgent GetAgent();
 
         public abstract ILocalConfigInfoProcessor GetProcessor();

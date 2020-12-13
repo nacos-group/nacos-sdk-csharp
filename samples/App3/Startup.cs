@@ -17,7 +17,26 @@ namespace App3
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddNacosAspNetCore(Configuration);
+            // services.AddNacosAspNetCore(Configuration);
+
+            /*
+                 "Optional": false,
+    "DataId": "demo",
+    "Group": "group1",
+    "Tenant": "9a760099-7724-4505-bb3d-e80028d53b35",
+    "ServerAddresses": [ "http://localhost:8848/" ],
+    "UserName": "test2",
+    "Password": "123456",
+    "AccessKey": "",
+    "SecretKey": "",
+    "EndPoint": "acm.aliyun.com"
+             */
+
+            services.AddNacosConfig(x =>
+            {
+                x.ServerAddresses = new System.Collections.Generic.List<string> { "http://localhost:8848/" };
+                x.EndPoint = "";
+            });
             services.AddControllers();
         }
 
