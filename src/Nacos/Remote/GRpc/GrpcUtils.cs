@@ -15,14 +15,7 @@
 
             var payload = new Payload
             {
-                Body = body,
-                Metadata = new Metadata
-                {
-                    ClientIp = "192.168.1.103",
-                    ClientPort = 80,
-                    ClientVersion = "Nacos-CSharp-Client:v1.0.0",
-                    Type = "com.alibaba.nacos.api.naming.remote.request.InstanceRequest"
-                }
+                Body = body
             };
 
             if (meta != null)

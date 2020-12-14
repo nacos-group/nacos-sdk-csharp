@@ -1,18 +1,28 @@
 ﻿namespace Nacos.Config
 {
     using Grpc.Net.Client;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
     using Nacos.Exceptions;
     using System.Threading.Tasks;
 
     public class GrpcConfigClient : INacosConfigClient
     {
+        private ILogger _logger;
+        private NacosOptions _options;
+
         private readonly GrpcChannel _channel;
         private readonly Remote.GRpc.GrpcSdkClient _sdkClient;
 
-        public GrpcConfigClient()
+        public GrpcConfigClient(
+            ILoggerFactory loggerFactory,
+            IOptionsMonitor<NacosOptions> optionAccs)
         {
+            _logger = loggerFactory.CreateLogger<GrpcConfigClient>();
+            _options = optionAccs.CurrentValue;
+
             _sdkClient = new Remote.GRpc.GrpcSdkClient("config");
-            _channel = _sdkClient.ConnectToServer("http://localhost:9848");
+            _channel = _sdkClient.ConnectToServer(_options.ServerAddresses[0]);
         }
 
         public string Name => "grpc";
