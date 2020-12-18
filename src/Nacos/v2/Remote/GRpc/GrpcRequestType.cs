@@ -8,6 +8,8 @@
 
         public static readonly string Config_Get = "com.alibaba.nacos.api.config.remote.request.ConfigQueryRequest";
 
+        public static readonly string Config_Listen = "com.alibaba.nacos.api.config.remote.request.ConfigBatchListenRequest";
+
         public static readonly string Naming_HeartBeat = "com.alibaba.nacos.api.remote.request.HeartBeatRequest";
 
         public static readonly string Naming_Instance = "com.alibaba.nacos.api.naming.remote.request.InstanceRequest";

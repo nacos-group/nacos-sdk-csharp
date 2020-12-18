@@ -5,6 +5,7 @@ namespace App3
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using Nacos.DependencyInjection;
 
     public class Startup
     {
@@ -32,7 +33,7 @@ namespace App3
     "EndPoint": "acm.aliyun.com"
              */
 
-            services.AddNacosConfig(x =>
+            services.AddNacosV2Config(x =>
             {
                 x.ServerAddresses = new System.Collections.Generic.List<string> { "http://localhost:8848/" };
                 x.EndPoint = "";

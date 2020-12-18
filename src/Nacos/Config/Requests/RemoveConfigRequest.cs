@@ -8,20 +8,19 @@
         /// <summary>
         /// The tenant, corresponding to the namespace field of Nacos
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("tenant")]
         public string Tenant { get; set; }
 
         /// <summary>
         /// Configuration ID
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("dataId")]
         public string DataId { get; set; }
 
         /// <summary>
         /// Configuration group
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("group")]
         public string Group { get; set; }
+
+        public string Tag { get; set; }
 
         public override void CheckParam()
         {

@@ -47,5 +47,16 @@
 
             return "p ok";
         }
+
+        // GET api/config/l?d=123
+        [HttpGet("a")]
+        public async Task<string> Listen(string d)
+        {
+            var client = _factory.GetConfigClient("grpc");
+
+            await client.AddListenerAsync(new AddListenerRequest { DataId = d, Group = "g", Tenant = "test", Content = new System.Random().Next(1, 9999999).ToString() });
+
+            return "p ok";
+        }
     }
 }
