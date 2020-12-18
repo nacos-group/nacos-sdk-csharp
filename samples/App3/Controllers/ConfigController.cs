@@ -23,7 +23,7 @@
 
             var res = await client.GetConfigAsync(new GetConfigRequest { DataId = d, Group = "g", Tenant = "test" });
 
-            return res;
+            return res ?? "empty config";
         }
 
         // GET api/config/d?d=123

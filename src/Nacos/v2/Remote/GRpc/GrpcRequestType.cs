@@ -17,5 +17,7 @@
         public static readonly string Naming_ServiceList = "com.alibaba.nacos.api.naming.remote.request.ServiceListRequest";
 
         public static readonly string ConnectionSetup = "com.alibaba.nacos.api.remote.request.ConnectionSetupRequest";
+
+        public static readonly string ServerCheck = "com.alibaba.nacos.api.remote.request.ServerCheckRequest";
     }
 }

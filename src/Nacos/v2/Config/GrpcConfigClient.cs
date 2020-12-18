@@ -43,14 +43,14 @@
         {
             if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
 
-            request.Tenant = string.IsNullOrWhiteSpace(request.Tenant) ? "" : request.Tenant;
+            request.Tenant = string.IsNullOrWhiteSpace(request.Tenant) ? _options.Namespace : request.Tenant;
             request.Group = string.IsNullOrWhiteSpace(request.Group) ? ConstValue.DefaultGroup : request.Group;
 
             request.CheckParam();
 
             var list = await _agent.QueryConfigAsync(request.DataId, request.Group, request.Tenant, 5000, true);
 
-            return string.Join(",", list);
+            return (list != null && list.Any()) ? list[0] : null;
         }
 
         public Task<string> GetServerStatus()
@@ -62,7 +62,7 @@
         {
             if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
 
-            request.Tenant = string.IsNullOrWhiteSpace(request.Tenant) ? "" : request.Tenant;
+            request.Tenant = string.IsNullOrWhiteSpace(request.Tenant) ? _options.Namespace : request.Tenant;
             request.Group = string.IsNullOrWhiteSpace(request.Group) ? ConstValue.DefaultGroup : request.Group;
 
             request.CheckParam();
@@ -76,7 +76,7 @@
         {
             if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
 
-            request.Tenant = string.IsNullOrWhiteSpace(request.Tenant) ? "" : request.Tenant;
+            request.Tenant = string.IsNullOrWhiteSpace(request.Tenant) ? _options.Namespace : request.Tenant;
             request.Group = string.IsNullOrWhiteSpace(request.Group) ? ConstValue.DefaultGroup : request.Group;
 
             request.CheckParam();

@@ -1,6 +1,8 @@
 ﻿namespace Nacos.Remote.GRpc
 {
     using Grpc.Net.Client;
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
 
     public class GrpcSdkClient
     {
@@ -23,7 +25,11 @@
 
             var url = $"{arr[0]}:{arr[1]}:{port + RpcPortOffset}";
             var channel = GrpcChannel.ForAddress(url);
-            BindRequestStream(channel);
+            if (ServerCheck(channel))
+            {
+                BindRequestStream(channel);
+            }
+
             return channel;
         }
 
@@ -37,6 +43,24 @@
 
             call.RequestStream.WriteAsync(payload).GetAwaiter().GetResult();
             call.RequestStream.CompleteAsync().GetAwaiter().GetResult();
+        }
+
+        private bool ServerCheck(GrpcChannel channel)
+        {
+            try
+            {
+                var payload = GrpcUtils.Convert<object>(new { }, new RequestMeta { Type = GrpcRequestType.ServerCheck });
+
+                var client = new Nacos.Request.RequestClient(channel);
+                var resp = client.request(payload);
+
+                return resp != null;
+            }
+            catch (System.Exception ex)
+            {
+                System.Console.WriteLine(ex.Message);
+                return false;
+            }
         }
     }
 }
