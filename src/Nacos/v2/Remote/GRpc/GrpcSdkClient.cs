@@ -1,9 +1,5 @@
 ﻿namespace Nacos.Remote.GRpc
 {
-    using Grpc.Net.Client;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-
     public class GrpcSdkClient
     {
         private string _name;
@@ -15,16 +11,15 @@
 
         public static readonly int RpcPortOffset = 1000;
 
-        public GrpcChannel ConnectToServer(string address)
+        public Grpc.Core.ChannelBase ConnectToServer(string address)
         {
             // convert nacos address to grpc address
             // http://ip:port => http://ip:(port + RpcPortOffset)
-            var arr = address.TrimEnd('/').Split(":");
+            var arr = address.TrimEnd('/').Split(':');
             var port = 8848;
             if (arr.Length == 3) port = int.Parse(arr[2]);
 
-            var url = $"{arr[0]}:{arr[1]}:{port + RpcPortOffset}";
-            var channel = GrpcChannel.ForAddress(url);
+            var channel = new Grpc.Core.Channel(arr[1].Replace("//", ""), port + RpcPortOffset, Grpc.Core.ChannelCredentials.Insecure);
             if (ServerCheck(channel))
             {
                 BindRequestStream(channel);
@@ -33,7 +28,7 @@
             return channel;
         }
 
-        private void BindRequestStream(GrpcChannel channel)
+        private void BindRequestStream(Grpc.Core.ChannelBase channel)
         {
             var streamClient = new Nacos.BiRequestStream.BiRequestStreamClient(channel);
 
@@ -45,7 +40,7 @@
             call.RequestStream.CompleteAsync().GetAwaiter().GetResult();
         }
 
-        private bool ServerCheck(GrpcChannel channel)
+        private bool ServerCheck(Grpc.Core.ChannelBase channel)
         {
             try
             {

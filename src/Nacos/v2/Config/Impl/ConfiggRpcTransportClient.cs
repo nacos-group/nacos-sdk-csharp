@@ -1,6 +1,5 @@
 ﻿namespace Nacos.Config.Impl
 {
-    using Grpc.Net.Client;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Nacos.Config.Abst;
@@ -15,7 +14,7 @@
     {
         private ILogger _logger;
 
-        private readonly GrpcChannel _channel;
+        private readonly Grpc.Core.ChannelBase _channel;
         private readonly Remote.GRpc.GrpcSdkClient _sdkClient;
 
         private Timer _configListenTimer;
