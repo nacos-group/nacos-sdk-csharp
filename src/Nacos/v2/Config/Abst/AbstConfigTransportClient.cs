@@ -1,5 +1,6 @@
 ﻿namespace Nacos.Config.Abst
 {
+    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
@@ -38,6 +39,16 @@
 
         protected abstract Task<List<string>> QueryConfigInner(string dataId, string group, string tenat, long readTimeous, bool notify);
 
+        protected abstract Task AddListenerInner(string dataId, string group, string tenant, List<Action<string>> callBacks);
+
+        protected abstract Task RemoveListenerInner(string dataId, string group, string tenant, Action<string> callBack);
+
         protected abstract void StartInner();
+
+        public Task AddListenerAsync(string dataId, string group, string tenant, List<Action<string>> callBacks)
+            => AddListenerInner(dataId, group, tenant, callBacks);
+
+        public Task RemoveListenerAsync(string dataId, string group, string tenant, Action<string> callBack)
+            => RemoveListenerInner(dataId, group, tenant, callBack);
     }
 }

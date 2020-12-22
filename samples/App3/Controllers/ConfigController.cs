@@ -48,13 +48,37 @@
             return "p ok";
         }
 
-        // GET api/config/l?d=123
+        // GET api/config/a?d=123
         [HttpGet("a")]
         public async Task<string> Listen(string d)
         {
             var client = _factory.GetConfigClient("grpc");
 
-            await client.AddListenerAsync(new AddListenerRequest { DataId = d, Group = "g", Tenant = "test", Content = new System.Random().Next(1, 9999999).ToString() });
+            await client.AddListenerAsync(new AddListenerRequest
+            {
+                DataId = d,
+                Group = "g",
+                Tenant = "test",
+                Content = new System.Random().Next(1, 9999999).ToString(),
+                Callbacks = new System.Collections.Generic.List<System.Action<string>> { x => System.Console.WriteLine("cb cb cb cb " + x) }
+            });
+
+            return "p ok";
+        }
+
+        // GET api/config/r?d=123
+        [HttpGet("r")]
+        public async Task<string> UnListen(string d)
+        {
+            var client = _factory.GetConfigClient("grpc");
+
+            await client.RemoveListenerAsync(new RemoveListenerRequest
+            {
+                DataId = d,
+                Group = "g",
+                Tenant = "test",
+                /*Callbacks = x => System.Console.WriteLine("cb cb cb cb " + x)*/
+            });
 
             return "p ok";
         }

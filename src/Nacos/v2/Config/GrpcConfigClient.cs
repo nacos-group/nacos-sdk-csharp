@@ -27,7 +27,7 @@
 
         public string Name => "grpc";
 
-        public async Task AddListenerAsync(AddListenerRequest request)
+        public Task AddListenerAsync(AddListenerRequest request)
         {
             if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
 
@@ -36,7 +36,7 @@
 
             request.CheckParam();
 
-            await Task.Delay(1);
+            return _agent.AddListenerAsync(request.DataId, request.Group, request.Tenant, request.Callbacks);
         }
 
         public async Task<string> GetConfigAsync(GetConfigRequest request)
@@ -88,7 +88,14 @@
 
         public Task RemoveListenerAsync(RemoveListenerRequest request)
         {
-            throw new System.NotImplementedException();
+            if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
+
+            if (string.IsNullOrWhiteSpace(request.Tenant)) request.Tenant = _options.Namespace;
+            if (string.IsNullOrWhiteSpace(request.Group)) request.Group = ConstValue.DefaultGroup;
+
+            request.CheckParam();
+
+            return _agent.RemoveListenerAsync(request.DataId, request.Group, request.Tenant, null);
         }
     }
 }

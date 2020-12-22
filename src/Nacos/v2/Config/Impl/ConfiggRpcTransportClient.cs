@@ -7,6 +7,7 @@
     using Nacos.Utilities;
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -16,6 +17,9 @@
 
         private readonly Grpc.Core.ChannelBase _channel;
         private readonly Remote.GRpc.GrpcSdkClient _sdkClient;
+        private Dictionary<string, CacheData> cacheMap = new Dictionary<string, CacheData>();
+
+        private readonly object _lock = new object();
 
         private Timer _configListenTimer;
 
@@ -28,6 +32,8 @@
 
             _sdkClient = new Remote.GRpc.GrpcSdkClient("config");
             _channel = _sdkClient.ConnectToServer(_options.ServerAddresses[0]);
+
+            StartInner();
         }
 
         protected override string GetNameInner() => "config_rpc_client";
@@ -37,10 +43,7 @@
             throw new NotImplementedException();
         }
 
-        protected override string GetTenantInner()
-        {
-            throw new NotImplementedException();
-        }
+        protected override string GetTenantInner() => _options.Namespace;
 
         protected override async Task<bool> PublishConfigInner(string dataId, string group, string tenant, string appName, string tag, string betaIps, string content)
         {
@@ -181,38 +184,199 @@
 
         private async Task ExecuteConfigListenAsync()
         {
-            try
+            var listenCachesMap = new Dictionary<string, List<CacheData>>();
+            var removeListenCachesMap = new Dictionary<string, List<CacheData>>();
+
+            foreach (var item in cacheMap.Values)
             {
-                // TODO: Read from listen map
-                var request = new Nacos.Config.Requests.ConfigBatchListenRequest();
-                request.AddConfigListenContext("", "", "", "");
-
-                var payload = Remote.GRpc.GrpcUtils.Convert(request, new Remote.GRpc.RequestMeta
+                if (item.Listeners != null && item.Listeners.Any() && !item.IsListenSuccess)
                 {
-                    Type = Remote.GRpc.GrpcRequestType.Config_Listen,
-                    ClientIp = "",
-                    ClientPort = 80,
-                    ClientVersion = ConstValue.ClientVersion
-                });
+                    if (!listenCachesMap.TryGetValue(item.TaskId.ToString(), out var list))
+                    {
+                        list = new List<CacheData>();
+                        listenCachesMap[item.TaskId.ToString()] = list;
+                    }
 
-                var client = new Nacos.Request.RequestClient(_channel);
-
-                var result = await client.requestAsync(payload);
-
-#if DEBUG
-                System.Diagnostics.Trace.WriteLine($"{Remote.GRpc.GrpcRequestType.Config_Listen} return {result.Body.Value.ToStringUtf8()}, {result.Metadata.ToJsonString()}");
-#endif
-                var resp = result.Body.Value.ToStringUtf8().ToObj<Nacos.Remote.CommonResponse>();
-
-                if (resp != null && resp.IsSuccess())
+                    list.Add(item);
+                }
+                else if ((item.Listeners == null || !item.Listeners.Any()) && item.IsListenSuccess)
                 {
+                    if (!removeListenCachesMap.TryGetValue(item.TaskId.ToString(), out var list))
+                    {
+                        list = new List<CacheData>();
+                        removeListenCachesMap[item.TaskId.ToString()] = list;
+                    }
+
+                    list.Add(item);
                 }
             }
-            catch (Exception ex)
+
+            if (listenCachesMap != null && listenCachesMap.Any())
             {
-                _logger.LogError(ex, "async listen config change error ");
-                throw;
+                try
+                {
+                    foreach (var task in listenCachesMap)
+                    {
+                        var taskId = task.Key;
+                        var listenCaches = task.Value;
+
+                        var request = new Nacos.Config.Requests.ConfigBatchListenRequest() { Listen = true };
+
+                        foreach (var item in listenCaches)
+                            request.AddConfigListenContext(item.Tenant, item.Group, item.DataId, item.Md5);
+
+                        if (request.ConfigListenContexts != null && request.ConfigListenContexts.Any())
+                        {
+                            var payload = Remote.GRpc.GrpcUtils.Convert(request, new Remote.GRpc.RequestMeta
+                            {
+                                Type = Remote.GRpc.GrpcRequestType.Config_Listen,
+                                ClientVersion = ConstValue.ClientVersion
+                            });
+
+                            var client = new Nacos.Request.RequestClient(_channel);
+
+                            var result = await client.requestAsync(payload);
+
+#if DEBUG
+                            System.Diagnostics.Trace.WriteLine($"{Remote.GRpc.GrpcRequestType.Config_Listen} return {result.Body.Value.ToStringUtf8()}, {result.Metadata.ToJsonString()}");
+#endif
+                            var resp = result.Body.Value.ToStringUtf8().ToObj<Nacos.Config.Requests.ConfigChangeBatchListenResponse>();
+
+                            if (resp != null && resp.IsSuccess())
+                            {
+                                HashSet<string> changeKeys = new HashSet<string>();
+
+                                if (resp.ChangedConfigs != null && resp.ChangedConfigs.Any())
+                                {
+                                    foreach (var item in resp.ChangedConfigs)
+                                    {
+                                        var changeKey = GroupKey.GetKeyTenant(item.DataId, item.Group, item.Tenant);
+
+                                        changeKeys.Add(changeKey);
+
+                                        if (cacheMap.TryGetValue(changeKey, out var cached))
+                                        {
+                                            // query and exec
+                                            var ct = await QueryConfigInner(cached.DataId, cached.Group, cached.Tenant, 3000, false);
+
+                                            Console.WriteLine($"new config = {ct.ToJsonString()}");
+
+                                            // check last md5
+                                            if (ct.Count > 0)
+                                                cached.Listeners.ForEach(x => x.Invoke(ct[0]));
+                                        }
+                                    }
+                                }
+
+                                foreach (var item in listenCaches)
+                                {
+                                    if (!changeKeys.Contains(GroupKey.GetKeyTenant(item.DataId, item.Group, item.Tenant)))
+                                    {
+                                        item.IsListenSuccess = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "async listen config change error ");
+                }
+            }
+
+            if (removeListenCachesMap != null && removeListenCachesMap.Any())
+            {
+                try
+                {
+                    foreach (var task in removeListenCachesMap)
+                    {
+                        var taskId = task.Key;
+                        var removeListenCaches = task.Value;
+
+                        var request = new Nacos.Config.Requests.ConfigBatchListenRequest { Listen = false };
+
+                        foreach (var item in removeListenCaches)
+                            request.AddConfigListenContext(item.Tenant, item.Group, item.DataId, item.Md5);
+
+                        if (request.ConfigListenContexts != null && request.ConfigListenContexts.Any())
+                        {
+                            var payload = Remote.GRpc.GrpcUtils.Convert(request, new Remote.GRpc.RequestMeta
+                            {
+                                Type = Remote.GRpc.GrpcRequestType.Config_Listen,
+                                ClientVersion = ConstValue.ClientVersion
+                            });
+
+                            var client = new Nacos.Request.RequestClient(_channel);
+
+                            var result = await client.requestAsync(payload);
+
+#if DEBUG
+                            System.Diagnostics.Trace.WriteLine($"{Remote.GRpc.GrpcRequestType.Config_Listen} return {result.Body.Value.ToStringUtf8()}, {result.Metadata.ToJsonString()}");
+#endif
+                            var resp = result.Body.Value.ToStringUtf8().ToObj<Nacos.Config.Requests.ConfigChangeBatchListenResponse>();
+
+                            if (resp != null && resp.IsSuccess())
+                            {
+                                // do remove
+                                Console.WriteLine("do remove");
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "async listen config change error ");
+                }
             }
         }
+
+        protected override Task AddListenerInner(string dataId, string group, string tenant, List<Action<string>> callBacks)
+        {
+            tenant = string.IsNullOrWhiteSpace(tenant) ? _options.Namespace : tenant;
+            group = string.IsNullOrWhiteSpace(group) ? ConstValue.DefaultGroup : group;
+
+            var cache = GetCache(dataId, group, tenant);
+            if (cache != null) return Task.CompletedTask;
+
+            string key = Nacos.Config.GroupKey.GetKeyTenant(dataId, group, tenant);
+
+            if (cacheMap.TryGetValue(key, out var cached)) return Task.CompletedTask;
+
+            cache = new CacheData { DataId = dataId, Group = group, Tenant = tenant };
+
+            lock (_lock)
+            {
+                var taskId = cacheMap.Count / CacheData.PerTaskConfigSize;
+                cache.TaskId = taskId;
+
+                cacheMap[key] = cache;
+            }
+
+            foreach (var item in callBacks) cache.AddListener(item);
+
+            return Task.CompletedTask;
+        }
+
+        protected override Task RemoveListenerInner(string dataId, string group, string tenant, Action<string> callBack)
+        {
+            tenant = string.IsNullOrWhiteSpace(tenant) ? _options.Namespace : tenant;
+            group = string.IsNullOrWhiteSpace(group) ? ConstValue.DefaultGroup : group;
+
+            string key = Nacos.Config.GroupKey.GetKeyTenant(dataId, group, tenant);
+
+            var cache = GetCache(dataId, group, tenant);
+
+            if (cache != null)
+            {
+                cache.RemoveListener(callBack);
+                if (cache.Listeners.Count <= 0) cacheMap.Remove(key);
+            }
+
+            return Task.CompletedTask;
+        }
+
+        private CacheData GetCache(string dataId, string group, string tenant)
+            => cacheMap.TryGetValue(GroupKey.GetKeyTenant(dataId, group, tenant), out var data) ? data : null;
     }
 }

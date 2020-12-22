@@ -1,5 +1,7 @@
 ﻿namespace Nacos.Remote.GRpc
 {
+    using Nacos.Utilities;
+
     public class GrpcSdkClient
     {
         private string _name;
@@ -35,6 +37,20 @@
             var payload = GrpcUtils.Convert<object>(new { }, new RequestMeta { Type = GrpcRequestType.ConnectionSetup });
 
             var call = streamClient.requestBiStream();
+
+            System.Threading.Tasks.Task.Factory.StartNew(
+                async () =>
+                {
+                    var cts = new System.Threading.CancellationTokenSource();
+
+                    while (await call.ResponseStream.MoveNext(cts.Token))
+                    {
+                        var current = call.ResponseStream.Current;
+#if DEBUG
+                        System.Diagnostics.Trace.WriteLine($"ConnectionSetup return {current.Body.Value.ToStringUtf8()}, {current.Metadata.ToJsonString()}");
+#endif
+                    }
+                }, System.Threading.Tasks.TaskCreationOptions.LongRunning);
 
             call.RequestStream.WriteAsync(payload).GetAwaiter().GetResult();
             call.RequestStream.CompleteAsync().GetAwaiter().GetResult();
