@@ -4,6 +4,7 @@
     using Microsoft.Extensions.Options;
     using Nacos.Config.Abst;
     using Nacos.Exceptions;
+    using Nacos.Remote.GRpc;
     using Nacos.Utilities;
     using System;
     using System.Collections.Generic;
@@ -175,11 +176,54 @@
 
         protected override void StartInner()
         {
+            // _sdkClient.RegisterServerPushResponseHandler(new ConfigChangeServerRequestHandler());
+            _sdkClient.RegisterServerPushResponseHandler(new ConfigChangeServerRequestHandler(cacheMap));
+
             _configListenTimer = new Timer(
                 async x =>
                 {
                     await ExecuteConfigListenAsync();
                 }, null, 0, 5000);
+        }
+
+        public class ConfigChangeServerRequestHandler : Remote.GRpc.IServerRequestHandler
+        {
+            private Dictionary<string, CacheData> cacheMap;
+
+            public ConfigChangeServerRequestHandler(Dictionary<string, CacheData> map)
+            {
+                this.cacheMap = map;
+            }
+
+            public Remote.CommonResponse RequestReply(Payload payload, Grpc.Core.IClientStreamWriter<Payload> streamWriter)
+            {
+                var request = GrpcUtils.Parse<Nacos.Config.Requests.ConfigChangeNotifyRequest>(payload);
+
+                string groupKey = GroupKey.GetKeyTenant(request.DataId, request.Group, request.Tenant);
+
+                if (cacheMap.TryGetValue(groupKey, out var cacheData))
+                {
+                    if (request.ContentPush && cacheData.LastModifiedTs < request.LastModifiedTs)
+                    {
+                    }
+
+                    cacheData.IsListenSuccess = false;
+                }
+
+                Console.WriteLine("desc => {0}", request.ToJsonString());
+
+                var ccnr = Remote.GRpc.GrpcUtils.Convert(
+                    new Nacos.Remote.CommonResponse()
+                    {
+                        RequestId = request.RequestId,
+                        ResultCode = 200,
+                    }, new Remote.GRpc.RequestMeta { Type = GrpcRequestType.Config_ChangeNotifyResponse, ClientVersion = ConstValue.ClientVersion });
+
+                streamWriter.WriteAsync(ccnr).GetAwaiter().GetResult();
+
+
+                return new Config.Requests.ConfigChangeNotifyResponse();
+            }
         }
 
         private async Task ExecuteConfigListenAsync()
@@ -263,7 +307,11 @@
 
                                             // check last md5
                                             if (ct.Count > 0)
-                                                cached.Listeners.ForEach(x => x.Invoke(ct[0]));
+                                            {
+                                                cached.SetContent(ct[0]);
+
+                                                if (cached.CheckListenerMd5()) cached.Listeners.ForEach(x => x.Invoke(ct[0]));
+                                            }
                                         }
                                     }
                                 }
@@ -343,7 +391,7 @@
 
             if (cacheMap.TryGetValue(key, out var cached)) return Task.CompletedTask;
 
-            cache = new CacheData { DataId = dataId, Group = group, Tenant = tenant };
+            cache = new CacheData { DataId = dataId, Group = group, Tenant = tenant, Content = string.Empty, LastMd5 = Nacos.Utilities.HashUtil.GetMd5(string.Empty) };
 
             lock (_lock)
             {

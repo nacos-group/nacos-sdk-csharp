@@ -44,5 +44,14 @@
 
             return retStr;
         }
+
+        public static T Parse<T>(Payload payload)
+        {
+            var retStr = payload.Body.Value.ToStringUtf8();
+
+            System.Diagnostics.Trace.WriteLine($" convert response result, {retStr} ");
+
+            return retStr.ToObj<T>();
+        }
     }
 }

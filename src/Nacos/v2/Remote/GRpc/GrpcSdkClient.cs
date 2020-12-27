@@ -1,6 +1,7 @@
 ﻿namespace Nacos.Remote.GRpc
 {
     using Nacos.Utilities;
+    using System.Collections.Generic;
 
     public class GrpcSdkClient
     {
@@ -12,6 +13,9 @@
         }
 
         public static readonly int RpcPortOffset = 1000;
+
+        protected List<IServerRequestHandler> serverRequestHandlers = new List<IServerRequestHandler>();
+
 
         public Grpc.Core.ChannelBase ConnectToServer(string address)
         {
@@ -46,14 +50,17 @@
                     while (await call.ResponseStream.MoveNext(cts.Token))
                     {
                         var current = call.ResponseStream.Current;
-#if DEBUG
-                        System.Diagnostics.Trace.WriteLine($"ConnectionSetup return {current.Body.Value.ToStringUtf8()}, {current.Metadata.ToJsonString()}");
-#endif
+
+                        var resp = HandleServerRequest(current, call.RequestStream);
                     }
                 }, System.Threading.Tasks.TaskCreationOptions.LongRunning);
 
             call.RequestStream.WriteAsync(payload).GetAwaiter().GetResult();
-            call.RequestStream.CompleteAsync().GetAwaiter().GetResult();
+
+            /*var ccnr = Remote.GRpc.GrpcUtils.Convert(new Nacos.Remote.CommonResponse(), new Remote.GRpc.RequestMeta { Type = GrpcRequestType.Config_ChangeNotifyResponse, ClientVersion = ConstValue.ClientVersion });
+
+            call.RequestStream.WriteAsync(ccnr).GetAwaiter().GetResult();
+            call.RequestStream.CompleteAsync().GetAwaiter().GetResult();*/
         }
 
         private bool ServerCheck(Grpc.Core.ChannelBase channel)
@@ -72,6 +79,25 @@
                 System.Console.WriteLine(ex.Message);
                 return false;
             }
+        }
+
+        public void RegisterServerPushResponseHandler(IServerRequestHandler serverRequestHandler)
+        {
+            serverRequestHandlers.Add(serverRequestHandler);
+        }
+
+        public CommonResponse HandleServerRequest(Payload payload, Grpc.Core.IClientStreamWriter<Payload> streamWriter)
+        {
+            foreach (var serverRequestHandler in serverRequestHandlers)
+            {
+                var response = serverRequestHandler.RequestReply(payload, streamWriter);
+                if (response != null)
+                {
+                    return response;
+                }
+            }
+
+            return null;
         }
     }
 }
