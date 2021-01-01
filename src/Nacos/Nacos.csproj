@@ -47,7 +47,8 @@
 
   <ItemGroup>
     <Folder Include="protos\" />
-    <Folder Include="v2\Config\Requests\" />
+    <Folder Include="v2\Naming\Event\" />
+    <Folder Include="v2\Naming\Utils\" />
   </ItemGroup>
 
 </Project>

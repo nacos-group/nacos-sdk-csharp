@@ -15,7 +15,9 @@
 
         public static readonly string Naming_HeartBeat = "com.alibaba.nacos.api.remote.request.HeartBeatRequest";
 
-        public static readonly string Naming_Instance = "com.alibaba.nacos.api.naming.remote.request.InstanceRequest";
+        public static readonly string Req_Naming_Instance = "com.alibaba.nacos.api.naming.remote.request.InstanceRequest";
+
+        public static readonly string Req_Naming_ServiceQuery = "com.alibaba.nacos.api.naming.remote.request.ServiceQueryRequest";
 
         public static readonly string Naming_ServiceList = "com.alibaba.nacos.api.naming.remote.request.ServiceListRequest";
 
