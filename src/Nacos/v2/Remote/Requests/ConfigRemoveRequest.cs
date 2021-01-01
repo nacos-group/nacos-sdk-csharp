@@ -1,12 +1,13 @@
-﻿namespace Nacos.Config.Requests
+﻿namespace Nacos.Remote.Requests
 {
-    public class ConfigQueryRequest
+    public class ConfigRemoveRequest : CommonRequest
     {
-        public ConfigQueryRequest(string dataId, string group, string tenant)
+        public ConfigRemoveRequest(string dataId, string group, string tenant, string tag)
         {
             this.Tenant = tenant;
             this.DataId = dataId;
             this.Group = group;
+            this.Tag = tag;
         }
 
         /// <summary>
@@ -27,7 +28,12 @@
         [Newtonsoft.Json.JsonProperty("group")]
         public string Group { get; private set; }
 
+        /// <summary>
+        /// Configuration content
+        /// </summary>
         [Newtonsoft.Json.JsonProperty("tag")]
-        public string Tag { get; set; }
+        public string Tag { get; private set; }
+
+        public override string GetGrpcType() => GRpc.GrpcRequestType.Config_Remove;
     }
 }

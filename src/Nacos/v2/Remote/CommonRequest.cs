@@ -1,6 +1,6 @@
 ﻿namespace Nacos.Remote
 {
-    public class CommonRequest
+    public abstract class CommonRequest
     {
         [Newtonsoft.Json.JsonProperty("headers")]
         public System.Collections.Generic.Dictionary<string, string> Headers { get; set; } = new System.Collections.Generic.Dictionary<string, string>();
@@ -19,5 +19,7 @@
                 ? defaultValue
                 : value;
         }
+
+        public abstract string GetGrpcType();
     }
 }

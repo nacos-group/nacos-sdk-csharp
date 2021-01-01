@@ -1,6 +1,6 @@
-﻿namespace Nacos.Remote.GRpc
+﻿namespace Nacos.Remote
 {
-    public class ServerInfo
+    public class RemoteServerInfo
     {
         public string ServerIp { get; set; }
 

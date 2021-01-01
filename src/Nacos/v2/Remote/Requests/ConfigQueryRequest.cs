@@ -1,6 +1,6 @@
-﻿namespace Nacos.Config.Requests
+﻿namespace Nacos.Remote.Requests
 {
-    public class ConfigQueryRequest
+    public class ConfigQueryRequest : CommonRequest
     {
         public ConfigQueryRequest(string dataId, string group, string tenant)
         {
@@ -29,5 +29,7 @@
 
         [Newtonsoft.Json.JsonProperty("tag")]
         public string Tag { get; set; }
+
+        public override string GetGrpcType() => GRpc.GrpcRequestType.Config_Get;
     }
 }

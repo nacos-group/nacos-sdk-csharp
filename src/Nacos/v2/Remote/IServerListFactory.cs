@@ -1,4 +1,4 @@
-﻿namespace Nacos.Remote.GRpc
+﻿namespace Nacos.Remote
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;
@@ -9,6 +9,6 @@
 
         Task<string> GetCurrentServerAsync();
 
-        List<string> GetServerListAsync();
+        Task<List<string>> GetServerListAsync();
     }
 }

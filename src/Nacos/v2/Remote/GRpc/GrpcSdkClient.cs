@@ -16,20 +16,12 @@
 
         protected List<IServerRequestHandler> serverRequestHandlers = new List<IServerRequestHandler>();
 
-
         public Grpc.Core.ChannelBase ConnectToServer(string address)
         {
-            // convert nacos address to grpc address
-            // http://ip:port => http://ip:(port + RpcPortOffset)
-            var arr = address.TrimEnd('/').Split(':');
-            var port = 8848;
-            if (arr.Length == 3) port = int.Parse(arr[2]);
+            var (ip, port) = GetIpAndPort(address);
+            var channel = new Grpc.Core.Channel(ip, port + RpcPortOffset, Grpc.Core.ChannelCredentials.Insecure);
 
-            var channel = new Grpc.Core.Channel(arr[1].Replace("//", ""), port + RpcPortOffset, Grpc.Core.ChannelCredentials.Insecure);
-            if (ServerCheck(channel))
-            {
-                BindRequestStream(channel);
-            }
+            if (ServerCheck(channel)) BindRequestStream(channel);
 
             return channel;
         }
@@ -55,12 +47,8 @@
                     }
                 }, System.Threading.Tasks.TaskCreationOptions.LongRunning);
 
+            // send request to setup connection between nacos server and client
             call.RequestStream.WriteAsync(payload).GetAwaiter().GetResult();
-
-            /*var ccnr = Remote.GRpc.GrpcUtils.Convert(new Nacos.Remote.CommonResponse(), new Remote.GRpc.RequestMeta { Type = GrpcRequestType.Config_ChangeNotifyResponse, ClientVersion = ConstValue.ClientVersion });
-
-            call.RequestStream.WriteAsync(ccnr).GetAwaiter().GetResult();
-            call.RequestStream.CompleteAsync().GetAwaiter().GetResult();*/
         }
 
         private bool ServerCheck(Grpc.Core.ChannelBase channel)
@@ -98,6 +86,17 @@
             }
 
             return null;
+        }
+
+        private (string Ip, int Port) GetIpAndPort(string address)
+        {
+            // convert nacos address to grpc address
+            // http://ip:port => http://ip:(port + RpcPortOffset)
+            var arr = address.TrimEnd('/').Split(':');
+            var port = 8848;
+            if (arr.Length == 3) port = int.Parse(arr[2]);
+
+            return (arr[1].Replace("//", ""), port);
         }
     }
 }

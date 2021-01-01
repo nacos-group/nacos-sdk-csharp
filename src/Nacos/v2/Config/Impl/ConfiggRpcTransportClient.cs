@@ -176,7 +176,6 @@
 
         protected override void StartInner()
         {
-            // _sdkClient.RegisterServerPushResponseHandler(new ConfigChangeServerRequestHandler());
             _sdkClient.RegisterServerPushResponseHandler(new ConfigChangeServerRequestHandler(cacheMap));
 
             _configListenTimer = new Timer(
@@ -186,7 +185,7 @@
                 }, null, 0, 5000);
         }
 
-        public class ConfigChangeServerRequestHandler : Remote.GRpc.IServerRequestHandler
+        public class ConfigChangeServerRequestHandler : Remote.IServerRequestHandler
         {
             private Dictionary<string, CacheData> cacheMap;
 
@@ -223,6 +222,11 @@
 
 
                 return new Config.Requests.ConfigChangeNotifyResponse();
+            }
+
+            public Remote.CommonResponse RequestReply(Remote.CommonRequest request, Remote.CommonRequestMeta meta)
+            {
+                throw new NotImplementedException();
             }
         }
 
