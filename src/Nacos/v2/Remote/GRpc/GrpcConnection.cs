@@ -1,5 +1,6 @@
 ﻿namespace Nacos.Remote.GRpc
 {
+    using Nacos.Exceptions;
     using System;
     using System.Threading.Tasks;
 
@@ -41,9 +42,9 @@
 
                 grpcResponse = await reqClient.requestAsync(grpcRequest, callOptions);
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                throw new Nacos.Exceptions.NacosException(Nacos.ConstValue.SERVER_ERROR, ex.Message);
+                throw new NacosException(NacosException.SERVER_ERROR, ex.Message);
             }
 
             var response = (CommonResponse)GrpcUtils.Parse(grpcResponse).Body;
@@ -60,12 +61,6 @@
         {
             Payload convert = GrpcUtils.Convert(request, meta);
             streamCall.RequestStream.WriteAsync(convert);
-        }
-
-
-        internal bool IsAbandon()
-        {
-            throw new NotImplementedException();
         }
     }
 }

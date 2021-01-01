@@ -39,7 +39,7 @@
         #region Instance
         public async Task<bool> RegisterInstanceAsync(RegisterInstanceRequest request)
         {
-            if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
+            if (request == null) throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "request param invalid");
 
             request.CheckParam();
 
@@ -73,7 +73,7 @@
 
         public async Task<bool> RemoveInstanceAsync(RemoveInstanceRequest request)
         {
-            if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
+            if (request == null) throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "request param invalid");
 
             request.CheckParam();
 
@@ -106,7 +106,7 @@
 
         public async Task<bool> ModifyInstanceAsync(ModifyInstanceRequest request)
         {
-            if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
+            if (request == null) throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "request param invalid");
 
             request.CheckParam();
 
@@ -134,7 +134,7 @@
 
         public async Task<ListInstancesResult> ListInstancesAsync(ListInstancesRequest request)
         {
-            if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
+            if (request == null) throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "request param invalid");
 
             request.CheckParam();
 
@@ -154,7 +154,7 @@
 
         public async Task<GetInstanceResult> GetInstanceAsync(GetInstanceRequest request)
         {
-            if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
+            if (request == null) throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "request param invalid");
 
             request.CheckParam();
 
@@ -174,7 +174,7 @@
 
         public async Task<bool> SendHeartbeatAsync(SendHeartbeatRequest request)
         {
-            if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
+            if (request == null) throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "request param invalid");
 
             request.CheckParam();
 
@@ -210,7 +210,7 @@
 
         public async Task<bool> ModifyInstanceHealthStatusAsync(ModifyInstanceHealthStatusRequest request)
         {
-            if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
+            if (request == null) throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "request param invalid");
 
             request.CheckParam();
 
@@ -261,7 +261,7 @@
         #region Services
         public async Task<bool> CreateServiceAsync(CreateServiceRequest request)
         {
-            if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
+            if (request == null) throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "request param invalid");
 
             request.CheckParam();
 
@@ -289,7 +289,7 @@
 
         public async Task<bool> RemoveServiceAsync(RemoveServiceRequest request)
         {
-            if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
+            if (request == null) throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "request param invalid");
 
             request.CheckParam();
 
@@ -317,7 +317,7 @@
 
         public async Task<bool> ModifyServiceAsync(ModifyServiceRequest request)
         {
-            if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
+            if (request == null) throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "request param invalid");
 
             request.CheckParam();
 
@@ -345,7 +345,7 @@
 
         public async Task<GetServiceResult> GetServiceAsync(GetServiceRequest request)
         {
-            if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
+            if (request == null) throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "request param invalid");
 
             request.CheckParam();
 
@@ -365,7 +365,7 @@
 
         public async Task<ListServicesResult> ListServicesAsync(ListServicesRequest request)
         {
-            if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
+            if (request == null) throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "request param invalid");
 
             request.CheckParam();
 
@@ -403,7 +403,7 @@
 
         public async Task<bool> ModifySwitchesAsync(ModifySwitchesRequest request)
         {
-            if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
+            if (request == null) throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "request param invalid");
 
             request.CheckParam();
 
@@ -434,7 +434,7 @@
         #region Cluster
         public async Task<ListClusterServersResult> ListClusterServersAsync(ListClusterServersRequest request)
         {
-            if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
+            if (request == null) throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "request param invalid");
 
             request.CheckParam();
 

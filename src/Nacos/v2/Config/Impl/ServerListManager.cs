@@ -11,6 +11,7 @@
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Nacos.Config.Abst;
+    using Nacos.Exceptions;
 
     public class ServerListManager : IServerListManager, IDisposable
     {
@@ -69,7 +70,7 @@
             {
                 if (string.IsNullOrWhiteSpace(_options.EndPoint))
                 {
-                    throw new Nacos.Exceptions.NacosException(ConstValue.CLIENT_INVALID_PARAM, "endpoint is blank");
+                    throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "endpoint is blank");
                 }
 
                 _isFixed = false;

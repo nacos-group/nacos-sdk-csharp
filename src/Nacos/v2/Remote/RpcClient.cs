@@ -1,6 +1,7 @@
 ﻿namespace Nacos.Remote
 {
     using Microsoft.Extensions.Logging;
+    using Nacos.Exceptions;
     using Nacos.Utilities;
     using System;
     using System.Collections.Generic;
@@ -189,7 +190,7 @@
             {
                 try
                 {
-                    if (this.currentConnetion != null && !IsRunning()) throw new Nacos.Exceptions.NacosException(ConstValue.CLIENT_INVALID_PARAM, "client not connected.");
+                    if (this.currentConnetion != null && !IsRunning()) throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "client not connected.");
 
                     response = await currentConnetion.RequestAsync(request, BuildMeta(request.GetRemoteType()), timeoutMills);
 
@@ -210,7 +211,7 @@
             // TODO UNHEALTHY adn switchServerAsync
             if (exceptionToThrow != null)
             {
-                throw new Nacos.Exceptions.NacosException(ConstValue.SERVER_ERROR, exceptionToThrow.Message);
+                throw new NacosException(NacosException.SERVER_ERROR, exceptionToThrow.Message);
             }
 
             return null;

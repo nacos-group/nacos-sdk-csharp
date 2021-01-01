@@ -7,31 +7,29 @@
 
     public static class FileLocalConfigInfoProcessor
     {
-        private static readonly string Failover_Base = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "nacos", "config");
-
-        private static readonly string Snapshot_Base = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "nacos", "config");
+        private static readonly string LOCAL_SNAPSHOT_PATH = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "nacos", "config");
 
         public static async Task<string> GetFailoverAsync(string serverName, string dataId, string group, string tenant)
         {
             FileInfo file = GetFailoverFile(serverName, dataId, group, tenant);
 
-            if (!file.Exists)
+            if (!file.Exists) return null;
+
+            try
             {
+                return await ReadFileAsync(file);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.WriteLine(ex);
                 return null;
             }
-
-            using FileStream fs = new FileStream(file.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            byte[] readByte = new byte[fs.Length];
-            await fs.ReadAsync(readByte, 0, readByte.Length);
-            string readStr = Encoding.UTF8.GetString(readByte);
-            fs.Close();
-            return readStr;
         }
 
         private static FileInfo GetFailoverFile(string serverName, string dataId, string group, string tenant)
         {
             string failoverFile;
-            failoverFile = Path.Combine(Snapshot_Base, serverName + "_nacos");
+            failoverFile = Path.Combine(LOCAL_SNAPSHOT_PATH, serverName + "_nacos");
 
             failoverFile = !string.IsNullOrEmpty(tenant)
                 ? Path.Combine(failoverFile, "config-data-tenant", tenant, group, dataId)
@@ -47,6 +45,19 @@
 
             if (!file.Exists) return null;
 
+            try
+            {
+                return await ReadFileAsync(file);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.WriteLine(ex);
+                return null;
+            }
+        }
+
+        private static async Task<string> ReadFileAsync(FileInfo file)
+        {
             using FileStream fs = new FileStream(file.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             byte[] readByte = new byte[fs.Length];
             await fs.ReadAsync(readByte, 0, readByte.Length);
@@ -58,7 +69,7 @@
         private static FileInfo GetSnapshotFile(string envName, string dataId, string group, string tenant)
         {
             string snapshotFile;
-            snapshotFile = Path.Combine(Snapshot_Base, envName + "_nacos");
+            snapshotFile = Path.Combine(LOCAL_SNAPSHOT_PATH, envName + "_nacos");
 
             snapshotFile = !string.IsNullOrEmpty(tenant)
                 ? Path.Combine(snapshotFile, "snapshot-tenant", tenant, group, dataId)
@@ -70,25 +81,36 @@
 
         public static async Task SaveSnapshotAsync(string envName, string dataId, string group, string tenant, string config)
         {
-            FileInfo snapshotFile = GetSnapshotFile(envName, dataId, group, tenant);
+            FileInfo file = GetSnapshotFile(envName, dataId, group, tenant);
             if (string.IsNullOrEmpty(config))
             {
-                if (snapshotFile.Exists)
+                try
                 {
-                    snapshotFile.Delete();
+                    file.Delete();
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Trace.WriteLine(ex);
                 }
             }
             else
             {
-                if (snapshotFile.Directory != null && !snapshotFile.Directory.Exists)
+                try
                 {
-                    snapshotFile.Directory.Create();
-                }
+                    if (file.Directory != null && !file.Directory.Exists)
+                    {
+                        file.Directory.Create();
+                    }
 
-                using FileStream fs = new FileStream(snapshotFile.FullName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
-                byte[] bytes = Encoding.UTF8.GetBytes(config);
-                await fs.WriteAsync(bytes, 0, bytes.Length);
-                fs.Close();
+                    using FileStream fs = new FileStream(file.FullName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
+                    byte[] bytes = Encoding.UTF8.GetBytes(config);
+                    await fs.WriteAsync(bytes, 0, bytes.Length);
+                    fs.Close();
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Trace.WriteLine(ex);
+                }
             }
         }
     }

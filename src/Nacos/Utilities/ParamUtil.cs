@@ -47,12 +47,12 @@
         {
             if (string.IsNullOrWhiteSpace(dataId) || !IsValid(dataId))
             {
-                throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "dataId invalid");
+                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "dataId invalid");
             }
 
             if (string.IsNullOrWhiteSpace(group) || !IsValid(group))
             {
-                throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "group invalid");
+                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "group invalid");
             }
         }
 
@@ -60,12 +60,12 @@
         {
             if (string.IsNullOrWhiteSpace(dataId) || !IsValid(dataId))
             {
-                throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "dataId invalid");
+                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "dataId invalid");
             }
 
             if (string.IsNullOrWhiteSpace(group) || !IsValid(group))
             {
-                throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "group invalid");
+                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "group invalid");
             }
         }
 
@@ -73,7 +73,7 @@
         {
             if (string.IsNullOrWhiteSpace(tenant) || !IsValid(tenant))
             {
-                throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "tenant invalid");
+                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "tenant invalid");
             }
         }
 
@@ -82,7 +82,7 @@
             CheckKeyParam(dataId, group);
             if (string.IsNullOrWhiteSpace(content))
             {
-                throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "content invalid");
+                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "content invalid");
             }
         }
 
@@ -90,12 +90,12 @@
         {
             if (string.IsNullOrWhiteSpace(ip))
             {
-                throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "ip invalid");
+                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "ip invalid");
             }
 
             if (port <= 0 || port > 65535)
             {
-                throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "port invalid");
+                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "port invalid");
             }
         }
 
@@ -103,7 +103,7 @@
         {
             if (string.IsNullOrWhiteSpace(serviceName))
             {
-                throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "serviceName invalid");
+                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "serviceName invalid");
             }
         }
 

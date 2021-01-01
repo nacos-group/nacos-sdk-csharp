@@ -3,6 +3,7 @@
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Nacos.Exceptions;
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -29,7 +30,7 @@
 
         public Task AddListenerAsync(AddListenerRequest request)
         {
-            if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
+            if (request == null) throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "request param invalid");
 
             if (string.IsNullOrWhiteSpace(request.Tenant)) request.Tenant = _options.Namespace;
             if (string.IsNullOrWhiteSpace(request.Group)) request.Group = ConstValue.DefaultGroup;
@@ -41,26 +42,57 @@
 
         public async Task<string> GetConfigAsync(GetConfigRequest request)
         {
-            if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
+            if (request == null) throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "request param invalid");
 
             request.Tenant = string.IsNullOrWhiteSpace(request.Tenant) ? _options.Namespace : request.Tenant;
             request.Group = string.IsNullOrWhiteSpace(request.Group) ? ConstValue.DefaultGroup : request.Group;
 
             request.CheckParam();
 
-            var list = await _agent.QueryConfigAsync(request.DataId, request.Group, request.Tenant, 5000, true);
+            // read from local cache at first
+            var content = await Nacos.Config.Impl.FileLocalConfigInfoProcessor.GetFailoverAsync(_agent.GetName(), request.DataId, request.Group, request.Tenant);
 
-            return (list != null && list.Any()) ? list[0] : null;
+            if (!string.IsNullOrWhiteSpace(content))
+            {
+                // TODO truncate content
+                _logger.LogWarning("[{0}] [get-config] get failover ok, dataId={1}, group={2}, tenant={3}, config={4}", _agent.GetName(), request.DataId, request.Group, request.Tenant, content);
+
+                return content;
+            }
+
+            try
+            {
+                var list = await _agent.QueryConfigAsync(request.DataId, request.Group, request.Tenant, 5000, true);
+
+                return (list != null && list.Any()) ? list[0] : null;
+            }
+            catch (NacosException e) when (e.ErrorCode == NacosException.NO_RIGHT)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(
+                    "[{0}] [get-config] get from server error, dataId={1}, group={2}, tenant={3}, msg={4}",
+                    _agent.GetName(), request.DataId, request.Group, request.Tenant, ex.Message);
+            }
+
+            _logger.LogWarning(
+                "[{}] [get-config] get snapshot ok, dataId={}, group={}, tenant={}, config={}",
+                _agent.GetName(), request.DataId, request.Group, request.Tenant, content);
+
+            content = await Nacos.Config.Impl.FileLocalConfigInfoProcessor.GetSnapshotAync(_agent.GetName(), request.DataId, request.Group, request.Tenant);
+            return content;
         }
 
         public Task<string> GetServerStatus()
         {
-            throw new System.NotImplementedException();
+            return Task.FromResult("UP");
         }
 
         public async Task<bool> PublishConfigAsync(PublishConfigRequest request)
         {
-            if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
+            if (request == null) throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "request param invalid");
 
             request.Tenant = string.IsNullOrWhiteSpace(request.Tenant) ? _options.Namespace : request.Tenant;
             request.Group = string.IsNullOrWhiteSpace(request.Group) ? ConstValue.DefaultGroup : request.Group;
@@ -74,7 +106,7 @@
 
         public async Task<bool> RemoveConfigAsync(RemoveConfigRequest request)
         {
-            if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
+            if (request == null) throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "request param invalid");
 
             request.Tenant = string.IsNullOrWhiteSpace(request.Tenant) ? _options.Namespace : request.Tenant;
             request.Group = string.IsNullOrWhiteSpace(request.Group) ? ConstValue.DefaultGroup : request.Group;
@@ -88,7 +120,7 @@
 
         public Task RemoveListenerAsync(RemoveListenerRequest request)
         {
-            if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
+            if (request == null) throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "request param invalid");
 
             if (string.IsNullOrWhiteSpace(request.Tenant)) request.Tenant = _options.Namespace;
             if (string.IsNullOrWhiteSpace(request.Group)) request.Group = ConstValue.DefaultGroup;

@@ -3,6 +3,7 @@
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Nacos.Config.Http;
+    using Nacos.Exceptions;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -177,7 +178,7 @@
         {
             if ((_serverUrls == null || !_serverUrls.Any())
                 && string.IsNullOrWhiteSpace(_nacosDomain))
-                throw new Nacos.Exceptions.NacosException(ConstValue.CLIENT_INVALID_PARAM, "no server available");
+                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "no server available");
 
             if (_serverUrls != null && _serverUrls.Any())
             {

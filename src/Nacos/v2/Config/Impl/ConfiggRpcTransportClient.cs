@@ -94,7 +94,7 @@
                     _logger.LogError(
                         "[{0}] [sub-server-error] get server config being modified concurrently, dataId={1}, group={2}, tenant={3}",
                         GetName(), dataId, group, tenant);
-                    throw new NacosException(Nacos.ConstValue.CONFLICT, $"data being modified, dataId={dataId},group={group},tenant={tenant}");
+                    throw new NacosException(NacosException.CONFLICT, $"data being modified, dataId={dataId},group={group},tenant={tenant}");
                 }
                 else
                 {

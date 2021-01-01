@@ -28,7 +28,7 @@
 
         public async Task<string> GetConfigAsync(GetConfigRequest request)
         {
-            if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
+            if (request == null) throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "request param invalid");
 
             request.Tenant = string.IsNullOrWhiteSpace(request.Tenant) ? _options.Namespace : request.Tenant;
             request.Group = string.IsNullOrWhiteSpace(request.Group) ? ConstValue.DefaultGroup : request.Group;
@@ -48,7 +48,7 @@
             {
                 config = await DoGetConfigAsync(request);
             }
-            catch (NacosException e) when (e.ErrorCode == ConstValue.NO_RIGHT)
+            catch (NacosException e) when (e.ErrorCode == NacosException.NO_RIGHT)
             {
                 throw;
             }
@@ -82,7 +82,7 @@
                     await GetProcessor().SaveSnapshotAsync(GetAgent().GetName(), request.DataId, request.Group, request.Tenant, null);
                     return null;
                 case System.Net.HttpStatusCode.Forbidden:
-                    throw new NacosException(ConstValue.NO_RIGHT, $"Insufficient privilege.");
+                    throw new NacosException(NacosException.NO_RIGHT, $"Insufficient privilege.");
                 default:
                     throw new NacosException((int)responseMessage.StatusCode, responseMessage.StatusCode.ToString());
             }
@@ -90,7 +90,7 @@
 
         public async Task<bool> PublishConfigAsync(PublishConfigRequest request)
         {
-            if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
+            if (request == null) throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "request param invalid");
 
             request.Tenant = string.IsNullOrWhiteSpace(request.Tenant) ? _options.Namespace : request.Tenant;
             request.Group = string.IsNullOrWhiteSpace(request.Group) ? ConstValue.DefaultGroup : request.Group;
@@ -107,7 +107,7 @@
                     return result.Equals("true", StringComparison.OrdinalIgnoreCase);
                 case System.Net.HttpStatusCode.Forbidden:
                     _logger.LogWarning($"[publish-single] error, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, code={(int)responseMessage.StatusCode} msg={responseMessage.StatusCode.ToString()}");
-                    throw new NacosException(ConstValue.NO_RIGHT, $"Insufficient privilege.");
+                    throw new NacosException(NacosException.NO_RIGHT, $"Insufficient privilege.");
                 default:
                     _logger.LogWarning($"[publish-single] error, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, code={(int)responseMessage.StatusCode} msg={responseMessage.StatusCode.ToString()}");
                     return false;
@@ -116,7 +116,7 @@
 
         public async Task<bool> RemoveConfigAsync(RemoveConfigRequest request)
         {
-            if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
+            if (request == null) throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "request param invalid");
 
             request.Tenant = string.IsNullOrWhiteSpace(request.Tenant) ? _options.Namespace : request.Tenant;
             request.Group = string.IsNullOrWhiteSpace(request.Group) ? ConstValue.DefaultGroup : request.Group;
@@ -133,7 +133,7 @@
                     return result.Equals("true", StringComparison.OrdinalIgnoreCase);
                 case System.Net.HttpStatusCode.Forbidden:
                     _logger.LogWarning($"[remove] error, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, code={(int)responseMessage.StatusCode} msg={responseMessage.StatusCode.ToString()}");
-                    throw new NacosException(ConstValue.NO_RIGHT, $"Insufficient privilege.");
+                    throw new NacosException(NacosException.NO_RIGHT, $"Insufficient privilege.");
                 default:
                     _logger.LogWarning($"[remove] error, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, code={(int)responseMessage.StatusCode} msg={responseMessage.StatusCode.ToString()}");
                     return false;
@@ -142,7 +142,7 @@
 
         public Task AddListenerAsync(AddListenerRequest request)
         {
-            if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
+            if (request == null) throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "request param invalid");
 
             if (string.IsNullOrWhiteSpace(request.Tenant)) request.Tenant = _options.Namespace;
             if (string.IsNullOrWhiteSpace(request.Group)) request.Group = ConstValue.DefaultGroup;
@@ -174,7 +174,7 @@
 
         public Task RemoveListenerAsync(RemoveListenerRequest request)
         {
-            if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
+            if (request == null) throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "request param invalid");
 
             if (string.IsNullOrWhiteSpace(request.Tenant)) request.Tenant = _options.Namespace;
             if (string.IsNullOrWhiteSpace(request.Group)) request.Group = ConstValue.DefaultGroup;
@@ -248,7 +248,7 @@
                     case System.Net.HttpStatusCode.Forbidden:
                         SetHealthServer(false);
                         _logger.LogWarning($"[listener] error, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, code={(int)responseMessage.StatusCode} msg={responseMessage.StatusCode.ToString()}");
-                        throw new NacosException(ConstValue.NO_RIGHT, $"Insufficient privilege.");
+                        throw new NacosException(NacosException.NO_RIGHT, $"Insufficient privilege.");
                     default:
                         SetHealthServer(false);
                         _logger.LogWarning($"[listener] error, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, code={(int)responseMessage.StatusCode} msg={responseMessage.StatusCode.ToString()}");

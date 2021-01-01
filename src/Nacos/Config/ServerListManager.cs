@@ -1,5 +1,6 @@
 ﻿namespace Nacos.Config
 {
+    using Nacos.Exceptions;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -62,7 +63,7 @@
             {
                 if (string.IsNullOrWhiteSpace(options.EndPoint))
                 {
-                    throw new Nacos.Exceptions.NacosException(ConstValue.CLIENT_INVALID_PARAM, "endpoint is blank");
+                    throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "endpoint is blank");
                 }
 
                 _isFixed = false;

@@ -5,6 +5,8 @@
 
     public abstract class RemoteConnection : IRequester
     {
+        private bool abandon = false;
+
         public RemoteServerInfo ServerInfo;
 
         protected Dictionary<string, string> labels = new Dictionary<string, string>();
@@ -26,5 +28,9 @@
         public Task CloseAsync() => Close();
 
         protected abstract Task Close();
+
+        public bool IsAbandon() => abandon;
+
+        public void SetAbandon(bool abandon) => this.abandon = abandon;
     }
 }
