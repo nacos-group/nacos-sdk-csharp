@@ -1,14 +1,13 @@
 ﻿namespace Nacos.Remote
 {
     using System.Collections.Generic;
-    using System.Threading.Tasks;
 
     public interface IServerListFactory
     {
-        Task<string> GenNextServerAsync();
+        string GenNextServer();
 
-        Task<string> GetCurrentServerAsync();
+        string GetCurrentServer();
 
-        Task<List<string>> GetServerListAsync();
+        List<string> GetServerList();
     }
 }

@@ -34,7 +34,8 @@
 
                     ConnectionSetupRequest conconSetupRequest = new ConnectionSetupRequest();
 
-                    grpcConn.SendRequest(conconSetupRequest, BuildMeta(conconSetupRequest.GetGrpcType()));
+                    grpcConn.SendRequest(conconSetupRequest, BuildMeta(conconSetupRequest.GetRemoteType()));
+                    return grpcConn;
                 }
 
                 return null;
@@ -79,7 +80,7 @@
         {
             try
             {
-                var payload = GrpcUtils.Convert<object>(new { }, new RequestMeta { Type = GrpcRequestType.ServerCheck });
+                var payload = GrpcUtils.Convert<object>(new { }, new RequestMeta { Type = RemoteRequestType.Req_ServerCheck });
 
                 var client = new Nacos.Request.RequestClient(channel);
                 var resp = client.request(payload);
@@ -106,6 +107,23 @@
                    while (await call.ResponseStream.MoveNext(cts.Token))
                    {
                        var current = call.ResponseStream.Current;
+
+                       var parse = GrpcUtils.Parse(current);
+
+                       var request = (CommonRequest)parse.Body;
+                       if (request != null)
+                       {
+                           try
+                           {
+                               var response = HandleServerRequest(request, parse.Metadata);
+                               response.RequestId = request.RequestId;
+                               await call.RequestStream.WriteAsync(GrpcUtils.Convert(response));
+                           }
+                           catch (Exception)
+                           {
+                               throw;
+                           }
+                       }
 
                         /*var resp = HandleServerRequest(current, call.RequestStream);*/
                    }

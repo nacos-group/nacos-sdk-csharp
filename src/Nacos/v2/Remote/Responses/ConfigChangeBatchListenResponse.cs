@@ -7,5 +7,7 @@
     {
         [Newtonsoft.Json.JsonProperty("changedConfigs")]
         public List<ConfigContext> ChangedConfigs = new List<ConfigContext>();
+
+        public override string GetRemoteType() => RemoteRequestType.Resp_Config_BatchListen;
     }
 }

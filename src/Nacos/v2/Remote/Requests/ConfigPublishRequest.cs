@@ -45,6 +45,6 @@
             AdditonMap[key] = value;
         }
 
-        public override string GetGrpcType() => GRpc.GrpcRequestType.Config_Publish;
+        public override string GetRemoteType() => RemoteRequestType.Req_Config_Publish;
     }
 }

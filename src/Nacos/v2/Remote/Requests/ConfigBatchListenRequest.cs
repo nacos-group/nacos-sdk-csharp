@@ -16,6 +16,6 @@
             this.ConfigListenContexts.Add(ctx);
         }
 
-        public override string GetGrpcType() => GRpc.GrpcRequestType.Config_Listen;
+        public override string GetRemoteType() => RemoteRequestType.Req_Config_Listen;
     }
 }

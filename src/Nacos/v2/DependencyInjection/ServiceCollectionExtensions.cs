@@ -24,10 +24,8 @@
                 clientBuilder.ConfigureHttpClient(httpClientAction);
             }
 
-            services.TryAddSingleton<Nacos.Config.Abst.ILocalConfigInfoProcessor, Nacos.Config.Impl.FileLocalConfigInfoProcessor>();
             services.AddSingleton<Nacos.INacosConfigClient, Nacos.Config.GrpcConfigClient>();
             services.AddSingleton<INacosConfigClientFactory, NacosConfigClientFactory>();
-            services.AddSingleton<Nacos.Config.Abst.IServerListManager, Nacos.Config.Impl.ServerListManager>();
             services.AddSingleton<Nacos.Config.Abst.IConfigTransportClient, Nacos.Config.Impl.ConfiggRpcTransportClient>();
             services.AddSingleton<Nacos.Security.V2.ISecurityProxy, Nacos.Security.V2.SecurityProxy>();
 
@@ -48,10 +46,8 @@
                 clientBuilder.ConfigureHttpClient(httpClientAction);
             }
 
-            services.TryAddSingleton<Nacos.Config.Abst.ILocalConfigInfoProcessor, Nacos.Config.Impl.FileLocalConfigInfoProcessor>();
             services.AddSingleton<Nacos.INacosConfigClient, Nacos.Config.GrpcConfigClient>();
             services.AddSingleton<INacosConfigClientFactory, NacosConfigClientFactory>();
-            services.AddSingleton<Nacos.Config.Abst.IServerListManager, Nacos.Config.Impl.ServerListManager>();
             services.AddSingleton<Nacos.Config.Abst.IConfigTransportClient, Nacos.Config.Impl.ConfiggRpcTransportClient>();
             services.AddSingleton<Nacos.Security.V2.ISecurityProxy, Nacos.Security.V2.SecurityProxy>();
 

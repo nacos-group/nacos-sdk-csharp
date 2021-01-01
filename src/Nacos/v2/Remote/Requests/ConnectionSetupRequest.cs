@@ -2,6 +2,6 @@
 {
     public class ConnectionSetupRequest : CommonRequest
     {
-        public override string GetGrpcType() => GRpc.GrpcRequestType.ConnectionSetup;
+        public override string GetRemoteType() => RemoteRequestType.Req_ConnectionSetup;
     }
 }

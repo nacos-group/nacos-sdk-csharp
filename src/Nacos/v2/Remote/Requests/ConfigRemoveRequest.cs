@@ -34,6 +34,6 @@
         [Newtonsoft.Json.JsonProperty("tag")]
         public string Tag { get; private set; }
 
-        public override string GetGrpcType() => GRpc.GrpcRequestType.Config_Remove;
+        public override string GetRemoteType() => RemoteRequestType.Req_Config_Remove;
     }
 }

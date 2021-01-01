@@ -1,10 +1,13 @@
 ﻿namespace Nacos.Config.Impl
 {
+    using Grpc.Core;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Nacos.Config.Abst;
     using Nacos.Exceptions;
-    using Nacos.Remote.GRpc;
+    using Nacos.Remote;
+    using Nacos.Remote.Requests;
+    using Nacos.Remote.Responses;
     using Nacos.Utilities;
     using System;
     using System.Collections.Generic;
@@ -16,9 +19,8 @@
     {
         private ILogger _logger;
 
-        private readonly Grpc.Core.ChannelBase _channel;
-        private readonly Remote.GRpc.GrpcSdkClient _sdkClient;
         private Dictionary<string, CacheData> cacheMap = new Dictionary<string, CacheData>();
+        private string uuid = System.Guid.NewGuid().ToString();
 
         private readonly object _lock = new object();
 
@@ -30,10 +32,7 @@
         {
             _logger = loggerFactory.CreateLogger<GrpcConfigClient>();
             _options = optionAccs.CurrentValue;
-
-            _sdkClient = new Remote.GRpc.GrpcSdkClient("config");
-            _channel = _sdkClient.ConnectToServer(_options.ServerAddresses[0]);
-
+            _serverListManager = new ServerListManager(_logger, optionAccs);
             StartInner();
         }
 
@@ -50,30 +49,14 @@
         {
             try
             {
-                var request = new Nacos.Config.Requests.ConfigPublishRequest(dataId, group, tenant, content);
+                var request = new ConfigPublishRequest(dataId, group, tenant, content);
                 request.PutAdditonalParam("tag", tag);
                 request.PutAdditonalParam("appName", appName);
                 request.PutAdditonalParam("betaIps", betaIps);
 
-                var payload = Remote.GRpc.GrpcUtils.Convert(request, new Remote.GRpc.RequestMeta
-                {
-                    Type = Remote.GRpc.GrpcRequestType.Config_Publish,
-                    ClientIp = "",
-                    ClientPort = 80,
-                    ClientVersion = ConstValue.ClientVersion
-                });
+                var response = await RequestProxy(GetOneRunningClient(), request);
 
-                var client = new Nacos.Request.RequestClient(_channel);
-
-                var result = await client.requestAsync(payload);
-
-#if DEBUG
-                System.Diagnostics.Trace.WriteLine($"{Remote.GRpc.GrpcRequestType.Config_Publish} return {result.Body.Value.ToStringUtf8()}, {result.Metadata.ToJsonString()}");
-#endif
-
-                var resp = result.Body.Value.ToStringUtf8().ToObj<Nacos.Remote.CommonResponse>();
-
-                return resp.IsSuccess();
+                return response.IsSuccess();
             }
             catch (Exception ex)
             {
@@ -86,41 +69,27 @@
         {
             try
             {
-                var request = new Nacos.Config.Requests.ConfigQueryRequest(dataId, group, tenant);
+                var request = new ConfigQueryRequest(dataId, group, tenant);
                 request.PutHeader("notify", notify.ToString());
 
-                var payload = Remote.GRpc.GrpcUtils.Convert(request, new Remote.GRpc.RequestMeta
-                {
-                    Type = Remote.GRpc.GrpcRequestType.Config_Get,
-                    ClientIp = "",
-                    ClientPort = 80,
-                    ClientVersion = ConstValue.ClientVersion
-                });
-
-                var client = new Nacos.Request.RequestClient(_channel);
-
-                var result = await client.requestAsync(payload);
-
-#if DEBUG
-                System.Diagnostics.Trace.WriteLine($"{Remote.GRpc.GrpcRequestType.Config_Get} return {result.Body.Value.ToStringUtf8()}, {result.Metadata.ToJsonString()}");
-#endif
-                var resp = result.Body.Value.ToStringUtf8().ToObj<Nacos.Config.Requests.ConfigQueryResponse>();
+                var response = (ConfigQueryResponse)(await RequestProxy(GetOneRunningClient(), request));
 
                 var ct = new List<string>();
 
-                if (resp.IsSuccess())
+                if (response.IsSuccess())
                 {
-                    // TODO snapshot
-                    ct.Add(resp.Content);
-                    ct.Add(string.IsNullOrWhiteSpace(resp.ContentType) ? resp.ContentType : "text");
+                    await FileLocalConfigInfoProcessor.SaveSnapshotAsync(this.GetName(), dataId, group, tenant, response.Content);
+
+                    ct.Add(response.Content);
+                    ct.Add(string.IsNullOrWhiteSpace(response.ContentType) ? response.ContentType : "text");
                     return ct;
                 }
-                else if (resp.ErrorCode.Equals(Nacos.Config.Requests.ConfigQueryResponse.CONFIG_NOT_FOUND))
+                else if (response.ErrorCode.Equals(ConfigQueryResponse.CONFIG_NOT_FOUND))
                 {
-                    // TODO snapshot
+                    await FileLocalConfigInfoProcessor.SaveSnapshotAsync(this.GetName(), dataId, group, tenant, null);
                     return ct;
                 }
-                else if (resp.ErrorCode.Equals(Nacos.Config.Requests.ConfigQueryResponse.CONFIG_QUERY_CONFLICT))
+                else if (response.ErrorCode.Equals(ConfigQueryResponse.CONFIG_QUERY_CONFLICT))
                 {
                     _logger.LogError(
                         "[{0}] [sub-server-error] get server config being modified concurrently, dataId={1}, group={2}, tenant={3}",
@@ -131,13 +100,13 @@
                 {
                     _logger.LogError(
                        "[{0}] [sub-server-error]  dataId={1}, group={2}, tenant={3}, code={4}",
-                       GetName(), dataId, group, tenant, resp.ToJsonString());
-                    throw new NacosException(resp.ErrorCode, $"http error, code={resp.ErrorCode}, dataId={dataId},group={group},tenant={tenant}");
+                       GetName(), dataId, group, tenant, response.ToJsonString());
+                    throw new NacosException(response.ErrorCode, $"http error, code={response.ErrorCode}, dataId={dataId},group={group},tenant={tenant}");
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[{0}] [sub-server-error] ", GetName());
+                _logger.LogError(ex, "[{0}] [sub-server-error] dataId={1}, group={2}, tenant={3}, code={4} ", GetName(), dataId, group, tenant, ex.Message);
                 throw;
             }
         }
@@ -146,26 +115,11 @@
         {
             try
             {
-                var request = new Nacos.Config.Requests.ConfigRemoveRequest(dataId, group, tenant, tag);
+                var request = new ConfigRemoveRequest(dataId, group, tenant, tag);
 
-                var payload = Remote.GRpc.GrpcUtils.Convert(request, new Remote.GRpc.RequestMeta
-                {
-                    Type = Remote.GRpc.GrpcRequestType.Config_Remove,
-                    ClientIp = "",
-                    ClientPort = 80,
-                    ClientVersion = ConstValue.ClientVersion
-                });
+                var response = await RequestProxy(GetOneRunningClient(), request);
 
-                var client = new Nacos.Request.RequestClient(_channel);
-
-                var result = await client.requestAsync(payload);
-
-#if DEBUG
-                System.Diagnostics.Trace.WriteLine($"{Remote.GRpc.GrpcRequestType.Config_Remove} return {result.Body.Value.ToStringUtf8()}, {result.Metadata.ToJsonString()}");
-#endif
-                var resp = result.Body.Value.ToStringUtf8().ToObj<Nacos.Remote.CommonResponse>();
-
-                return resp.IsSuccess();
+                return response.IsSuccess();
             }
             catch (Exception ex)
             {
@@ -176,58 +130,11 @@
 
         protected override void StartInner()
         {
-            _sdkClient.RegisterServerPushResponseHandler(new ConfigChangeServerRequestHandler(cacheMap));
-
             _configListenTimer = new Timer(
                 async x =>
                 {
                     await ExecuteConfigListenAsync();
                 }, null, 0, 5000);
-        }
-
-        public class ConfigChangeServerRequestHandler : Remote.IServerRequestHandler
-        {
-            private Dictionary<string, CacheData> cacheMap;
-
-            public ConfigChangeServerRequestHandler(Dictionary<string, CacheData> map)
-            {
-                this.cacheMap = map;
-            }
-
-            public Remote.CommonResponse RequestReply(Payload payload, Grpc.Core.IClientStreamWriter<Payload> streamWriter)
-            {
-                var request = GrpcUtils.Parse<Nacos.Config.Requests.ConfigChangeNotifyRequest>(payload);
-
-                string groupKey = GroupKey.GetKeyTenant(request.DataId, request.Group, request.Tenant);
-
-                if (cacheMap.TryGetValue(groupKey, out var cacheData))
-                {
-                    if (request.ContentPush && cacheData.LastModifiedTs < request.LastModifiedTs)
-                    {
-                    }
-
-                    cacheData.IsListenSuccess = false;
-                }
-
-                Console.WriteLine("desc => {0}", request.ToJsonString());
-
-                var ccnr = Remote.GRpc.GrpcUtils.Convert(
-                    new Nacos.Remote.CommonResponse()
-                    {
-                        RequestId = request.RequestId,
-                        ResultCode = 200,
-                    }, new Remote.GRpc.RequestMeta { Type = GrpcRequestType.Config_ChangeNotifyResponse, ClientVersion = ConstValue.ClientVersion });
-
-                streamWriter.WriteAsync(ccnr).GetAwaiter().GetResult();
-
-
-                return new Config.Requests.ConfigChangeNotifyResponse();
-            }
-
-            public Remote.CommonResponse RequestReply(Remote.CommonRequest request, Remote.CommonRequestMeta meta)
-            {
-                throw new NotImplementedException();
-            }
         }
 
         private async Task ExecuteConfigListenAsync()
@@ -261,42 +168,31 @@
 
             if (listenCachesMap != null && listenCachesMap.Any())
             {
-                try
+                foreach (var task in listenCachesMap)
                 {
-                    foreach (var task in listenCachesMap)
+                    var taskId = task.Key;
+                    var listenCaches = task.Value;
+
+                    var request = new ConfigBatchListenRequest() { Listen = true };
+
+                    foreach (var item in listenCaches)
+                        request.AddConfigListenContext(item.Tenant, item.Group, item.DataId, item.Md5);
+
+                    if (request.ConfigListenContexts != null && request.ConfigListenContexts.Any())
                     {
-                        var taskId = task.Key;
-                        var listenCaches = task.Value;
-
-                        var request = new Nacos.Config.Requests.ConfigBatchListenRequest() { Listen = true };
-
-                        foreach (var item in listenCaches)
-                            request.AddConfigListenContext(item.Tenant, item.Group, item.DataId, item.Md5);
-
-                        if (request.ConfigListenContexts != null && request.ConfigListenContexts.Any())
+                        try
                         {
-                            var payload = Remote.GRpc.GrpcUtils.Convert(request, new Remote.GRpc.RequestMeta
-                            {
-                                Type = Remote.GRpc.GrpcRequestType.Config_Listen,
-                                ClientVersion = ConstValue.ClientVersion
-                            });
+                            var rpcClient = EnsureRpcClient(taskId);
 
-                            var client = new Nacos.Request.RequestClient(_channel);
+                            var configChangeBatchListenResponse = (ConfigChangeBatchListenResponse)(await RequestProxy(rpcClient, request));
 
-                            var result = await client.requestAsync(payload);
-
-#if DEBUG
-                            System.Diagnostics.Trace.WriteLine($"{Remote.GRpc.GrpcRequestType.Config_Listen} return {result.Body.Value.ToStringUtf8()}, {result.Metadata.ToJsonString()}");
-#endif
-                            var resp = result.Body.Value.ToStringUtf8().ToObj<Nacos.Config.Requests.ConfigChangeBatchListenResponse>();
-
-                            if (resp != null && resp.IsSuccess())
+                            if (configChangeBatchListenResponse != null && configChangeBatchListenResponse.IsSuccess())
                             {
                                 HashSet<string> changeKeys = new HashSet<string>();
 
-                                if (resp.ChangedConfigs != null && resp.ChangedConfigs.Any())
+                                if (configChangeBatchListenResponse.ChangedConfigs != null && configChangeBatchListenResponse.ChangedConfigs.Any())
                                 {
-                                    foreach (var item in resp.ChangedConfigs)
+                                    foreach (var item in configChangeBatchListenResponse.ChangedConfigs)
                                     {
                                         var changeKey = GroupKey.GetKeyTenant(item.DataId, item.Group, item.Tenant);
 
@@ -329,56 +225,44 @@
                                 }
                             }
                         }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "async listen config change error ");
+                        }
                     }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "async listen config change error ");
                 }
             }
 
             if (removeListenCachesMap != null && removeListenCachesMap.Any())
             {
-                try
+                foreach (var task in removeListenCachesMap)
                 {
-                    foreach (var task in removeListenCachesMap)
+                    var taskId = task.Key;
+                    var removeListenCaches = task.Value;
+
+                    var request = new ConfigBatchListenRequest { Listen = false };
+
+                    foreach (var item in removeListenCaches)
+                        request.AddConfigListenContext(item.Tenant, item.Group, item.DataId, item.Md5);
+
+                    if (request.ConfigListenContexts != null && request.ConfigListenContexts.Any())
                     {
-                        var taskId = task.Key;
-                        var removeListenCaches = task.Value;
-
-                        var request = new Nacos.Config.Requests.ConfigBatchListenRequest { Listen = false };
-
-                        foreach (var item in removeListenCaches)
-                            request.AddConfigListenContext(item.Tenant, item.Group, item.DataId, item.Md5);
-
-                        if (request.ConfigListenContexts != null && request.ConfigListenContexts.Any())
+                        try
                         {
-                            var payload = Remote.GRpc.GrpcUtils.Convert(request, new Remote.GRpc.RequestMeta
-                            {
-                                Type = Remote.GRpc.GrpcRequestType.Config_Listen,
-                                ClientVersion = ConstValue.ClientVersion
-                            });
+                            RpcClient rpcClient = EnsureRpcClient(taskId);
+                            var response = await RequestProxy(rpcClient, request);
 
-                            var client = new Nacos.Request.RequestClient(_channel);
-
-                            var result = await client.requestAsync(payload);
-
-#if DEBUG
-                            System.Diagnostics.Trace.WriteLine($"{Remote.GRpc.GrpcRequestType.Config_Listen} return {result.Body.Value.ToStringUtf8()}, {result.Metadata.ToJsonString()}");
-#endif
-                            var resp = result.Body.Value.ToStringUtf8().ToObj<Nacos.Config.Requests.ConfigChangeBatchListenResponse>();
-
-                            if (resp != null && resp.IsSuccess())
+                            if (response != null && response.IsSuccess())
                             {
                                 // do remove
                                 Console.WriteLine("do remove");
                             }
                         }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "async remove listen config change error ");
+                        }
                     }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "async listen config change error ");
                 }
             }
         }
@@ -430,5 +314,146 @@
 
         private CacheData GetCache(string dataId, string group, string tenant)
             => cacheMap.TryGetValue(GroupKey.GetKeyTenant(dataId, group, tenant), out var data) ? data : null;
+
+        private RpcClient EnsureRpcClient(string taskId)
+        {
+            Dictionary<string, string> labels = GetLabels();
+            Dictionary<string, string> newlabels = new Dictionary<string, string>(labels);
+            newlabels["taskId"] = taskId;
+
+            RpcClient rpcClient = RpcClientFactory
+                    .CreateClient("config-" + taskId + "-" + uuid, new RemoteConnectionType(RemoteConnectionType.GRPC), newlabels);
+
+            if (rpcClient.IsWaitInited())
+            {
+                InitHandlerRpcClient(rpcClient);
+
+                rpcClient.Start();
+            }
+
+            return rpcClient;
+        }
+
+        private void InitHandlerRpcClient(RpcClient rpcClientInner)
+        {
+            rpcClientInner.RegisterServerPushResponseHandler(new ConfigRpcServerRequestHandler(cacheMap));
+            rpcClientInner.RegisterConnectionListener(new ConfigRpcConnectionEventListener(rpcClientInner, cacheMap));
+
+            rpcClientInner.Init(new ConfigRpcServerListFactory(_serverListManager));
+        }
+
+        public class ConfigRpcServerRequestHandler : IServerRequestHandler
+        {
+            private Dictionary<string, CacheData> _cacheMap;
+
+            public ConfigRpcServerRequestHandler(Dictionary<string, CacheData> map)
+            {
+                this._cacheMap = map;
+            }
+
+            public CommonResponse RequestReply(Payload payload, IClientStreamWriter<Payload> streamWriter)
+            {
+                throw new NotImplementedException();
+            }
+
+            public CommonResponse RequestReply(CommonRequest request, CommonRequestMeta meta)
+            {
+                if (request is ConfigChangeNotifyRequest)
+                {
+                    var configChangeNotifyRequest = (ConfigChangeNotifyRequest)request;
+
+                    string groupKey = GroupKey.GetKeyTenant(configChangeNotifyRequest.DataId, configChangeNotifyRequest.Group, configChangeNotifyRequest.Tenant);
+
+                    if (_cacheMap.TryGetValue(groupKey, out var cacheData))
+                    {
+                        if (configChangeNotifyRequest.ContentPush
+                            && cacheData.LastModifiedTs < configChangeNotifyRequest.LastModifiedTs)
+                        {
+                        }
+
+                        cacheData.IsListenSuccess = false;
+                    }
+
+                    Console.WriteLine("Config RequestReply => {0}", request.ToJsonString());
+
+                    return new ConfigChangeNotifyResponse();
+                }
+
+                return null;
+            }
+        }
+
+        public class ConfigRpcConnectionEventListener : IConnectionEventListener
+        {
+            private readonly RpcClient _rpcClient;
+            private readonly Dictionary<string, CacheData> _cacheMap;
+
+            public ConfigRpcConnectionEventListener(RpcClient rpcClientInner, Dictionary<string, CacheData> cacheMap)
+            {
+                this._rpcClient = rpcClientInner;
+                this._cacheMap = cacheMap;
+            }
+
+            public void OnConnected()
+            {
+            }
+
+            public void OnDisConnected()
+            {
+                if (_rpcClient.GetLabels().TryGetValue("taskId", out var taskId))
+                {
+                    var values = _cacheMap.Values;
+
+                    foreach (var cacheData in values)
+                    {
+                        if (cacheData.TaskId.Equals(Convert.ToInt32(taskId)))
+                        {
+                            cacheData.IsListenSuccess = false;
+                            continue;
+                        }
+
+                        cacheData.IsListenSuccess = false;
+                    }
+                }
+            }
+        }
+
+        public class ConfigRpcServerListFactory : IServerListFactory
+        {
+            private readonly IServerListManager _serverListManager;
+
+            public ConfigRpcServerListFactory(IServerListManager serverListManager)
+            {
+                this._serverListManager = serverListManager;
+            }
+
+            public string GenNextServer() => _serverListManager.GetNextServerAddr();
+
+            public string GetCurrentServer() => _serverListManager.GetCurrentServerAddr();
+
+            public List<string> GetServerList() => _serverListManager.GetServerUrls();
+        }
+
+        private Dictionary<string, string> GetLabels()
+        {
+            var labels = new Dictionary<string, string>(2)
+            {
+                [RemoteConstants.LABEL_SOURCE] = RemoteConstants.LABEL_SOURCE_SDK,
+                [RemoteConstants.LABEL_MODULE] = RemoteConstants.LABEL_MODULE_CONFIG
+            };
+            return labels;
+        }
+
+        private async Task<CommonResponse> RequestProxy(RpcClient rpcClientInner, CommonRequest request)
+        {
+            // TODO: 1. security headers, spas headers
+            // TODO: 2. limiter
+            return await rpcClientInner.Request(request);
+        }
+
+        private RpcClient GetOneRunningClient()
+        {
+            return EnsureRpcClient("0");
+        }
     }
 }

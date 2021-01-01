@@ -30,7 +30,7 @@
         {
             var streamClient = new Nacos.BiRequestStream.BiRequestStreamClient(channel);
 
-            var payload = GrpcUtils.Convert<object>(new { }, new RequestMeta { Type = GrpcRequestType.ConnectionSetup });
+            var payload = GrpcUtils.Convert<object>(new { }, new RequestMeta { Type = RemoteRequestType.Req_ConnectionSetup });
 
             var call = streamClient.requestBiStream();
 
@@ -55,7 +55,7 @@
         {
             try
             {
-                var payload = GrpcUtils.Convert<object>(new { }, new RequestMeta { Type = GrpcRequestType.ServerCheck });
+                var payload = GrpcUtils.Convert<object>(new { }, new RequestMeta { Type = RemoteRequestType.Req_ServerCheck });
 
                 var client = new Nacos.Request.RequestClient(channel);
                 var resp = client.request(payload);

@@ -35,9 +35,9 @@
         private readonly ILogger _logger;
         private readonly NacosOptions _options;
 
-        public ServerListManager(ILoggerFactory loggerFactory, IOptionsMonitor<NacosOptions> optionsAccs)
+        public ServerListManager(ILogger logger, IOptionsMonitor<NacosOptions> optionsAccs)
         {
-            _logger = loggerFactory.CreateLogger<ServerListManager>();
+            _logger = logger;
             _options = optionsAccs.CurrentValue;
 
             _serverUrls = new List<string>();
@@ -262,6 +262,12 @@
         public void Dispose()
         {
             _refreshSvcListTimer?.Dispose();
+        }
+
+        public string GetNextServerAddr()
+        {
+            RefreshCurrentServerAddr();
+            return _currentServerAddr;
         }
     }
 }

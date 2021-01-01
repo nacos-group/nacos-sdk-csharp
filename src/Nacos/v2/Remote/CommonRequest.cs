@@ -20,6 +20,6 @@
                 : value;
         }
 
-        public abstract string GetGrpcType();
+        public abstract string GetRemoteType();
     }
 }

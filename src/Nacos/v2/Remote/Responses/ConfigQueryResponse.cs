@@ -2,7 +2,7 @@
 {
     using System.Collections.Generic;
 
-    public class ConfigQueryResponse : Nacos.Remote.CommonResponse
+    public class ConfigQueryResponse : CommonResponse
     {
         public static readonly int CONFIG_NOT_FOUND = 300;
 
@@ -16,5 +16,7 @@
 
         [Newtonsoft.Json.JsonProperty("labels")]
         public Dictionary<string, string> Labels { get; set; }
+
+        public override string GetRemoteType() => RemoteRequestType.Resp_Config_Query;
     }
 }

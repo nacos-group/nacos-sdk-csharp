@@ -1,9 +1,9 @@
 ﻿namespace Nacos.Remote
 {
-    public class CommonResponse
+    public abstract class CommonResponse
     {
         [Newtonsoft.Json.JsonProperty("resultCode")]
-        public int ResultCode { get; set; }
+        public int ResultCode { get; set; } = 200;
 
         [Newtonsoft.Json.JsonProperty("errorCode")]
         public int ErrorCode { get; set; }
@@ -15,5 +15,7 @@
         public string RequestId { get; set; }
 
         public bool IsSuccess() => ResultCode == 200;
+
+        public abstract string GetRemoteType();
     }
 }

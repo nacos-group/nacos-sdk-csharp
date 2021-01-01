@@ -2,6 +2,7 @@
 {
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
+    using System;
 
     public static class JsonUtil
     {
@@ -15,6 +16,13 @@
             if (string.IsNullOrWhiteSpace(json)) return default(T);
 
             return JsonConvert.DeserializeObject<T>(json);
+        }
+
+        public static object ToObj(this string json, Type type)
+        {
+            if (string.IsNullOrWhiteSpace(json) || type == null) return null;
+
+            return JsonConvert.DeserializeObject(json, type);
         }
 
         public static string GetPropValue(this string json, string prop)

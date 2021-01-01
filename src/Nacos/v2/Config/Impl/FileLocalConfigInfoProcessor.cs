@@ -1,18 +1,17 @@
 ﻿namespace Nacos.Config.Impl
 {
-    using Nacos.Config.Abst;
     using System;
     using System.IO;
     using System.Text;
     using System.Threading.Tasks;
 
-    public class FileLocalConfigInfoProcessor : ILocalConfigInfoProcessor
+    public static class FileLocalConfigInfoProcessor
     {
-        private readonly string failover_base = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "nacos", "config");
+        private static readonly string Failover_Base = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "nacos", "config");
 
-        private readonly string snapshot_base = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "nacos", "config");
+        private static readonly string Snapshot_Base = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "nacos", "config");
 
-        public async Task<string> GetFailoverAsync(string serverName, string dataId, string group, string tenant)
+        public static async Task<string> GetFailoverAsync(string serverName, string dataId, string group, string tenant)
         {
             FileInfo file = GetFailoverFile(serverName, dataId, group, tenant);
 
@@ -29,10 +28,10 @@
             return readStr;
         }
 
-        private FileInfo GetFailoverFile(string serverName, string dataId, string group, string tenant)
+        private static FileInfo GetFailoverFile(string serverName, string dataId, string group, string tenant)
         {
             string failoverFile;
-            failoverFile = Path.Combine(snapshot_base, serverName + "_nacos");
+            failoverFile = Path.Combine(Snapshot_Base, serverName + "_nacos");
 
             failoverFile = !string.IsNullOrEmpty(tenant)
                 ? Path.Combine(failoverFile, "config-data-tenant", tenant, group, dataId)
@@ -42,7 +41,7 @@
             return file;
         }
 
-        public async Task<string> GetSnapshotAync(string name, string dataId, string group, string tenant)
+        public static async Task<string> GetSnapshotAync(string name, string dataId, string group, string tenant)
         {
             FileInfo file = GetSnapshotFile(name, dataId, group, tenant);
 
@@ -56,10 +55,10 @@
             return readStr;
         }
 
-        private FileInfo GetSnapshotFile(string envName, string dataId, string group, string tenant)
+        private static FileInfo GetSnapshotFile(string envName, string dataId, string group, string tenant)
         {
             string snapshotFile;
-            snapshotFile = Path.Combine(snapshot_base, envName + "_nacos");
+            snapshotFile = Path.Combine(Snapshot_Base, envName + "_nacos");
 
             snapshotFile = !string.IsNullOrEmpty(tenant)
                 ? Path.Combine(snapshotFile, "snapshot-tenant", tenant, group, dataId)
@@ -69,7 +68,7 @@
             return file;
         }
 
-        public async Task SaveSnapshotAsync(string envName, string dataId, string group, string tenant, string config)
+        public static async Task SaveSnapshotAsync(string envName, string dataId, string group, string tenant, string config)
         {
             FileInfo snapshotFile = GetSnapshotFile(envName, dataId, group, tenant);
             if (string.IsNullOrEmpty(config))

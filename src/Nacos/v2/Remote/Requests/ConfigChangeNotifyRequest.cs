@@ -34,6 +34,6 @@
         [Newtonsoft.Json.JsonProperty("lastModifiedTs")]
         public long LastModifiedTs { get; set; }
 
-        public override string GetGrpcType() => GRpc.GrpcRequestType.Config_ChangeNotifyResponse;
+        public override string GetRemoteType() => RemoteRequestType.Resp_Config_ChangeNotify;
     }
 }

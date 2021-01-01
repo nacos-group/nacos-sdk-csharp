@@ -37,7 +37,7 @@
 
             try
             {
-                var callOptions = default(Grpc.Core.CallOptions).WithDeadline(DateTime.Now.AddMilliseconds(timeoutMills));
+                var callOptions = default(Grpc.Core.CallOptions).WithDeadline(DateTime.UtcNow.AddMilliseconds(timeoutMills));
 
                 grpcResponse = await reqClient.requestAsync(grpcRequest, callOptions);
             }
@@ -46,7 +46,7 @@
                 throw new Nacos.Exceptions.NacosException(Nacos.ConstValue.SERVER_ERROR, ex.Message);
             }
 
-            var response = GrpcUtils.Parse(grpcResponse);
+            var response = (CommonResponse)GrpcUtils.Parse(grpcResponse).Body;
             return response;
         }
 

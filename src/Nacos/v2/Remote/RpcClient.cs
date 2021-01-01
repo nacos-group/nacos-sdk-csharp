@@ -136,8 +136,7 @@
                 {
                     startUpretyTimes--;
 
-                    // TODO
-                    RemoteServerInfo serverInfo = null;
+                    RemoteServerInfo serverInfo = NextRpcServer();
 
                     logger?.LogInformation("{0} try to  connect to server on start up,server : {1}", this._name, serverInfo?.ToString());
 
@@ -192,7 +191,7 @@
                 {
                     if (this.currentConnetion != null && !IsRunning()) throw new Nacos.Exceptions.NacosException(ConstValue.CLIENT_INVALID_PARAM, "client not connected.");
 
-                    response = await currentConnetion.RequestAsync(request, BuildMeta(""), timeoutMills);
+                    response = await currentConnetion.RequestAsync(request, BuildMeta(request.GetRemoteType()), timeoutMills);
 
                     if (response != null)
                     {
@@ -260,13 +259,13 @@
 
         protected RemoteServerInfo NextRpcServer()
         {
-            string serverAddress = GetServerListFactory().GenNextServerAsync().GetAwaiter().GetResult();
+            string serverAddress = GetServerListFactory().GenNextServer();
             return ResolveServerInfo(serverAddress);
         }
 
         protected RemoteServerInfo CurrentRpcServer()
         {
-            string serverAddress = GetServerListFactory().GetCurrentServerAsync().GetAwaiter().GetResult();
+            string serverAddress = GetServerListFactory().GetCurrentServer();
             return ResolveServerInfo(serverAddress);
         }
 
