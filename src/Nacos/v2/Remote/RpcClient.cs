@@ -1,7 +1,7 @@
-﻿namespace Nacos.Remote
+﻿namespace Nacos.V2.Remote
 {
     using Microsoft.Extensions.Logging;
-    using Nacos.Exceptions;
+    using Nacos.V2.Exceptions;
     using Nacos.Utilities;
     using System;
     using System.Collections.Generic;

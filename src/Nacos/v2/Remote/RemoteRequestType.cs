@@ -1,4 +1,4 @@
-﻿namespace Nacos.Remote
+﻿namespace Nacos.V2.Remote
 {
     using System;
     using System.Collections.Generic;
@@ -19,7 +19,11 @@
 
         public static readonly string Req_Naming_ServiceQuery = "com.alibaba.nacos.api.naming.remote.request.ServiceQueryRequest";
 
-        public static readonly string Naming_ServiceList = "com.alibaba.nacos.api.naming.remote.request.ServiceListRequest";
+        public static readonly string Req_Naming_ServiceList = "com.alibaba.nacos.api.naming.remote.request.ServiceListRequest";
+
+        public static readonly string Req_Naming_NotifySubscriber = "com.alibaba.nacos.api.naming.remote.request.NotifySubscriberRequest";
+
+        public static readonly string Req_Naming_SubscribeService = "com.alibaba.nacos.api.naming.remote.request.SubscribeServiceRequest";
 
         public static readonly string Req_ConnectionSetup = "com.alibaba.nacos.api.remote.request.ConnectionSetupRequest";
 
@@ -39,12 +43,13 @@
 
         public static Dictionary<string, Type> RemoteResponseTypeMapping = new Dictionary<string, Type>
         {
-            { Resp_Config_Pubish, typeof(Nacos.Remote.Responses.ConfigPubishResponse) },
-            { Resp_Config_BatchListen, typeof(Nacos.Remote.Responses.ConfigChangeBatchListenResponse) },
-            { Resp_Config_ChangeNotify, typeof(Nacos.Remote.Responses.ConfigChangeNotifyResponse) },
-            { Resp_Config_Query, typeof(Nacos.Remote.Responses.ConfigQueryResponse) },
-            { Resp_Config_Remove, typeof(Nacos.Remote.Responses.ConfigRemoveResponse) },
-            { Req_Config_ChangeNotify, typeof(Nacos.Remote.Requests.ConfigChangeNotifyRequest) },
+            { Resp_Config_Pubish, typeof(Nacos.V2.Remote.Responses.ConfigPubishResponse) },
+            { Resp_Config_BatchListen, typeof(Nacos.V2.Remote.Responses.ConfigChangeBatchListenResponse) },
+            { Resp_Config_ChangeNotify, typeof(Nacos.V2.Remote.Responses.ConfigChangeNotifyResponse) },
+            { Resp_Config_Query, typeof(Nacos.V2.Remote.Responses.ConfigQueryResponse) },
+            { Resp_Config_Remove, typeof(Nacos.V2.Remote.Responses.ConfigRemoveResponse) },
+            { Req_Config_ChangeNotify, typeof(Nacos.V2.Remote.Requests.ConfigChangeNotifyRequest) },
+            { Req_Naming_NotifySubscriber, typeof(Nacos.V2.Remote.Requests.NotifySubscriberRequest) },
         };
     }
 }

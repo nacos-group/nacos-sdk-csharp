@@ -1,6 +1,6 @@
-﻿namespace Nacos.Naming.Dtos
+﻿namespace Nacos.V2.Naming.Dtos
 {
-    using Nacos.Common;
+    using Nacos.V2.Common;
     using System.Collections.Generic;
     using System.Linq;
 

@@ -1,4 +1,4 @@
-﻿namespace Nacos.Security.V2
+﻿namespace Nacos.V2.Security
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;

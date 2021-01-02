@@ -1,4 +1,4 @@
-﻿namespace Nacos.Remote.GRpc
+﻿namespace Nacos.V2.Remote.GRpc
 {
     using Nacos.Utilities;
     using System.Linq;

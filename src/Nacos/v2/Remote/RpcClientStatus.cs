@@ -1,4 +1,4 @@
-﻿namespace Nacos.Remote
+﻿namespace Nacos.V2.Remote
 {
     using Microsoft.Extensions.Logging;
     using Nacos.Utilities;

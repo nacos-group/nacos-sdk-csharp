@@ -1,9 +1,9 @@
-﻿namespace Nacos.Remote.Responses
+﻿namespace Nacos.V2.Remote.Responses
 {
     public class QueryServiceResponse : CommonResponse
     {
         [Newtonsoft.Json.JsonProperty("serviceInfo")]
-        public Nacos.Naming.Dtos.ServiceInfo ServiceInfo { get; set; }
+        public Nacos.V2.Naming.Dtos.ServiceInfo ServiceInfo { get; set; }
 
         public override string GetRemoteType() => "";
     }

@@ -1,4 +1,4 @@
-﻿namespace Nacos.Naming.Remote
+﻿namespace Nacos.V2.Naming.Remote
 {
     public class NamingRemoteConstants
     {

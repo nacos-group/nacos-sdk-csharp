@@ -1,8 +1,8 @@
-﻿namespace Nacos.Config
+﻿namespace Nacos.V2.Config
 {
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
-    using Nacos.Exceptions;
+    using Nacos.V2.Exceptions;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -14,11 +14,11 @@
         private NacosOptions _options;
         private List<Listener> listeners = new List<Listener>();
 
-        private readonly Nacos.Config.Abst.IConfigTransportClient _agent;
+        private readonly Abst.IConfigTransportClient _agent;
 
         public GrpcConfigClient(
             ILoggerFactory loggerFactory,
-            IEnumerable<Nacos.Config.Abst.IConfigTransportClient> agents,
+            IEnumerable<Abst.IConfigTransportClient> agents,
             IOptionsMonitor<NacosOptions> optionAccs)
         {
             _logger = loggerFactory.CreateLogger<GrpcConfigClient>();
@@ -50,7 +50,7 @@
             request.CheckParam();
 
             // read from local cache at first
-            var content = await Nacos.Config.Impl.FileLocalConfigInfoProcessor.GetFailoverAsync(_agent.GetName(), request.DataId, request.Group, request.Tenant);
+            var content = await Impl.FileLocalConfigInfoProcessor.GetFailoverAsync(_agent.GetName(), request.DataId, request.Group, request.Tenant);
 
             if (!string.IsNullOrWhiteSpace(content))
             {
@@ -81,7 +81,7 @@
                 "[{}] [get-config] get snapshot ok, dataId={}, group={}, tenant={}, config={}",
                 _agent.GetName(), request.DataId, request.Group, request.Tenant, content);
 
-            content = await Nacos.Config.Impl.FileLocalConfigInfoProcessor.GetSnapshotAync(_agent.GetName(), request.DataId, request.Group, request.Tenant);
+            content = await Impl.FileLocalConfigInfoProcessor.GetSnapshotAync(_agent.GetName(), request.DataId, request.Group, request.Tenant);
             return content;
         }
 

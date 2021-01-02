@@ -1,4 +1,4 @@
-﻿namespace Nacos.Common
+﻿namespace Nacos.V2.Common
 {
     public class Constants
     {

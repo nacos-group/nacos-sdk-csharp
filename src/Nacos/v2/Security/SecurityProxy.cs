@@ -1,4 +1,4 @@
-﻿namespace Nacos.Security.V2
+﻿namespace Nacos.V2.Security
 {
     using Microsoft.Extensions.Options;
     using System;
@@ -47,6 +47,16 @@
         public SecurityProxy(IOptionsMonitor<NacosOptions> optionsAccs)
         {
             _options = optionsAccs.CurrentValue;
+
+            _username = _options.UserName ?? "";
+            _password = _options.Password ?? "";
+            contextPath = _options.ContextPath;
+            contextPath = contextPath.StartsWith("/") ? contextPath : "/" + contextPath;
+        }
+
+        public SecurityProxy(NacosOptions optionsAccs)
+        {
+            _options = optionsAccs;
 
             _username = _options.UserName ?? "";
             _password = _options.Password ?? "";

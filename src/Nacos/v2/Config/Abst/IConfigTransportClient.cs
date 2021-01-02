@@ -1,4 +1,4 @@
-﻿namespace Nacos.Config.Abst
+﻿namespace Nacos.V2.Config.Abst
 {
     using System;
     using System.Collections.Generic;

@@ -1,4 +1,4 @@
-﻿namespace Nacos.Naming.Dtos
+﻿namespace Nacos.V2.Naming.Dtos
 {
     using System.Collections.Generic;
 

@@ -1,8 +1,7 @@
-﻿namespace Nacos.DependencyInjection
+﻿namespace Nacos.V2.DependencyInjection
 {
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.DependencyInjection.Extensions;
     using Nacos;
     using System;
     using System.Net.Http;
@@ -24,10 +23,10 @@
                 clientBuilder.ConfigureHttpClient(httpClientAction);
             }
 
-            services.AddSingleton<Nacos.INacosConfigClient, Nacos.Config.GrpcConfigClient>();
+            services.AddSingleton<Nacos.INacosConfigClient, Nacos.V2.Config.GrpcConfigClient>();
             services.AddSingleton<INacosConfigClientFactory, NacosConfigClientFactory>();
-            services.AddSingleton<Nacos.Config.Abst.IConfigTransportClient, Nacos.Config.Impl.ConfiggRpcTransportClient>();
-            services.AddSingleton<Nacos.Security.V2.ISecurityProxy, Nacos.Security.V2.SecurityProxy>();
+            services.AddSingleton<Nacos.V2.Config.Abst.IConfigTransportClient, Nacos.V2.Config.Impl.ConfiggRpcTransportClient>();
+            services.AddSingleton<Nacos.V2.Security.ISecurityProxy, Nacos.V2.Security.SecurityProxy>();
 
             return services;
         }
@@ -46,10 +45,49 @@
                 clientBuilder.ConfigureHttpClient(httpClientAction);
             }
 
-            services.AddSingleton<Nacos.INacosConfigClient, Nacos.Config.GrpcConfigClient>();
+            services.AddSingleton<Nacos.INacosConfigClient, Nacos.V2.Config.GrpcConfigClient>();
             services.AddSingleton<INacosConfigClientFactory, NacosConfigClientFactory>();
-            services.AddSingleton<Nacos.Config.Abst.IConfigTransportClient, Nacos.Config.Impl.ConfiggRpcTransportClient>();
-            services.AddSingleton<Nacos.Security.V2.ISecurityProxy, Nacos.Security.V2.SecurityProxy>();
+            services.AddSingleton<Nacos.V2.Config.Abst.IConfigTransportClient, Nacos.V2.Config.Impl.ConfiggRpcTransportClient>();
+            services.AddSingleton<Nacos.V2.Security.ISecurityProxy, Nacos.V2.Security.SecurityProxy>();
+
+            return services;
+        }
+
+        public static IServiceCollection AddNacosV2Naming(this IServiceCollection services, Action<NacosOptions> configure, Action<HttpClient> httpClientAction = null)
+        {
+            if (services == null) throw new ArgumentNullException(nameof(services));
+
+            services.AddOptions();
+            services.Configure(configure);
+
+            var clientBuilder = services.AddHttpClient(ConstValue.ClientName)
+                .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseProxy = false });
+
+            if (httpClientAction != null) clientBuilder.ConfigureHttpClient(httpClientAction);
+
+            services.AddSingleton<INacosNamingV2Client, Nacos.V2.Naming.NacosNamingV2Client>();
+
+            return services;
+        }
+
+        public static IServiceCollection AddNacosV2Naming(this IServiceCollection services, IConfiguration configuration, Action<HttpClient> httpClientAction = null, string sectionName = "nacos")
+        {
+            if (services == null) throw new ArgumentNullException(nameof(services));
+
+            services.Configure<NacosOptions>(configuration.GetSection(sectionName));
+
+            var clientBuilder = services.AddHttpClient(ConstValue.ClientName)
+                .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseProxy = false });
+
+            if (httpClientAction != null)
+            {
+                clientBuilder.ConfigureHttpClient(httpClientAction);
+            }
+
+            services.AddSingleton<Nacos.INacosConfigClient, Nacos.V2.Config.GrpcConfigClient>();
+            services.AddSingleton<INacosConfigClientFactory, NacosConfigClientFactory>();
+            services.AddSingleton<Nacos.V2.Config.Abst.IConfigTransportClient, Nacos.V2.Config.Impl.ConfiggRpcTransportClient>();
+            services.AddSingleton<Nacos.V2.Security.ISecurityProxy, Nacos.V2.Security.SecurityProxy>();
 
             return services;
         }

@@ -1,4 +1,4 @@
-﻿namespace Nacos.Remote.Responses
+﻿namespace Nacos.V2.Remote.Responses
 {
     public class ConfigChangeNotifyResponse : CommonResponse
     {

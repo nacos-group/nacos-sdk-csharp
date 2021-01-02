@@ -1,13 +1,13 @@
-﻿namespace Nacos.Config.Impl
+﻿namespace Nacos.V2.Config.Impl
 {
     using Grpc.Core;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
-    using Nacos.Config.Abst;
-    using Nacos.Exceptions;
-    using Nacos.Remote;
-    using Nacos.Remote.Requests;
-    using Nacos.Remote.Responses;
+    using Nacos.V2.Config.Abst;
+    using Nacos.V2.Exceptions;
+    using Nacos.V2.Remote;
+    using Nacos.V2.Remote.Requests;
+    using Nacos.V2.Remote.Responses;
     using Nacos.Utilities;
     using System;
     using System.Collections.Generic;
@@ -275,7 +275,7 @@
             var cache = GetCache(dataId, group, tenant);
             if (cache != null) return Task.CompletedTask;
 
-            string key = Nacos.Config.GroupKey.GetKeyTenant(dataId, group, tenant);
+            string key = Nacos.V2.Config.GroupKey.GetKeyTenant(dataId, group, tenant);
 
             if (cacheMap.TryGetValue(key, out var cached)) return Task.CompletedTask;
 
@@ -299,7 +299,7 @@
             tenant = string.IsNullOrWhiteSpace(tenant) ? _options.Namespace : tenant;
             group = string.IsNullOrWhiteSpace(group) ? ConstValue.DefaultGroup : group;
 
-            string key = Nacos.Config.GroupKey.GetKeyTenant(dataId, group, tenant);
+            string key = Nacos.V2.Config.GroupKey.GetKeyTenant(dataId, group, tenant);
 
             var cache = GetCache(dataId, group, tenant);
 

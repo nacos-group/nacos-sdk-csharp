@@ -5,7 +5,7 @@ namespace App3
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
-    using Nacos.DependencyInjection;
+    using Nacos.V2.DependencyInjection;
 
     public class Startup
     {

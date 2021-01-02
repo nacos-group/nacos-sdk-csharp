@@ -1,6 +1,6 @@
-﻿namespace Nacos.Remote.GRpc
+﻿namespace Nacos.V2.Remote.GRpc
 {
-    using Nacos.Exceptions;
+    using Nacos.V2.Exceptions;
     using System;
     using System.Threading.Tasks;
 

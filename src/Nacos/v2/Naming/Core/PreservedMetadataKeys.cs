@@ -1,6 +1,6 @@
-﻿namespace Nacos.Naming.Core
+﻿namespace Nacos.V2.Naming.Core
 {
-    using Nacos.Remote;
+    using Nacos.V2.Remote;
     using System.Collections.Generic;
 
     public class PreservedMetadataKeys

@@ -1,6 +1,7 @@
-﻿namespace Nacos.Naming.Remote
+﻿namespace Nacos.V2.Naming.Remote
 {
-    using Nacos.Naming.Dtos;
+    using Nacos.V2.Naming.Dtos;
+    using Nacos.V2.Remote;
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
@@ -20,7 +21,7 @@
 
         Task<ServiceInfo> QueryInstancesOfService(string serviceName, string groupName, string clusters, int udpPort, bool healthyOnly);
 
-        Service QueryService(string serviceName, string groupName);
+        Task<Service> QueryService(string serviceName, string groupName);
 
 
         Task CreateService(Service service, AbstractSelector selector);
@@ -32,9 +33,9 @@
         Task UpdateService(Service service, AbstractSelector selector);
 
 
-        List<string> GetServiceList(int pageNo, int pageSize, string groupName, AbstractSelector selector);
+        Task<ListView<string>> GetServiceList(int pageNo, int pageSize, string groupName, AbstractSelector selector);
 
-        ServiceInfo Subscribe(string serviceName, string groupName, string clusters);
+        Task<ServiceInfo> Subscribe(string serviceName, string groupName, string clusters);
 
         Task Unsubscribe(string serviceName, string groupName, string clusters);
 

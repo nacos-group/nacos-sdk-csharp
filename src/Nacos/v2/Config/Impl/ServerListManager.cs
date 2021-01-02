@@ -1,4 +1,4 @@
-﻿namespace Nacos.Config.Impl
+﻿namespace Nacos.V2.Config.Impl
 {
     using System;
     using System.Collections.Generic;
@@ -10,8 +10,8 @@
     using System.Threading.Tasks;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
-    using Nacos.Config.Abst;
-    using Nacos.Exceptions;
+    using Nacos.V2.Config.Abst;
+    using Nacos.V2.Exceptions;
 
     public class ServerListManager : IServerListManager, IDisposable
     {

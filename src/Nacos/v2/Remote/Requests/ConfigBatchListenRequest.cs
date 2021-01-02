@@ -1,4 +1,4 @@
-﻿namespace Nacos.Remote.Requests
+﻿namespace Nacos.V2.Remote.Requests
 {
     using System.Collections.Generic;
 

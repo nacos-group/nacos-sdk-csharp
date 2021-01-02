@@ -1,4 +1,4 @@
-﻿namespace Nacos.Remote.Requests
+﻿namespace Nacos.V2.Remote.Requests
 {
     public class InstanceRequest : AbstractNamingRequest
     {
@@ -6,9 +6,9 @@
         public string Type { get; set; }
 
         [Newtonsoft.Json.JsonProperty("instance")]
-        public Nacos.Naming.Dtos.Instance Instance { get; set; }
+        public Nacos.V2.Naming.Dtos.Instance Instance { get; set; }
 
-        public InstanceRequest(string @namespace, string serviceName, string groupName, string type, Nacos.Naming.Dtos.Instance instance)
+        public InstanceRequest(string @namespace, string serviceName, string groupName, string type, Nacos.V2.Naming.Dtos.Instance instance)
             : base(@namespace, serviceName, groupName)
         {
             this.Type = type;

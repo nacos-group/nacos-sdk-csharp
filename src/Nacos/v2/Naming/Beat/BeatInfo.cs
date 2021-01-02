@@ -1,4 +1,4 @@
-﻿namespace Nacos.Naming.Beat
+﻿namespace Nacos.V2.Naming.Beat
 {
     using System.Collections.Generic;
 
@@ -19,7 +19,7 @@
 
         public bool scheduled { get; set; }
 
-        public int period { get; set; }
+        public long period { get; set; }
 
         public bool stopped { get; set; }
 

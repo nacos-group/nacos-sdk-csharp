@@ -1,4 +1,4 @@
-﻿namespace Nacos.Remote
+﻿namespace Nacos.V2.Remote
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;

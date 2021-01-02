@@ -1,6 +1,6 @@
-﻿namespace Nacos.Remote.GRpc
+﻿namespace Nacos.V2.Remote.GRpc
 {
-    using Nacos.Remote.Requests;
+    using Nacos.V2.Remote.Requests;
     using System;
 
     public class GrpcClient : RpcClient

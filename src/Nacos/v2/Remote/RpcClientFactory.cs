@@ -1,4 +1,4 @@
-﻿namespace Nacos.Remote
+﻿namespace Nacos.V2.Remote
 {
     using Microsoft.Extensions.Logging;
     using Nacos.Utilities;
@@ -21,7 +21,7 @@
 
                     if (connectionType.Type.Equals(RemoteConnectionType.GRPC))
                     {
-                        moduleClient = new Nacos.Remote.GRpc.GrpcClient(clientNameInner);
+                        moduleClient = new Nacos.V2.Remote.GRpc.GrpcClient(clientNameInner);
                     }
 
                     if (moduleClient == null)

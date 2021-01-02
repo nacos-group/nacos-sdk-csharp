@@ -1,6 +1,6 @@
-﻿namespace Nacos.Naming.Dtos
+﻿namespace Nacos.V2.Naming.Dtos
 {
-    using Nacos.Common;
+    using Nacos.V2.Common;
     using System;
     using System.Collections.Generic;
 
@@ -65,6 +65,10 @@
 
         public static string GetKey(string name, string clusters)
             => !string.IsNullOrEmpty(clusters) ? name + Constants.SERVICE_INFO_SPLITER + clusters : name;
+
+
+        [Newtonsoft.Json.JsonIgnore]
+        public string JsonFromServer { get; set; }
 
         public string GetKeyEncoded() => GetKey(System.Net.WebUtility.UrlEncode(GetGroupedServiceName()), clusters);
 

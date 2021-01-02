@@ -1,4 +1,4 @@
-﻿namespace Nacos.Config.Abst
+﻿namespace Nacos.V2.Config.Abst
 {
     using System;
     using System.Collections.Generic;
@@ -8,7 +8,7 @@
     {
         protected NacosOptions _options;
         protected IServerListManager _serverListManager;
-        protected Nacos.Security.V2.ISecurityProxy _securityProxy;
+        protected Nacos.V2.Security.ISecurityProxy _securityProxy;
 
         public string GetName() => GetNameInner();
 

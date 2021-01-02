@@ -1,18 +1,20 @@
-﻿namespace Nacos.Naming.Remote.Grpc
+﻿namespace Nacos.V2.Naming.Remote.Grpc
 {
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
-    using Nacos.Exceptions;
-    using Nacos.Naming.Cache;
-    using Nacos.Naming.Dtos;
-    using Nacos.Remote;
-    using Nacos.Remote.Requests;
-    using Nacos.Remote.Responses;
+    using Nacos.V2.Exceptions;
+    using Nacos.V2.Naming.Cache;
+    using Nacos.V2.Naming.Dtos;
+    using Nacos.V2.Naming.Utils;
+    using Nacos.V2.Remote;
+    using Nacos.V2.Remote.Requests;
+    using Nacos.V2.Remote.Responses;
+    using Nacos.Utilities;
 
-    public class NamingGrpcClientProxy : INamingClientProxy
+    public class NamingGrpcClientProxy : INamingClientProxy, IDisposable
     {
         private readonly ILogger _logger;
 
@@ -48,7 +50,7 @@
 
             this.rpcClient = RpcClientFactory.CreateClient(uuid, new RemoteConnectionType(RemoteConnectionType.GRPC), labels);
 
-            this.namingGrpcConnectionEventListener = new NamingGrpcConnectionEventListener();
+            this.namingGrpcConnectionEventListener = new NamingGrpcConnectionEventListener(_logger, this);
 
             Start(serverListFactory, serviceInfoHolder);
         }
@@ -57,18 +59,18 @@
         {
             rpcClient.Init(serverListFactory);
             rpcClient.Start();
-            rpcClient.RegisterServerPushResponseHandler(new NamingPushResponseHandler());
+            rpcClient.RegisterServerPushResponseHandler(new NamingPushResponseHandler(serviceInfoHolder));
             rpcClient.RegisterConnectionListener(namingGrpcConnectionEventListener);
         }
 
         public Task CreateService(Service service, AbstractSelector selector)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         public Task<bool> DeleteService(string serviceName, string groupName)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(false);
         }
 
         public async Task DeregisterService(string serviceName, string groupName, Instance instance)
@@ -77,18 +79,25 @@
 
             var request = new InstanceRequest(namespaceId, serviceName, groupName, NamingRemoteConstants.DE_REGISTER_INSTANCE, instance);
 
-            // TODO
             await RequestToServer<CommonResponse>(request);
+            namingGrpcConnectionEventListener.RemoveInstanceForRedo(serviceName, groupName, instance);
         }
 
-        public List<string> GetServiceList(int pageNo, int pageSize, string groupName, AbstractSelector selector)
+        public async Task<ListView<string>> GetServiceList(int pageNo, int pageSize, string groupName, AbstractSelector selector)
         {
-            throw new NotImplementedException();
+            var request = new ServiceListRequest(namespaceId, groupName, pageNo, pageSize);
+
+            if (selector != null && selector.Type.Equals("label")) request.Selector = selector.ToJsonString();
+
+            var response = await RequestToServer<ServiceListResponse>(request);
+
+            var result = new ListView<string>(response.Count, response.ServiceNames);
+            return result;
         }
 
         public async Task<Dtos.ServiceInfo> QueryInstancesOfService(string serviceName, string groupName, string clusters, int udpPort, bool healthyOnly)
         {
-            ServiceQueryRequest request = new ServiceQueryRequest(namespaceId, serviceName, groupName)
+            var request = new ServiceQueryRequest(namespaceId, serviceName, groupName)
             {
                 Cluster = clusters,
                 HealthyOnly = healthyOnly,
@@ -99,9 +108,9 @@
             return response.ServiceInfo;
         }
 
-        public Service QueryService(string serviceName, string groupName)
+        public Task<Service> QueryService(string serviceName, string groupName)
         {
-            throw new NotImplementedException();
+            return Task.FromResult<Service>(null);
         }
 
         public async Task RegisterServiceAsync(string serviceName, string groupName, Instance instance)
@@ -110,28 +119,33 @@
 
             var request = new InstanceRequest(namespaceId, serviceName, groupName, NamingRemoteConstants.REGISTER_INSTANCE, instance);
 
-            // TODO
             await RequestToServer<CommonResponse>(request);
+
+            namingGrpcConnectionEventListener.CacheInstanceForRedo(serviceName, groupName, instance);
         }
 
-        public bool ServerHealthy()
+        public bool ServerHealthy() => rpcClient.IsRunning();
+
+        public async Task<Dtos.ServiceInfo> Subscribe(string serviceName, string groupName, string clusters)
         {
-            throw new NotImplementedException();
+            var request = new SubscribeServiceRequest(namespaceId, serviceName, groupName, clusters, true);
+            var response = await RequestToServer<SubscribeServiceResponse>(request);
+
+            namingGrpcConnectionEventListener.CacheSubscriberForRedo(NamingUtils.GetGroupedName(serviceName, groupName), clusters);
+            return response.ServiceInfo;
         }
 
-        public Dtos.ServiceInfo Subscribe(string serviceName, string groupName, string clusters)
+        public async Task Unsubscribe(string serviceName, string groupName, string clusters)
         {
-            throw new NotImplementedException();
-        }
+            var request = new SubscribeServiceRequest(namespaceId, serviceName, groupName, clusters, true);
+            await RequestToServer<SubscribeServiceResponse>(request);
 
-        public Task Unsubscribe(string serviceName, string groupName, string clusters)
-        {
-            throw new NotImplementedException();
+            namingGrpcConnectionEventListener.RemoveSubscriberForRedo(NamingUtils.GetGroupedName(serviceName, groupName), clusters);
         }
 
         public Task UpdateBeatInfo(List<Instance> modifiedInstances)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         public Task UpdateInstance(string serviceName, string groupName, Instance instance)
@@ -141,7 +155,7 @@
 
         public Task UpdateService(Service service, AbstractSelector selector)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         private async Task<T> RequestToServer<T>(CommonRequest request)
@@ -173,5 +187,7 @@
 
             throw new NacosException(NacosException.SERVER_ERROR, "Server return invalid response");
         }
+
+        public void Dispose() => rpcClient.Dispose();
     }
 }

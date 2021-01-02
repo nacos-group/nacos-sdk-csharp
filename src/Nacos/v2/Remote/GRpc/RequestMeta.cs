@@ -1,4 +1,4 @@
-﻿namespace Nacos.Remote.GRpc
+﻿namespace Nacos.V2.Remote.GRpc
 {
     public class RequestMeta
     {
