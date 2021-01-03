@@ -62,12 +62,12 @@
                 var serviceInfo = ServiceInfo.FromKey(item);
                 try
                 {
-                    _clientProxy.Subscribe(serviceInfo.name, serviceInfo.groupName, serviceInfo.clusters)
+                    _clientProxy.Subscribe(serviceInfo.Name, serviceInfo.GroupName, serviceInfo.Clusters)
                         .ConfigureAwait(false).GetAwaiter().GetResult();
                 }
                 catch (Exception ex)
                 {
-                    _logger?.LogWarning(ex, "re subscribe service {0} failed", serviceInfo.name);
+                    _logger?.LogWarning(ex, "re subscribe service {0} failed", serviceInfo.Name);
                 }
             }
         }
@@ -90,10 +90,14 @@
         {
             string key = NamingUtils.GetGroupedName(serviceName, groupName);
 
-            _registeredInstanceCached[key] = new HashSet<Instance>
+            if (_registeredInstanceCached.TryGetValue(key, out var instances))
             {
-                instance
-            };
+                instances.Add(instance);
+            }
+            else
+            {
+                _registeredInstanceCached[key] = new HashSet<Instance> { instance };
+            }
         }
 
         internal void RemoveInstanceForRedo(string serviceName, string groupName, Instance instance)

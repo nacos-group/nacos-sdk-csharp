@@ -1,8 +1,6 @@
 ﻿namespace Nacos.V2.Naming.Core
 {
     using Nacos.V2.Naming.Cache;
-    using Nacos.V2.Remote;
-    using System.Collections.Generic;
 
     public class PushReceiver : System.IDisposable
     {
@@ -15,7 +13,6 @@
 
         public void Dispose()
         {
-            throw new System.NotImplementedException();
         }
     }
 }

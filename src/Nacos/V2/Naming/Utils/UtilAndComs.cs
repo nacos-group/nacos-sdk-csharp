@@ -1,8 +1,5 @@
 ﻿namespace Nacos.V2.Naming.Utils
 {
-    using System;
-    using Nacos.V2.Common;
-
     public class UtilAndComs
     {
         public static string WebContext = "/nacos";

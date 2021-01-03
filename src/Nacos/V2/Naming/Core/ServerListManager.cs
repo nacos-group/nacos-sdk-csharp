@@ -114,8 +114,7 @@
                     return;
                 }
 
-                if (DateTimeOffset.Now.ToUnixTimeSeconds() - _lastServerListRefreshTime < _refreshServerListInternal)
-                    return;
+                if (DateTimeOffset.Now.ToUnixTimeSeconds() - _lastServerListRefreshTime < _refreshServerListInternal) return;
 
                 var list = await GetServerListFromEndpoint();
 

@@ -8,7 +8,6 @@
     using Nacos.V2.Naming.Event;
     using Nacos.V2.Naming.Remote;
     using Nacos.V2.Remote;
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -19,8 +18,6 @@
         private readonly NacosOptions _options;
 
         private string _namespace;
-
-        /*private String _logName;*/
 
         private ServiceInfoHolder _serviceInfoHolder;
 
@@ -105,8 +102,8 @@
                 serviceInfo = await _clientProxy.QueryInstancesOfService(serviceName, groupName, clusterString, 0, false);
             }
 
-            List<Instance> list = serviceInfo.hosts;
-            if (serviceInfo == null || serviceInfo.hosts == null || !serviceInfo.hosts.Any())
+            List<Instance> list = serviceInfo.Hosts;
+            if (serviceInfo == null || serviceInfo.Hosts == null || !serviceInfo.Hosts.Any())
             {
                 return new List<Instance>();
             }
@@ -130,9 +127,7 @@
             => await _clientProxy.GetServiceList(pageNo, pageSize, groupName, selector);
 
         public Task<List<ServiceInfo>> GetSubscribeServices()
-        {
-            throw new NotImplementedException();
-        }
+            => Task.FromResult(_changeNotifier.GetSubscribeServices());
 
         public async Task RegisterInstance(string serviceName, string ip, int port)
             => await RegisterInstance(serviceName, ip, port, Constants.DEFAULT_CLUSTER_NAME);
@@ -145,7 +140,7 @@
 
         public async Task RegisterInstance(string serviceName, string groupName, string ip, int port, string clusterName)
         {
-            Instance instance = new Instance()
+            var instance = new Instance()
             {
                 Ip = ip,
                 Port = port,
@@ -205,7 +200,7 @@
 
         private List<Instance> SelectInstances(ServiceInfo serviceInfo, bool healthy)
         {
-            List<Instance> list = serviceInfo.hosts;
+            List<Instance> list = serviceInfo.Hosts;
             if (serviceInfo == null || list == null || !list.Any())
             {
                 return new List<Instance>();
@@ -249,7 +244,7 @@
                 }
 
                 // TODO return Balancer.RandomByWeight.selectHost(serviceInfo);
-                return serviceInfo.hosts[0];
+                return serviceInfo.Hosts[0];
             }
             else
             {
@@ -257,14 +252,11 @@
                         .QueryInstancesOfService(serviceName, groupName, clusterString, 0, false);
 
                 // return Balancer.RandomByWeight.selectHost(serviceInfo);
-                return serviceInfo.hosts[0];
+                return serviceInfo.Hosts[0];
             }
         }
 
-        public Task ShutDown()
-        {
-            throw new NotImplementedException();
-        }
+        public Task ShutDown() => Task.CompletedTask;
 
         public async Task Subscribe(string serviceName, IEventListener listener)
             => await Subscribe(serviceName, new List<string>(), listener);
@@ -277,10 +269,7 @@
 
         public async Task Subscribe(string serviceName, string groupName, List<string> clusters, IEventListener listener)
         {
-            if (listener == null)
-            {
-                return;
-            }
+            if (listener == null) return;
 
             string clusterString = string.Join(",", clusters);
 

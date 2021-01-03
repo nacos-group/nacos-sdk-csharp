@@ -1,5 +1,6 @@
 ﻿namespace Nacos.V2.Naming.Dtos
 {
+    using Nacos.Utilities;
     using Nacos.V2.Common;
     using System.Collections.Generic;
     using System.Linq;
@@ -102,6 +103,11 @@
             if (Metadata == null || !Metadata.Any()) return defaultValue;
 
             return Metadata[key];
+        }
+
+        public override string ToString()
+        {
+            return $"Instance{{instanceId='{InstanceId}', ip='{Ip}', port={Port}, weight={Weight}, healthy={Healthy}, enabled={Enabled}, ephemeral={Ephemeral}, clusterName='{ClusterName}', serviceName='{ServiceName}', metadata={Metadata.ToJsonString()}}}";
         }
     }
 }

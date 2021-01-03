@@ -143,7 +143,7 @@
 
             payload.Metadata = new Metadata
             {
-                ClientVersion = ConstValue.ClientVersion,
+                ClientVersion = Common.Constants.CLIENT_VERSION,
                 Type = response.GetRemoteType(),
             };
 

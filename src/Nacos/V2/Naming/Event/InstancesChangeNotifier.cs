@@ -70,7 +70,6 @@
 
             if (!listenerMap.TryGetValue(key, out var eventListeners)) return;
 
-
             foreach (var listener in eventListeners) listener.OnEvent(@event);
         }
     }

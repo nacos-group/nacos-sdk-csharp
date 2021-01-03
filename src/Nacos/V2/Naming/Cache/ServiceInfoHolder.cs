@@ -58,7 +58,7 @@
             {
             }
 
-            if (serviceInfo.hosts == null || !serviceInfo.hosts.Any() || !serviceInfo.Validate()) return oldService;
+            if (serviceInfo.Hosts == null || !serviceInfo.Hosts.Any() || !serviceInfo.Validate()) return oldService;
 
             serviceInfoMap[serviceInfo.GetKey()] = serviceInfo;
 
@@ -71,11 +71,11 @@
 
             if (changed)
             {
-                _logger?.LogInformation("current ips:({0}) service: {1} -> {2}", serviceInfo.IpCount(), serviceInfo.GetKey(), serviceInfo.hosts.ToJsonString());
+                _logger?.LogInformation("current ips:({0}) service: {1} -> {2}", serviceInfo.IpCount(), serviceInfo.GetKey(), serviceInfo.Hosts.ToJsonString());
 
                 if (_notifier != null)
                 {
-                    _notifier.OnEvent(new InstancesChangeEvent(serviceInfo.name, serviceInfo.groupName, serviceInfo.clusters, serviceInfo.hosts));
+                    _notifier.OnEvent(new InstancesChangeEvent(serviceInfo.Name, serviceInfo.GroupName, serviceInfo.Clusters, serviceInfo.Hosts));
                 }
 
                 DiskCache.WriteAsync(serviceInfo, cacheDir)
@@ -89,19 +89,19 @@
         {
             if (oldService == null)
             {
-                _logger?.LogInformation("init new ips({0}) service: {1} -> {2}", newService.IpCount(), newService.GetKey(), newService.hosts.ToJsonString());
+                _logger?.LogInformation("init new ips({0}) service: {1} -> {2}", newService.IpCount(), newService.GetKey(), newService.Hosts.ToJsonString());
                 return true;
             }
 
-            if (oldService.lastRefTime > newService.lastRefTime)
+            if (oldService.LastRefTime > newService.LastRefTime)
             {
-                _logger?.LogWarning("out of date data received, old-t: {0}, new-t: {1}", oldService.lastRefTime, newService.lastRefTime);
+                _logger?.LogWarning("out of date data received, old-t: {0}, new-t: {1}", oldService.LastRefTime, newService.LastRefTime);
             }
 
             bool changed = false;
 
-            var oldHostMap = oldService.hosts.ToDictionary(x => x.ToInetAddr());
-            var newHostMap = newService.hosts.ToDictionary(x => x.ToInetAddr());
+            var oldHostMap = oldService.Hosts.ToDictionary(x => x.ToInetAddr());
+            var newHostMap = newService.Hosts.ToDictionary(x => x.ToInetAddr());
 
             var modHosts = newHostMap.Where(x => oldHostMap.ContainsKey(x.Key) && !x.Value.ToString().Equals(oldHostMap[x.Key].ToString()))
                    .Select(x => x.Value).ToList();
@@ -143,14 +143,11 @@
             return changed;
         }
 
-        internal ConcurrentDictionary<string, Dtos.ServiceInfo> GetServiceInfoMap()
-        {
-            return serviceInfoMap;
-        }
+        internal ConcurrentDictionary<string, Dtos.ServiceInfo> GetServiceInfoMap() => serviceInfoMap;
 
         private void InitCacheDir(string @namespace)
         {
-            var jmSnapshotPath = System.Environment.GetEnvironmentVariable("JM.SNAPSHOT.PATH");
+            var jmSnapshotPath = Environment.GetEnvironmentVariable("JM.SNAPSHOT.PATH");
             if (!string.IsNullOrWhiteSpace(jmSnapshotPath))
             {
                 cacheDir = System.IO.Path.Combine(jmSnapshotPath, "nacos", "naming", @namespace);

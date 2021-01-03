@@ -53,7 +53,7 @@
 
         protected CommonRequestMeta BuildMeta(string type)
         {
-            var meta = new CommonRequestMeta { ClientVersion = ConstValue.ClientVersion, Labels = labels, Type = type };
+            var meta = new CommonRequestMeta { ClientVersion = Nacos.V2.Common.Constants.CLIENT_VERSION, Labels = labels, Type = type };
             return meta;
         }
 

@@ -6,22 +6,29 @@
 
     public class ServiceInfo
     {
-#pragma warning disable SA1300 // Element should begin with upper-case letter
-        public string name { get; set; }
+        [Newtonsoft.Json.JsonProperty("name")]
+        public string Name { get; set; }
 
-        public string groupName { get; set; }
+        [Newtonsoft.Json.JsonProperty("groupName")]
+        public string GroupName { get; set; }
 
-        public long cacheMillis { get; set; } = 1000L;
+        [Newtonsoft.Json.JsonProperty("cacheMillis")]
+        public long CacheMillis { get; set; } = 1000L;
 
-        public long lastRefTime { get; set; } = 0L;
+        [Newtonsoft.Json.JsonProperty("lastRefTime")]
+        public long LastRefTime { get; set; } = 0L;
 
-        public string checksum { get; set; } = "";
+        [Newtonsoft.Json.JsonProperty("checksum")]
+        public string Checksum { get; set; } = "";
 
-        public List<Instance> hosts { get; set; } = new List<Instance>();
+        [Newtonsoft.Json.JsonProperty("hosts")]
+        public List<Instance> Hosts { get; set; } = new List<Instance>();
 
-        public bool allIPs { get; set; } = false;
+        [Newtonsoft.Json.JsonProperty("metallIPsadata")]
+        public bool AllIPs { get; set; } = false;
 
-        public string clusters { get; set; }
+        [Newtonsoft.Json.JsonProperty("clusters")]
+        public string Clusters { get; set; }
 
         public ServiceInfo()
         {
@@ -37,14 +44,14 @@
             var keys = key.Split(new string[] { Constants.SERVICE_INFO_SPLITER }, StringSplitOptions.RemoveEmptyEntries);
             if (keys.Length >= maxIndex + 1)
             {
-                this.groupName = keys[groupIndex];
-                this.name = keys[serviceNameIndex];
-                this.clusters = keys[clusterIndex];
+                this.GroupName = keys[groupIndex];
+                this.Name = keys[serviceNameIndex];
+                this.Clusters = keys[clusterIndex];
             }
             else if (keys.Length == maxIndex)
             {
-                this.groupName = keys[groupIndex];
-                this.name = keys[serviceNameIndex];
+                this.GroupName = keys[groupIndex];
+                this.Name = keys[serviceNameIndex];
             }
             else
             {
@@ -55,13 +62,13 @@
 
         public ServiceInfo(string serviceName, string clusters)
         {
-            this.name = serviceName;
-            this.clusters = clusters;
+            this.Name = serviceName;
+            this.Clusters = clusters;
         }
 
-        public int IpCount() => hosts.Count;
+        public int IpCount() => Hosts.Count;
 
-        public string GetKey() => GetKey(GetGroupedServiceName(), clusters);
+        public string GetKey() => GetKey(GetGroupedServiceName(), Clusters);
 
         public static string GetKey(string name, string clusters)
             => !string.IsNullOrEmpty(clusters) ? name + Constants.SERVICE_INFO_SPLITER + clusters : name;
@@ -70,14 +77,14 @@
         [Newtonsoft.Json.JsonIgnore]
         public string JsonFromServer { get; set; }
 
-        public string GetKeyEncoded() => GetKey(System.Net.WebUtility.UrlEncode(GetGroupedServiceName()), clusters);
+        public string GetKeyEncoded() => GetKey(System.Net.WebUtility.UrlEncode(GetGroupedServiceName()), Clusters);
 
         public bool Validate()
         {
-            if (allIPs) return true;
+            if (AllIPs) return true;
 
             var validHosts = new List<Instance>();
-            foreach (var host in hosts)
+            foreach (var host in Hosts)
             {
                 if (!host.Healthy) continue;
 
@@ -88,9 +95,9 @@
         }
 
         private string GetGroupedServiceName()
-            => !string.IsNullOrWhiteSpace(groupName) && this.name.IndexOf(Constants.SERVICE_INFO_SPLITER) == -1
-                ? groupName + Constants.SERVICE_INFO_SPLITER + this.name
-                : this.name;
+            => !string.IsNullOrWhiteSpace(GroupName) && this.Name.IndexOf(Constants.SERVICE_INFO_SPLITER) == -1
+                ? GroupName + Constants.SERVICE_INFO_SPLITER + this.Name
+                : this.Name;
 
         public static ServiceInfo FromKey(string key)
         {
@@ -99,17 +106,19 @@
             string[] segs = key.Split(new string[] { Constants.SERVICE_INFO_SPLITER }, StringSplitOptions.RemoveEmptyEntries);
             if (segs.Length == maxSegCount - 1)
             {
-                serviceInfo.groupName = segs[0];
-                serviceInfo.name = segs[1];
+                serviceInfo.GroupName = segs[0];
+                serviceInfo.Name = segs[1];
             }
             else if (segs.Length == maxSegCount)
             {
-                serviceInfo.groupName = segs[0];
-                serviceInfo.name = segs[1];
-                serviceInfo.clusters = segs[2];
+                serviceInfo.GroupName = segs[0];
+                serviceInfo.Name = segs[1];
+                serviceInfo.Clusters = segs[2];
             }
 
             return serviceInfo;
         }
+
+        public override string ToString() => GetKey();
     }
 }

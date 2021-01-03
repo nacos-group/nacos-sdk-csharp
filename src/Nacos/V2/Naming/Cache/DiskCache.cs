@@ -53,7 +53,7 @@
                     {
                         ServiceInfo dom = new ServiceInfo(fileName);
                         List<Instance> ips = new List<Instance>();
-                        dom.hosts = ips;
+                        dom.Hosts = ips;
 
                         ServiceInfo newFormat = null;
 
@@ -76,7 +76,7 @@
 
                                 newFormat = line.ToObj<ServiceInfo>();
 
-                                if (string.IsNullOrWhiteSpace(newFormat.name))
+                                if (string.IsNullOrWhiteSpace(newFormat.Name))
                                 {
                                     ips.Add(line.ToObj<Instance>());
                                 }
@@ -88,12 +88,12 @@
                         }
 
                         if (newFormat != null
-                            && !string.IsNullOrWhiteSpace(newFormat.name)
-                            && newFormat.hosts != null && newFormat.hosts.Any())
+                            && !string.IsNullOrWhiteSpace(newFormat.Name)
+                            && newFormat.Hosts != null && newFormat.Hosts.Any())
                         {
                             domMap[dom.GetKey()] = newFormat;
                         }
-                        else if (dom.hosts != null && dom.hosts.Any())
+                        else if (dom.Hosts != null && dom.Hosts.Any())
                         {
                             domMap[dom.GetKey()] = dom;
                         }
