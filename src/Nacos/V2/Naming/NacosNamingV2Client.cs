@@ -5,6 +5,7 @@
     using Nacos.V2.Common;
     using Nacos.V2.Naming.Cache;
     using Nacos.V2.Naming.Dtos;
+    using Nacos.V2.Naming.Event;
     using Nacos.V2.Naming.Remote;
     using Nacos.V2.Remote;
     using System;
@@ -23,7 +24,7 @@
 
         private ServiceInfoHolder _serviceInfoHolder;
 
-        /*private InstancesChangeNotifier changeNotifier;*/
+        private InstancesChangeNotifier _changeNotifier;
 
         private INamingClientProxy _clientProxy;
 
@@ -33,8 +34,9 @@
         {
             _logger = loggerFactory.CreateLogger<NacosNamingV2Client>();
             _options = optionAccs.CurrentValue;
-            _namespace = Guid.NewGuid().ToString();
-            this._serviceInfoHolder = new ServiceInfoHolder(_logger, _namespace, _options);
+            _namespace = _options.Namespace;
+            this._changeNotifier = new InstancesChangeNotifier();
+            this._serviceInfoHolder = new ServiceInfoHolder(_logger, _namespace, _options, _changeNotifier);
             this._clientProxy = new NamingClientProxyDelegate(_logger, _namespace, _serviceInfoHolder, optionAccs);
         }
 
@@ -282,7 +284,7 @@
 
             string clusterString = string.Join(",", clusters);
 
-            // changeNotifier.registerListener(groupName, serviceName, clusterString, listener);
+            _changeNotifier.RegisterListener(groupName, serviceName, clusterString, listener);
             await _clientProxy.Subscribe(serviceName, groupName, clusterString);
         }
 
@@ -290,7 +292,7 @@
             => await Unsubscribe(serviceName, new List<string>(), listener);
 
         public async Task Unsubscribe(string serviceName, string groupName, IEventListener listener)
-            => await Unsubscribe(serviceName, groupName, new List<String>(), listener);
+            => await Unsubscribe(serviceName, groupName, new List<string>(), listener);
 
         public async Task Unsubscribe(string serviceName, List<string> clusters, IEventListener listener)
             => await Unsubscribe(serviceName, Constants.DEFAULT_GROUP, clusters, listener);
@@ -299,13 +301,11 @@
         {
             string clustersString = string.Join(",", clusters);
 
-            /*changeNotifier.deregisterListener(groupName, serviceName, clustersString, listener);
-            if (!changeNotifier.isSubscribed(groupName, serviceName, clustersString))
+            _changeNotifier.DeregisterListener(groupName, serviceName, clustersString, listener);
+            if (!_changeNotifier.IsSubscribed(groupName, serviceName, clustersString))
             {
-                clientProxy.unsubscribe(serviceName, groupName, clustersString);
-            }*/
-
-            await _clientProxy.Unsubscribe(serviceName, groupName, clustersString);
+                await _clientProxy.Unsubscribe(serviceName, groupName, clustersString);
+            }
         }
     }
 }

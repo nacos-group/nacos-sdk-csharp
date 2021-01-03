@@ -25,7 +25,7 @@
             {
                 var req = (NotifySubscriberRequest)request;
                 _serviceInfoHolder.ProcessServiceInfo(req.ServiceInfo);
-                return new NotifySubscriberResponse();
+                return new NotifySubscriberResponse() { RequestId = req.RequestId };
             }
 
             return null;

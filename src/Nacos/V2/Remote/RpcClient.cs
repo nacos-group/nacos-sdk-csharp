@@ -276,13 +276,13 @@
             serverInfo.ServerPort = RpcPortOffset();
             if (serverAddress.Contains(ConstValue.HTTP_PREFIX))
             {
-                var arr = serverAddress.Split(':');
+                var arr = serverAddress.TrimEnd('/').Split(':');
                 serverInfo.ServerIp = arr[1].Replace("//", "");
                 serverInfo.ServerPort += Convert.ToInt32(arr[2].Replace("//", ""));
             }
             else
             {
-                var arr = serverAddress.Split(':');
+                var arr = serverAddress.TrimEnd('/').Split(':');
                 serverInfo.ServerIp = arr[0];
                 serverInfo.ServerPort += Convert.ToInt32(arr[1]);
             }

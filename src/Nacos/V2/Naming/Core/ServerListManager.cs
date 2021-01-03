@@ -156,7 +156,7 @@
             => GetServerList()[_currentIndex % GetServerList().Count];
 
         public List<string> GetServerList()
-            => _serverList == null || _serverList.Any() ? _serversFromEndpoint : _serverList;
+            => _serverList == null || !_serverList.Any() ? _serversFromEndpoint : _serverList;
 
         internal bool IsDomain() => !string.IsNullOrWhiteSpace(_nacosDomain);
 

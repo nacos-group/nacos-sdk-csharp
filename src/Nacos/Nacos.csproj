@@ -47,7 +47,6 @@
 
   <ItemGroup>
     <Folder Include="V2\protos\" />
-    <Folder Include="V2\Naming\Event\" />
   </ItemGroup>
 
 </Project>

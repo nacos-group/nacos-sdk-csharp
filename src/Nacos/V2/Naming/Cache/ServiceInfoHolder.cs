@@ -7,6 +7,7 @@
     using System;
     using System.Collections.Concurrent;
     using System.Linq;
+    using Nacos.V2.Naming.Event;
 
     public class ServiceInfoHolder
     {
@@ -14,13 +15,16 @@
 
         private FailoverReactor failoverReactor;
 
+        private InstancesChangeNotifier _notifier;
+
         private string cacheDir = "";
 
         private ILogger _logger;
 
-        public ServiceInfoHolder(ILogger logger, string @namespace, NacosOptions nacosOptions)
+        public ServiceInfoHolder(ILogger logger, string @namespace, NacosOptions nacosOptions, InstancesChangeNotifier notifier = null)
         {
             this._logger = logger;
+            this._notifier = notifier;
 
             InitCacheDir(@namespace);
 
@@ -54,7 +58,7 @@
             {
             }
 
-            if ((serviceInfo.hosts != null && serviceInfo.hosts.Any()) || !serviceInfo.Validate()) return oldService;
+            if (serviceInfo.hosts == null || !serviceInfo.hosts.Any() || !serviceInfo.Validate()) return oldService;
 
             serviceInfoMap[serviceInfo.GetKey()] = serviceInfo;
 
@@ -68,6 +72,11 @@
             if (changed)
             {
                 _logger?.LogInformation("current ips:({0}) service: {1} -> {2}", serviceInfo.IpCount(), serviceInfo.GetKey(), serviceInfo.hosts.ToJsonString());
+
+                if (_notifier != null)
+                {
+                    _notifier.OnEvent(new InstancesChangeEvent(serviceInfo.name, serviceInfo.groupName, serviceInfo.clusters, serviceInfo.hosts));
+                }
 
                 DiskCache.WriteAsync(serviceInfo, cacheDir)
                     .ConfigureAwait(false).GetAwaiter().GetResult();
@@ -142,7 +151,7 @@
         private void InitCacheDir(string @namespace)
         {
             var jmSnapshotPath = System.Environment.GetEnvironmentVariable("JM.SNAPSHOT.PATH");
-            if (string.IsNullOrWhiteSpace(jmSnapshotPath))
+            if (!string.IsNullOrWhiteSpace(jmSnapshotPath))
             {
                 cacheDir = System.IO.Path.Combine(jmSnapshotPath, "nacos", "naming", @namespace);
             }
@@ -161,7 +170,8 @@
             {
                 return failoverReactor.getService(key);
             }*/
-            return serviceInfoMap[key];
+
+            return serviceInfoMap.TryGetValue(key, out var serviceInfo) ? serviceInfo : null;
         }
     }
 }
