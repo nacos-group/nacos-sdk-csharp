@@ -11,7 +11,7 @@
     public class GrpcConfigClient : INacosConfigClient
     {
         private ILogger _logger;
-        private NacosOptions _options;
+        private NacosSdkOptions _options;
         private List<Listener> listeners = new List<Listener>();
 
         private readonly Abst.IConfigTransportClient _agent;
@@ -19,7 +19,7 @@
         public GrpcConfigClient(
             ILoggerFactory loggerFactory,
             IEnumerable<Abst.IConfigTransportClient> agents,
-            IOptionsMonitor<NacosOptions> optionAccs)
+            IOptionsMonitor<NacosSdkOptions> optionAccs)
         {
             _logger = loggerFactory.CreateLogger<GrpcConfigClient>();
             _options = optionAccs.CurrentValue;

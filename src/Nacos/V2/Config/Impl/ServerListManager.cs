@@ -34,9 +34,9 @@
         private readonly string _defaultNodesPath;
         private readonly bool _isFixed = false;
         private readonly ILogger _logger;
-        private readonly NacosOptions _options;
+        private readonly NacosSdkOptions _options;
 
-        public ServerListManager(ILogger logger, IOptionsMonitor<NacosOptions> optionsAccs)
+        public ServerListManager(ILogger logger, IOptionsMonitor<NacosSdkOptions> optionsAccs)
         {
             _logger = logger;
             _options = optionsAccs.CurrentValue;

@@ -28,7 +28,7 @@
 
         public ConfiggRpcTransportClient(
             ILoggerFactory loggerFactory,
-            IOptionsMonitor<NacosOptions> optionAccs)
+            IOptionsMonitor<NacosSdkOptions> optionAccs)
         {
             _logger = loggerFactory.CreateLogger<GrpcConfigClient>();
             _options = optionAccs.CurrentValue;

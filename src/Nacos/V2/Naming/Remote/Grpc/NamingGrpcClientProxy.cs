@@ -32,7 +32,7 @@
             ILogger logger,
             string namespaceId,
             IServerListFactory serverListFactory,
-            IOptionsMonitor<NacosOptions> optionsMonitor,
+            IOptionsMonitor<NacosSdkOptions> optionsMonitor,
             ServiceInfoHolder serviceInfoHolder)
         {
             this._logger = logger;

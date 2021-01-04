@@ -18,6 +18,7 @@
     using Nacos.V2.Remote;
     using Nacos.V2.Security;
     using Nacos.Utilities;
+    using Microsoft.Extensions.Options;
 
     public class NamingHttpClientProxy : INamingClientProxy
     {
@@ -45,20 +46,20 @@
 
         private int serverPort = DEFAULT_SERVER_PORT;
 
-        private NacosOptions _options;
+        private NacosSdkOptions _options;
 
         private Timer _loginTimer;
 
-        public NamingHttpClientProxy(ILogger logger, IHttpClientFactory clientFactory, string namespaceId, ServerListManager serverListManager, NacosOptions options, ServiceInfoHolder serviceInfoHolder)
+        public NamingHttpClientProxy(ILogger logger, string namespaceId, ServerListManager serverListManager, IOptionsMonitor<NacosSdkOptions> options, ServiceInfoHolder serviceInfoHolder, IHttpClientFactory clientFactory = null)
         {
             this._logger = logger;
             this._clientFactory = clientFactory;
             this.serverListManager = serverListManager;
             this._securityProxy = new SecurityProxy(options);
-            this._options = options;
+            this._options = options.CurrentValue;
             this.SetServerPort(DEFAULT_SERVER_PORT);
             this.namespaceId = namespaceId;
-            this.beatReactor = new BeatReactor(this, options);
+            this.beatReactor = new BeatReactor(this, _options);
             this.InitRefreshTask();
             this.pushReceiver = new PushReceiver(serviceInfoHolder);
             this.serviceInfoHolder = serviceInfoHolder;

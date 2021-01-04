@@ -42,9 +42,9 @@
         /// </summary>
         private long _tokenRefreshWindow;
 
-        private readonly NacosOptions _options;
+        private readonly NacosSdkOptions _options;
 
-        public SecurityProxy(IOptionsMonitor<NacosOptions> optionsAccs)
+        public SecurityProxy(IOptionsMonitor<NacosSdkOptions> optionsAccs)
         {
             _options = optionsAccs.CurrentValue;
 
@@ -54,7 +54,7 @@
             contextPath = contextPath.StartsWith("/") ? contextPath : "/" + contextPath;
         }
 
-        public SecurityProxy(NacosOptions optionsAccs)
+        public SecurityProxy(NacosSdkOptions optionsAccs)
         {
             _options = optionsAccs;
 

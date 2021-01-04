@@ -30,13 +30,13 @@
 
         private long _lastServerListRefreshTime = 0L;
 
-        public ServerListManager(ILogger logger, NacosOptions options)
+        public ServerListManager(ILogger logger, NacosSdkOptions options)
         {
             this._logger = logger;
             InitServerAddr(options);
         }
 
-        private void InitServerAddr(NacosOptions options)
+        private void InitServerAddr(NacosSdkOptions options)
         {
             this._endpoint = options.EndPoint;
 

@@ -13,7 +13,7 @@
     {
         private Nacos.V2.Naming.Remote.Http.NamingHttpClientProxy _serverProxy;
 
-        public BeatReactor(Nacos.V2.Naming.Remote.Http.NamingHttpClientProxy serverProxy, NacosOptions options)
+        public BeatReactor(Nacos.V2.Naming.Remote.Http.NamingHttpClientProxy serverProxy, NacosSdkOptions options)
         {
             this._serverProxy = serverProxy;
         }

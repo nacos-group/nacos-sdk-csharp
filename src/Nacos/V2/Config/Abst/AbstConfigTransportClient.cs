@@ -6,7 +6,7 @@
 
     public abstract class AbstConfigTransportClient : IConfigTransportClient
     {
-        protected NacosOptions _options;
+        protected NacosSdkOptions _options;
         protected IServerListManager _serverListManager;
         protected Nacos.V2.Security.ISecurityProxy _securityProxy;
 

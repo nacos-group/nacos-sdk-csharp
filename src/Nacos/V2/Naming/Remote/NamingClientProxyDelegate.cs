@@ -8,6 +8,7 @@
     using Nacos.V2.Naming.Cache;
     using Nacos.V2.Naming.Core;
     using Nacos.V2.Naming.Dtos;
+    using Nacos.V2.Naming.Event;
     using Nacos.V2.Naming.Remote.Grpc;
     using Nacos.V2.Naming.Remote.Http;
     using Nacos.V2.Naming.Utils;
@@ -17,19 +18,21 @@
     {
         private ServerListManager serverListManager;
 
-        /*private  ServiceInfoUpdateService serviceInfoUpdateService;*/
+        private ServiceInfoUpdateService _serviceInfoUpdateService;
 
         private ServiceInfoHolder serviceInfoHolder;
 
-        /*private NamingHttpClientProxy httpClientProxy;*/
+        private NamingHttpClientProxy httpClientProxy;
 
         private NamingGrpcClientProxy grpcClientProxy;
 
-        public NamingClientProxyDelegate(ILogger logger, string @namespace, ServiceInfoHolder serviceInfoHolder, IOptionsMonitor<NacosOptions> options)
+        public NamingClientProxyDelegate(ILogger logger, string @namespace, ServiceInfoHolder serviceInfoHolder, IOptionsMonitor<NacosSdkOptions> options, InstancesChangeNotifier changeNotifier)
         {
             this.serverListManager = new ServerListManager(logger, options.CurrentValue);
             this.serviceInfoHolder = serviceInfoHolder;
+            this._serviceInfoUpdateService = new ServiceInfoUpdateService(options.CurrentValue, serviceInfoHolder, this, changeNotifier);
             this.grpcClientProxy = new NamingGrpcClientProxy(logger, @namespace, serverListManager, options, serviceInfoHolder);
+            this.httpClientProxy = new NamingHttpClientProxy(logger, @namespace, serverListManager, options, serviceInfoHolder);
         }
 
         public Task CreateService(Service service, AbstractSelector selector) => Task.CompletedTask;
@@ -67,27 +70,24 @@
                 result = await GetExecuteClientProxy().Subscribe(serviceName, groupName, clusters);
             }
 
-            // serviceInfoUpdateService.scheduleUpdateIfAbsent(serviceName, groupName, clusters);
+            _serviceInfoUpdateService.ScheduleUpdateIfAbsent(serviceName, groupName, clusters);
             serviceInfoHolder.ProcessServiceInfo(result);
             return result;
         }
 
         public async Task Unsubscribe(string serviceName, string groupName, string clusters)
-            => await GetExecuteClientProxy().Unsubscribe(serviceName, groupName, clusters);
-
-        public Task UpdateBeatInfo(List<Instance> modifiedInstances)
         {
-            // HTTP
-            return Task.CompletedTask;
+            _serviceInfoUpdateService.StopUpdateIfContain(serviceName, groupName, clusters);
+            await GetExecuteClientProxy().Unsubscribe(serviceName, groupName, clusters);
         }
+
+        public async Task UpdateBeatInfo(List<Instance> modifiedInstances)
+            => await httpClientProxy.UpdateBeatInfo(modifiedInstances);
 
         public Task UpdateInstance(string serviceName, string groupName, Instance instance) => Task.CompletedTask;
 
         public Task UpdateService(Service service, AbstractSelector selector) => Task.CompletedTask;
 
-        private INamingClientProxy GetExecuteClientProxy()
-        {
-            return grpcClientProxy;
-        }
+        private INamingClientProxy GetExecuteClientProxy() => grpcClientProxy;
     }
 }

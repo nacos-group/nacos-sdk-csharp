@@ -4,6 +4,7 @@
     using Microsoft.Extensions.Options;
     using Nacos.V2.Common;
     using Nacos.V2.Naming.Cache;
+    using Nacos.V2.Naming.Core;
     using Nacos.V2.Naming.Dtos;
     using Nacos.V2.Naming.Event;
     using Nacos.V2.Naming.Remote;
@@ -12,10 +13,10 @@
     using System.Linq;
     using System.Threading.Tasks;
 
-    public class NacosNamingV2Client : INacosNamingV2Client
+    public class NacosNamingService : INacosNamingService
     {
         private readonly ILogger _logger;
-        private readonly NacosOptions _options;
+        private readonly NacosSdkOptions _options;
 
         private string _namespace;
 
@@ -25,16 +26,16 @@
 
         private INamingClientProxy _clientProxy;
 
-        public NacosNamingV2Client(
+        public NacosNamingService(
             ILoggerFactory loggerFactory,
-            IOptionsMonitor<NacosOptions> optionAccs)
+            IOptionsMonitor<NacosSdkOptions> optionAccs)
         {
-            _logger = loggerFactory.CreateLogger<NacosNamingV2Client>();
+            _logger = loggerFactory.CreateLogger<NacosNamingService>();
             _options = optionAccs.CurrentValue;
             _namespace = _options.Namespace;
             this._changeNotifier = new InstancesChangeNotifier();
             this._serviceInfoHolder = new ServiceInfoHolder(_logger, _namespace, _options, _changeNotifier);
-            this._clientProxy = new NamingClientProxyDelegate(_logger, _namespace, _serviceInfoHolder, optionAccs);
+            this._clientProxy = new NamingClientProxyDelegate(_logger, _namespace, _serviceInfoHolder, optionAccs, _changeNotifier);
         }
 
         public async Task DeregisterInstance(string serviceName, string ip, int port)
@@ -201,11 +202,8 @@
         private List<Instance> SelectInstances(ServiceInfo serviceInfo, bool healthy)
         {
             List<Instance> list = serviceInfo.Hosts;
-            if (serviceInfo == null || list == null || !list.Any())
-            {
-                return new List<Instance>();
-            }
 
+            if (serviceInfo == null || list == null || !list.Any()) return new List<Instance>();
 
             return list.Where(x => x.Healthy.Equals(healthy) && x.Enabled && x.Weight > 0).ToList();
         }
@@ -243,16 +241,14 @@
                     serviceInfo = await _clientProxy.Subscribe(serviceName, groupName, clusterString);
                 }
 
-                // TODO return Balancer.RandomByWeight.selectHost(serviceInfo);
-                return serviceInfo.Hosts[0];
+                return Balancer.GetHostByRandom(serviceInfo?.Hosts);
             }
             else
             {
                 ServiceInfo serviceInfo = await _clientProxy
                         .QueryInstancesOfService(serviceName, groupName, clusterString, 0, false);
 
-                // return Balancer.RandomByWeight.selectHost(serviceInfo);
-                return serviceInfo.Hosts[0];
+                return Balancer.GetHostByRandom(serviceInfo?.Hosts);
             }
         }
 

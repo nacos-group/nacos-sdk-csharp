@@ -9,9 +9,9 @@
     [Route("n")]
     public class NamingController : ControllerBase
     {
-        private readonly Nacos.V2.INacosNamingV2Client _client;
+        private readonly Nacos.V2.INacosNamingService _client;
 
-        public NamingController(Nacos.V2.INacosNamingV2Client client)
+        public NamingController(Nacos.V2.INacosNamingService client)
         {
             _client = client;
         }

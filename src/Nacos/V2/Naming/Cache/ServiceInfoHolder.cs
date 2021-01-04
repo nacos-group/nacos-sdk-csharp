@@ -21,7 +21,7 @@
 
         private ILogger _logger;
 
-        public ServiceInfoHolder(ILogger logger, string @namespace, NacosOptions nacosOptions, InstancesChangeNotifier notifier = null)
+        public ServiceInfoHolder(ILogger logger, string @namespace, NacosSdkOptions nacosOptions, InstancesChangeNotifier notifier = null)
         {
             this._logger = logger;
             this._notifier = notifier;
@@ -41,7 +41,7 @@
             this.failoverReactor = new FailoverReactor(this, cacheDir);
         }
 
-        private bool IsLoadCacheAtStart(NacosOptions nacosOptions)
+        private bool IsLoadCacheAtStart(NacosSdkOptions nacosOptions)
         {
             bool loadCacheAtStart = false;
             if (nacosOptions != null && string.IsNullOrWhiteSpace(nacosOptions.NamingLoadCacheAtStart))

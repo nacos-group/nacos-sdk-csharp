@@ -5,7 +5,7 @@
     using Nacos.V2.Naming.Dtos;
     using Nacos.V2.Remote;
 
-    public interface INacosNamingV2Client
+    public interface INacosNamingService
     {
         /// <summary>
         /// register a instance to service.

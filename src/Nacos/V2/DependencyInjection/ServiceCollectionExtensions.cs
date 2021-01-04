@@ -8,7 +8,7 @@
 
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddNacosV2Config(this IServiceCollection services, Action<NacosOptions> configure, Action<HttpClient> httpClientAction = null)
+        public static IServiceCollection AddNacosV2Config(this IServiceCollection services, Action<NacosSdkOptions> configure, Action<HttpClient> httpClientAction = null)
         {
             if (services == null) throw new ArgumentNullException(nameof(services));
 
@@ -31,11 +31,11 @@
             return services;
         }
 
-        public static IServiceCollection AddNacosConfig(this IServiceCollection services, IConfiguration configuration, Action<HttpClient> httpClientAction = null, string sectionName = "nacos")
+        public static IServiceCollection AddNacosV2Config(this IServiceCollection services, IConfiguration configuration, Action<HttpClient> httpClientAction = null, string sectionName = "nacos")
         {
             if (services == null) throw new ArgumentNullException(nameof(services));
 
-            services.Configure<NacosOptions>(configuration.GetSection(sectionName));
+            services.Configure<NacosSdkOptions>(configuration.GetSection(sectionName));
 
             var clientBuilder = services.AddHttpClient(ConstValue.ClientName)
                 .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseProxy = false });
@@ -53,7 +53,7 @@
             return services;
         }
 
-        public static IServiceCollection AddNacosV2Naming(this IServiceCollection services, Action<NacosOptions> configure, Action<HttpClient> httpClientAction = null)
+        public static IServiceCollection AddNacosV2Naming(this IServiceCollection services, Action<NacosSdkOptions> configure, Action<HttpClient> httpClientAction = null)
         {
             if (services == null) throw new ArgumentNullException(nameof(services));
 
@@ -65,7 +65,7 @@
 
             if (httpClientAction != null) clientBuilder.ConfigureHttpClient(httpClientAction);
 
-            services.AddSingleton<INacosNamingV2Client, Nacos.V2.Naming.NacosNamingV2Client>();
+            services.AddSingleton<INacosNamingService, Nacos.V2.Naming.NacosNamingService>();
 
             return services;
         }
@@ -74,20 +74,14 @@
         {
             if (services == null) throw new ArgumentNullException(nameof(services));
 
-            services.Configure<NacosOptions>(configuration.GetSection(sectionName));
+            services.Configure<NacosSdkOptions>(configuration.GetSection(sectionName));
 
             var clientBuilder = services.AddHttpClient(ConstValue.ClientName)
                 .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseProxy = false });
 
-            if (httpClientAction != null)
-            {
-                clientBuilder.ConfigureHttpClient(httpClientAction);
-            }
+            if (httpClientAction != null) clientBuilder.ConfigureHttpClient(httpClientAction);
 
-            services.AddSingleton<Nacos.INacosConfigClient, Nacos.V2.Config.GrpcConfigClient>();
-            services.AddSingleton<INacosConfigClientFactory, NacosConfigClientFactory>();
-            services.AddSingleton<Nacos.V2.Config.Abst.IConfigTransportClient, Nacos.V2.Config.Impl.ConfiggRpcTransportClient>();
-            services.AddSingleton<Nacos.V2.Security.ISecurityProxy, Nacos.V2.Security.SecurityProxy>();
+            services.AddSingleton<INacosNamingService, Nacos.V2.Naming.NacosNamingService>();
 
             return services;
         }
