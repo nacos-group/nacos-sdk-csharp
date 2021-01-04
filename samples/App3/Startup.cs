@@ -43,6 +43,7 @@ namespace App3
             {
                 x.ServerAddresses = new System.Collections.Generic.List<string> { "http://localhost:8848/" };
                 x.EndPoint = "";
+                x.Namespace = "cs";
             });
 
             services.AddControllers();

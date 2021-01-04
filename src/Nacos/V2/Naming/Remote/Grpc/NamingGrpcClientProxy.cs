@@ -40,7 +40,7 @@
             this.uuid = Guid.NewGuid().ToString();
 
             // TODO
-            this.requestTimeout = 3000L;
+            this.requestTimeout = 5000L;
 
             Dictionary<string, string> labels = new Dictionary<string, string>()
             {
@@ -95,7 +95,7 @@
             return result;
         }
 
-        public async Task<Dtos.ServiceInfo> QueryInstancesOfService(string serviceName, string groupName, string clusters, int udpPort, bool healthyOnly)
+        public async Task<ServiceInfo> QueryInstancesOfService(string serviceName, string groupName, string clusters, int udpPort, bool healthyOnly)
         {
             var request = new ServiceQueryRequest(namespaceId, serviceName, groupName)
             {
@@ -126,7 +126,7 @@
 
         public bool ServerHealthy() => rpcClient.IsRunning();
 
-        public async Task<Dtos.ServiceInfo> Subscribe(string serviceName, string groupName, string clusters)
+        public async Task<ServiceInfo> Subscribe(string serviceName, string groupName, string clusters)
         {
             var request = new SubscribeServiceRequest(namespaceId, serviceName, groupName, clusters, true);
             var response = await RequestToServer<SubscribeServiceResponse>(request);
@@ -167,6 +167,11 @@
                         requestTimeout < 0
                         ? await rpcClient.Request(request)
                         : await rpcClient.Request(request, requestTimeout);
+
+                if (response == null)
+                {
+                    throw new NacosException(NacosException.SERVER_ERROR, "Request nacos server failed: RequestToServer<T>");
+                }
 
                 if (response.ResultCode != 200)
                 {

@@ -54,13 +54,11 @@
 
         internal Dtos.ServiceInfo ProcessServiceInfo(Dtos.ServiceInfo serviceInfo)
         {
-            if (serviceInfoMap.TryGetValue(serviceInfo.GetKey(), out var oldService))
-            {
-            }
+            serviceInfoMap.TryGetValue(serviceInfo.GetKey(), out var oldService);
 
             if (serviceInfo.Hosts == null || !serviceInfo.Hosts.Any() || !serviceInfo.Validate()) return oldService;
 
-            serviceInfoMap[serviceInfo.GetKey()] = serviceInfo;
+            serviceInfoMap.AddOrUpdate(serviceInfo.GetKey(), serviceInfo, (x, y) => serviceInfo);
 
             bool changed = IsChangedServiceInfo(oldService, serviceInfo);
 

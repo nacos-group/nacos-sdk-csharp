@@ -1,5 +1,6 @@
 ﻿namespace Nacos.V2.Naming.Event
 {
+    using Nacos.V2.Naming.Dtos;
     using Nacos.V2.Naming.Utils;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
@@ -11,7 +12,6 @@
 
         private object obj = new object();
 
-
         public void RegisterListener(string groupName, string serviceName, string clusters, IEventListener listener)
         {
             string key = ServiceInfo.GetKey(NamingUtils.GetGroupedName(serviceName, groupName), clusters);
@@ -19,7 +19,7 @@
             {
                 lock (obj)
                 {
-                    eventListeners = listenerMap[key];
+                    listenerMap.TryGetValue(key, out eventListeners);
                     if (eventListeners == null)
                     {
                         eventListeners = new HashSet<IEventListener>();
@@ -53,12 +53,12 @@
                 && eventListeners != null && eventListeners.Any();
         }
 
-        public List<Nacos.V2.Naming.Dtos.ServiceInfo> GetSubscribeServices()
+        public List<ServiceInfo> GetSubscribeServices()
         {
-            List<Nacos.V2.Naming.Dtos.ServiceInfo> serviceInfos = new List<Nacos.V2.Naming.Dtos.ServiceInfo>();
+            List<ServiceInfo> serviceInfos = new List<ServiceInfo>();
             foreach (var key in listenerMap.Keys)
             {
-                serviceInfos.Add(Nacos.V2.Naming.Dtos.ServiceInfo.FromKey(key));
+                serviceInfos.Add(ServiceInfo.FromKey(key));
             }
 
             return serviceInfos;

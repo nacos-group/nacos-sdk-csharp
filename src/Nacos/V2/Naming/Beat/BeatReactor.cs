@@ -1,8 +1,10 @@
 ﻿namespace Nacos.V2.Naming.Beat
 {
+    using Microsoft.Extensions.Logging;
     using Nacos.V2.Common;
     using Nacos.V2.Exceptions;
     using Nacos.V2.Naming.Dtos;
+    using Nacos.V2.Naming.Remote.Http;
     using Nacos.V2.Naming.Utils;
     using System;
     using System.Collections.Concurrent;
@@ -11,10 +13,13 @@
 
     public class BeatReactor
     {
-        private Nacos.V2.Naming.Remote.Http.NamingHttpClientProxy _serverProxy;
+        private readonly ILogger _logger;
 
-        public BeatReactor(Nacos.V2.Naming.Remote.Http.NamingHttpClientProxy serverProxy, NacosSdkOptions options)
+        private NamingHttpClientProxy _serverProxy;
+
+        public BeatReactor(ILogger logger, NamingHttpClientProxy serverProxy, NacosSdkOptions options)
         {
+            this._logger = logger;
             this._serverProxy = serverProxy;
         }
 
@@ -27,35 +32,33 @@
             return serviceName + Constants.NAMING_INSTANCE_ID_SPLITTER + ip + Constants.NAMING_INSTANCE_ID_SPLITTER + port;
         }
 
-        internal BeatInfo BuildBeatInfo(Instance instance)
-        {
-            return BuildBeatInfo(instance.ServiceName, instance);
-        }
+        internal BeatInfo BuildBeatInfo(Instance instance) => BuildBeatInfo(instance.ServiceName, instance);
 
         internal void AddBeatInfo(string serviceName, BeatInfo beatInfo)
         {
-            // TODO logger
-            string key = BuildKey(serviceName, beatInfo.ip, beatInfo.port);
+            _logger?.LogInformation("[BEAT] adding beat: {0} to beat map.", beatInfo);
 
-            if (Dom2Beat.TryRemove(key, out var exitBeat)) exitBeat.stopped = true;
+            string key = BuildKey(serviceName, beatInfo.Ip, beatInfo.Port);
 
-            Dom2Beat[key] = beatInfo;
+            if (Dom2Beat.TryRemove(key, out var exitBeat)) exitBeat.Stopped = true;
+
+            Dom2Beat.AddOrUpdate(key, beatInfo, (x, y) => beatInfo);
 
             var timer = new Timer(
                 async x =>
                 {
                     var info = x as BeatInfo;
                     await BeatTask(info);
-                }, beatInfo, beatInfo.period, beatInfo.period);
+                }, beatInfo, beatInfo.Period, beatInfo.Period);
 
-            _beatTimer[key] = timer;
+            _beatTimer.AddOrUpdate(key, timer, (x, y) => timer);
         }
 
         private async Task BeatTask(BeatInfo beatInfo)
         {
-            if (beatInfo.stopped) return;
+            if (beatInfo.Stopped) return;
 
-            long nextTime = beatInfo.period;
+            long nextTime = beatInfo.Period;
 
             try
             {
@@ -80,12 +83,12 @@
                 {
                     Instance instance = new Instance
                     {
-                        Port = beatInfo.port,
-                        Ip = beatInfo.ip,
-                        Weight = beatInfo.weight ?? 1,
-                        Metadata = beatInfo.metadata,
-                        ClusterName = beatInfo.cluster,
-                        ServiceName = beatInfo.serviceName,
+                        Port = beatInfo.Port,
+                        Ip = beatInfo.Ip,
+                        Weight = beatInfo.Weight ?? 1,
+                        Metadata = beatInfo.Metadata,
+                        ClusterName = beatInfo.Cluster,
+                        ServiceName = beatInfo.ServiceName,
                         Ephemeral = true,
 
                         // InstanceId = ""
@@ -93,7 +96,7 @@
 
                     try
                     {
-                        await _serverProxy.RegisterServiceAsync(beatInfo.serviceName, NamingUtils.GetGroupName(beatInfo.serviceName), instance);
+                        await _serverProxy.RegisterServiceAsync(beatInfo.ServiceName, NamingUtils.GetGroupName(beatInfo.ServiceName), instance);
                     }
                     catch
                     {
@@ -102,42 +105,36 @@
             }
             catch (NacosException ex)
             {
-                Console.WriteLine(ex);
+                _logger?.LogError(ex, "[CLIENT-BEAT] failed to send beat: {}, code: {}, msg: {}", beatInfo, ex.ErrorCode, ex.ErrorMsg);
             }
 
-            var timer = new Timer(
-                async x =>
-                {
-                    var info = x as BeatInfo;
-                    await BeatTask(info);
-                }, beatInfo, nextTime, nextTime);
+            string key = BuildKey(beatInfo.ServiceName, beatInfo.Ip, beatInfo.Port);
 
-
-            string key = BuildKey(beatInfo.serviceName, beatInfo.ip, beatInfo.port);
-            _beatTimer[key] = timer;
+            if (_beatTimer.TryGetValue(key, out var timer))
+                timer.Change(nextTime, Timeout.Infinite);
         }
 
         internal BeatInfo BuildBeatInfo(string groupedServiceName, Instance instance)
         {
             return new BeatInfo
             {
-                serviceName = groupedServiceName,
-                ip = instance.Ip,
-                port = instance.Port,
-                cluster = instance.ClusterName,
-                weight = instance.Weight,
-                metadata = instance.Metadata,
-                period = instance.GetInstanceHeartBeatInterval(),
-                scheduled = false
+                ServiceName = groupedServiceName,
+                Ip = instance.Ip,
+                Port = instance.Port,
+                Cluster = instance.ClusterName,
+                Weight = instance.Weight,
+                Metadata = instance.Metadata,
+                Period = instance.GetInstanceHeartBeatInterval(),
+                Scheduled = false
             };
         }
 
         internal void RemoveBeatInfo(string serviceName, string ip, int port)
         {
-            // TODO logger
+            _logger?.LogInformation("[BEAT] removing beat: {0}:{1}:{2} from beat map.", serviceName, ip, port);
             string key = BuildKey(serviceName, ip, port);
 
-            if (Dom2Beat.TryRemove(key, out var beatInfo)) beatInfo.stopped = true;
+            if (Dom2Beat.TryRemove(key, out var beatInfo)) beatInfo.Stopped = true;
 
             if (_beatTimer.TryRemove(key, out var t)) t.Dispose();
         }

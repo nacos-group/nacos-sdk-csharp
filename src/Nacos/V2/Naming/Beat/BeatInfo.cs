@@ -4,28 +4,36 @@
 
     public class BeatInfo
     {
-#pragma warning disable SA1300 // Element should begin with upper-case letter
-        public int port { get; set; }
+        [Newtonsoft.Json.JsonProperty("port")]
+        public int Port { get; set; }
 
-        public string ip { get; set; }
+        [Newtonsoft.Json.JsonProperty("ip")]
+        public string Ip { get; set; }
 
-        public double? weight { get; set; }
+        [Newtonsoft.Json.JsonProperty("weight")]
+        public double? Weight { get; set; }
 
-        public string serviceName { get; set; }
+        [Newtonsoft.Json.JsonProperty("serviceName")]
+        public string ServiceName { get; set; }
 
-        public string cluster { get; set; }
+        [Newtonsoft.Json.JsonProperty("cluster")]
+        public string Cluster { get; set; }
 
-        public Dictionary<string, string> metadata { get; set; } = new Dictionary<string, string>();
+        [Newtonsoft.Json.JsonProperty("metadata")]
+        public Dictionary<string, string> Metadata { get; set; } = new Dictionary<string, string>();
 
-        public bool scheduled { get; set; }
+        [Newtonsoft.Json.JsonProperty("scheduled")]
+        public bool Scheduled { get; set; }
 
-        public long period { get; set; }
+        [Newtonsoft.Json.JsonProperty("period")]
+        public long Period { get; set; }
 
-        public bool stopped { get; set; }
+        [Newtonsoft.Json.JsonProperty("stopped")]
+        public bool Stopped { get; set; }
 
         public override string ToString()
         {
-            return "BeatInfo{" + "port=" + port + ", ip='" + ip + '\'' + ", weight=" + weight + ", serviceName='" + serviceName + '\'' + ", cluster='" + cluster + '\'' + ", metadata=" + metadata + ", scheduled=" + scheduled + ", period=" + period + ", stopped=" + stopped + '}';
+            return "BeatInfo{" + "port=" + Port + ", ip='" + Ip + '\'' + ", weight=" + Weight + ", serviceName='" + ServiceName + '\'' + ", cluster='" + Cluster + '\'' + ", metadata=" + Metadata + ", scheduled=" + Scheduled + ", period=" + Period + ", stopped=" + Stopped + '}';
         }
     }
 }

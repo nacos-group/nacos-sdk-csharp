@@ -59,7 +59,7 @@
             this._options = options.CurrentValue;
             this.SetServerPort(DEFAULT_SERVER_PORT);
             this.namespaceId = namespaceId;
-            this.beatReactor = new BeatReactor(this, _options);
+            this.beatReactor = new BeatReactor(_logger, this, _options);
             this.InitRefreshTask();
             this.pushReceiver = new PushReceiver(serviceInfoHolder);
             this.serviceInfoHolder = serviceInfoHolder;
@@ -67,15 +67,16 @@
 
         internal async Task<Newtonsoft.Json.Linq.JObject> SendBeat(BeatInfo beatInfo, bool lightBeatEnabled)
         {
-            Dictionary<string, string> parameters = new Dictionary<string, string>()
+            var parameters = new Dictionary<string, string>()
             {
                 { CommonParams.NAMESPACE_ID, namespaceId },
-                { CommonParams.SERVICE_NAME, beatInfo.serviceName },
-                { CommonParams.CLUSTER_NAME, beatInfo.cluster },
-                { "ip", beatInfo.ip.ToString() },
-                { "port", beatInfo.port.ToString() },
+                { CommonParams.SERVICE_NAME, beatInfo.ServiceName },
+                { CommonParams.CLUSTER_NAME, beatInfo.Cluster },
+                { "ip", beatInfo.Ip.ToString() },
+                { "port", beatInfo.Port.ToString() },
             };
-            Dictionary<string, string> body = new Dictionary<string, string>();
+
+            var body = new Dictionary<string, string>();
 
             if (!lightBeatEnabled) body["beat"] = beatInfo.ToJsonString();
 
@@ -236,7 +237,7 @@
             string groupedServiceName = NamingUtils.GetGroupedName(serviceName, groupName);
             if (instance.Ephemeral)
             {
-                Nacos.V2.Naming.Beat.BeatInfo beatInfo = beatReactor.BuildBeatInfo(groupedServiceName, instance);
+                BeatInfo beatInfo = beatReactor.BuildBeatInfo(groupedServiceName, instance);
                 beatReactor.AddBeatInfo(groupedServiceName, beatInfo);
             }
 
@@ -254,7 +255,6 @@
                 { "ephemeral", instance.Ephemeral.ToString() },
                 { "metadata", instance.Metadata.ToJsonString() },
             };
-
 
             await ReqApi(UtilAndComs.NacosUrlInstance, paramters, HttpMethod.Post);
         }
@@ -337,14 +337,14 @@
                 }
 
                 // TODO http or https
-                url = "http" + curServer + api;
+                url = UtilAndComs.HTTP + curServer + api;
             }
 
             try
             {
-                var client = _clientFactory.CreateClient(ConstValue.ClientName);
+                var client = _clientFactory?.CreateClient(ConstValue.ClientName) ?? new HttpClient();
                 client.Timeout = TimeSpan.FromSeconds(8);
-                var requestUrl = $"{url}?{InitParams(paramters)}";
+                var requestUrl = $"{url}?{InitParams(paramters, body)}";
                 var requestMessage = new HttpRequestMessage(method, requestUrl);
 
                 BuildHeader(requestMessage, headers);
@@ -441,7 +441,7 @@
 
                 if (beatReactor.Dom2Beat.ContainsKey(key) && instance.Ephemeral)
                 {
-                    Nacos.V2.Naming.Beat.BeatInfo beatInfo = beatReactor.BuildBeatInfo(instance);
+                    BeatInfo beatInfo = beatReactor.BuildBeatInfo(instance);
                     beatReactor.AddBeatInfo(instance.ServiceName, beatInfo);
                 }
             }
@@ -487,12 +487,20 @@
             await ReqApi(UtilAndComs.NacosUrlService, paramters, HttpMethod.Put);
         }
 
-        private string InitParams(Dictionary<string, string> dict)
+        private string InitParams(Dictionary<string, string> dict, Dictionary<string, string> body)
         {
-            var builder = new StringBuilder(300);
+            var builder = new StringBuilder(1024);
             if (dict != null && dict.Any())
             {
                 foreach (var item in dict)
+                {
+                    builder.Append($"{item.Key}={item.Value}&");
+                }
+            }
+
+            if (body != null && body.Any())
+            {
+                foreach (var item in body)
                 {
                     builder.Append($"{item.Key}={item.Value}&");
                 }
