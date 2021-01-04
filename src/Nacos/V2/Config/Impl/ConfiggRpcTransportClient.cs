@@ -351,11 +351,6 @@
                 this._cacheMap = map;
             }
 
-            public CommonResponse RequestReply(Payload payload, IClientStreamWriter<Payload> streamWriter)
-            {
-                throw new NotImplementedException();
-            }
-
             public CommonResponse RequestReply(CommonRequest request, CommonRequestMeta meta)
             {
                 if (request is ConfigChangeNotifyRequest)

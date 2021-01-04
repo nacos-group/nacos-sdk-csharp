@@ -14,11 +14,6 @@
             this._serviceInfoHolder = serviceInfoHolder;
         }
 
-        public CommonResponse RequestReply(Payload payload, global::Grpc.Core.IClientStreamWriter<Payload> streamWriter)
-        {
-            throw new System.NotImplementedException();
-        }
-
         public CommonResponse RequestReply(CommonRequest request, CommonRequestMeta meta)
         {
             if (request is NotifySubscriberRequest)
