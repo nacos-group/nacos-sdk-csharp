@@ -19,8 +19,6 @@
 
         public string ContextPath { get; set; } = "nacos";
 
-        public string ClusterName { get; set; } = "serverlist";
-
         /// <summary>
         /// default timeout, unit is Milliseconds.
         /// </summary>

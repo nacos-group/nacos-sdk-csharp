@@ -43,7 +43,7 @@
 
             _serverUrls = new List<string>();
             _contentPath = _options.ContextPath;
-            _defaultNodesPath = _options.ClusterName;
+            _defaultNodesPath = "serverlist";
             var @namespace = _options.Namespace;
 
             if (_options.ServerAddresses != null && _options.ServerAddresses.Any())

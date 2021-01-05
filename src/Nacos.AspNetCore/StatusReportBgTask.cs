@@ -43,7 +43,7 @@
                 return Task.CompletedTask;
             }
 
-            uris = UriTool.GetUri(_features, _options);
+            uris = UriTool.GetUri(_features, _options.Ip, _options.Port, _options.PreferredNetworks);
 
             foreach (var uri in uris)
             {
