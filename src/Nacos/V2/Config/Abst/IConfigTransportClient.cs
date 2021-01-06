@@ -33,6 +33,8 @@
 
         Task RemoveListenerAsync(string dataId, string group, string tenant, Action<string> callBack);
 
+        Task RemoveCacheAsync(string dataId, string group);
+
         void Start();
     }
 }

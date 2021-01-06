@@ -1,14 +1,13 @@
 ﻿namespace Nacos.V2.Config.Impl
 {
-    using Grpc.Core;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
+    using Nacos.Utilities;
     using Nacos.V2.Config.Abst;
     using Nacos.V2.Exceptions;
     using Nacos.V2.Remote;
     using Nacos.V2.Remote.Requests;
     using Nacos.V2.Remote.Responses;
-    using Nacos.Utilities;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -27,10 +26,10 @@
         private Timer _configListenTimer;
 
         public ConfiggRpcTransportClient(
-            ILoggerFactory loggerFactory,
+            ILogger logger,
             IOptionsMonitor<NacosSdkOptions> optionAccs)
         {
-            _logger = loggerFactory.CreateLogger<GrpcConfigClient>();
+            _logger = logger;
             _options = optionAccs.CurrentValue;
             _serverListManager = new ServerListManager(_logger, optionAccs);
             StartInner();
@@ -142,7 +141,7 @@
             var listenCachesMap = new Dictionary<string, List<CacheData>>();
             var removeListenCachesMap = new Dictionary<string, List<CacheData>>();
 
-            foreach (var item in cacheMap.Values)
+            /*foreach (var item in cacheMap.Values)
             {
                 if (item.Listeners != null && item.Listeners.Any() && !item.IsListenSuccess)
                 {
@@ -164,7 +163,7 @@
 
                     list.Add(item);
                 }
-            }
+            }*/
 
             if (listenCachesMap != null && listenCachesMap.Any())
             {
@@ -210,7 +209,7 @@
                                             {
                                                 cached.SetContent(ct[0]);
 
-                                                if (cached.CheckListenerMd5()) cached.Listeners.ForEach(x => x.Invoke(ct[0]));
+                                                /*if (cached.CheckListenerMd5()) cached.Listeners.ForEach(x => x.Invoke(ct[0]));*/
                                             }
                                         }
                                     }
@@ -289,7 +288,7 @@
                 cacheMap[key] = cache;
             }
 
-            foreach (var item in callBacks) cache.AddListener(item);
+            /*foreach (var item in callBacks) cache.AddListener(item);*/
 
             return Task.CompletedTask;
         }
@@ -299,14 +298,14 @@
             tenant = string.IsNullOrWhiteSpace(tenant) ? _options.Namespace : tenant;
             group = string.IsNullOrWhiteSpace(group) ? ConstValue.DefaultGroup : group;
 
-            string key = Nacos.V2.Config.GroupKey.GetKeyTenant(dataId, group, tenant);
+            string key = GroupKey.GetKeyTenant(dataId, group, tenant);
 
             var cache = GetCache(dataId, group, tenant);
 
             if (cache != null)
             {
-                cache.RemoveListener(callBack);
-                if (cache.Listeners.Count <= 0) cacheMap.Remove(key);
+                /*cache.RemoveListener(callBack);
+                if (cache.Listeners.Count <= 0) cacheMap.Remove(key);*/
             }
 
             return Task.CompletedTask;
@@ -449,6 +448,11 @@
         private RpcClient GetOneRunningClient()
         {
             return EnsureRpcClient("0");
+        }
+
+        protected override Task RemoveCache(string dataId, string group)
+        {
+            throw new NotImplementedException();
         }
     }
 }

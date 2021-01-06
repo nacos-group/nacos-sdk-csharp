@@ -38,7 +38,7 @@
             else
             {
                 // rpc
-                _agent = null;
+                _agent = new ConfiggRpcTransportClient(logger, options);
             }
         }
 
@@ -47,13 +47,15 @@
             throw new NotImplementedException();
         }
 
-        public Task AddListeners(string dataId, string group, List<IListener> listeners)
+        public Task AddTenantListeners(string dataId, string group, List<IListener> listeners)
         {
             group = Null2defaultGroup(group);
-            CacheData cache = AddCacheDataIfAbsent(dataId, group);
+            string tenant = _agent.GetTenant();
+
+            CacheData cache = AddCacheDataIfAbsent(dataId, group, tenant);
             foreach (var listener in listeners)
             {
-                // cache.AddListener(listener);
+                cache.AddListener(listener);
             }
 
             if (!cache.IsListenSuccess)
@@ -64,20 +66,35 @@
             return Task.CompletedTask;
         }
 
+        public async Task RemoveTenantListener(string dataId, string group, IListener listener)
+        {
+            group = Null2defaultGroup(group);
+            string tenant = _agent.GetTenant();
+
+            CacheData cache = GetCache(dataId, group, tenant);
+            if (cache != null)
+            {
+                cache.RemoveListener(listener);
+                if ((cache.GetListeners()?.Count ?? 0) > 0)
+                {
+                    await _agent.RemoveCacheAsync(dataId, group);
+                }
+            }
+        }
+
         private string Null2defaultGroup(string group) => (group == null) ? Constants.DEFAULT_GROUP : group.Trim();
 
-        public CacheData AddCacheDataIfAbsent(string dataId, string group)
+        public CacheData AddCacheDataIfAbsent(string dataId, string group, string tenant)
         {
-            CacheData cache = GetCache(dataId, group);
+            CacheData cache = GetCache(dataId, group, tenant);
 
             if (cache != null) return cache;
 
-            string key = GroupKey.GetKey(dataId, group);
-            cache = new CacheData(_configFilterChainManager, _agent.GetName(), dataId, group);
+            string key = GroupKey.GetKey(dataId, group, tenant);
 
             lock (cacheMap)
             {
-                CacheData cacheFromMap = GetCache(dataId, group);
+                CacheData cacheFromMap = GetCache(dataId, group, tenant);
 
                 // multiple listeners on the same dataid+group and race condition,so double check again
                 // other listener thread beat me to set to cacheMap
@@ -86,16 +103,20 @@
                     cache = cacheFromMap;
 
                     // reset so that server not hang this check
-                    // cache.SetInitializing(true);
+                    cache.IsInitializing = true;
                 }
                 else
                 {
-                    int taskId = cacheMap.Count / 3000;
+                    cache = new CacheData(_configFilterChainManager, _agent.GetName(), dataId, group, tenant);
+
+                    int taskId = cacheMap.Count / CacheData.PerTaskConfigSize;
                     cache.TaskId = taskId;
                 }
 
-                var copy = new Dictionary<string, CacheData>(cacheMap);
-                copy[key] = cache;
+                var copy = new Dictionary<string, CacheData>(cacheMap)
+                {
+                    [key] = cache
+                };
                 cacheMap = copy;
             }
 
@@ -105,30 +126,29 @@
             return cache;
         }
 
-        public void RemoveListener(string dataId, string group, IListener listener)
-        {
-            group = Null2defaultGroup(group);
-            CacheData cache = GetCache(dataId, group);
-            if (cache != null)
-            {
-                /*cache.RemoveListener(listener);
-                if (cache.getListeners().isEmpty())
-                {
-                    _agent.RemoveCache(dataId, group);
-                }*/
-            }
-        }
-
         public CacheData GetCache(string dataId, string group)
-        {
-            return GetCache(dataId, group, TenantUtil.GetUserTenantForAcm());
-        }
+            => GetCache(dataId, group, TenantUtil.GetUserTenantForAcm());
 
         public CacheData GetCache(string dataId, string group, string tenant)
         {
             if (dataId == null || group == null) throw new ArgumentException();
 
             return cacheMap.TryGetValue(GroupKey.GetKeyTenant(dataId, group, tenant), out var cache) ? cache : null;
+        }
+
+        internal void RemoveCache(string dataId, string group, string tenant = null)
+        {
+            string groupKey = tenant == null ? GroupKey.GetKey(dataId, group) : GroupKey.GetKeyTenant(dataId, group, tenant);
+            lock (cacheMap)
+            {
+                var copy = new Dictionary<string, CacheData>(cacheMap);
+                copy.Remove(groupKey);
+                cacheMap = copy;
+            }
+
+            _logger?.LogInformation("[{}] [unsubscribe] {}", this._agent.GetName(), groupKey);
+
+            // MetricsMonitor.getListenConfigCountMonitor().set(cacheMap.get().size());
         }
 
         public async Task<bool> RemoveConfig(string dataId, string group, string tenant, string tag)
@@ -196,10 +216,10 @@
             }
         }
 
+        public string GetAgentName() => this._agent.GetName();
 
         public void Dispose()
         {
-            throw new NotImplementedException();
         }
     }
 }
