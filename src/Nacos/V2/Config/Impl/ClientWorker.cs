@@ -28,17 +28,15 @@
 
             Init(options);
 
-            ServerListManager serverListManager = new ServerListManager(logger, options);
+            ServerListManager serverListManager = new ServerListManager(logger, options.CurrentValue);
 
             if (ParamUtils.UseHttpSwitch())
             {
-                // http
-                _agent = null;
+                _agent = new ConfigHttpTransportClient(logger, options.CurrentValue, serverListManager, cacheMap);
             }
             else
             {
-                // rpc
-                _agent = new ConfiggRpcTransportClient(logger, options);
+                _agent = new ConfigRpcTransportClient(logger, options.CurrentValue, serverListManager, cacheMap);
             }
         }
 

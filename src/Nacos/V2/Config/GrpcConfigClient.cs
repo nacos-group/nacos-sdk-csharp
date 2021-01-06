@@ -37,7 +37,8 @@
 
             request.CheckParam();
 
-            return _agent.AddListenerAsync(request.DataId, request.Group, request.Tenant, request.Callbacks);
+            /*return _agent.AddListenerAsync(request.DataId, request.Group, request.Tenant, request.Callbacks);*/
+            return Task.CompletedTask;
         }
 
         public async Task<string> GetConfigAsync(GetConfigRequest request)
@@ -127,7 +128,8 @@
 
             request.CheckParam();
 
-            return _agent.RemoveListenerAsync(request.DataId, request.Group, request.Tenant, null);
+            /*return _agent.RemoveListenerAsync(request.DataId, request.Group, request.Tenant, null);*/
+            return Task.CompletedTask;
         }
     }
 }

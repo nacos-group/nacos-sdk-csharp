@@ -29,11 +29,9 @@
 
         Task<List<string>> QueryConfigAsync(string dataId, string group, string tenat, long readTimeous, bool notify);
 
-        Task AddListenerAsync(string dataId, string group, string tenant, List<Action<string>> callBacks);
-
-        Task RemoveListenerAsync(string dataId, string group, string tenant, Action<string> callBack);
-
         Task RemoveCacheAsync(string dataId, string group);
+
+        Task ExecuteConfigListenAsync();
 
         void Start();
     }

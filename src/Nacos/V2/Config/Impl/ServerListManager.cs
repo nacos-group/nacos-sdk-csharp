@@ -36,10 +36,10 @@
         private readonly ILogger _logger;
         private readonly NacosSdkOptions _options;
 
-        public ServerListManager(ILogger logger, IOptionsMonitor<NacosSdkOptions> optionsAccs)
+        public ServerListManager(ILogger logger, NacosSdkOptions options)
         {
             _logger = logger;
-            _options = optionsAccs.CurrentValue;
+            _options = options;
 
             _serverUrls = new List<string>();
             _contentPath = _options.ContextPath;

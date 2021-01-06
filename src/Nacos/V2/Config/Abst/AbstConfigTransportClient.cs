@@ -18,13 +18,13 @@
         public string GetTenant() => GetTenantInner();
 
         public Task<bool> PublishConfigAsync(string dataId, string group, string tenant, string appName, string tag, string betaIps, string content)
-            => PublishConfigInner(dataId, group, tenant, appName, tag, betaIps, content);
+            => PublishConfig(dataId, group, tenant, appName, tag, betaIps, content);
 
         public Task<List<string>> QueryConfigAsync(string dataId, string group, string tenat, long readTimeous, bool notify)
-            => QueryConfigInner(dataId, group, tenat, readTimeous, notify);
+            => QueryConfig(dataId, group, tenat, readTimeous, notify);
 
         public Task<bool> RemoveConfigAsync(string dataId, string group, string tenat, string tag)
-            => RemoveConfigInner(dataId, group, tenat, tag);
+            => RemoveConfig(dataId, group, tenat, tag);
 
         public void Start() => StartInner();
 
@@ -34,26 +34,20 @@
 
         protected abstract string GetTenantInner();
 
-        protected abstract Task<bool> PublishConfigInner(string dataId, string group, string tenant, string appName, string tag, string betaIps, string content);
+        protected abstract Task<bool> PublishConfig(string dataId, string group, string tenant, string appName, string tag, string betaIps, string content);
 
-        protected abstract Task<bool> RemoveConfigInner(string dataId, string group, string tenat, string tag);
+        protected abstract Task<bool> RemoveConfig(string dataId, string group, string tenat, string tag);
 
-        protected abstract Task<List<string>> QueryConfigInner(string dataId, string group, string tenat, long readTimeous, bool notify);
-
-        protected abstract Task AddListenerInner(string dataId, string group, string tenant, List<Action<string>> callBacks);
-
-        protected abstract Task RemoveListenerInner(string dataId, string group, string tenant, Action<string> callBack);
+        protected abstract Task<List<string>> QueryConfig(string dataId, string group, string tenat, long readTimeous, bool notify);
 
         protected abstract Task RemoveCache(string dataId, string group);
 
         protected abstract void StartInner();
 
-        public Task AddListenerAsync(string dataId, string group, string tenant, List<Action<string>> callBacks)
-            => AddListenerInner(dataId, group, tenant, callBacks);
-
-        public Task RemoveListenerAsync(string dataId, string group, string tenant, Action<string> callBack)
-            => RemoveListenerInner(dataId, group, tenant, callBack);
-
         public Task RemoveCacheAsync(string dataId, string group) => RemoveCache(dataId, group);
+
+        protected abstract Task ExecuteConfigListen();
+
+        public Task ExecuteConfigListenAsync() => ExecuteConfigListen();
     }
 }
