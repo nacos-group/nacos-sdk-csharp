@@ -26,7 +26,7 @@
             }
         }
 
-        private static FileInfo GetFailoverFile(string serverName, string dataId, string group, string tenant)
+        internal static FileInfo GetFailoverFile(string serverName, string dataId, string group, string tenant)
         {
             string failoverFile;
             failoverFile = Path.Combine(LOCAL_SNAPSHOT_PATH, serverName + "_nacos");

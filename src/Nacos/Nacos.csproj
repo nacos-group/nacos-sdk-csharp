@@ -46,6 +46,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="V2\Config\ListenerImpl\" />
     <Folder Include="V2\protos\" />
   </ItemGroup>
 
