@@ -42,7 +42,6 @@
 
         private void Init(IOptionsMonitor<NacosSdkOptions> options)
         {
-            throw new NotImplementedException();
         }
 
         public Task AddTenantListeners(string dataId, string group, List<IListener> listeners)
@@ -62,6 +61,24 @@
             }
 
             return Task.CompletedTask;
+        }
+
+        internal void AddTenantListenersWithContent(string dataId, string group, string content, List<IListener> listeners)
+        {
+            group = Null2defaultGroup(group);
+            string tenant = _agent.GetTenant();
+            CacheData cache = AddCacheDataIfAbsent(dataId, group, tenant);
+            cache.SetContent(content);
+            foreach (var listener in listeners)
+            {
+                cache.AddListener(listener);
+            }
+
+            // if current cache is already at listening status,do not notify.
+            if (!cache.IsListenSuccess)
+            {
+                // _agent.notifyListenConfig();
+            }
         }
 
         public async Task RemoveTenantListener(string dataId, string group, IListener listener)
@@ -120,7 +137,6 @@
 
             _logger.LogInformation("[{0}] [subscribe] {1}", this._agent.GetName(), key);
 
-            // MetricsMonitor.getListenConfigCountMonitor().set(cacheMap.get().size());
             return cache;
         }
 
@@ -145,8 +161,6 @@
             }
 
             _logger?.LogInformation("[{}] [unsubscribe] {}", this._agent.GetName(), groupKey);
-
-            // MetricsMonitor.getListenConfigCountMonitor().set(cacheMap.get().size());
         }
 
         public async Task<bool> RemoveConfig(string dataId, string group, string tenant, string tag)
@@ -215,6 +229,8 @@
         }
 
         public string GetAgentName() => this._agent.GetName();
+
+        internal bool IsHealthServer() => true;
 
         public void Dispose()
         {

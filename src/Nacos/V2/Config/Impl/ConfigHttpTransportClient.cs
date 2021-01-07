@@ -11,6 +11,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Http;
+    using System.Threading;
     using System.Threading.Tasks;
 
     public class ConfigHttpTransportClient : AbstConfigTransportClient
@@ -25,10 +26,12 @@
 
         private double _currentLongingTaskCount = 0;
 
+        private Timer _executeConfigListenTimer;
+
         public ConfigHttpTransportClient(
             ILogger logger,
             NacosSdkOptions options,
-            IServerListManager serverListManager,
+            ServerListManager serverListManager,
             Dictionary<string, CacheData> cacheMap)
         {
             this._logger = logger;
@@ -226,10 +229,7 @@
 
         private async Task<HttpResponseMessage> HttpPost(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, string encoding, long readTimeoutMs)
         {
-            if (headers == null)
-            {
-                headers = new Dictionary<string, string>(16);
-            }
+            if (headers == null) headers = new Dictionary<string, string>(16);
 
             AssembleHttpParams(paramValues, headers);
             return await _agent.HttpPost(path, headers, paramValues, encoding, readTimeoutMs);
@@ -237,10 +237,7 @@
 
         private async Task<HttpResponseMessage> HttpGet(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, string encoding, long readTimeoutMs)
         {
-            if (headers == null)
-            {
-                headers = new Dictionary<string, string>(16);
-            }
+            if (headers == null) headers = new Dictionary<string, string>(16);
 
             AssembleHttpParams(paramValues, headers);
             return await _agent.HttpGet(path, headers, paramValues, encoding, readTimeoutMs);
@@ -248,10 +245,7 @@
 
         private async Task<HttpResponseMessage> HttpDelete(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, string encoding, long readTimeoutMs)
         {
-            if (headers == null)
-            {
-                headers = new Dictionary<string, string>(16);
-            }
+            if (headers == null) headers = new Dictionary<string, string>(16);
 
             AssembleHttpParams(paramValues, headers);
             return await _agent.HttpDelete(path, headers, paramValues, encoding, readTimeoutMs);
@@ -259,16 +253,12 @@
 
         private void AssembleHttpParams(Dictionary<string, string> paramValues, Dictionary<string, string> headers)
         {
-            // super.getSecurityHeaders()
-            Dictionary<string, string> securityHeaders = new Dictionary<string, string>();
+            Dictionary<string, string> securityHeaders = GetSecurityHeaders();
 
             if (securityHeaders != null)
             {
                 // put security header to param
-                foreach (var item in securityHeaders)
-                {
-                    paramValues[item.Key] = item.Value;
-                }
+                foreach (var item in securityHeaders) paramValues[item.Key] = item.Value;
 
                 if (!string.IsNullOrWhiteSpace(_options.Namespace)
                     && !paramValues.ContainsKey("tenant"))
@@ -277,36 +267,25 @@
                 }
             }
 
-            // super.getSpasHeaders();
-            Dictionary<string, string> spasHeaders = new Dictionary<string, string>();
+            Dictionary<string, string> spasHeaders = GetSpasHeaders();
             if (spasHeaders != null)
             {
                 // put spasHeader to header.
-                foreach (var item in spasHeaders)
-                {
-                    headers[item.Key] = item.Value;
-                }
+                foreach (var item in spasHeaders) headers[item.Key] = item.Value;
             }
 
-            // super.getCommonHeader();
-            Dictionary<string, string> commonHeader = new Dictionary<string, string>();
+            Dictionary<string, string> commonHeader = GetCommonHeader();
             if (commonHeader != null)
             {
                 // put common headers
-                foreach (var item in commonHeader)
-                {
-                    headers[item.Key] = item.Value;
-                }
+                foreach (var item in commonHeader) headers[item.Key] = item.Value;
             }
 
             // SpasAdapter.getSignHeaders(params, super.secretKey);
             Dictionary<string, string> signHeaders = new Dictionary<string, string>();
             if (signHeaders != null)
             {
-                foreach (var item in signHeaders)
-                {
-                    headers[item.Key] = item.Value;
-                }
+                foreach (var item in signHeaders) headers[item.Key] = item.Value;
             }
         }
 
@@ -367,7 +346,11 @@
 
         protected override void StartInner()
         {
-            throw new NotImplementedException();
+            _executeConfigListenTimer = new Timer(
+                   async x =>
+                   {
+                       await ExecuteConfigListen();
+                   }, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(10));
         }
     }
 }

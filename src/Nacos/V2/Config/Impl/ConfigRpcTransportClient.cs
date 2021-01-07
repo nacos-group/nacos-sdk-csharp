@@ -1,8 +1,8 @@
 ﻿namespace Nacos.V2.Config.Impl
 {
     using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Options;
     using Nacos.Utilities;
+    using Nacos.V2.Common;
     using Nacos.V2.Config.Abst;
     using Nacos.V2.Exceptions;
     using Nacos.V2.Remote;
@@ -30,7 +30,7 @@
         public ConfigRpcTransportClient(
             ILogger logger,
             NacosSdkOptions options,
-            IServerListManager serverListManager,
+            ServerListManager serverListManager,
             Dictionary<string, CacheData> cacheMap)
         {
             this._logger = logger;
@@ -43,10 +43,7 @@
 
         protected override string GetNameInner() => RPC_AGENT_NAME;
 
-        protected override string GetNamespaceInner()
-        {
-            throw new NotImplementedException();
-        }
+        protected override string GetNamespaceInner() => _options.Namespace;
 
         protected override string GetTenantInner() => _options.Namespace;
 
@@ -143,9 +140,6 @@
                 }, null, 0, 5000);
         }
 
-        private CacheData GetCache(string dataId, string group, string tenant)
-            => _cacheMap.TryGetValue(GroupKey.GetKeyTenant(dataId, group, tenant), out var data) ? data : null;
-
         private RpcClient EnsureRpcClient(string taskId)
         {
             Dictionary<string, string> labels = GetLabels();
@@ -173,92 +167,6 @@
             rpcClientInner.Init(new ConfigRpcServerListFactory(_serverListManager));
         }
 
-        public class ConfigRpcServerRequestHandler : IServerRequestHandler
-        {
-            private Dictionary<string, CacheData> _cacheMap;
-
-            public ConfigRpcServerRequestHandler(Dictionary<string, CacheData> map)
-            {
-                this._cacheMap = map;
-            }
-
-            public CommonResponse RequestReply(CommonRequest request, CommonRequestMeta meta)
-            {
-                if (request is ConfigChangeNotifyRequest)
-                {
-                    var configChangeNotifyRequest = (ConfigChangeNotifyRequest)request;
-
-                    string groupKey = GroupKey.GetKeyTenant(configChangeNotifyRequest.DataId, configChangeNotifyRequest.Group, configChangeNotifyRequest.Tenant);
-
-                    if (_cacheMap.TryGetValue(groupKey, out var cacheData))
-                    {
-                        if (configChangeNotifyRequest.ContentPush
-                            && cacheData.LastModifiedTs < configChangeNotifyRequest.LastModifiedTs)
-                        {
-                        }
-
-                        cacheData.IsListenSuccess = false;
-                    }
-
-                    Console.WriteLine("Config RequestReply => {0}", request.ToJsonString());
-
-                    return new ConfigChangeNotifyResponse();
-                }
-
-                return null;
-            }
-        }
-
-        public class ConfigRpcConnectionEventListener : IConnectionEventListener
-        {
-            private readonly RpcClient _rpcClient;
-            private readonly Dictionary<string, CacheData> _cacheMap;
-
-            public ConfigRpcConnectionEventListener(RpcClient rpcClientInner, Dictionary<string, CacheData> cacheMap)
-            {
-                this._rpcClient = rpcClientInner;
-                this._cacheMap = cacheMap;
-            }
-
-            public void OnConnected()
-            {
-            }
-
-            public void OnDisConnected()
-            {
-                if (_rpcClient.GetLabels().TryGetValue("taskId", out var taskId))
-                {
-                    var values = _cacheMap.Values;
-
-                    foreach (var cacheData in values)
-                    {
-                        if (cacheData.TaskId.Equals(Convert.ToInt32(taskId)))
-                        {
-                            cacheData.IsListenSuccess = false;
-                            continue;
-                        }
-
-                        cacheData.IsListenSuccess = false;
-                    }
-                }
-            }
-        }
-
-        public class ConfigRpcServerListFactory : IServerListFactory
-        {
-            private readonly IServerListManager _serverListManager;
-
-            public ConfigRpcServerListFactory(IServerListManager serverListManager)
-            {
-                this._serverListManager = serverListManager;
-            }
-
-            public string GenNextServer() => _serverListManager.GetNextServerAddr();
-
-            public string GetCurrentServer() => _serverListManager.GetCurrentServerAddr();
-
-            public List<string> GetServerList() => _serverListManager.GetServerUrls();
-        }
 
         private Dictionary<string, string> GetLabels()
         {
@@ -272,16 +180,45 @@
 
         private async Task<CommonResponse> RequestProxy(RpcClient rpcClientInner, CommonRequest request)
         {
-            // TODO: 1. security headers, spas headers
-            // TODO: 2. limiter
+            BuildRequestHeader(request);
+
+            // TODO: 1. limiter
             return await rpcClientInner.Request(request);
+        }
+
+        private void BuildRequestHeader(CommonRequest request)
+        {
+            Dictionary<string, string> securityHeaders = GetSecurityHeaders();
+
+            if (securityHeaders != null)
+            {
+                // put security header to param
+                foreach (var item in securityHeaders) request.PutHeader(item.Key, item.Value);
+            }
+
+            Dictionary<string, string> spasHeaders = GetSpasHeaders();
+            if (spasHeaders != null)
+            {
+                // put spasHeader to header.
+                foreach (var item in spasHeaders) request.PutHeader(item.Key, item.Value);
+            }
         }
 
         private RpcClient GetOneRunningClient() => EnsureRpcClient("0");
 
         protected override Task RemoveCache(string dataId, string group)
         {
-            throw new NotImplementedException();
+            var groupKey = GroupKey.GetKey(dataId, group);
+            lock (_cacheMap)
+            {
+                var copy = new Dictionary<string, CacheData>(_cacheMap);
+                copy.Remove(groupKey);
+                _cacheMap = copy;
+            }
+
+            _logger?.LogInformation("[{0}] [unsubscribe] {1}", GetNameInner(), groupKey);
+
+            return Task.CompletedTask;
         }
 
         protected async override Task ExecuteConfigListen()
@@ -289,29 +226,35 @@
             var listenCachesMap = new Dictionary<string, List<CacheData>>();
             var removeListenCachesMap = new Dictionary<string, List<CacheData>>();
 
-            /*foreach (var item in cacheMap.Values)
+            foreach (var item in _cacheMap.Values)
             {
-                if (item.Listeners != null && item.Listeners.Any() && !item.IsListenSuccess)
+                if (item.GetListeners() != null && item.GetListeners().Any() && !item.IsListenSuccess)
                 {
-                    if (!listenCachesMap.TryGetValue(item.TaskId.ToString(), out var list))
+                    if (!item.IsUseLocalConfig)
                     {
-                        list = new List<CacheData>();
-                        listenCachesMap[item.TaskId.ToString()] = list;
-                    }
+                        if (!listenCachesMap.TryGetValue(item.TaskId.ToString(), out var list))
+                        {
+                            list = new List<CacheData>();
+                            listenCachesMap[item.TaskId.ToString()] = list;
+                        }
 
-                    list.Add(item);
+                        list.Add(item);
+                    }
                 }
-                else if ((item.Listeners == null || !item.Listeners.Any()) && item.IsListenSuccess)
+                else if ((item.GetListeners() == null || !item.GetListeners().Any()) && item.IsListenSuccess)
                 {
-                    if (!removeListenCachesMap.TryGetValue(item.TaskId.ToString(), out var list))
+                    if (!item.IsUseLocalConfig)
                     {
-                        list = new List<CacheData>();
-                        removeListenCachesMap[item.TaskId.ToString()] = list;
-                    }
+                        if (!removeListenCachesMap.TryGetValue(item.TaskId.ToString(), out var list))
+                        {
+                            list = new List<CacheData>();
+                            removeListenCachesMap[item.TaskId.ToString()] = list;
+                        }
 
-                    list.Add(item);
+                        list.Add(item);
+                    }
                 }
-            }*/
+            }
 
             if (listenCachesMap != null && listenCachesMap.Any())
             {
@@ -335,7 +278,7 @@
 
                             if (configChangeBatchListenResponse != null && configChangeBatchListenResponse.IsSuccess())
                             {
-                                HashSet<string> changeKeys = new HashSet<string>();
+                                var changeKeys = new HashSet<string>();
 
                                 if (configChangeBatchListenResponse.ChangedConfigs != null && configChangeBatchListenResponse.ChangedConfigs.Any())
                                 {
@@ -345,21 +288,7 @@
 
                                         changeKeys.Add(changeKey);
 
-                                        if (_cacheMap.TryGetValue(changeKey, out var cached))
-                                        {
-                                            // query and exec
-                                            var ct = await QueryConfig(cached.DataId, cached.Group, cached.Tenant, 3000, false);
-
-                                            Console.WriteLine($"new config = {ct.ToJsonString()}");
-
-                                            // check last md5
-                                            if (ct.Count > 0)
-                                            {
-                                                cached.SetContent(ct[0]);
-
-                                                /*if (cached.CheckListenerMd5()) cached.Listeners.ForEach(x => x.Invoke(ct[0]));*/
-                                            }
-                                        }
+                                        await RefreshContentAndCheck(changeKey, true);
                                     }
                                 }
 
@@ -401,8 +330,7 @@
 
                             if (response != null && response.IsSuccess())
                             {
-                                // do remove
-                                Console.WriteLine("do remove");
+                                foreach (var item in removeListenCaches) RemoveCache(item.DataId, item.Group, item.Tenant);
                             }
                         }
                         catch (Exception ex)
@@ -412,6 +340,51 @@
                     }
                 }
             }
+        }
+
+        private async Task RefreshContentAndCheck(string groupKey, bool notify)
+        {
+            if (_cacheMap != null && _cacheMap.ContainsKey(groupKey))
+            {
+                _cacheMap.TryGetValue(groupKey, out var cache);
+                await RefreshContentAndCheck(cache, notify);
+            }
+        }
+
+        private async Task RefreshContentAndCheck(CacheData cacheData, bool notify)
+        {
+            try
+            {
+                var ct = await GetServerConfig(cacheData.DataId, cacheData.Group, cacheData.Tenant, 3000L, notify);
+                cacheData.SetContent(ct[0]);
+                if (ct.Count > 1 && ct[1] != null) cacheData.Type = ct[1];
+
+                cacheData.CheckListenerMd5();
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "refresh content and check md5 fail ,dataid={0},group={1},tenant={2} ", cacheData.DataId, cacheData.Group, cacheData.Tenant);
+            }
+        }
+
+        public async Task<List<string>> GetServerConfig(string dataId, string group, string tenant, long readTimeout, bool notify)
+        {
+            if (string.IsNullOrWhiteSpace(group)) group = Constants.DEFAULT_GROUP;
+
+            return await QueryConfig(dataId, group, tenant, readTimeout, notify);
+        }
+
+        private void RemoveCache(string dataId, string group, string tenant)
+        {
+            var groupKey = GroupKey.GetKeyTenant(dataId, group, tenant);
+            lock (_cacheMap)
+            {
+                var copy = new Dictionary<string, CacheData>(_cacheMap);
+                copy.Remove(groupKey);
+                _cacheMap = copy;
+            }
+
+            _logger?.LogInformation("[{0}] [unsubscribe] {1}", GetNameInner(), groupKey);
         }
     }
 }

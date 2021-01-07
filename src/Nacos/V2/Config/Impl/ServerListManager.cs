@@ -1,5 +1,7 @@
 ﻿namespace Nacos.V2.Config.Impl
 {
+    using Microsoft.Extensions.Logging;
+    using Nacos.V2.Exceptions;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -8,12 +10,8 @@
     using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Options;
-    using Nacos.V2.Config.Abst;
-    using Nacos.V2.Exceptions;
 
-    public class ServerListManager : IServerListManager, IDisposable
+    public class ServerListManager : IDisposable
     {
         public const string FIXED_NAME = "fixed";
         private const string HTTP = "http";
@@ -207,10 +205,7 @@
             }
         }
 
-        public List<string> GetServerUrls()
-        {
-            return _serverUrls;
-        }
+        public List<string> GetServerUrls() => _serverUrls;
 
         public string GetCurrentServerAddr()
         {
@@ -231,10 +226,7 @@
             _currentServerAddr = _serverUrls[index];
         }
 
-        public void UpdateCurrentServerAddr(string currentServerAddr)
-        {
-            _currentServerAddr = currentServerAddr;
-        }
+        public void UpdateCurrentServerAddr(string currentServerAddr) => _currentServerAddr = currentServerAddr;
 
         public string GetName() => _name;
 
