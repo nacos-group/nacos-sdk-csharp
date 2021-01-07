@@ -23,7 +23,7 @@
         {
             _configurationSource = configurationSource;
             _parser = configurationSource.NacosConfigurationParser;
-            _configDict = new ConcurrentDictionary<string, string>();
+            _configDict = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             _client = new NacosMsConfigClient(NullLoggerFactory.Instance, new NacosOptions
             {
@@ -83,7 +83,7 @@
             {
                 _configDict[key] = val;
 
-                var nData = new Dictionary<string, string>();
+                var nData = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
                 foreach (var dict in _configDict)
                 {
@@ -114,7 +114,7 @@
             {
                 if (_configurationSource.Listeners != null && _configurationSource.Listeners.Any())
                 {
-                    var dict = new Dictionary<string, string>();
+                    var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
                     foreach (var listener in _configurationSource.Listeners)
                     {
