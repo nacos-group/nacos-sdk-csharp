@@ -56,7 +56,7 @@
             if (!string.IsNullOrWhiteSpace(content))
             {
                 // TODO truncate content
-                _logger.LogWarning("[{0}] [get-config] get failover ok, dataId={1}, group={2}, tenant={3}, config={4}", _agent.GetName(), request.DataId, request.Group, request.Tenant, content);
+                _logger?.LogWarning("[{0}] [get-config] get failover ok, dataId={1}, group={2}, tenant={3}, config={4}", _agent.GetName(), request.DataId, request.Group, request.Tenant, content);
 
                 return content;
             }
@@ -73,12 +73,12 @@
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(
+                _logger?.LogWarning(
                     "[{0}] [get-config] get from server error, dataId={1}, group={2}, tenant={3}, msg={4}",
                     _agent.GetName(), request.DataId, request.Group, request.Tenant, ex.Message);
             }
 
-            _logger.LogWarning(
+            _logger?.LogWarning(
                 "[{}] [get-config] get snapshot ok, dataId={}, group={}, tenant={}, config={}",
                 _agent.GetName(), request.DataId, request.Group, request.Tenant, content);
 

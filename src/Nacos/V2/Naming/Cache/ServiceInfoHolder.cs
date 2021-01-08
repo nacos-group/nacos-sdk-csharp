@@ -111,7 +111,7 @@
             if (newHosts.Count > 0)
             {
                 changed = true;
-                _logger.LogInformation(
+                _logger?.LogInformation(
                     "new ips ({0}) service: {1} -> {2}",
                     newHosts.Count(),
                     newService.GetKey(),
@@ -121,7 +121,7 @@
             if (removeHosts.Count() > 0)
             {
                 changed = true;
-                _logger.LogInformation(
+                _logger?.LogInformation(
                   "removed ips ({0}) service: {1} -> {2}",
                   removeHosts.Count(),
                   newService.GetKey(),
@@ -131,7 +131,7 @@
             if (modHosts.Count() > 0)
             {
                 changed = true;
-                _logger.LogInformation(
+                _logger?.LogInformation(
                  "modified ips ({0}) service: {1} -> {2}",
                  modHosts.Count(),
                  newService.GetKey(),

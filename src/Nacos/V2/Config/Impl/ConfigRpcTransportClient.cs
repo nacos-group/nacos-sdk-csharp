@@ -62,7 +62,7 @@
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "[{0}] [publish-single] error, dataId={1}, group={2}, tenant={3}, code={4}", this.GetName(), dataId, group, tenant, "unkonw");
+                _logger?.LogWarning(ex, "[{0}] [publish-single] error, dataId={1}, group={2}, tenant={3}, code={4}", this.GetName(), dataId, group, tenant, "unkonw");
                 return false;
             }
         }
@@ -94,14 +94,14 @@
                 }
                 else if (response.ErrorCode.Equals(ConfigQueryResponse.CONFIG_QUERY_CONFLICT))
                 {
-                    _logger.LogError(
+                    _logger?.LogError(
                         "[{0}] [sub-server-error] get server config being modified concurrently, dataId={1}, group={2}, tenant={3}",
                         GetName(), dataId, group, tenant);
                     throw new NacosException(NacosException.CONFLICT, $"data being modified, dataId={dataId},group={group},tenant={tenant}");
                 }
                 else
                 {
-                    _logger.LogError(
+                    _logger?.LogError(
                        "[{0}] [sub-server-error]  dataId={1}, group={2}, tenant={3}, code={4}",
                        GetName(), dataId, group, tenant, response.ToJsonString());
                     throw new NacosException(response.ErrorCode, $"http error, code={response.ErrorCode}, dataId={dataId},group={group},tenant={tenant}");
@@ -109,7 +109,7 @@
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[{0}] [sub-server-error] dataId={1}, group={2}, tenant={3}, code={4} ", GetName(), dataId, group, tenant, ex.Message);
+                _logger?.LogError(ex, "[{0}] [sub-server-error] dataId={1}, group={2}, tenant={3}, code={4} ", GetName(), dataId, group, tenant, ex.Message);
                 throw;
             }
         }
@@ -126,7 +126,7 @@
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "[{0}] [remove-single] error, dataId={1}, group={2}, tenant={3}, code={4}", this.GetName(), dataId, group, tenant, "unkonw");
+                _logger?.LogWarning(ex, "[{0}] [remove-single] error, dataId={1}, group={2}, tenant={3}, code={4}", this.GetName(), dataId, group, tenant, "unkonw");
                 return false;
             }
         }
@@ -303,7 +303,7 @@
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogError(ex, "async listen config change error ");
+                            _logger?.LogError(ex, "async listen config change error ");
                         }
                     }
                 }
@@ -335,7 +335,7 @@
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogError(ex, "async remove listen config change error ");
+                            _logger?.LogError(ex, "async remove listen config change error ");
                         }
                     }
                 }

@@ -30,14 +30,9 @@
 
             ServerListManager serverListManager = new ServerListManager(logger, options.CurrentValue);
 
-            if (ParamUtils.UseHttpSwitch())
-            {
-                _agent = new ConfigHttpTransportClient(logger, options.CurrentValue, serverListManager, cacheMap);
-            }
-            else
-            {
-                _agent = new ConfigRpcTransportClient(logger, options.CurrentValue, serverListManager, cacheMap);
-            }
+            _agent = options.CurrentValue.ConfigUseRpc
+                ? new ConfigRpcTransportClient(logger, options.CurrentValue, serverListManager, cacheMap)
+                : new ConfigHttpTransportClient(logger, options.CurrentValue, serverListManager, cacheMap);
         }
 
         private void Init(IOptionsMonitor<NacosSdkOptions> options)
@@ -133,7 +128,7 @@
                 cacheMap = copy;
             }
 
-            _logger.LogInformation("[{0}] [subscribe] {1}", this._agent.GetName(), key);
+            _logger?.LogInformation("[{0}] [subscribe] {1}", this._agent.GetName(), key);
 
             return cache;
         }

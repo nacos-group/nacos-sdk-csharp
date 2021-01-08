@@ -48,6 +48,10 @@
         /// </summary>
         public int ListenInterval { get; set; } = 1000;
 
+        public bool ConfigUseRpc { get; set; } = true;
+
+        public bool NamingUseRpc { get; set; } = true;
+
         public string NamingLoadCacheAtStart { get; set; }
     }
 }

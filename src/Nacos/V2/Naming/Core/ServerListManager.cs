@@ -110,7 +110,7 @@
             {
                 if (_serverList != null && _serverList.Count > 0)
                 {
-                    _logger.LogDebug("server list provided by user: {0}", string.Join(",", _serverList));
+                    _logger?.LogDebug("server list provided by user: {0}", string.Join(",", _serverList));
                     return;
                 }
 
@@ -141,7 +141,7 @@
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "failed to update server list");
+                _logger?.LogWarning(ex, "failed to update server list");
             }
         }
 

@@ -72,7 +72,7 @@
 
         protected override async Task<bool> PublishConfig(string dataId, string group, string tenant, string appName, string tag, string betaIps, string content)
         {
-            group = Null2defaultGroup(group);
+            group = ParamUtils.Null2DefaultGroup(group);
             ParamUtils.CheckParam(dataId, group, content);
 
             ConfigRequest cr = new ConfigRequest();
@@ -105,7 +105,7 @@
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(
+                _logger?.LogWarning(
                   ex,
                   "[{0}] [publish-single] exception, dataId={1}, group={2}, tenant={3}",
                   _agent.GetName(), dataId, group, tenant);
@@ -115,7 +115,7 @@
 
             if (result.StatusCode == System.Net.HttpStatusCode.OK)
             {
-                _logger.LogInformation(
+                _logger?.LogInformation(
                  "[{0}] [publish-single] ok, dataId={1}, group={2}, tenant={3}, config={4}",
                  _agent.GetName(), dataId, group, tenant, ContentUtils.TruncateContent(content));
 
@@ -123,14 +123,14 @@
             }
             else if (result.StatusCode == System.Net.HttpStatusCode.Forbidden)
             {
-                _logger.LogWarning(
+                _logger?.LogWarning(
                 "[{0}] [publish-single] error, dataId={1}, group={2}, tenant={3}, code={4}, msg={5}",
                 _agent.GetName(), dataId, group, tenant, (int)result.StatusCode, result.StatusCode.ToString());
                 throw new NacosException((int)result.StatusCode, result.StatusCode.ToString());
             }
             else
             {
-                _logger.LogWarning(
+                _logger?.LogWarning(
                "[{0}] [publish-single] error, dataId={1}, group={2}, tenant={3}, code={4}, msg={5}",
                _agent.GetName(), dataId, group, tenant, (int)result.StatusCode, result.StatusCode.ToString());
                 return false;
@@ -165,7 +165,7 @@
             }
             catch (Exception ex)
             {
-                _logger.LogError(
+                _logger?.LogError(
                     ex,
                     "[{0}] [sub-server] get server config exception, dataId={1}, group={2}, tenant={3}",
                     _agent.GetName(), dataId, group, tenant);
@@ -199,7 +199,7 @@
                     return ct.ToList();
                 case System.Net.HttpStatusCode.Conflict:
                     {
-                        _logger.LogError(
+                        _logger?.LogError(
                             "[{}] [sub-server-error] get server config being modified concurrently, dataId={}, group={}, tenant={}",
                             _agent.GetName(), dataId, group, tenant);
 
@@ -208,7 +208,7 @@
 
                 case System.Net.HttpStatusCode.Forbidden:
                     {
-                        _logger.LogError(
+                        _logger?.LogError(
                            "[{0}] [sub-server-error] no right, dataId={1}, group={2}, tenant={3}",
                            _agent.GetName(), dataId, group, tenant);
 
@@ -217,15 +217,13 @@
 
                 default:
                     {
-                        _logger.LogError(
+                        _logger?.LogError(
                           "[{0}] [sub-server-error] , dataId={1}, group={2}, tenant={3}, code={4}",
                           _agent.GetName(), dataId, group, tenant, result.StatusCode);
                         throw new NacosException((int)result.StatusCode, "http error, code=" + (int)result.StatusCode + ",dataId=" + dataId + ",group=" + group + ",tenant=" + tenant);
                     }
             }
         }
-
-        private string Null2defaultGroup(string group) => (group == null) ? Constants.DEFAULT_GROUP : group.Trim();
 
         private async Task<HttpResponseMessage> HttpPost(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, string encoding, long readTimeoutMs)
         {
@@ -253,7 +251,7 @@
 
         private void AssembleHttpParams(Dictionary<string, string> paramValues, Dictionary<string, string> headers)
         {
-            Dictionary<string, string> securityHeaders = GetSecurityHeaders();
+            var securityHeaders = GetSecurityHeaders();
 
             if (securityHeaders != null)
             {
@@ -267,14 +265,14 @@
                 }
             }
 
-            Dictionary<string, string> spasHeaders = GetSpasHeaders();
+            var spasHeaders = GetSpasHeaders();
             if (spasHeaders != null)
             {
                 // put spasHeader to header.
                 foreach (var item in spasHeaders) headers[item.Key] = item.Value;
             }
 
-            Dictionary<string, string> commonHeader = GetCommonHeader();
+            var commonHeader = GetCommonHeader();
             if (commonHeader != null)
             {
                 // put common headers
@@ -282,7 +280,7 @@
             }
 
             // SpasAdapter.getSignHeaders(params, super.secretKey);
-            Dictionary<string, string> signHeaders = new Dictionary<string, string>();
+            var signHeaders = new Dictionary<string, string>();
             if (signHeaders != null)
             {
                 foreach (var item in signHeaders) headers[item.Key] = item.Value;
@@ -296,7 +294,7 @@
 
         protected override async Task<bool> RemoveConfig(string dataId, string group, string tenant, string tag)
         {
-            group = Null2defaultGroup(group);
+            group = ParamUtils.Null2DefaultGroup(group);
             ParamUtils.CheckKeyParam(dataId, group);
             string url = Constants.CONFIG_CONTROLLER_PATH;
             var parameters = new Dictionary<string, string>(4);
@@ -313,7 +311,7 @@
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(
+                _logger?.LogWarning(
                     ex,
                     "[remove] error,, dataId={1}, group={2}, tenant={3}",
                     dataId, group, tenant);
@@ -322,7 +320,7 @@
 
             if (result.StatusCode == System.Net.HttpStatusCode.OK)
             {
-                _logger.LogInformation(
+                _logger?.LogInformation(
                  "[{0}] [remove] ok, dataId={1}, group={2}, tenant={3}",
                  _agent.GetName(), dataId, group, tenant);
 
@@ -330,14 +328,14 @@
             }
             else if (result.StatusCode == System.Net.HttpStatusCode.Forbidden)
             {
-                _logger.LogWarning(
+                _logger?.LogWarning(
                    "[{}] [remove] error,, dataId={1}, group={2}, tenant={3}, code={4}, msg={5}",
                    _agent.GetName(), dataId, group, tenant, (int)result.StatusCode, result.StatusCode.ToString());
                 throw new NacosException((int)result.StatusCode, result.StatusCode.ToString());
             }
             else
             {
-                _logger.LogWarning(
+                _logger?.LogWarning(
                    "[{}] [remove] error,, dataId={1}, group={2}, tenant={3}, code={4}, msg={5}",
                    _agent.GetName(), dataId, group, tenant, (int)result.StatusCode, result.StatusCode.ToString());
                 return false;

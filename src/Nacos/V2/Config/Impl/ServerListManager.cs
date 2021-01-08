@@ -105,7 +105,7 @@
             {
                 if (_serverUrls != null && _serverUrls.Count > 0)
                 {
-                    _logger.LogWarning("[update-serverlist] current serverlist from address server is empty!!!");
+                    _logger?.LogWarning("[update-serverlist] current serverlist from address server is empty!!!");
                     return;
                 }
 
@@ -139,7 +139,7 @@
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[{0}][update-serverlist] failed to update serverlist from address server!", _name);
+                _logger?.LogError(ex, "[{0}][update-serverlist] failed to update serverlist from address server!", _name);
             }
         }
 
@@ -191,7 +191,7 @@
                     }
                     else
                     {
-                        _logger.LogWarning("get serverlist fail,url: {0}", _addressServerUrl);
+                        _logger?.LogWarning("get serverlist fail,url: {0}", _addressServerUrl);
                         return null;
                     }
                 }
@@ -200,7 +200,7 @@
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[init-serverlist] fail to get NACOS-server serverlist! env: {0}, url: {1}", _name, _addressServerUrl);
+                _logger?.LogError(ex, "[init-serverlist] fail to get NACOS-server serverlist! env: {0}, url: {1}", _name, _addressServerUrl);
                 return null;
             }
         }
