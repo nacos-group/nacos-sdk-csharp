@@ -223,5 +223,7 @@
             string remoteConnectionType = Environment.GetEnvironmentVariable("nacos.remote.config.connectiontype");
             return remoteConnectionType;
         }
+
+        public static string Null2DefaultGroup(string group) => (group == null) ? Constants.DEFAULT_GROUP : group.Trim();
     }
 }

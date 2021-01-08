@@ -46,7 +46,7 @@
 
         public Task AddTenantListeners(string dataId, string group, List<IListener> listeners)
         {
-            group = Null2defaultGroup(group);
+            group = ParamUtils.Null2DefaultGroup(group);
             string tenant = _agent.GetTenant();
 
             CacheData cache = AddCacheDataIfAbsent(dataId, group, tenant);
@@ -65,7 +65,7 @@
 
         internal void AddTenantListenersWithContent(string dataId, string group, string content, List<IListener> listeners)
         {
-            group = Null2defaultGroup(group);
+            group = ParamUtils.Null2DefaultGroup(group);
             string tenant = _agent.GetTenant();
             CacheData cache = AddCacheDataIfAbsent(dataId, group, tenant);
             cache.SetContent(content);
@@ -83,7 +83,7 @@
 
         public async Task RemoveTenantListener(string dataId, string group, IListener listener)
         {
-            group = Null2defaultGroup(group);
+            group = ParamUtils.Null2DefaultGroup(group);
             string tenant = _agent.GetTenant();
 
             CacheData cache = GetCache(dataId, group, tenant);
@@ -96,8 +96,6 @@
                 }
             }
         }
-
-        private string Null2defaultGroup(string group) => (group == null) ? Constants.DEFAULT_GROUP : group.Trim();
 
         public CacheData AddCacheDataIfAbsent(string dataId, string group, string tenant)
         {

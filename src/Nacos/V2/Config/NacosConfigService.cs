@@ -57,7 +57,7 @@
 
         private async Task<string> GetConfigInner(string tenant, string dataId, string group, long timeoutMs)
         {
-            group = Null2DefaultGroup(group);
+            group = ParamUtils.Null2DefaultGroup(group);
             ParamUtils.CheckKeyParam(dataId, group);
             ConfigResponse cr = new ConfigResponse();
 
@@ -112,7 +112,7 @@
         private async Task<bool> PublishConfigInner(string tenant, string dataId, string group, string tag, string appName,
             string betaIps, string content, string type)
         {
-            group = Null2DefaultGroup(group);
+            group = ParamUtils.Null2DefaultGroup(group);
             ParamUtils.CheckParam(dataId, group, content);
 
             ConfigRequest cr = new ConfigRequest();
@@ -129,11 +129,9 @@
 
         private async Task<bool> RemoveConfigInner(string tenant, string dataId, string group, string tag)
         {
-            group = Null2DefaultGroup(group);
+            group = ParamUtils.Null2DefaultGroup(group);
             ParamUtils.CheckKeyParam(dataId, group);
             return await _worker.RemoveConfig(dataId, group, tenant, tag);
         }
-
-        private string Null2DefaultGroup(string group) => (group == null) ? Constants.DEFAULT_GROUP : group.Trim();
     }
 }
