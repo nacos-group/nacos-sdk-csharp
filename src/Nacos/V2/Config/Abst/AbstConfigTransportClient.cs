@@ -105,5 +105,44 @@
             headers[HttpHeaderConsts.ACCEPT_CHARSET] = "UTF-8";
             return headers;
         }
+
+        protected Dictionary<string, string> GetSignHeaders(Dictionary<string, string> paramValues, string secretKey)
+        {
+            if (paramValues == null) return null;
+
+            var resource = string.Empty;
+            if (paramValues.ContainsKey(Constants.TENANT) && paramValues.ContainsKey(Constants.GROUP))
+            {
+                resource = paramValues[Constants.TENANT] + "+" + paramValues[Constants.GROUP];
+            }
+            else
+            {
+                if (paramValues.TryGetValue(Constants.GROUP, out var group) && string.IsNullOrWhiteSpace(group))
+                {
+                    resource = group;
+                }
+            }
+
+            return GetSignHeaders(resource, secretKey);
+        }
+
+        private Dictionary<string, string> GetSignHeaders(string resource, string secretKey)
+        {
+            var header = new Dictionary<string, string>(2);
+
+            var timeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
+            header["Timestamp"] = timeStamp;
+
+            if (!string.IsNullOrWhiteSpace(secretKey))
+            {
+                var signature = string.IsNullOrWhiteSpace(resource)
+                    ? HashUtil.GetHMACSHA1(timeStamp, secretKey)
+                    : HashUtil.GetHMACSHA1($"{resource}+{timeStamp}", secretKey);
+
+                header["Spas-Signature"] = signature;
+            }
+
+            return header;
+        }
     }
 }

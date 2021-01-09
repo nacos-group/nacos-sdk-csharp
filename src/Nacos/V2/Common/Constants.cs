@@ -168,5 +168,7 @@
         public static string ALL_PATTERN = "*";
 
         public static string COLON = ":";
+
+        public static string TENANT = "tenant";
     }
 }

@@ -255,7 +255,6 @@
 
             if (securityHeaders != null)
             {
-                // put security header to param
                 foreach (var item in securityHeaders) paramValues[item.Key] = item.Value;
 
                 if (!string.IsNullOrWhiteSpace(_options.Namespace)
@@ -268,19 +267,16 @@
             var spasHeaders = GetSpasHeaders();
             if (spasHeaders != null)
             {
-                // put spasHeader to header.
                 foreach (var item in spasHeaders) headers[item.Key] = item.Value;
             }
 
             var commonHeader = GetCommonHeader();
             if (commonHeader != null)
             {
-                // put common headers
                 foreach (var item in commonHeader) headers[item.Key] = item.Value;
             }
 
-            // SpasAdapter.getSignHeaders(params, super.secretKey);
-            var signHeaders = new Dictionary<string, string>();
+            var signHeaders = GetSignHeaders(paramValues, _options.SecretKey);
             if (signHeaders != null)
             {
                 foreach (var item in signHeaders) headers[item.Key] = item.Value;
