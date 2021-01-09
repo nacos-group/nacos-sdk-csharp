@@ -35,7 +35,7 @@
         {
             string content = await GetConfig(dataId, group, timeoutMs);
 
-            _worker.AddTenantListenersWithContent(dataId, group, content, new List<IListener> { listener });
+            await _worker.AddTenantListenersWithContent(dataId, group, content, new List<IListener> { listener });
             return content;
         }
 

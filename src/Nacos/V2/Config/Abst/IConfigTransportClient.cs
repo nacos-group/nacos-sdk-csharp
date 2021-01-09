@@ -33,6 +33,8 @@
 
         Task ExecuteConfigListenAsync();
 
+        Task NotifyListenConfigAsync();
+
         void Start();
     }
 }

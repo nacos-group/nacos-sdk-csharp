@@ -9,6 +9,7 @@
     using Nacos.V2.Remote.Requests;
     using Nacos.V2.Remote.Responses;
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
@@ -18,14 +19,16 @@
     {
         private static readonly string RPC_AGENT_NAME = "config_rpc_client";
 
+        private readonly BlockingCollection<object> _listenExecutebell = new BlockingCollection<object>(boundedCapacity: 1);
+
+        private object _bellItem = new object();
+
         private ILogger _logger;
 
         private Dictionary<string, CacheData> _cacheMap;
         private string uuid = System.Guid.NewGuid().ToString();
 
         private readonly object _lock = new object();
-
-        private Timer _configListenTimer;
 
         public ConfigRpcTransportClient(
             ILogger logger,
@@ -36,9 +39,10 @@
             this._logger = logger;
             this._options = options;
             this._serverListManager = serverListManager;
+            this._accessKey = _options.AccessKey;
+            this._secretKey = _options.SecretKey;
             this._cacheMap = cacheMap;
-
-            _securityProxy = new Security.SecurityProxy(options);
+            this._securityProxy = new Security.SecurityProxy(options);
 
             StartInner();
         }
@@ -135,11 +139,28 @@
 
         protected override void StartInner()
         {
-            _configListenTimer = new Timer(
-                async x =>
+            Task.Factory.StartNew(async () =>
+            {
+                while (true)
                 {
-                    await ExecuteConfigListen();
-                }, null, 0, 5000);
+                    try
+                    {
+                        // block 5000ms
+                        if (_listenExecutebell.TryTake(out _, 5000))
+                        {
+                            await ExecuteConfigListen();
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger?.LogError(ex, "[ rpc listen execute ] [rpc listen] exception");
+                    }
+                }
+            });
         }
 
         private RpcClient EnsureRpcClient(string taskId)
@@ -163,12 +184,11 @@
 
         private void InitHandlerRpcClient(RpcClient rpcClientInner)
         {
-            rpcClientInner.RegisterServerPushResponseHandler(new ConfigRpcServerRequestHandler(_cacheMap));
+            rpcClientInner.RegisterServerPushResponseHandler(new ConfigRpcServerRequestHandler(_cacheMap, NotifyListenConfig));
             rpcClientInner.RegisterConnectionListener(new ConfigRpcConnectionEventListener(rpcClientInner, _cacheMap));
 
             rpcClientInner.Init(new ConfigRpcServerListFactory(_serverListManager));
         }
-
 
         private Dictionary<string, string> GetLabels()
         {
@@ -387,6 +407,12 @@
             }
 
             _logger?.LogInformation("[{0}] [unsubscribe] {1}", GetNameInner(), groupKey);
+        }
+
+        protected override Task NotifyListenConfig()
+        {
+            _listenExecutebell.Add(_bellItem);
+            return Task.CompletedTask;
         }
     }
 }

@@ -5,15 +5,10 @@
     using Nacos.V2.Utils;
     using System;
     using System.Collections.Generic;
-    using System.Collections.Concurrent;
 
     public class CacheData
     {
         public static readonly int PerTaskConfigSize = 3000;
-
-        public CacheData()
-        {
-        }
 
         public CacheData(ConfigFilterChainManager configFilterChainManager, string name, string dataId, string group)
         {
@@ -27,6 +22,7 @@
             this.DataId = dataId;
             this.Group = group;
             this.Tenant = TenantUtil.GetUserTenantForAcm();
+            this.Listeners = new List<ManagerListenerWrap>();
             this.IsInitializing = true;
             this.Content = LoadCacheContentFromDiskLocal(name, dataId, group, Tenant);
             this.Md5 = GetMd5String(this.Content);
@@ -44,9 +40,7 @@
             this.DataId = dataId;
             this.Group = group;
             this.Tenant = tenant;
-            this.IsInitializing = true;
-            this.Content = LoadCacheContentFromDiskLocal(name, dataId, group, Tenant);
-            this.Md5 = GetMd5String(this.Content);
+            this.Listeners = new List<ManagerListenerWrap>();
             this.IsInitializing = true;
             this.Content = LoadCacheContentFromDiskLocal(name, dataId, group, Tenant);
             this.Md5 = GetMd5String(this.Content);
@@ -61,8 +55,6 @@
         public string Md5 { get; set; }
 
         public string Content { get; set; }
-
-        public string LastMd5 { get; set; }
 
         public string Tenant { get; set; }
 
@@ -82,28 +74,41 @@
 
         public ConfigFilterChainManager ConfigFilterChainManager { get; set; }
 
-        private List<ManagerListenerWrap> Listeners { get; set; } = new List<ManagerListenerWrap>();
+        private List<ManagerListenerWrap> Listeners { get; set; }
 
-        public bool CheckListenerMd5() => !LastMd5.Equals(Md5);
+        public void CheckListenerMd5()
+        {
+            foreach (var wrap in Listeners)
+            {
+                if (!wrap.LastCallMd5.Equals(Md5))
+                {
+                    SafeNotifyListener(Content, Md5, wrap);
+                }
+            }
+        }
+
+        private void SafeNotifyListener(string content, string md5, ManagerListenerWrap wrap)
+        {
+            var listener = wrap.Listener;
+
+            wrap.LastContent = content;
+            wrap.LastCallMd5 = md5;
+
+            listener.ReceiveConfigInfo(content);
+        }
 
         public void AddListener(IListener listener)
         {
-            if (listener == null)
-            {
-                throw new ArgumentException("listener is null");
-            }
+            if (listener == null) throw new ArgumentException("listener is null");
 
-            ManagerListenerWrap wrap = new ManagerListenerWrap(listener, Md5);
+            ManagerListenerWrap wrap = new ManagerListenerWrap(listener, Md5, Content);
 
             Listeners.Add(wrap);
         }
 
         public void RemoveListener(IListener listener)
         {
-            if (listener == null)
-            {
-                throw new ArgumentException("listener is null");
-            }
+            if (listener == null) throw new ArgumentException("listener is null");
 
             ManagerListenerWrap wrap = new ManagerListenerWrap(listener);
             if (Listeners.Remove(wrap))
@@ -135,14 +140,7 @@
 
         public override string ToString() => $"CacheData [{DataId},{Group}]";
 
-        public override bool Equals(object obj)
-        {
-            if (WeakReference.Equals(this, obj)) return true;
-
-            return obj is CacheData other
-                ? DataId.Equals(other.DataId) && Group.Equals(other.Group)
-                : false;
-        }
+        public override bool Equals(object obj) => obj is CacheData other && DataId.Equals(other.DataId) && Group.Equals(other.Group);
 
         public override int GetHashCode()
         {
@@ -152,7 +150,6 @@
             result = (prime * result) + ((Group == null) ? 0 : Group.GetHashCode());
             return result;
         }
-
 
         public List<IListener> GetListeners()
         {
@@ -178,41 +175,25 @@
 
         internal class ManagerListenerWrap
         {
-            internal readonly IListener Listener;
-            internal readonly String LastCallMd5 = CacheData.GetMd5String(null);
-            internal readonly String LastContent = null;
+            internal IListener Listener;
+            internal string LastCallMd5 = GetMd5String(null);
+            internal string LastContent = null;
 
             internal ManagerListenerWrap(IListener listener)
             {
                 this.Listener = listener;
             }
 
-            internal ManagerListenerWrap(IListener listener, String md5)
-            {
-                this.Listener = listener;
-                this.LastCallMd5 = md5;
-            }
-
-            internal ManagerListenerWrap(IListener listener, String md5, String lastContent)
+            internal ManagerListenerWrap(IListener listener, string md5, string lastContent)
             {
                 this.Listener = listener;
                 this.LastCallMd5 = md5;
                 this.LastContent = lastContent;
             }
 
-            public override bool Equals(object obj)
-            {
-                if (WeakReference.Equals(this, obj)) return true;
+            public override bool Equals(object obj) => obj is ManagerListenerWrap other && Listener.Equals(other.Listener);
 
-                return obj is ManagerListenerWrap other
-                    ? Listener.Equals(other.Listener)
-                    : false;
-            }
-
-            public override int GetHashCode()
-            {
-                return base.GetHashCode();
-            }
+            public override int GetHashCode() => base.GetHashCode();
         }
     }
 }

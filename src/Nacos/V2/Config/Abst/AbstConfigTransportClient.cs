@@ -55,6 +55,8 @@
 
         public Task ExecuteConfigListenAsync() => ExecuteConfigListen();
 
+        protected abstract Task NotifyListenConfig();
+
         protected Dictionary<string, string> GetSpasHeaders()
         {
             var spasHeaders = new Dictionary<string, string>(2);
@@ -144,5 +146,7 @@
 
             return header;
         }
+
+        public Task NotifyListenConfigAsync() => NotifyListenConfig();
     }
 }

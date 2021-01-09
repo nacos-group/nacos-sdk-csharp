@@ -46,7 +46,7 @@
         [HttpGet("a")]
         public async Task<string> Listen(string d)
         {
-            await _svc.AddListener(d, "g", null);
+            await _svc.AddListener(d, "g", _configListen);
             return "al ok";
         }
 
@@ -54,9 +54,19 @@
         [HttpGet("r")]
         public async Task<string> UnListen(string d)
         {
-            await _svc.RemoveListener(d, "g", null);
+            await _svc.RemoveListener(d, "g", _configListen);
 
             return "rl ok";
+        }
+
+        private static CusConfigListen _configListen = new CusConfigListen();
+
+        public class CusConfigListen : Nacos.V2.IListener
+        {
+            public void ReceiveConfigInfo(string configInfo)
+            {
+                System.Console.WriteLine("config cb cb cb " + configInfo);
+            }
         }
     }
 }

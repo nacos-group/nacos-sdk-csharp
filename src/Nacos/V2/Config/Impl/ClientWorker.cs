@@ -26,8 +26,6 @@
             _logger = logger;
             _configFilterChainManager = configFilterChainManager;
 
-            Init(options);
-
             ServerListManager serverListManager = new ServerListManager(logger, options.CurrentValue);
 
             _agent = options.CurrentValue.ConfigUseRpc
@@ -35,11 +33,7 @@
                 : new ConfigHttpTransportClient(logger, options.CurrentValue, serverListManager, cacheMap);
         }
 
-        private void Init(IOptionsMonitor<NacosSdkOptions> options)
-        {
-        }
-
-        public Task AddTenantListeners(string dataId, string group, List<IListener> listeners)
+        public async Task AddTenantListeners(string dataId, string group, List<IListener> listeners)
         {
             group = ParamUtils.Null2DefaultGroup(group);
             string tenant = _agent.GetTenant();
@@ -52,13 +46,11 @@
 
             if (!cache.IsListenSuccess)
             {
-                // _agent.notifyListenConfig();
+                await _agent.NotifyListenConfigAsync();
             }
-
-            return Task.CompletedTask;
         }
 
-        internal void AddTenantListenersWithContent(string dataId, string group, string content, List<IListener> listeners)
+        internal async Task AddTenantListenersWithContent(string dataId, string group, string content, List<IListener> listeners)
         {
             group = ParamUtils.Null2DefaultGroup(group);
             string tenant = _agent.GetTenant();
@@ -72,7 +64,7 @@
             // if current cache is already at listening status,do not notify.
             if (!cache.IsListenSuccess)
             {
-                // _agent.notifyListenConfig();
+                await _agent.NotifyListenConfigAsync();
             }
         }
 
@@ -121,11 +113,7 @@
                     cache.TaskId = taskId;
                 }
 
-                var copy = new Dictionary<string, CacheData>(cacheMap)
-                {
-                    [key] = cache
-                };
-                cacheMap = copy;
+                cacheMap[key] = cache;
             }
 
             _logger?.LogInformation("[{0}] [subscribe] {1}", this._agent.GetName(), key);
@@ -148,9 +136,7 @@
             string groupKey = tenant == null ? GroupKey.GetKey(dataId, group) : GroupKey.GetKeyTenant(dataId, group, tenant);
             lock (cacheMap)
             {
-                var copy = new Dictionary<string, CacheData>(cacheMap);
-                copy.Remove(groupKey);
-                cacheMap = copy;
+                cacheMap.Remove(groupKey);
             }
 
             _logger?.LogInformation("[{}] [unsubscribe] {}", this._agent.GetName(), groupKey);
@@ -168,57 +154,6 @@
             if (string.IsNullOrWhiteSpace(group)) group = Constants.DEFAULT_GROUP;
 
             return this._agent.QueryConfigAsync(dataId, group, tenant, readTimeout, notify);
-        }
-
-        private async Task CheckLocalConfig(string agentName, CacheData cacheData)
-        {
-            string dataId = cacheData.DataId;
-            string group = cacheData.Group;
-            string tenant = cacheData.Tenant;
-
-            var path = FileLocalConfigInfoProcessor.GetFailoverFile(agentName, dataId, group, tenant);
-
-            if (!cacheData.IsUseLocalConfig && path.Exists)
-            {
-                string content = await FileLocalConfigInfoProcessor.GetFailoverAsync(agentName, dataId, group, tenant);
-                string md5 = HashUtil.GetMd5(content);
-                cacheData.SetUseLocalConfigInfo(true);
-                cacheData.SetLocalConfigInfoVersion(ObjectUtil.DateTimeToTimestamp(path.LastWriteTimeUtc));
-                cacheData.SetContent(content);
-
-                _logger?.LogWarning(
-                    "[{0}] [failover-change] failover file created. dataId={1}, group={2}, tenant={3}, md5={4}, content={5}",
-                    agentName, dataId, group, tenant, md5, ContentUtils.TruncateContent(content));
-
-                return;
-            }
-
-            // If use local config info, then it doesn't notify business listener and notify after getting from server.
-            if (cacheData.IsUseLocalConfig && !path.Exists)
-            {
-                cacheData.SetUseLocalConfigInfo(false);
-
-                _logger?.LogWarning(
-                  "[{}] [failover-change] failover file deleted. dataId={}, group={}, tenant={}",
-                  agentName, dataId, group, tenant);
-                return;
-            }
-
-            // When it changed.
-            if (cacheData.IsUseLocalConfig
-                && path.Exists
-                && cacheData.GetLocalConfigInfoVersion() != ObjectUtil.DateTimeToTimestamp(path.LastWriteTimeUtc))
-            {
-                string content = await FileLocalConfigInfoProcessor.GetFailoverAsync(agentName, dataId, group, tenant);
-                string md5 = HashUtil.GetMd5(content);
-                cacheData.SetUseLocalConfigInfo(true);
-                cacheData.SetLocalConfigInfoVersion(ObjectUtil.DateTimeToTimestamp(path.LastWriteTimeUtc));
-                cacheData.SetContent(content);
-
-                _logger?.LogWarning(
-                   "[{0}] [failover-change] failover file created. dataId={1}, group={2}, tenant={3}, md5={4}, content={5}",
-                   agentName, dataId, group, tenant, md5, ContentUtils.TruncateContent(content));
-            }
         }
 
         public string GetAgentName() => this._agent.GetName();

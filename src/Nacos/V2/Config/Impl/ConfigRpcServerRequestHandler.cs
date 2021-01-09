@@ -6,14 +6,17 @@
     using Nacos.V2.Remote.Responses;
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
 
     public class ConfigRpcServerRequestHandler : IServerRequestHandler
     {
         private Dictionary<string, CacheData> _cacheMap;
+        private Func<Task> _func;
 
-        public ConfigRpcServerRequestHandler(Dictionary<string, CacheData> map)
+        public ConfigRpcServerRequestHandler(Dictionary<string, CacheData> map, Func<Task> func)
         {
             this._cacheMap = map;
+            this._func = func;
         }
 
         public CommonResponse RequestReply(CommonRequest request, CommonRequestMeta meta)
@@ -30,6 +33,8 @@
                     }
 
                     cacheData.IsListenSuccess = false;
+
+                    _func.Invoke().Wait();
                 }
 
                 Console.WriteLine("Config RequestReply => {0}", request.ToJsonString());
