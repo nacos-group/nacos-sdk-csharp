@@ -19,6 +19,7 @@
     using Nacos.V2.Security;
     using Nacos.Utilities;
     using Microsoft.Extensions.Options;
+    using Nacos.V2.Utils;
 
     public class NamingHttpClientProxy : INamingClientProxy
     {
@@ -89,7 +90,7 @@
             this.serverPort = serverPort;
 
             // env first
-            var env = Environment.GetEnvironmentVariable(NAMING_SERVER_PORT);
+            var env = EnvUtil.GetEnvValue(NAMING_SERVER_PORT);
             if (!string.IsNullOrWhiteSpace(env) && int.TryParse(env, out var port))
             {
                 this.serverPort = port;

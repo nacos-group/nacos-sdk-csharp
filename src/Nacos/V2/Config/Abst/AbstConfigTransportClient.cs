@@ -93,7 +93,7 @@
 
             string ts = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
 
-            var appKey = Environment.GetEnvironmentVariable("nacos.client.appKey");
+            var appKey = EnvUtil.GetEnvValue("nacos.client.appKey");
             string token = HashUtil.GetMd5(ts + (string.IsNullOrWhiteSpace(appKey) ? "" : appKey));
 
             headers[Constants.CLIENT_APPNAME_HEADER] = AppDomain.CurrentDomain.FriendlyName;

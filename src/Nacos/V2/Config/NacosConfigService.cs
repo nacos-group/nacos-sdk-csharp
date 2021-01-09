@@ -45,7 +45,7 @@
             => await PublishConfig(dataId, group, content, "text");
 
         public async Task<bool> PublishConfig(string dataId, string group, string content, string type)
-            => await PublishConfigInner(dataId, group, content, null, null, null, content, type);
+            => await PublishConfigInner(_namespace, dataId, group, null, null, null, content, type);
 
         public async Task<bool> RemoveConfig(string dataId, string group)
             => await RemoveConfigInner(_namespace, dataId, group, null);

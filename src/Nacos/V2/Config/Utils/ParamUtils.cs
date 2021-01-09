@@ -2,6 +2,7 @@
 {
     using Nacos.V2.Common;
     using Nacos.V2.Exceptions;
+    using Nacos.V2.Utils;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -210,7 +211,7 @@
         /// <returns>use http or not</returns>
         public static bool UseHttpSwitch()
         {
-            var useHttpSwitch = Environment.GetEnvironmentVariable("clientworker.use.http.switch");
+            var useHttpSwitch = EnvUtil.GetEnvValue("clientworker.use.http.switch");
             return "Y".Equals(useHttpSwitch, StringComparison.OrdinalIgnoreCase);
         }
 
@@ -220,7 +221,7 @@
         /// <returns>connection type</returns>
         public static string ConfigRemoteConnectionType()
         {
-            string remoteConnectionType = Environment.GetEnvironmentVariable("nacos.remote.config.connectiontype");
+            string remoteConnectionType = EnvUtil.GetEnvValue("nacos.remote.config.connectiontype");
             return remoteConnectionType;
         }
 

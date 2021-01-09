@@ -12,11 +12,11 @@
         /// <returns>user tenant for acm</returns>
         public static string GetUserTenantForAcm()
         {
-            string tmp = Environment.GetEnvironmentVariable("tenant.id");
+            string tmp = EnvUtil.GetEnvValue("tenant.id");
 
             if (string.IsNullOrWhiteSpace(tmp))
             {
-                tmp = Environment.GetEnvironmentVariable("acm.namespace");
+                tmp = EnvUtil.GetEnvValue("acm.namespace");
             }
 
             return tmp ?? string.Empty;
@@ -28,11 +28,11 @@
         /// <returns>user tenant for ans</returns>
         public static string GetUserTenantForAns()
         {
-            string tmp = Environment.GetEnvironmentVariable("tenant.id");
+            string tmp = EnvUtil.GetEnvValue("tenant.id");
 
             if (string.IsNullOrWhiteSpace(tmp))
             {
-                tmp = Environment.GetEnvironmentVariable("ans.namespace");
+                tmp = EnvUtil.GetEnvValue("ans.namespace");
             }
 
             return tmp;

@@ -38,6 +38,8 @@
             this._serverListManager = serverListManager;
             this._cacheMap = cacheMap;
 
+            _securityProxy = new Security.SecurityProxy(options);
+
             StartInner();
         }
 

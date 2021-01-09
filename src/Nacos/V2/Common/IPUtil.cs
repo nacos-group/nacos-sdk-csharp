@@ -55,7 +55,7 @@
 
         public static bool IsIP(string addr)
         {
-            return System.Net.IPAddress.TryParse(addr, out var ip);
+            return System.Net.IPAddress.TryParse(addr, out _);
         }
 
         public static bool ContainsPort(string address)
@@ -107,24 +107,18 @@
 
         public static string CheckIPs(params string[] ips)
         {
-            if (ips == null || ips.Length == 0)
-            {
-                return CHECK_OK;
-            }
+            if (ips == null || ips.Length == 0) return CHECK_OK;
 
             // illegal response
             StringBuilder illegalResponse = new StringBuilder();
             foreach (string ip in ips)
             {
-                if (IPUtil.IsIP(ip)) continue;
+                if (IsIP(ip)) continue;
 
                 illegalResponse.Append(ip + ",");
             }
 
-            if (illegalResponse.Length == 0)
-            {
-                return CHECK_OK;
-            }
+            if (illegalResponse.Length == 0) return CHECK_OK;
 
             var resp = illegalResponse.ToString();
 

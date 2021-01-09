@@ -8,6 +8,7 @@
     using System.Collections.Concurrent;
     using System.Linq;
     using Nacos.V2.Naming.Event;
+    using Nacos.V2.Utils;
 
     public class ServiceInfoHolder
     {
@@ -145,7 +146,7 @@
 
         private void InitCacheDir(string @namespace)
         {
-            var jmSnapshotPath = Environment.GetEnvironmentVariable("JM.SNAPSHOT.PATH");
+            var jmSnapshotPath = EnvUtil.GetEnvValue("JM.SNAPSHOT.PATH");
             if (!string.IsNullOrWhiteSpace(jmSnapshotPath))
             {
                 cacheDir = System.IO.Path.Combine(jmSnapshotPath, "nacos", "naming", @namespace);
