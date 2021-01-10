@@ -145,7 +145,7 @@
 
         public Task<List<string>> GetServerConfig(string dataId, string group, string tenant, long readTimeout, bool notify)
         {
-            if (string.IsNullOrWhiteSpace(group)) group = Constants.DEFAULT_GROUP;
+            if (group.IsNullOrWhiteSpace()) group = Constants.DEFAULT_GROUP;
 
             return this._agent.QueryConfigAsync(dataId, group, tenant, readTimeout, notify);
         }

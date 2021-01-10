@@ -1,6 +1,7 @@
 ﻿namespace Nacos.V2.Config.Impl
 {
     using Microsoft.Extensions.Logging;
+    using Nacos.V2.Common;
     using Nacos.V2.Exceptions;
     using System;
     using System.Collections.Generic;
@@ -16,6 +17,7 @@
         public const string FIXED_NAME = "fixed";
         private const string HTTP = "http";
         private const string HTTPS = "https";
+        private const string DefaultNodesPath = "serverlist";
 
         private string _name = "";
         private string _namespace = "";
@@ -41,7 +43,7 @@
 
             _serverUrls = new List<string>();
             _contentPath = _options.ContextPath;
-            _defaultNodesPath = "serverlist";
+            _defaultNodesPath = DefaultNodesPath;
             var @namespace = _options.Namespace;
 
             if (_options.ServerAddresses != null && _options.ServerAddresses.Any())
@@ -53,7 +55,7 @@
                     _serverUrls.Add(item.TrimEnd('/'));
                 }
 
-                if (string.IsNullOrWhiteSpace(@namespace))
+                if (@namespace.IsNullOrWhiteSpace())
                 {
                     _name = $"{FIXED_NAME}-{GetFixedNameSuffix(_serverUrls)}";
                 }
@@ -66,14 +68,14 @@
             }
             else
             {
-                if (string.IsNullOrWhiteSpace(_options.EndPoint))
+                if (_options.EndPoint.IsNullOrWhiteSpace())
                 {
                     throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "endpoint is blank");
                 }
 
                 _isFixed = false;
 
-                if (string.IsNullOrWhiteSpace(@namespace))
+                if (@namespace.IsNullOrWhiteSpace())
                 {
                     _name = _options.EndPoint;
                     _addressServerUrl = $"http://{_options.EndPoint}:{_endpointPort}/{_contentPath}/{_defaultNodesPath}";
@@ -174,7 +176,7 @@
 
                         foreach (var item in list)
                         {
-                            if (!string.IsNullOrWhiteSpace(item))
+                            if (item.IsNotNullOrWhiteSpace())
                             {
                                 var ipPort = item.Trim().Split(':');
                                 var ip = ipPort[0].Trim();
@@ -209,7 +211,7 @@
 
         public string GetCurrentServerAddr()
         {
-            if (string.IsNullOrWhiteSpace(_currentServerAddr))
+            if (_currentServerAddr.IsNullOrWhiteSpace())
             {
                 Random random = new Random();
                 int index = random.Next(0, _serverUrls.Count);

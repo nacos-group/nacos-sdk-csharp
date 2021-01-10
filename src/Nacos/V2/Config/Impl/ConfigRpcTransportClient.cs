@@ -86,7 +86,7 @@
                     await FileLocalConfigInfoProcessor.SaveSnapshotAsync(this.GetName(), dataId, group, tenant, response.Content);
 
                     ct[0] = response.Content;
-                    ct[1] = string.IsNullOrWhiteSpace(response.ContentType) ? response.ContentType : "text";
+                    ct[1] = response.ContentType.IsNotNullOrWhiteSpace() ? response.ContentType : "text";
 
                     return ct.ToList();
                 }
@@ -384,7 +384,7 @@
 
         public async Task<List<string>> GetServerConfig(string dataId, string group, string tenant, long readTimeout, bool notify)
         {
-            if (string.IsNullOrWhiteSpace(group)) group = Constants.DEFAULT_GROUP;
+            if (group.IsNullOrWhiteSpace()) group = Constants.DEFAULT_GROUP;
 
             return await QueryConfig(dataId, group, tenant, readTimeout, notify);
         }

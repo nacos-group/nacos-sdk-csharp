@@ -41,7 +41,7 @@
             int serviceNameIndex = 1;
             int groupIndex = 0;
 
-            var keys = key.Split(new string[] { Constants.SERVICE_INFO_SPLITER }, StringSplitOptions.RemoveEmptyEntries);
+            var keys = key.SplitByString(Constants.SERVICE_INFO_SPLITER);
             if (keys.Length >= maxIndex + 1)
             {
                 this.GroupName = keys[groupIndex];
@@ -103,7 +103,7 @@
         {
             var serviceInfo = new ServiceInfo();
             int maxSegCount = 3;
-            string[] segs = key.Split(new string[] { Constants.SERVICE_INFO_SPLITER }, StringSplitOptions.RemoveEmptyEntries);
+            string[] segs = key.SplitByString(Constants.SERVICE_INFO_SPLITER);
             if (segs.Length == maxSegCount - 1)
             {
                 serviceInfo.GroupName = segs[0];

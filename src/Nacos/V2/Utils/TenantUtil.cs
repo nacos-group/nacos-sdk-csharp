@@ -1,5 +1,6 @@
 ﻿namespace Nacos.V2.Utils
 {
+    using Nacos.V2.Common;
     using System;
 
     public class TenantUtil
@@ -14,7 +15,7 @@
         {
             string tmp = EnvUtil.GetEnvValue("tenant.id");
 
-            if (string.IsNullOrWhiteSpace(tmp))
+            if (tmp.IsNullOrWhiteSpace())
             {
                 tmp = EnvUtil.GetEnvValue("acm.namespace");
             }
@@ -30,7 +31,7 @@
         {
             string tmp = EnvUtil.GetEnvValue("tenant.id");
 
-            if (string.IsNullOrWhiteSpace(tmp))
+            if (tmp.IsNullOrWhiteSpace())
             {
                 tmp = EnvUtil.GetEnvValue("ans.namespace");
             }

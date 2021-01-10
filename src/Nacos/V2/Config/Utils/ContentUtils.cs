@@ -60,7 +60,7 @@
         /// <returns>truncated content</returns>
         public static string TruncateContent(string content)
         {
-            if (string.IsNullOrWhiteSpace(content))
+            if (content.IsNullOrWhiteSpace())
             {
                 return string.Empty;
             }

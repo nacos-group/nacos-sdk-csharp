@@ -50,12 +50,12 @@
         {
             CheckTenant(tenant);
 
-            if (string.IsNullOrWhiteSpace(dataId) || !IsValid(dataId))
+            if (dataId.IsNullOrWhiteSpace() || !IsValid(dataId))
             {
                 throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "dataId invalid");
             }
 
-            if (string.IsNullOrWhiteSpace(group) || !IsValid(group))
+            if (group.IsNullOrWhiteSpace() || !IsValid(group))
             {
                 throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "group invalid");
             }
@@ -68,12 +68,12 @@
         /// <param name="group">group</param>
         public static void CheckKeyParam(string dataId, string group)
         {
-            if (string.IsNullOrWhiteSpace(dataId) || !IsValid(dataId))
+            if (dataId.IsNullOrWhiteSpace() || !IsValid(dataId))
             {
                 throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "dataId invalid");
             }
 
-            if (string.IsNullOrWhiteSpace(group) || !IsValid(group))
+            if (group.IsNullOrWhiteSpace() || !IsValid(group))
             {
                 throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "group invalid");
             }
@@ -87,17 +87,17 @@
         /// <param name="datumId">datumId</param>
         public static void CheckKeyParam(string dataId, string group, string datumId)
         {
-            if (string.IsNullOrWhiteSpace(dataId) || !IsValid(dataId))
+            if (dataId.IsNullOrWhiteSpace() || !IsValid(dataId))
             {
                 throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "dataId invalid");
             }
 
-            if (string.IsNullOrWhiteSpace(group) || !IsValid(group))
+            if (group.IsNullOrWhiteSpace() || !IsValid(group))
             {
                 throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "group invalid");
             }
 
-            if (string.IsNullOrWhiteSpace(datumId) || !IsValid(datumId))
+            if (datumId.IsNullOrWhiteSpace() || !IsValid(datumId))
             {
                 throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "datumId invalid");
             }
@@ -117,13 +117,13 @@
 
             foreach (var dataId in dataIds)
             {
-                if (string.IsNullOrWhiteSpace(dataId) || !IsValid(dataId))
+                if (dataId.IsNullOrWhiteSpace() || !IsValid(dataId))
                 {
                     throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "dataId invalid");
                 }
             }
 
-            if (string.IsNullOrWhiteSpace(group) || !IsValid(group))
+            if (group.IsNullOrWhiteSpace() || !IsValid(group))
             {
                 throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "group invalid");
             }
@@ -138,7 +138,7 @@
         public static void CheckParam(string dataId, string group, string content)
         {
             CheckKeyParam(dataId, group);
-            if (string.IsNullOrWhiteSpace(content))
+            if (content.IsNullOrWhiteSpace())
             {
                 throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "content invalid");
             }
@@ -154,7 +154,7 @@
         public static void CheckParam(string dataId, string group, string datumId, string content)
         {
             CheckKeyParam(dataId, group, datumId);
-            if (string.IsNullOrWhiteSpace(content))
+            if (content.IsNullOrWhiteSpace())
             {
                 throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "content invalid");
             }
@@ -166,7 +166,7 @@
         /// <param name="tenant">tenant</param>
         public static void CheckTenant(string tenant)
         {
-            if (string.IsNullOrWhiteSpace(tenant) || !IsValid(tenant))
+            if (tenant.IsNullOrWhiteSpace() || !IsValid(tenant))
             {
                 throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "tenant invalid");
             }
@@ -178,7 +178,7 @@
         /// <param name="betaIps">beta ips</param>
         public static void CheckBetaIps(string betaIps)
         {
-            if (string.IsNullOrWhiteSpace(betaIps))
+            if (betaIps.IsNullOrWhiteSpace())
             {
                 throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "betaIps invalid");
             }
@@ -199,7 +199,7 @@
         /// <param name="content">content</param>
         public static void CheckContent(string content)
         {
-            if (string.IsNullOrWhiteSpace(content))
+            if (content.IsNullOrWhiteSpace())
             {
                 throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "content invalid");
             }

@@ -1,6 +1,7 @@
 ﻿namespace Nacos.V2.Security
 {
     using Microsoft.Extensions.Options;
+    using Nacos.V2.Common;
     using System;
     using System.Collections.Generic;
     using System.Net.Http;
@@ -97,7 +98,7 @@
 
         private async Task<bool> LoginAsync(string server)
         {
-            if (!string.IsNullOrWhiteSpace(_username))
+            if (_username.IsNotNullOrWhiteSpace())
             {
                 var dict = new Dictionary<string, string>
                 {

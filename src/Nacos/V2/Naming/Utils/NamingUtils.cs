@@ -18,7 +18,7 @@
         /// <returns>groupName@@serviceName</returns>
         public static string GetGroupedName(string serviceName, string groupName)
         {
-            if (string.IsNullOrWhiteSpace(serviceName))
+            if (serviceName.IsNullOrWhiteSpace())
             {
                 throw new ArgumentException("Param 'serviceName' is illegal, serviceName is blank");
             }
@@ -29,7 +29,7 @@
 
         public static string GetServiceName(string serviceNameWithGroup)
         {
-            if (string.IsNullOrWhiteSpace(serviceNameWithGroup))
+            if (serviceNameWithGroup.IsNullOrWhiteSpace())
             {
                 return string.Empty;
             }
@@ -39,12 +39,12 @@
                 return serviceNameWithGroup;
             }
 
-            return serviceNameWithGroup.Split(new string[] { Constants.SERVICE_INFO_SPLITER }, StringSplitOptions.RemoveEmptyEntries)[1];
+            return serviceNameWithGroup.SplitByString(Constants.SERVICE_INFO_SPLITER)[1];
         }
 
         public static string GetGroupName(string serviceNameWithGroup)
         {
-            if (string.IsNullOrWhiteSpace(serviceNameWithGroup))
+            if (serviceNameWithGroup.IsNullOrWhiteSpace())
             {
                 return string.Empty;
             }
@@ -54,7 +54,7 @@
                 return Constants.DEFAULT_GROUP;
             }
 
-            return serviceNameWithGroup.Split(new string[] { Constants.SERVICE_INFO_SPLITER }, StringSplitOptions.RemoveEmptyEntries)[0];
+            return serviceNameWithGroup.SplitByString(Constants.SERVICE_INFO_SPLITER)[0];
         }
 
         /// <summary>
@@ -67,9 +67,9 @@
         /// </pre>
         /// </summary>
         /// <param name="combineServiceName">such as: groupName@@serviceName</param>
-        public static void CheckServiceNameFormat(String combineServiceName)
+        public static void CheckServiceNameFormat(string combineServiceName)
         {
-            string[] split = combineServiceName.Split(new string[] { Constants.SERVICE_INFO_SPLITER }, StringSplitOptions.RemoveEmptyEntries);
+            string[] split = combineServiceName.SplitByString(Constants.SERVICE_INFO_SPLITER);
             if (split.Length <= 1)
             {
                 throw new ArgumentException(

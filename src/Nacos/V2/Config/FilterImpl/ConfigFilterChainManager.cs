@@ -1,6 +1,7 @@
 ﻿namespace Nacos.V2.Config.FilterImpl
 {
     using System.Collections.Generic;
+    using Nacos.V2.Config.Abst;
 
     public class ConfigFilterChainManager : IConfigFilterChain
     {

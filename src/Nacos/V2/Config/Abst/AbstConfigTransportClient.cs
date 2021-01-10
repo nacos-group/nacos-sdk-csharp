@@ -73,7 +73,7 @@
                 spasHeaders["Spas-SecurityToken"] = string.Empty;
             }
 
-            if (!string.IsNullOrWhiteSpace(_accessKey) && !string.IsNullOrWhiteSpace(_secretKey))
+            if (_accessKey.IsNotNullOrWhiteSpace() && _secretKey.IsNotNullOrWhiteSpace())
             {
                 spasHeaders["Spas-AccessKey"] = _accessKey;
             }
@@ -97,7 +97,7 @@
             string ts = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
 
             var appKey = EnvUtil.GetEnvValue("nacos.client.appKey");
-            string token = HashUtil.GetMd5(ts + (string.IsNullOrWhiteSpace(appKey) ? "" : appKey));
+            string token = HashUtil.GetMd5(ts + (appKey.IsNullOrWhiteSpace() ? "" : appKey));
 
             headers[Constants.CLIENT_APPNAME_HEADER] = AppDomain.CurrentDomain.FriendlyName;
             headers[Constants.CLIENT_REQUEST_TS_HEADER] = ts;
@@ -120,7 +120,7 @@
             }
             else
             {
-                if (paramValues.TryGetValue(Constants.GROUP, out var group) && string.IsNullOrWhiteSpace(group))
+                if (paramValues.TryGetValue(Constants.GROUP, out var group) && group.IsNullOrWhiteSpace())
                 {
                     resource = group;
                 }
@@ -136,9 +136,9 @@
             var timeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
             header["Timestamp"] = timeStamp;
 
-            if (!string.IsNullOrWhiteSpace(secretKey))
+            if (secretKey.IsNotNullOrWhiteSpace())
             {
-                var signature = string.IsNullOrWhiteSpace(resource)
+                var signature = resource.IsNullOrWhiteSpace()
                     ? HashUtil.GetHMACSHA1(timeStamp, secretKey)
                     : HashUtil.GetHMACSHA1($"{resource}+{timeStamp}", secretKey);
 

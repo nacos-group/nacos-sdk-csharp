@@ -1,6 +1,6 @@
-﻿namespace Nacos.V2.Config.FilterImpl
+﻿namespace Nacos.V2.Config.Abst
 {
-    public interface IConfigRequest
+    public interface IConfigResponse
     {
         object GetParameter(string key);
 

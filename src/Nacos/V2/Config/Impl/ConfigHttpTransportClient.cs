@@ -86,7 +86,7 @@
 
         private async Task<List<string>> GetServerConfig(string dataId, string group, string tenant, long readTimeout, bool notify)
         {
-            if (string.IsNullOrWhiteSpace(group)) group = Constants.DEFAULT_GROUP;
+            if (group.IsNullOrWhiteSpace()) group = Constants.DEFAULT_GROUP;
 
             return await QueryConfig(dataId, group, tenant, readTimeout, notify);
         }
@@ -100,7 +100,7 @@
                 {
                     sb.Append(cacheData.DataId).Append(Constants.WORD_SEPARATOR);
                     sb.Append(cacheData.Group).Append(Constants.WORD_SEPARATOR);
-                    if (string.IsNullOrWhiteSpace(cacheData.Tenant))
+                    if (cacheData.Tenant.IsNullOrWhiteSpace())
                     {
                         sb.Append(cacheData.Md5).Append(Constants.LINE_SEPARATOR);
                     }
@@ -139,7 +139,7 @@
                 headers["Long-Pulling-Timeout-No-Hangup"] = "true";
             }
 
-            if (string.IsNullOrWhiteSpace(probeUpdateString)) return new List<string>();
+            if (probeUpdateString.IsNullOrWhiteSpace()) return new List<string>();
 
             try
             {
@@ -181,11 +181,11 @@
 
             var updateList = new List<string>();
 
-            foreach (string dataIdAndGroup in response.Split(new string[] { Constants.LINE_SEPARATOR }, StringSplitOptions.RemoveEmptyEntries))
+            foreach (string dataIdAndGroup in response.SplitByString(Constants.LINE_SEPARATOR))
             {
                 if (!string.IsNullOrEmpty(dataIdAndGroup))
                 {
-                    var keyArr = dataIdAndGroup.Split(new string[] { Constants.WORD_SEPARATOR }, StringSplitOptions.RemoveEmptyEntries);
+                    var keyArr = dataIdAndGroup.SplitByString(Constants.WORD_SEPARATOR);
                     if (keyArr.Length < 2)
                         continue;
                     string dataId = keyArr[0];
@@ -245,12 +245,12 @@
             parameters["group"] = group;
             parameters["content"] = content;
 
-            if (!string.IsNullOrWhiteSpace(tenant)) parameters["tenant"] = tenant;
-            if (!string.IsNullOrWhiteSpace(appName)) parameters["appName"] = appName;
-            if (!string.IsNullOrWhiteSpace(tag)) parameters["tag"] = tag;
+            if (tenant.IsNotNullOrWhiteSpace()) parameters["tenant"] = tenant;
+            if (appName.IsNotNullOrWhiteSpace()) parameters["appName"] = appName;
+            if (tag.IsNotNullOrWhiteSpace()) parameters["tag"] = tag;
 
             var headers = new Dictionary<string, string>(1);
-            if (!string.IsNullOrWhiteSpace(betaIps)) headers["betaIps"] = betaIps;
+            if (betaIps.IsNotNullOrWhiteSpace()) headers["betaIps"] = betaIps;
 
             HttpResponseMessage result = null;
             try
@@ -294,13 +294,13 @@
         protected override async Task<List<string>> QueryConfig(string dataId, string group, string tenant, long readTimeout, bool notify)
         {
             string[] ct = new string[2];
-            if (string.IsNullOrWhiteSpace(group)) group = Constants.DEFAULT_GROUP;
+            if (group.IsNullOrWhiteSpace()) group = Constants.DEFAULT_GROUP;
 
             HttpResponseMessage result = null;
             try
             {
                 var paramters = new Dictionary<string, string>(3);
-                if (string.IsNullOrWhiteSpace(tenant))
+                if (tenant.IsNullOrWhiteSpace())
                 {
                     paramters["dataId"] = dataId;
                     paramters["group"] = group;
@@ -339,7 +339,7 @@
                     {
                         var t = values.FirstOrDefault();
 
-                        if (!string.IsNullOrWhiteSpace(t)) ct[1] = t;
+                        if (t.IsNotNullOrWhiteSpace()) ct[1] = t;
                         else ct[1] = "text";
                     }
                     else
@@ -411,7 +411,7 @@
             {
                 foreach (var item in securityHeaders) paramValues[item.Key] = item.Value;
 
-                if (!string.IsNullOrWhiteSpace(_options.Namespace)
+                if (_options.Namespace.IsNotNullOrWhiteSpace()
                     && !paramValues.ContainsKey("tenant"))
                 {
                     paramValues["tenant"] = _options.Namespace;
@@ -450,8 +450,8 @@
                 ["group"] = group
             };
 
-            if (!string.IsNullOrWhiteSpace(tenant)) parameters["tenant"] = tenant;
-            if (!string.IsNullOrWhiteSpace(tenant)) parameters["tag"] = tag;
+            if (tenant.IsNotNullOrWhiteSpace()) parameters["tenant"] = tenant;
+            if (tag.IsNotNullOrWhiteSpace()) parameters["tag"] = tag;
 
             HttpResponseMessage result = null;
             try

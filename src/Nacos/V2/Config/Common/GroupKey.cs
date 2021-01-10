@@ -1,5 +1,6 @@
 ﻿namespace Nacos.V2.Config
 {
+    using Nacos.V2.Common;
     using System.Text;
 
     public class GroupKey
@@ -16,7 +17,7 @@
             UrlEncode(dataId, sb);
             sb.Append('+');
             UrlEncode(group, sb);
-            if (!string.IsNullOrWhiteSpace(datumStr))
+            if (datumStr.IsNotNullOrWhiteSpace())
             {
                 sb.Append('+');
                 UrlEncode(datumStr, sb);
@@ -77,7 +78,7 @@
                 }
             }
 
-            if (string.IsNullOrWhiteSpace(group))
+            if (group.IsNullOrWhiteSpace())
             {
                 group = sb.ToString();
                 if (group.Length == 0)

@@ -22,7 +22,7 @@
 
                 var json = dom.JsonFromServer;
 
-                if (string.IsNullOrWhiteSpace(json)) json = dom.ToJsonString();
+                if (json.IsNullOrWhiteSpace()) json = dom.ToJsonString();
 
                 var path = Path.Combine(dir, fileName);
 
