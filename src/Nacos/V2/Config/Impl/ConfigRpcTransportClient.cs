@@ -12,7 +12,6 @@
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading;
     using System.Threading.Tasks;
 
     public class ConfigRpcTransportClient : AbstConfigTransportClient
@@ -25,16 +24,14 @@
 
         private ILogger _logger;
 
-        private Dictionary<string, CacheData> _cacheMap;
+        private ConcurrentDictionary<string, CacheData> _cacheMap;
         private string uuid = System.Guid.NewGuid().ToString();
-
-        private readonly object _lock = new object();
 
         public ConfigRpcTransportClient(
             ILogger logger,
             NacosSdkOptions options,
             ServerListManager serverListManager,
-            Dictionary<string, CacheData> cacheMap)
+            ConcurrentDictionary<string, CacheData> cacheMap)
         {
             this._logger = logger;
             this._options = options;
@@ -231,12 +228,8 @@
         protected override Task RemoveCache(string dataId, string group)
         {
             var groupKey = GroupKey.GetKey(dataId, group);
-            lock (_cacheMap)
-            {
-                var copy = new Dictionary<string, CacheData>(_cacheMap);
-                copy.Remove(groupKey);
-                _cacheMap = copy;
-            }
+
+            _cacheMap.TryRemove(groupKey, out _);
 
             _logger?.LogInformation("[{0}] [unsubscribe] {1}", GetNameInner(), groupKey);
 
@@ -399,12 +392,8 @@
         private void RemoveCache(string dataId, string group, string tenant)
         {
             var groupKey = GroupKey.GetKeyTenant(dataId, group, tenant);
-            lock (_cacheMap)
-            {
-                var copy = new Dictionary<string, CacheData>(_cacheMap);
-                copy.Remove(groupKey);
-                _cacheMap = copy;
-            }
+
+            _cacheMap.TryRemove(groupKey, out _);
 
             _logger?.LogInformation("[{0}] [unsubscribe] {1}", GetNameInner(), groupKey);
         }

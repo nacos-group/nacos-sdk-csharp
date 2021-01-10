@@ -97,7 +97,7 @@
 
         public Task Start() => Task.CompletedTask;
 
-        private string GetUrl(string serverAddr, string relativePath) => $"{serverAddr}{relativePath}";
+        private string GetUrl(string serverAddr, string relativePath) => $"{serverAddr.TrimEnd('/')}/{_serverListMgr.GetContentPath()}{relativePath}";
 
         private string InitParams(Dictionary<string, string> dict)
         {

@@ -9,6 +9,7 @@
     using Nacos.V2.Exceptions;
     using Nacos.V2.Utils;
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Http;
@@ -22,11 +23,15 @@
 
         private readonly ILogger _logger;
 
-        private Dictionary<string, CacheData> _cacheMap;
+        private ConcurrentDictionary<string, CacheData> _cacheMap;
+
+        private ConcurrentDictionary<int, Timer> _longPollingMap = new ConcurrentDictionary<int, Timer>();
 
         private IHttpAgent _agent;
 
         private double _currentLongingTaskCount = 0;
+        private long _timeout;
+        private int _taskPenaltyTime;
 
         private Timer _executeConfigListenTimer;
 
@@ -34,18 +39,27 @@
             ILogger logger,
             NacosSdkOptions options,
             ServerListManager serverListManager,
-            Dictionary<string, CacheData> cacheMap)
+            ConcurrentDictionary<string, CacheData> cacheMap)
         {
             this._logger = logger;
             this._options = options;
             this._serverListManager = serverListManager;
             this._cacheMap = cacheMap;
+            this._securityProxy = new Security.SecurityProxy(options);
+            Init();
 
             _agent = new ServerHttpAgent(_logger, options);
+
+            StartInner();
         }
 
+        private void Init()
+        {
+            _timeout = Constants.CONFIG_LONG_POLL_TIMEOUT;
+            _taskPenaltyTime = Constants.CONFIG_RETRY_TIME;
+        }
 
-        protected override async Task ExecuteConfigListen()
+        protected override Task ExecuteConfigListen()
         {
             // Dispatch taskes.
             int listenerSize = _cacheMap.Count;
@@ -57,82 +71,17 @@
                 for (int i = (int)_currentLongingTaskCount; i < longingTaskCount; i++)
                 {
                     // The task list is no order.So it maybe has issues when changing.
-                    // executorService.execute(new LongPollingRunnable(agent, i, this));
-                    var cacheDatas = new List<CacheData>();
-                    var inInitializingCacheList = new List<string>();
-
-                    try
+                    if (!_longPollingMap.ContainsKey(i))
                     {
-                        foreach (var cacheData in _cacheMap.Values)
-                        {
-                            if (cacheData.TaskId == i) cacheDatas.Add(cacheData);
-
-                            try
-                            {
-                                await CheckLocalConfig(_agent.GetName(), cacheData);
-
-                                if (cacheData.IsUseLocalConfig)
-                                {
-                                    cacheData.CheckListenerMd5();
-                                }
-                            }
-                            catch (Exception e)
-                            {
-                                _logger?.LogError(e, "get local config info error");
-                            }
-                        }
-
-                        var changedGroupKeys = await CheckUpdateDataIds(_agent, this, cacheDatas, inInitializingCacheList);
-
-                        foreach (var groupKey in changedGroupKeys)
-                        {
-                            var key = GroupKey.ParseKey(groupKey);
-                            var dataId = key[0];
-                            var group = key[1];
-                            string tenant = null;
-                            if (key.Length == 3) tenant = key[2];
-
-                            try
-                            {
-                                var ct = await GetServerConfig(dataId, group, tenant, 3000L, true);
-                                CacheData cache = _cacheMap[GroupKey.GetKeyTenant(dataId, group, tenant)];
-                                cache.SetContent(ct[0]);
-                                if (ct[1] != null)
-                                {
-                                    cache.Type = ct[1];
-                                }
-
-                                _logger?.LogInformation("[{0}] [data-received] dataId={1}, group={2}, tenant={3}, md5={4}, content={5}, type={6}", _agent.GetName(), dataId, group, tenant, cache.Md5,
-                                        ContentUtils.TruncateContent(ct[0]), ct[1]);
-                            }
-                            catch (NacosException ioe)
-                            {
-                                _logger?.LogError(ioe, "[%s] [get-update] get changed config exception. dataId=%s, group=%s, tenant=%s", _agent.GetName(), dataId, group, tenant);
-                            }
-                        }
-
-                        foreach (var cacheData in cacheDatas)
-                        {
-                            if (!cacheData.IsInitializing || inInitializingCacheList
-                                    .Contains(GroupKey.GetKeyTenant(cacheData.DataId, cacheData.Group, cacheData.Tenant)))
-                            {
-                                cacheData.CheckListenerMd5();
-                                cacheData.IsInitializing = false;
-                            }
-                        }
-
-                        inInitializingCacheList.Clear();
-
-                        // executorService.execute(this);
-                    }
-                    catch (Exception)
-                    {
-                        throw;
+                        var t = LongPolling(i);
+                        _longPollingMap.TryAdd(i, t);
                     }
                 }
 
                 _currentLongingTaskCount = longingTaskCount;
             }
+
+            return Task.CompletedTask;
         }
 
         private async Task<List<string>> GetServerConfig(string dataId, string group, string tenant, long readTimeout, bool notify)
@@ -142,7 +91,7 @@
             return await QueryConfig(dataId, group, tenant, readTimeout, notify);
         }
 
-        private async Task<List<string>> CheckUpdateDataIds(IHttpAgent agent, ConfigHttpTransportClient configHttpTransportClient, List<CacheData> cacheDatas, List<string> inInitializingCacheList)
+        private async Task<List<string>> CheckUpdateDataIds(List<CacheData> cacheDatas, List<string> inInitializingCacheList)
         {
             StringBuilder sb = new StringBuilder();
             foreach (CacheData cacheData in cacheDatas)
@@ -171,16 +120,18 @@
             }
 
             var isInitializingCacheList = inInitializingCacheList != null && inInitializingCacheList.Any();
-            return await CheckUpdateConfigStr(agent, configHttpTransportClient, sb.ToString(), isInitializingCacheList);
+            return await CheckUpdateConfigStr(sb.ToString(), isInitializingCacheList);
         }
 
-        private async Task<List<string>> CheckUpdateConfigStr(IHttpAgent agent, ConfigHttpTransportClient configTransportClient, string probeUpdateString, bool isInitializingCacheList)
+        private async Task<List<string>> CheckUpdateConfigStr(string probeUpdateString, bool isInitializingCacheList)
         {
-            var parameters = new Dictionary<string, string>(2);
-            parameters[Constants.PROBE_MODIFY_REQUEST] = probeUpdateString;
+            var parameters = new Dictionary<string, string>(2)
+            {
+                [Constants.PROBE_MODIFY_REQUEST] = probeUpdateString
+            };
 
             var headers = new Dictionary<string, string>(2);
-            headers["Long-Pulling-Timeout"] = "30";
+            headers["Long-Pulling-Timeout"] = _timeout.ToString();
 
             // told server do not hang me up if new initializing cacheData added in
             if (isInitializingCacheList)
@@ -196,31 +147,75 @@
 
                 // In order to prevent the server from handling the delay of the client's long task,
                 // increase the client's read timeout to avoid this problem.
-                //  (long)Math.Round(30000 >> 1);
-                long readTimeoutMs = 30000 + 0;
+                long readTimeoutMs = _timeout + (long)Math.Round((_timeout >> 1) * 1d);
 
                 var result = await _agent.HttpPost(Constants.CONFIG_CONTROLLER_PATH + "/listener", headers, parameters, "", readTimeoutMs);
 
                 if (result.IsSuccessStatusCode)
                 {
-                    /*SetHealthServer(true);
-                    return parseUpdateDataIdResponse(httpAgent, result.getData());*/
+                    _isHealthServer = true;
+                    var data = await result.Content.ReadAsStringAsync();
+                    return ParseUpdateDataIdResponse(data);
                 }
                 else
                 {
-                    /*setHealthServer(false);
-                    LOGGER.error("[{}] [check-update] get changed dataId error, code: {}", httpAgent.getName(),
-                            result.getCode());*/
+                    _isHealthServer = false;
+                    _logger?.LogError("[{0}] [check-update] get changed dataId error, code: {1}", _agent.GetName(), result.StatusCode.ToString());
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                /*setHealthServer(false);
-                LOGGER.error("[" + httpAgent.getName() + "] [check-update] get changed dataId exception", e);*/
+                _isHealthServer = false;
+                _logger?.LogError(ex, "[{0}] [check-update] get changed dataId exception", _agent.GetName());
                 throw;
             }
 
             return null;
+        }
+
+        private List<string> ParseUpdateDataIdResponse(string response)
+        {
+            if (string.IsNullOrEmpty(response)) return new List<string>();
+
+            response = System.Net.WebUtility.UrlDecode(response);
+
+            var updateList = new List<string>();
+
+            foreach (string dataIdAndGroup in response.Split(new string[] { Constants.LINE_SEPARATOR }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (!string.IsNullOrEmpty(dataIdAndGroup))
+                {
+                    var keyArr = dataIdAndGroup.Split(new string[] { Constants.WORD_SEPARATOR }, StringSplitOptions.RemoveEmptyEntries);
+                    if (keyArr.Length < 2)
+                        continue;
+                    string dataId = keyArr[0];
+                    string group = keyArr[1];
+                    if (keyArr.Length == 2)
+                    {
+                        updateList.Add(GroupKey.GetKey(dataId, group));
+
+                        _logger?.LogInformation(
+                            "[{0}] [polling-resp] config changed. dataId={1}, group={2}",
+                            _agent.GetName(), dataId, group);
+                    }
+                    else if (keyArr.Length == 3)
+                    {
+                        string tenant = keyArr[2];
+                        updateList.Add(GroupKey.GetKeyTenant(dataId, group, tenant));
+
+                        _logger?.LogInformation(
+                            "[{0}] [polling-resp] config changed. dataId={1}, group={2}, tenant={3}",
+                            _agent.GetName(), dataId, group, tenant);
+                    }
+                    else
+                    {
+                        _logger?.LogError("[{0}] [polling-resp] invalid dataIdAndGroup error {1}", _agent.GetName(),
+                            dataIdAndGroup);
+                    }
+                }
+            }
+
+            return updateList;
         }
 
         protected override string GetNameInner() => _agent.GetName();
@@ -359,7 +354,7 @@
                 case System.Net.HttpStatusCode.Conflict:
                     {
                         _logger?.LogError(
-                            "[{}] [sub-server-error] get server config being modified concurrently, dataId={}, group={}, tenant={}",
+                            "[{0}] [sub-server-error] get server config being modified concurrently, dataId={1}, group={2}, tenant={3}",
                             _agent.GetName(), dataId, group, tenant);
 
                         throw new NacosException(NacosException.CONFLICT, "data being modified, dataId=" + dataId + ",group=" + group + ",tenant=" + tenant);
@@ -449,9 +444,11 @@
             group = ParamUtils.Null2DefaultGroup(group);
             ParamUtils.CheckKeyParam(dataId, group);
             string url = Constants.CONFIG_CONTROLLER_PATH;
-            var parameters = new Dictionary<string, string>(4);
-            parameters["dataId"] = dataId;
-            parameters["group"] = group;
+            var parameters = new Dictionary<string, string>(4)
+            {
+                ["dataId"] = dataId,
+                ["group"] = group
+            };
 
             if (!string.IsNullOrWhiteSpace(tenant)) parameters["tenant"] = tenant;
             if (!string.IsNullOrWhiteSpace(tenant)) parameters["tag"] = tag;
@@ -481,14 +478,14 @@
             else if (result.StatusCode == System.Net.HttpStatusCode.Forbidden)
             {
                 _logger?.LogWarning(
-                   "[{}] [remove] error,, dataId={1}, group={2}, tenant={3}, code={4}, msg={5}",
+                   "[{0}] [remove] error,, dataId={1}, group={2}, tenant={3}, code={4}, msg={5}",
                    _agent.GetName(), dataId, group, tenant, (int)result.StatusCode, result.StatusCode.ToString());
                 throw new NacosException((int)result.StatusCode, result.StatusCode.ToString());
             }
             else
             {
                 _logger?.LogWarning(
-                   "[{}] [remove] error,, dataId={1}, group={2}, tenant={3}, code={4}, msg={5}",
+                   "[{0}] [remove] error,, dataId={1}, group={2}, tenant={3}, code={4}, msg={5}",
                    _agent.GetName(), dataId, group, tenant, (int)result.StatusCode, result.StatusCode.ToString());
                 return false;
             }
@@ -499,8 +496,20 @@
             _executeConfigListenTimer = new Timer(
                    async x =>
                    {
-                       await ExecuteConfigListen();
-                   }, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(10));
+                       try
+                       {
+                           await ExecuteConfigListen();
+                       }
+                       catch (Exception ex)
+                       {
+                           _logger?.LogError(ex, "[{0}] [sub-check] rotate check error", _agent.GetName());
+                       }
+
+                       if (_executeConfigListenTimer != null)
+                       {
+                           _executeConfigListenTimer.Change(100, Timeout.Infinite);
+                       }
+                   }, null, 1, Timeout.Infinite);
         }
 
         protected override Task NotifyListenConfig() => Task.CompletedTask;
@@ -534,7 +543,7 @@
                 cacheData.SetUseLocalConfigInfo(false);
 
                 _logger?.LogWarning(
-                  "[{}] [failover-change] failover file deleted. dataId={}, group={}, tenant={}",
+                  "[{0}] [failover-change] failover file deleted. dataId={1}, group={2}, tenant={3}",
                   agentName, dataId, group, tenant);
                 return;
             }
@@ -554,6 +563,90 @@
                    "[{0}] [failover-change] failover file created. dataId={1}, group={2}, tenant={3}, md5={4}, content={5}",
                    agentName, dataId, group, tenant, md5, ContentUtils.TruncateContent(content));
             }
+        }
+
+        private Timer LongPolling(int taskId)
+        {
+            return new Timer(
+                async x =>
+            {
+                var cacheDatas = new List<CacheData>();
+                var inInitializingCacheList = new List<string>();
+                int selfTaskId = -1;
+                int.TryParse(x.ToString(), out selfTaskId);
+                try
+                {
+                    foreach (var cacheData in _cacheMap.Values)
+                    {
+                        // no listener should stop here.
+                        if (cacheData.TaskId == selfTaskId && cacheData.GetListeners() != null && cacheData.GetListeners().Any())
+                        {
+                            cacheDatas.Add(cacheData);
+                            try
+                            {
+                                await CheckLocalConfig(_agent.GetName(), cacheData);
+
+                                if (cacheData.IsUseLocalConfig) cacheData.CheckListenerMd5();
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger?.LogError(ex, "get local config info error");
+                            }
+                        }
+                    }
+
+                    var changedGroupKeys = await CheckUpdateDataIds(cacheDatas, inInitializingCacheList);
+
+                    foreach (string groupKey in changedGroupKeys)
+                    {
+                        string[] key = GroupKey.ParseKey(groupKey);
+                        string dataId = key[0];
+                        string group = key[1];
+                        string tenant = null;
+                        if (key.Length == 3) tenant = key[2];
+
+                        try
+                        {
+                            List<string> ct = await GetServerConfig(dataId, group, tenant, 3000L, true);
+
+                            if (_cacheMap.TryGetValue(GroupKey.GetKeyTenant(dataId, group, tenant), out var cache))
+                            {
+                                cache.SetContent(ct[0]);
+
+                                if (ct[1] != null) cache.Type = ct[1];
+
+                                _logger?.LogInformation("[{0}] [data-received] dataId={1}, group={2}, tenant={3}, md5={4}, content={5}, type={6}", _agent.GetName(), dataId, group, tenant, cache.Md5,
+                                       ContentUtils.TruncateContent(ct[0]), ct[1]);
+                            }
+                        }
+                        catch (Exception ioe)
+                        {
+                            _logger?.LogError(ioe, "[{0}] [get-update] get changed config exception. dataId={0}, group={2}, tenant={3}", _agent.GetName(), dataId, group, tenant);
+                        }
+                    }
+
+                    foreach (var cacheData in cacheDatas)
+                    {
+                        if (!cacheData.IsInitializing || inInitializingCacheList.Contains(GroupKey.GetKeyTenant(cacheData.DataId, cacheData.Group, cacheData.Tenant)))
+                        {
+                            cacheData.CheckListenerMd5();
+                            cacheData.IsInitializing = false;
+                        }
+                    }
+
+                    inInitializingCacheList.Clear();
+
+                    if (_longPollingMap.TryGetValue(selfTaskId, out var t)) t.Change(1, Timeout.Infinite);
+                }
+                catch (Exception ex)
+                {
+                    _logger?.LogError(ex, "longPolling error");
+                    if (_longPollingMap.TryGetValue(selfTaskId, out var t))
+                    {
+                        t.Change(_taskPenaltyTime, Timeout.Infinite);
+                    }
+                }
+            }, taskId, 0, Timeout.Infinite);
         }
     }
 }

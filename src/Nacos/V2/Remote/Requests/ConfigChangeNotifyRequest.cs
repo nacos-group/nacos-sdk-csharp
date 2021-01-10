@@ -34,6 +34,12 @@
         [Newtonsoft.Json.JsonProperty("lastModifiedTs")]
         public long LastModifiedTs { get; set; }
 
+        [Newtonsoft.Json.JsonProperty("content")]
+        public string Content { get; set; }
+
+        [Newtonsoft.Json.JsonProperty("type")]
+        public string Type { get; set; }
+
         public override string GetRemoteType() => RemoteRequestType.Resp_Config_ChangeNotify;
     }
 }

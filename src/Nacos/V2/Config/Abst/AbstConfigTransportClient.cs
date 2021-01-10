@@ -15,6 +15,7 @@
         protected ISecurityProxy _securityProxy;
         protected string _accessKey;
         protected string _secretKey;
+        protected bool _isHealthServer;
 
         public string GetName() => GetNameInner();
 
@@ -148,5 +149,7 @@
         }
 
         public Task NotifyListenConfigAsync() => NotifyListenConfig();
+
+        public bool GetIsHealthServer() => _isHealthServer;
     }
 }

@@ -183,7 +183,7 @@
                     return (T)response;
                 }
 
-                _logger?.LogError("Server return unexpected response '{}', expected response should be '{}'", response.GetType().Name, typeof(T).Name);
+                _logger?.LogError("Server return unexpected response '{0}', expected response should be '{1}'", response.GetType().Name, typeof(T).Name);
             }
             catch (Exception e)
             {

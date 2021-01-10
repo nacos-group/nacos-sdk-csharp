@@ -8,6 +8,7 @@
     using Nacos.V2.Config.Utils;
     using Nacos.V2.Utils;
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
@@ -17,7 +18,7 @@
 
         private ConfigFilterChainManager _configFilterChainManager;
 
-        private Dictionary<string, CacheData> cacheMap = new Dictionary<string, CacheData>();
+        private ConcurrentDictionary<string, CacheData> _cacheMap = new ConcurrentDictionary<string, CacheData>();
 
         private IConfigTransportClient _agent;
 
@@ -29,8 +30,8 @@
             ServerListManager serverListManager = new ServerListManager(logger, options.CurrentValue);
 
             _agent = options.CurrentValue.ConfigUseRpc
-                ? new ConfigRpcTransportClient(logger, options.CurrentValue, serverListManager, cacheMap)
-                : new ConfigHttpTransportClient(logger, options.CurrentValue, serverListManager, cacheMap);
+                ? new ConfigRpcTransportClient(logger, options.CurrentValue, serverListManager, _cacheMap)
+                : new ConfigHttpTransportClient(logger, options.CurrentValue, serverListManager, _cacheMap);
         }
 
         public async Task AddTenantListeners(string dataId, string group, List<IListener> listeners)
@@ -91,30 +92,26 @@
             if (cache != null) return cache;
 
             string key = GroupKey.GetKey(dataId, group, tenant);
+            CacheData cacheFromMap = GetCache(dataId, group, tenant);
 
-            lock (cacheMap)
+            // multiple listeners on the same dataid+group and race condition,so double check again
+            // other listener thread beat me to set to cacheMap
+            if (cacheFromMap != null)
             {
-                CacheData cacheFromMap = GetCache(dataId, group, tenant);
+                cache = cacheFromMap;
 
-                // multiple listeners on the same dataid+group and race condition,so double check again
-                // other listener thread beat me to set to cacheMap
-                if (cacheFromMap != null)
-                {
-                    cache = cacheFromMap;
-
-                    // reset so that server not hang this check
-                    cache.IsInitializing = true;
-                }
-                else
-                {
-                    cache = new CacheData(_configFilterChainManager, _agent.GetName(), dataId, group, tenant);
-
-                    int taskId = cacheMap.Count / CacheData.PerTaskConfigSize;
-                    cache.TaskId = taskId;
-                }
-
-                cacheMap[key] = cache;
+                // reset so that server not hang this check
+                cache.IsInitializing = true;
             }
+            else
+            {
+                cache = new CacheData(_configFilterChainManager, _agent.GetName(), dataId, group, tenant);
+
+                int taskId = _cacheMap.Count / CacheData.PerTaskConfigSize;
+                cache.TaskId = taskId;
+            }
+
+            _cacheMap.AddOrUpdate(key, cache, (x, y) => cache);
 
             _logger?.LogInformation("[{0}] [subscribe] {1}", this._agent.GetName(), key);
 
@@ -128,18 +125,16 @@
         {
             if (dataId == null || group == null) throw new ArgumentException();
 
-            return cacheMap.TryGetValue(GroupKey.GetKeyTenant(dataId, group, tenant), out var cache) ? cache : null;
+            return _cacheMap.TryGetValue(GroupKey.GetKeyTenant(dataId, group, tenant), out var cache) ? cache : null;
         }
 
         internal void RemoveCache(string dataId, string group, string tenant = null)
         {
             string groupKey = tenant == null ? GroupKey.GetKey(dataId, group) : GroupKey.GetKeyTenant(dataId, group, tenant);
-            lock (cacheMap)
-            {
-                cacheMap.Remove(groupKey);
-            }
 
-            _logger?.LogInformation("[{}] [unsubscribe] {}", this._agent.GetName(), groupKey);
+            _cacheMap.TryRemove(groupKey, out _);
+
+            _logger?.LogInformation("[{0}] [unsubscribe] {1}", this._agent.GetName(), groupKey);
         }
 
         public async Task<bool> RemoveConfig(string dataId, string group, string tenant, string tag)
@@ -158,7 +153,7 @@
 
         public string GetAgentName() => this._agent.GetName();
 
-        internal bool IsHealthServer() => true;
+        internal bool IsHealthServer() => this._agent.GetIsHealthServer();
 
         public void Dispose()
         {

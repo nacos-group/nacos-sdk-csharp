@@ -23,6 +23,8 @@
         /// <returns>Tenant</returns>
         string GetTenant();
 
+        bool GetIsHealthServer();
+
         Task<bool> PublishConfigAsync(string dataId, string group, string tenant, string appName, string tag, string betaIps, string content);
 
         Task<bool> RemoveConfigAsync(string dataId, string group, string tenat, string tag);

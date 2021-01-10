@@ -5,15 +5,15 @@
     using Nacos.V2.Remote.Requests;
     using Nacos.V2.Remote.Responses;
     using System;
-    using System.Collections.Generic;
+    using System.Collections.Concurrent;
     using System.Threading.Tasks;
 
     public class ConfigRpcServerRequestHandler : IServerRequestHandler
     {
-        private Dictionary<string, CacheData> _cacheMap;
+        private ConcurrentDictionary<string, CacheData> _cacheMap;
         private Func<Task> _func;
 
-        public ConfigRpcServerRequestHandler(Dictionary<string, CacheData> map, Func<Task> func)
+        public ConfigRpcServerRequestHandler(ConcurrentDictionary<string, CacheData> map, Func<Task> func)
         {
             this._cacheMap = map;
             this._func = func;
@@ -30,10 +30,14 @@
                     if (configChangeNotifyRequest.ContentPush
                         && cacheData.LastModifiedTs < configChangeNotifyRequest.LastModifiedTs)
                     {
+                        cacheData.SetContent(configChangeNotifyRequest.Content);
+                        cacheData.Type = configChangeNotifyRequest.Type;
+                        cacheData.CheckListenerMd5();
                     }
 
                     cacheData.IsListenSuccess = false;
 
+                    // notifyListenConfig
                     _func.Invoke().Wait();
                 }
 

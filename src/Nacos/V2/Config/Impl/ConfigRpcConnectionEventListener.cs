@@ -2,14 +2,14 @@
 {
     using Nacos.V2.Remote;
     using System;
-    using System.Collections.Generic;
+    using System.Collections.Concurrent;
 
     public class ConfigRpcConnectionEventListener : IConnectionEventListener
     {
         private readonly RpcClient _rpcClient;
-        private readonly Dictionary<string, CacheData> _cacheMap;
+        private readonly ConcurrentDictionary<string, CacheData> _cacheMap;
 
-        public ConfigRpcConnectionEventListener(RpcClient rpcClientInner, Dictionary<string, CacheData> cacheMap)
+        public ConfigRpcConnectionEventListener(RpcClient rpcClientInner, ConcurrentDictionary<string, CacheData> cacheMap)
         {
             this._rpcClient = rpcClientInner;
             this._cacheMap = cacheMap;

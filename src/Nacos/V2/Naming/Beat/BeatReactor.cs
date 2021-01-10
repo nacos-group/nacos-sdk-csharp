@@ -105,7 +105,7 @@
             }
             catch (NacosException ex)
             {
-                _logger?.LogError(ex, "[CLIENT-BEAT] failed to send beat: {}, code: {}, msg: {}", beatInfo, ex.ErrorCode, ex.ErrorMsg);
+                _logger?.LogError(ex, "[CLIENT-BEAT] failed to send beat: {0}, code: {1}, msg: {2}", beatInfo, ex.ErrorCode, ex.ErrorMsg);
             }
 
             string key = BuildKey(beatInfo.ServiceName, beatInfo.Ip, beatInfo.Port);
