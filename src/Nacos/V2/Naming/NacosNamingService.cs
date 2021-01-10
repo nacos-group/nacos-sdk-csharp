@@ -28,14 +28,14 @@
 
         public NacosNamingService(
             ILoggerFactory loggerFactory,
-            IOptionsMonitor<NacosSdkOptions> optionAccs)
+            IOptions<NacosSdkOptions> optionAccs)
         {
             _logger = loggerFactory.CreateLogger<NacosNamingService>();
-            _options = optionAccs.CurrentValue;
+            _options = optionAccs.Value;
             _namespace = _options.Namespace;
             this._changeNotifier = new InstancesChangeNotifier();
             this._serviceInfoHolder = new ServiceInfoHolder(_logger, _namespace, _options, _changeNotifier);
-            this._clientProxy = new NamingClientProxyDelegate(_logger, _namespace, _serviceInfoHolder, optionAccs, _changeNotifier);
+            this._clientProxy = new NamingClientProxyDelegate(_logger, _namespace, _serviceInfoHolder, _options, _changeNotifier);
         }
 
         public async Task DeregisterInstance(string serviceName, string ip, int port)

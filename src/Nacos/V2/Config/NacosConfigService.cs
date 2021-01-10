@@ -18,11 +18,11 @@
 
         private readonly ConfigFilterChainManager _configFilterChainManager = new ConfigFilterChainManager();
 
-        public NacosConfigService(ILoggerFactory loggerFactory, IOptionsMonitor<NacosSdkOptions> optionsAccs)
+        public NacosConfigService(ILoggerFactory loggerFactory, IOptions<NacosSdkOptions> optionsAccs)
         {
             this._logger = loggerFactory.CreateLogger<NacosConfigService>();
-            this._namespace = optionsAccs.CurrentValue.Namespace;
-            this._worker = new ClientWorker(_logger, _configFilterChainManager, optionsAccs);
+            this._namespace = optionsAccs.Value.Namespace;
+            this._worker = new ClientWorker(_logger, _configFilterChainManager, optionsAccs.Value);
         }
 
         public Task AddListener(string dataId, string group, IListener listener)

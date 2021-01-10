@@ -1,7 +1,6 @@
 ﻿namespace Nacos.V2.Config.Impl
 {
     using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Options;
     using Nacos.V2.Common;
     using Nacos.V2.Config.Abst;
     using Nacos.V2.Config.FilterImpl;
@@ -22,16 +21,16 @@
 
         private IConfigTransportClient _agent;
 
-        public ClientWorker(ILogger logger, ConfigFilterChainManager configFilterChainManager, IOptionsMonitor<NacosSdkOptions> options)
+        public ClientWorker(ILogger logger, ConfigFilterChainManager configFilterChainManager, NacosSdkOptions options)
         {
             _logger = logger;
             _configFilterChainManager = configFilterChainManager;
 
-            ServerListManager serverListManager = new ServerListManager(logger, options.CurrentValue);
+            ServerListManager serverListManager = new ServerListManager(logger, options);
 
-            _agent = options.CurrentValue.ConfigUseRpc
-                ? new ConfigRpcTransportClient(logger, options.CurrentValue, serverListManager, _cacheMap)
-                : new ConfigHttpTransportClient(logger, options.CurrentValue, serverListManager, _cacheMap);
+            _agent = options.ConfigUseRpc
+                ? new ConfigRpcTransportClient(logger, options, serverListManager, _cacheMap)
+                : new ConfigHttpTransportClient(logger, options, serverListManager, _cacheMap);
         }
 
         public async Task AddTenantListeners(string dataId, string group, List<IListener> listeners)

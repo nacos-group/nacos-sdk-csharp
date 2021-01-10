@@ -26,11 +26,11 @@
 
         private NamingGrpcClientProxy grpcClientProxy;
 
-        public NamingClientProxyDelegate(ILogger logger, string @namespace, ServiceInfoHolder serviceInfoHolder, IOptionsMonitor<NacosSdkOptions> options, InstancesChangeNotifier changeNotifier)
+        public NamingClientProxyDelegate(ILogger logger, string @namespace, ServiceInfoHolder serviceInfoHolder, NacosSdkOptions options, InstancesChangeNotifier changeNotifier)
         {
-            this.serverListManager = new ServerListManager(logger, options.CurrentValue);
+            this.serverListManager = new ServerListManager(logger, options);
             this.serviceInfoHolder = serviceInfoHolder;
-            this._serviceInfoUpdateService = new ServiceInfoUpdateService(options.CurrentValue, serviceInfoHolder, this, changeNotifier);
+            this._serviceInfoUpdateService = new ServiceInfoUpdateService(options, serviceInfoHolder, this, changeNotifier);
             this.grpcClientProxy = new NamingGrpcClientProxy(logger, @namespace, serverListManager, options, serviceInfoHolder);
             this.httpClientProxy = new NamingHttpClientProxy(logger, @namespace, serverListManager, options, serviceInfoHolder);
         }

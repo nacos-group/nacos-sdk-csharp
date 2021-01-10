@@ -59,7 +59,8 @@ namespace MsConfigApp
 
                      // read configuration from config files
                      // default is json
-                     builder.AddNacosConfiguration(c.GetSection("NacosConfig"));
+                     // builder.AddNacosConfiguration(c.GetSection("NacosConfig"));
+                     builder.AddNacosV2Configuration(c.GetSection("NacosConfig"));
 
                      // specify ini or yaml
                      // builder.AddNacosConfiguration(c.GetSection("NacosConfig"), Nacos.IniParser.IniConfigurationStringParser.Instance);

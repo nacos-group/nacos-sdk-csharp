@@ -62,5 +62,49 @@
 
             return builder.Add(source);
         }
+
+        public static IConfigurationBuilder AddNacosV2Configuration(
+           this IConfigurationBuilder builder, Action<NacosV2ConfigurationSource> action)
+        {
+            if (builder == null)
+            {
+                throw new ArgumentNullException(nameof(builder));
+            }
+
+            if (action == null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
+            var source = new NacosV2ConfigurationSource();
+
+            action(source);
+
+            source.NacosConfigurationParser ??= DefaultJsonConfigurationStringParser.Instance;
+
+            return builder.Add(source);
+        }
+
+        public static IConfigurationBuilder AddNacosV2Configuration(
+           this IConfigurationBuilder builder,
+           IConfiguration configuration,
+           INacosConfigurationParser parser = null)
+        {
+            if (builder == null)
+            {
+                throw new ArgumentNullException(nameof(builder));
+            }
+
+            if (configuration == null)
+            {
+                throw new ArgumentNullException(nameof(configuration));
+            }
+
+            var source = new NacosV2ConfigurationSource();
+            configuration.Bind(source);
+            source.NacosConfigurationParser = parser ?? DefaultJsonConfigurationStringParser.Instance;
+
+            return builder.Add(source);
+        }
     }
 }

@@ -51,13 +51,13 @@
 
         private Timer _loginTimer;
 
-        public NamingHttpClientProxy(ILogger logger, string namespaceId, ServerListManager serverListManager, IOptionsMonitor<NacosSdkOptions> options, ServiceInfoHolder serviceInfoHolder, IHttpClientFactory clientFactory = null)
+        public NamingHttpClientProxy(ILogger logger, string namespaceId, ServerListManager serverListManager, NacosSdkOptions options, ServiceInfoHolder serviceInfoHolder, IHttpClientFactory clientFactory = null)
         {
             this._logger = logger;
             this._clientFactory = clientFactory;
             this.serverListManager = serverListManager;
             this._securityProxy = new SecurityProxy(options);
-            this._options = options.CurrentValue;
+            this._options = options;
             this.SetServerPort(DEFAULT_SERVER_PORT);
             this.namespaceId = namespaceId;
             this.beatReactor = new BeatReactor(_logger, this, _options);
