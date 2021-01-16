@@ -1,5 +1,6 @@
 ﻿namespace Nacos.V2.Naming.Beat
 {
+    using Nacos.Utilities;
     using System.Collections.Generic;
 
     public class BeatInfo
@@ -33,7 +34,7 @@
 
         public override string ToString()
         {
-            return "BeatInfo{" + "port=" + Port + ", ip='" + Ip + '\'' + ", weight=" + Weight + ", serviceName='" + ServiceName + '\'' + ", cluster='" + Cluster + '\'' + ", metadata=" + Metadata + ", scheduled=" + Scheduled + ", period=" + Period + ", stopped=" + Stopped + '}';
+            return "BeatInfo{" + "port=" + Port + ", ip='" + Ip + '\'' + ", weight=" + Weight + ", serviceName='" + ServiceName + '\'' + ", cluster='" + Cluster + '\'' + ", metadata=" + Metadata.ToJsonString() + ", scheduled=" + Scheduled + ", period=" + Period + ", stopped=" + Stopped + '}';
         }
     }
 }

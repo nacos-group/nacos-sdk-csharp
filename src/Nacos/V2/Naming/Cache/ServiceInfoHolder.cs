@@ -53,6 +53,13 @@
             return loadCacheAtStart;
         }
 
+        internal Dtos.ServiceInfo ProcessServiceInfo(string json)
+        {
+            var serviceInfo = json.ToObj<Dtos.ServiceInfo>();
+            serviceInfo.JsonFromServer = json;
+            return ProcessServiceInfo(serviceInfo);
+        }
+
         internal Dtos.ServiceInfo ProcessServiceInfo(Dtos.ServiceInfo serviceInfo)
         {
             serviceInfoMap.TryGetValue(serviceInfo.GetKey(), out var oldService);

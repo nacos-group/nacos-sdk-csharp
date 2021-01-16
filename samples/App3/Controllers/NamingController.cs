@@ -45,6 +45,24 @@
             return "RegisterInstance ok";
         }
 
+        // GET n/r2
+        [HttpGet("r2")]
+        public async Task<string> RegisterInstance2()
+        {
+            // await _client.RegisterInstance("mysvc", "127.0.0.1", 9635);
+            var instance = new Nacos.V2.Naming.Dtos.Instance
+            {
+                Ip = "127.0.0.1",
+                Ephemeral = true,
+                Port = 9563,
+                ServiceName = "mysvc2"
+            };
+
+            await _client.RegisterInstance("mysvc2", instance);
+
+            return "RegisterInstance ok";
+        }
+
         // GET n/dr
         [HttpGet("dr")]
         public async Task<string> DeregisterInstance()

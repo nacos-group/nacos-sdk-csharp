@@ -62,7 +62,7 @@
             this.namespaceId = namespaceId;
             this.beatReactor = new BeatReactor(_logger, this, _options);
             this.InitRefreshTask();
-            this.pushReceiver = new PushReceiver(serviceInfoHolder);
+            this.pushReceiver = new PushReceiver(_logger, serviceInfoHolder);
             this.serviceInfoHolder = serviceInfoHolder;
         }
 
@@ -328,7 +328,7 @@
 
             if (curServer.StartsWith(UtilAndComs.HTTPS) || curServer.StartsWith(UtilAndComs.HTTP))
             {
-                url = curServer + api;
+                url = curServer.TrimEnd('/') + api;
             }
             else
             {
@@ -426,7 +426,7 @@
 
         public async Task<ServiceInfo> Subscribe(string serviceName, string groupName, string clusters)
         {
-            return await QueryInstancesOfService(serviceName, groupName, clusters, 0, false);
+            return await QueryInstancesOfService(serviceName, groupName, clusters, pushReceiver.GetUdpPort(), false);
         }
 
         public Task Unsubscribe(string serviceName, string groupName, string clusters)

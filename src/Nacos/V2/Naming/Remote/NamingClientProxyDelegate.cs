@@ -16,6 +16,8 @@
 
     public class NamingClientProxyDelegate : INamingClientProxy, IDisposable
     {
+        private NacosSdkOptions _options;
+
         private ServerListManager serverListManager;
 
         private ServiceInfoUpdateService _serviceInfoUpdateService;
@@ -28,6 +30,7 @@
 
         public NamingClientProxyDelegate(ILogger logger, string @namespace, ServiceInfoHolder serviceInfoHolder, NacosSdkOptions options, InstancesChangeNotifier changeNotifier)
         {
+            this._options = options;
             this.serverListManager = new ServerListManager(logger, options);
             this.serviceInfoHolder = serviceInfoHolder;
             this._serviceInfoUpdateService = new ServiceInfoUpdateService(options, serviceInfoHolder, this, changeNotifier);
@@ -88,6 +91,6 @@
 
         public Task UpdateService(Service service, AbstractSelector selector) => Task.CompletedTask;
 
-        private INamingClientProxy GetExecuteClientProxy() => grpcClientProxy;
+        private INamingClientProxy GetExecuteClientProxy() => _options.NamingUseRpc ? grpcClientProxy : httpClientProxy;
     }
 }
