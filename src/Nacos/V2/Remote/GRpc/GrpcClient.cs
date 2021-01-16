@@ -1,5 +1,6 @@
 ﻿namespace Nacos.V2.Remote.GRpc
 {
+    using Microsoft.Extensions.Logging;
     using Nacos.V2.Remote.Requests;
     using System;
 
@@ -42,7 +43,7 @@
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                logger?.LogError(ex, "[{0}]Fail to connect to server!", this.GetName());
                 return null;
             }
         }
@@ -87,9 +88,9 @@
 
                 return resp != null;
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                System.Console.WriteLine(ex.Message);
+                logger?.LogError(ex, "[{0}]Fail to server check!", GetName());
                 return false;
             }
         }
@@ -124,21 +125,20 @@
                                throw;
                            }
                        }
-
-                        /*var resp = HandleServerRequest(current, call.RequestStream);*/
                    }
 
                    if (IsRunning() && !grpcConn.IsAbandon())
                    {
-                       // LoggerUtils.printIfErrorEnabled(LOGGER, " Request Stream onCompleted ,switch server ");
-                       /*if (rpcClientStatus.compareAndSet(RpcClientStatus.RUNNING, RpcClientStatus.UNHEALTHY))
+                       logger?.LogInformation(" Request Stream onCompleted ,switch server ");
+
+                       if (System.Threading.Interlocked.CompareExchange(ref rpcClientStatus, RpcClientStatus.UNHEALTHY, RpcClientStatus.RUNNING) == RpcClientStatus.RUNNING)
                        {
-                           switchServerAsync();
-                       }*/
+                           SwitchServerAsync();
+                       }
                    }
                    else
                    {
-                       /*LoggerUtils.printIfErrorEnabled(LOGGER, "client is not running status ,ignore complete  event ");*/
+                       logger?.LogInformation("client is not running status ,ignore complete  event ");
                    }
                }, System.Threading.Tasks.TaskCreationOptions.LongRunning);
 

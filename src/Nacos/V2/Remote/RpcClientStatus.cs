@@ -1,10 +1,5 @@
 ﻿namespace Nacos.V2.Remote
 {
-    using Microsoft.Extensions.Logging;
-    using Nacos.Utilities;
-    using System;
-    using System.Collections.Generic;
-
     public class RpcClientStatus
     {
         /// <summary>
@@ -15,7 +10,7 @@
         /// <summary>
         /// server list factory is ready,wait to start
         /// </summary>
-        public const int INITED = 1;
+        public const int INITIALIZED = 1;
 
         /// <summary>
         /// server list factory is ready,wait to start
@@ -36,14 +31,5 @@
         /// client is shutdown...
         /// </summary>
         public const int SHUTDOWN = 5;
-
-        public int Status { get; set; }
-
-        public string Desc { get; set; }
-
-        public RpcClientStatus(int status)
-        {
-            this.Status = status;
-        }
     }
 }

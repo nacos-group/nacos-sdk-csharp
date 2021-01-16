@@ -29,7 +29,7 @@
 
         public static readonly string Req_ServerCheck = "com.alibaba.nacos.api.remote.request.ServerCheckRequest";
 
-        public static readonly string Resp_Config_Pubish = "com.alibaba.nacos.api.config.remote.response.ConfigPubishResponse";
+        public static readonly string Resp_Config_Pubish = "com.alibaba.nacos.api.config.remote.response.ConfigPublishResponse";
 
         public static readonly string Resp_Config_BatchListen = "com.alibaba.nacos.api.config.remote.response.ConfigChangeBatchListenResponse";
 
@@ -49,9 +49,11 @@
 
         public static readonly string Resp_Naming_Instance = "com.alibaba.nacos.api.naming.remote.response.InstanceResponse";
 
+        public static readonly string Resp_ConnectionUnregister = "com.alibaba.nacos.api.remote.response.ConnectionUnregisterResponse";
+
         public static Dictionary<string, Type> RemoteResponseTypeMapping = new Dictionary<string, Type>
         {
-            { Resp_Config_Pubish, typeof(Nacos.V2.Remote.Responses.ConfigPubishResponse) },
+            { Resp_Config_Pubish, typeof(Nacos.V2.Remote.Responses.ConfigPublishResponse) },
             { Resp_Config_BatchListen, typeof(Nacos.V2.Remote.Responses.ConfigChangeBatchListenResponse) },
             { Resp_Config_ChangeNotify, typeof(Nacos.V2.Remote.Responses.ConfigChangeNotifyResponse) },
             { Resp_Config_Query, typeof(Nacos.V2.Remote.Responses.ConfigQueryResponse) },
@@ -62,6 +64,7 @@
             { Resp_Naming_QueryService, typeof(Nacos.V2.Remote.Responses.QueryServiceResponse) },
             { Resp_Naming_ServiceList, typeof(Nacos.V2.Remote.Responses.ServiceListResponse) },
             { Resp_Naming_Instance, typeof(Nacos.V2.Remote.Responses.InstanceResponse) },
+            { Resp_ConnectionUnregister, typeof(Nacos.V2.Remote.Responses.ConnectionUnregisterResponse) },
         };
     }
 }

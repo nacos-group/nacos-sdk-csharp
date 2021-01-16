@@ -1,6 +1,7 @@
 ﻿namespace Nacos.V2.Utils
 {
     using System;
+    using System.Threading;
 
     public static class ObjectUtil
     {

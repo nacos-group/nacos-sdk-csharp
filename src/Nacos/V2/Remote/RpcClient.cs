@@ -7,6 +7,10 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using System.Collections.Concurrent;
+    using Nacos.V2.Common;
+    using Nacos.V2.Remote.Requests;
+    using System.Threading;
 
     public abstract class RpcClient : IDisposable
     {
@@ -14,11 +18,13 @@
 
         private IServerListFactory _serverListFactory;
 
+        private readonly BlockingCollection<ReconnectContext> _reconnectionSignal = new BlockingCollection<ReconnectContext>(boundedCapacity: 1);
+
         protected ILogger logger;
 
         protected Dictionary<string, string> labels = new Dictionary<string, string>();
 
-        protected RpcClientStatus rpcClientStatus = new RpcClientStatus(RpcClientStatus.WAIT_INIT);
+        protected int rpcClientStatus = RpcClientStatus.WAIT_INIT;
 
         protected RemoteConnection currentConnetion;
 
@@ -37,18 +43,19 @@
         public RpcClient(IServerListFactory serverListFactory)
         {
             this._serverListFactory = serverListFactory;
-            rpcClientStatus.Status = RpcClientStatus.INITED;
 
-            logger?.LogInformation("RpcClient init in constructor , ServerListFactory ={}", this._serverListFactory?.GetType()?.Name);
+            Interlocked.CompareExchange(ref rpcClientStatus, RpcClientStatus.INITIALIZED, RpcClientStatus.WAIT_INIT);
+
+            logger?.LogInformation("RpcClient init in constructor , ServerListFactory ={0}", this._serverListFactory?.GetType()?.Name);
         }
 
         public RpcClient(string name, IServerListFactory serverListFactory)
             : this(name)
         {
             this._serverListFactory = serverListFactory;
-            rpcClientStatus.Status = RpcClientStatus.INITED;
+            Interlocked.CompareExchange(ref rpcClientStatus, RpcClientStatus.INITIALIZED, RpcClientStatus.WAIT_INIT);
 
-            logger?.LogInformation("RpcClient init in constructor , ServerListFactory ={}", this._serverListFactory?.GetType()?.Name);
+            logger?.LogInformation("RpcClient init in constructor , ServerListFactory ={0}", this._serverListFactory?.GetType()?.Name);
         }
 
         protected CommonRequestMeta BuildMeta(string type)
@@ -90,24 +97,24 @@
         /// <summary>
         /// check is this client is inited.
         /// </summary>
-        public bool IsWaitInited() => this.rpcClientStatus.Status == RpcClientStatus.WAIT_INIT;
+        public bool IsWaitInited() => this.rpcClientStatus == RpcClientStatus.WAIT_INIT;
 
         /// <summary>
         /// check is this client is running.
         /// </summary>
-        public bool IsRunning() => this.rpcClientStatus.Status == RpcClientStatus.RUNNING;
+        public bool IsRunning() => this.rpcClientStatus == RpcClientStatus.RUNNING;
 
         /// <summary>
         /// check is this client is shutdwon.
         /// </summary>
-        public bool IsShutdwon() => this.rpcClientStatus.Status == RpcClientStatus.SHUTDOWN;
+        public bool IsShutdwon() => this.rpcClientStatus == RpcClientStatus.SHUTDOWN;
 
         public void Init(IServerListFactory serverListFactory)
         {
             if (!IsWaitInited()) return;
 
             this._serverListFactory = serverListFactory;
-            rpcClientStatus.Status = RpcClientStatus.INITED;
+            Interlocked.CompareExchange(ref rpcClientStatus, RpcClientStatus.INITIALIZED, RpcClientStatus.WAIT_INIT);
 
             logger?.LogInformation("RpcClient init in constructor , ServerListFactory ={}", this._serverListFactory?.GetType()?.Name);
         }
@@ -124,10 +131,13 @@
 
         public void Start()
         {
-            if (this.rpcClientStatus.Status >= RpcClientStatus.STARTING) return;
+            if (Interlocked.CompareExchange(ref rpcClientStatus, RpcClientStatus.STARTING, RpcClientStatus.INITIALIZED) != RpcClientStatus.INITIALIZED) return;
+
+            StartReconnect();
 
             RemoteConnection connectToServer = null;
-            this.rpcClientStatus.Status = RpcClientStatus.STARTING;
+
+            Interlocked.Exchange(ref rpcClientStatus, RpcClientStatus.STARTING);
 
             int startUpretyTimes = 3;
 
@@ -153,13 +163,168 @@
             {
                 logger?.LogInformation("{0} success to connect to server on start up", this._name);
                 this.currentConnetion = connectToServer;
-                rpcClientStatus.Status = RpcClientStatus.RUNNING;
+                Interlocked.Exchange(ref rpcClientStatus, RpcClientStatus.RUNNING);
                 /*eventLinkedBlockingQueue.offer(new ConnectionEvent(ConnectionEvent.CONNECTED));*/
             }
             else
             {
-                /*switchServerAsync();*/
+                SwitchServerAsync();
             }
+        }
+
+        private void StartReconnect()
+        {
+            Task.Factory.StartNew(async () =>
+            {
+                while (true)
+                {
+                    try
+                    {
+                        // block 5000ms
+                        if (_reconnectionSignal.TryTake(out var reconnectContext, 5000))
+                        {
+                            if (reconnectContext.ServerInfo != null)
+                            {
+                                var address = reconnectContext.ServerInfo.ServerIp + Constants.COLON + reconnectContext.ServerInfo.ServerPort;
+
+                                if (!GetServerListFactory().GetServerList().Contains(address)) reconnectContext.ServerInfo = null;
+                            }
+
+                            await Reconnect(reconnectContext.ServerInfo, reconnectContext.OnRequestFail);
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        logger?.LogError(ex, "[ rpc listen execute ] [rpc listen] exception");
+                    }
+                }
+            });
+        }
+
+        protected async Task Reconnect(RemoteServerInfo recommendServerInfo, bool onRequestFail)
+        {
+            try
+            {
+                var recommendServer = recommendServerInfo;
+                if (onRequestFail && await ServerCheck())
+                {
+                    logger?.LogInformation("[{0}] Server check success : {1}", _name, recommendServer);
+                    Interlocked.Exchange(ref rpcClientStatus, RpcClientStatus.RUNNING);
+                    return;
+                }
+
+                // loop until start client success.
+                bool switchSuccess = false;
+
+                int reConnectTimes = 0;
+                int retryTurns = 0;
+                Exception lastException = null;
+                while (!switchSuccess && !IsShutdwon())
+                {
+                    // 1.get a new server
+                    RemoteServerInfo serverInfo = null;
+                    try
+                    {
+                        serverInfo = recommendServer == null ? NextRpcServer() : recommendServer;
+
+                        // 2.create a new channel to new server
+                        var connectionNew = ConnectToServer(serverInfo);
+                        if (connectionNew != null)
+                        {
+                            logger?.LogInformation("[{0}] success to connect server : {1}", _name, recommendServer);
+
+                            // successfully create a new connect.
+                            if (currentConnetion != null)
+                            {
+                                // set current connection to enable connection event.
+                                currentConnetion.SetAbandon(true);
+                                CloseConnection(currentConnetion);
+                            }
+
+                            currentConnetion = connectionNew;
+                            Interlocked.Exchange(ref rpcClientStatus, RpcClientStatus.RUNNING);
+                            switchSuccess = true;
+
+                            // var s = eventLinkedBlockingQueue.add(new ConnectionEvent(ConnectionEvent.CONNECTED));
+                            return;
+                        }
+
+                        // close connection if client is already shutdown.
+                        if (IsShutdwon())
+                        {
+                            CloseConnection(currentConnetion);
+                        }
+
+                        lastException = null;
+                    }
+                    catch (Exception e)
+                    {
+                        lastException = e;
+                    }
+                    finally
+                    {
+                        recommendServer = null;
+                    }
+
+                    if (reConnectTimes > 0 && reConnectTimes % _serverListFactory.GetServerList().Count == 0)
+                    {
+                        logger?.LogInformation("[{0}] fail to connect server,after trying {1} times, last try server is {2}", _name, reConnectTimes, serverInfo);
+
+                        if (retryTurns == int.MaxValue)
+                        {
+                            retryTurns = 50;
+                        }
+                        else
+                        {
+                            retryTurns++;
+                        }
+                    }
+
+                    reConnectTimes++;
+
+                    try
+                    {
+                        // sleep x milliseconds to switch next server.
+                        if (!IsRunning())
+                        {
+                            // first round ,try servers at a delay 100ms;second round ,200ms; max delays 5s. to be reconsidered.
+                            Thread.Sleep((int)(Math.Min(retryTurns + 1, 50) * 100L));
+                        }
+                    }
+                    catch
+                    {
+                        // Do  nothing.
+                    }
+                }
+
+                if (IsShutdwon())
+                {
+                    logger?.LogInformation("[{0}] client is shutdown ,stop reconnect to server", _name);
+                }
+            }
+            catch (Exception e)
+            {
+                logger?.LogError(e, "[{0}] fail to  connect to server", _name);
+            }
+        }
+
+        private async Task<bool> ServerCheck()
+        {
+            var serverCheckRequest = new ServerCheckRequest();
+            try
+            {
+                var response = await this.currentConnetion.RequestAsync(serverCheckRequest, BuildMeta(serverCheckRequest.GetRemoteType()));
+                return response == null ? false : response.IsSuccess();
+            }
+            catch
+            {
+            }
+
+            return false;
         }
 
         public abstract RemoteConnection ConnectToServer(RemoteServerInfo serverInfo);
@@ -196,6 +361,18 @@
 
                     if (response != null)
                     {
+                        // it means that we are new to this nacos server, because we do not setup the connection!!
+                        // here should have a try to reconnect or switch server.
+                        if (response is Responses.ConnectionUnregisterResponse)
+                        {
+                            if (Interlocked.CompareExchange(ref rpcClientStatus, RpcClientStatus.UNHEALTHY, RpcClientStatus.RUNNING) == RpcClientStatus.RUNNING)
+                            {
+                                SwitchServerAsync();
+                            }
+
+                            throw new System.Exception("Invalid client status.");
+                        }
+
                         // TODO UNHEALTHY adn switchServerAsync
                         return response;
                     }
@@ -208,6 +385,11 @@
                 retryTimes--;
             }
 
+            if (Interlocked.CompareExchange(ref rpcClientStatus, RpcClientStatus.UNHEALTHY, RpcClientStatus.RUNNING) == RpcClientStatus.RUNNING)
+            {
+                SwitchServerAsyncOnRequestFail();
+            }
+
             // TODO UNHEALTHY adn switchServerAsync
             if (exceptionToThrow != null)
             {
@@ -216,6 +398,22 @@
 
             return null;
         }
+
+        private void SwitchServerAsyncOnRequestFail()
+        {
+            SwitchServerAsync(null, true);
+        }
+
+        public void SwitchServerAsync()
+        {
+            SwitchServerAsync(null, false);
+        }
+
+        public void SwitchServerAsync(RemoteServerInfo serverInfo, bool onRequestFail)
+        {
+            _reconnectionSignal.TryAdd(new ReconnectContext(serverInfo, onRequestFail));
+        }
+
 
         protected CommonResponse HandleServerRequest(CommonRequest request, CommonRequestMeta meta)
         {
@@ -295,7 +493,7 @@
         public void Dispose()
         {
             // executorService.shutdown();
-            rpcClientStatus.Status = RpcClientStatus.SHUTDOWN;
+            Interlocked.Exchange(ref rpcClientStatus, RpcClientStatus.SHUTDOWN);
             CloseConnection(currentConnetion);
         }
 

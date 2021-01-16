@@ -40,7 +40,7 @@ namespace App3
                 x.Namespace = "cs";
 
                 // swich to use http or rpc
-                x.ConfigUseRpc = false;
+                x.ConfigUseRpc = true;
             });
 
             services.AddNacosV2Naming(x =>
@@ -50,7 +50,7 @@ namespace App3
                 x.Namespace = "cs";
 
                 // swich to use http or rpc
-                x.NamingUseRpc = false;
+                x.NamingUseRpc = true;
             });
 
             services.AddControllers();
