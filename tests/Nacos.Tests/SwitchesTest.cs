@@ -1,4 +1,4 @@
-﻿namespace Nacos.Tests
+﻿/*namespace Nacos.Tests
 {
     using System.Threading.Tasks;
     using Xunit;
@@ -27,3 +27,4 @@
         }
     }
 }
+*/
