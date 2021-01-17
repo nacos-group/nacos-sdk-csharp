@@ -1,7 +1,7 @@
 ﻿namespace Nacos.V2.Security
 {
     using Microsoft.Extensions.Options;
-    using Nacos.V2.Common;
+    using Nacos.V2.Utils;
     using System;
     using System.Collections.Generic;
     using System.Net.Http;

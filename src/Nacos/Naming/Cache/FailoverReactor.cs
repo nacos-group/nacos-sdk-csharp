@@ -1,8 +1,7 @@
 ﻿namespace Nacos
 {
     using Microsoft.Extensions.Logging;
-    using Nacos.Utilities;
-    using Nacos.V2.Common;
+    using Nacos.V2.Utils;
     using System;
     using System.Collections.Concurrent;
     using System.IO;

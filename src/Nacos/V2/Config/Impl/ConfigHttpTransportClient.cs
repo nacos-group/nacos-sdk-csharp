@@ -527,7 +527,7 @@
                 string content = await FileLocalConfigInfoProcessor.GetFailoverAsync(agentName, dataId, group, tenant);
                 string md5 = HashUtil.GetMd5(content);
                 cacheData.SetUseLocalConfigInfo(true);
-                cacheData.SetLocalConfigInfoVersion(ObjectUtil.DateTimeToTimestamp(path.LastWriteTimeUtc));
+                cacheData.SetLocalConfigInfoVersion(path.LastWriteTimeUtc.ToTimestamp());
                 cacheData.SetContent(content);
 
                 _logger?.LogWarning(
@@ -551,12 +551,12 @@
             // When it changed.
             if (cacheData.IsUseLocalConfig
                 && path.Exists
-                && cacheData.GetLocalConfigInfoVersion() != ObjectUtil.DateTimeToTimestamp(path.LastWriteTimeUtc))
+                && cacheData.GetLocalConfigInfoVersion() != path.LastWriteTimeUtc.ToTimestamp())
             {
                 string content = await FileLocalConfigInfoProcessor.GetFailoverAsync(agentName, dataId, group, tenant);
                 string md5 = HashUtil.GetMd5(content);
                 cacheData.SetUseLocalConfigInfo(true);
-                cacheData.SetLocalConfigInfoVersion(ObjectUtil.DateTimeToTimestamp(path.LastWriteTimeUtc));
+                cacheData.SetLocalConfigInfoVersion(path.LastWriteTimeUtc.ToTimestamp());
                 cacheData.SetContent(content);
 
                 _logger?.LogWarning(

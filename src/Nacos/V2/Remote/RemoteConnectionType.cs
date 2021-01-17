@@ -1,21 +1,20 @@
 ﻿namespace Nacos.V2.Remote
 {
-    using Microsoft.Extensions.Logging;
-    using Nacos.Utilities;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-
-    public class RemoteConnectionType
+    public enum RemoteConnectionType
     {
-        public static string RSOCKET = "RSOCKET";
+        /// <summary>
+        /// GRPC
+        /// </summary>
+        GRPC = 0,
 
-        public static string TB_REMOTEING = "TB_REMOTEING";
+        /// <summary>
+        /// RSOCKET
+        /// </summary>
+        RSOCKET = 1,
 
-        public static string GRPC = "GRPC";
-
-        public string Type { get; set; }
-
-        public RemoteConnectionType(string type) => this.Type = type;
+        /// <summary>
+        /// TB_REMOTEING
+        /// </summary>
+        TB_REMOTEING = 2,
     }
 }

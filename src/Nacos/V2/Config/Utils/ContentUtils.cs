@@ -1,6 +1,7 @@
 ﻿namespace Nacos.V2.Config.Utils
 {
     using Nacos.V2.Common;
+    using Nacos.V2.Utils;
     using System;
 
     public static class ContentUtils

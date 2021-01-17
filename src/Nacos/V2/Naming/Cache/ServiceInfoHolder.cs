@@ -1,7 +1,6 @@
 ﻿namespace Nacos.V2.Naming.Cache
 {
     using Microsoft.Extensions.Logging;
-    using Nacos.Utilities;
     using Nacos.V2.Naming.Utils;
     using Nacos.V2.Naming.Backups;
     using System;

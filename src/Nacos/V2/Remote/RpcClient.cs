@@ -2,7 +2,6 @@
 {
     using Microsoft.Extensions.Logging;
     using Nacos.V2.Exceptions;
-    using Nacos.Utilities;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -11,6 +10,7 @@
     using Nacos.V2.Common;
     using Nacos.V2.Remote.Requests;
     using System.Threading;
+    using Nacos.V2.Utils;
 
     public abstract class RpcClient : IDisposable
     {

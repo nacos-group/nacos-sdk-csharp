@@ -1,6 +1,6 @@
 ﻿namespace Nacos.V2.Remote.GRpc
 {
-    using Nacos.Utilities;
+    using Nacos.V2.Utils;
     using System.Linq;
 
     public static class GrpcUtils

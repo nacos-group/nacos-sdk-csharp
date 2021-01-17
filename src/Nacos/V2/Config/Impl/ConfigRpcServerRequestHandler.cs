@@ -1,9 +1,9 @@
 ﻿namespace Nacos.V2.Config.Impl
 {
-    using Nacos.Utilities;
     using Nacos.V2.Remote;
     using Nacos.V2.Remote.Requests;
     using Nacos.V2.Remote.Responses;
+    using Nacos.V2.Utils;
     using System;
     using System.Collections.Concurrent;
     using System.Threading.Tasks;

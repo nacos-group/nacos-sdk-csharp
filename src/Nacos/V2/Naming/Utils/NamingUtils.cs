@@ -2,6 +2,7 @@
 {
     using System;
     using Nacos.V2.Common;
+    using Nacos.V2.Utils;
 
     public class NamingUtils
     {

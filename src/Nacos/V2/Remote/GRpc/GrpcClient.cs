@@ -48,7 +48,7 @@
             }
         }
 
-        public override RemoteConnectionType GetConnectionType() => new RemoteConnectionType(RemoteConnectionType.GRPC);
+        public override RemoteConnectionType GetConnectionType() => RemoteConnectionType.GRPC;
 
         public override int RpcPortOffset() => 1000;
 

@@ -2,7 +2,7 @@
 {
     using Nacos.V2.Common;
     using Nacos.V2.Naming.Dtos;
-    using Nacos.Utilities;
+    using Nacos.V2.Utils;
     using System;
     using System.Collections.Generic;
     using System.IO;

@@ -1,6 +1,6 @@
 ﻿namespace Nacos.V2.Config
 {
-    using Nacos.V2.Common;
+    using Nacos.V2.Utils;
     using System.Text;
 
     public class GroupKey

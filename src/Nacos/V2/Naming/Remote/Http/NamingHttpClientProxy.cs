@@ -17,8 +17,6 @@
     using Nacos.V2.Naming.Utils;
     using Nacos.V2.Remote;
     using Nacos.V2.Security;
-    using Nacos.Utilities;
-    using Microsoft.Extensions.Options;
     using Nacos.V2.Utils;
 
     public class NamingHttpClientProxy : INamingClientProxy

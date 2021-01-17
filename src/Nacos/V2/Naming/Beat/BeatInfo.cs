@@ -1,6 +1,6 @@
 ﻿namespace Nacos.V2.Naming.Beat
 {
-    using Nacos.Utilities;
+    using Nacos.V2.Utils;
     using System.Collections.Generic;
 
     public class BeatInfo

@@ -1,8 +1,8 @@
 ﻿namespace Nacos.V2.Naming.Core
 {
     using Microsoft.Extensions.Logging;
-    using Nacos.Utilities;
     using Nacos.V2.Naming.Cache;
+    using Nacos.V2.Utils;
     using System;
     using System.IO;
     using System.IO.Compression;

@@ -1,7 +1,7 @@
 ﻿namespace Nacos.V2.Config.Impl
 {
     using Microsoft.Extensions.Logging;
-    using Nacos.V2.Common;
+    using Nacos.V2.Utils;
     using Nacos.V2.Exceptions;
     using System;
     using System.Collections.Generic;

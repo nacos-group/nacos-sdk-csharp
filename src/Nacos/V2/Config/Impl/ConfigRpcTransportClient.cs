@@ -1,13 +1,13 @@
 ﻿namespace Nacos.V2.Config.Impl
 {
     using Microsoft.Extensions.Logging;
-    using Nacos.Utilities;
     using Nacos.V2.Common;
     using Nacos.V2.Config.Abst;
     using Nacos.V2.Exceptions;
     using Nacos.V2.Remote;
     using Nacos.V2.Remote.Requests;
     using Nacos.V2.Remote.Responses;
+    using Nacos.V2.Utils;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
@@ -167,7 +167,7 @@
             newlabels["taskId"] = taskId;
 
             RpcClient rpcClient = RpcClientFactory
-                    .CreateClient("config-" + taskId + "-" + uuid, new RemoteConnectionType(RemoteConnectionType.GRPC), newlabels);
+                    .CreateClient("config-" + taskId + "-" + uuid, RemoteConnectionType.GRPC, newlabels);
 
             if (rpcClient.IsWaitInited())
             {

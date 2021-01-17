@@ -12,7 +12,7 @@
     using Nacos.V2.Remote;
     using Nacos.V2.Remote.Requests;
     using Nacos.V2.Remote.Responses;
-    using Nacos.Utilities;
+    using Nacos.V2.Utils;
 
     public class NamingGrpcClientProxy : INamingClientProxy, IDisposable
     {
@@ -48,7 +48,7 @@
                 { RemoteConstants.LABEL_MODULE, RemoteConstants.LABEL_MODULE_NAMING },
             };
 
-            this.rpcClient = RpcClientFactory.CreateClient(uuid, new RemoteConnectionType(RemoteConnectionType.GRPC), labels);
+            this.rpcClient = RpcClientFactory.CreateClient(uuid, RemoteConnectionType.GRPC, labels);
 
             this.namingGrpcConnectionEventListener = new NamingGrpcConnectionEventListener(_logger, this);
 

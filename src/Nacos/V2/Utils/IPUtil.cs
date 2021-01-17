@@ -1,4 +1,4 @@
-﻿namespace Nacos.V2.Common
+﻿namespace Nacos.V2.Utils
 {
     using System;
     using System.Text;
