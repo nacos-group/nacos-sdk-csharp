@@ -1,4 +1,4 @@
-name: Build_With_Stable
+name: Build_With_Alpha
 
 on:
   push:
@@ -37,10 +37,10 @@ jobs:
       run: dotnet --version
     - name: Show java Version
       run: java -version  
-    - name: Setup Stable Nacos Server
+    - name: Setup Alpha Nacos Server
       run: |
-        wget https://github.com/alibaba/nacos/releases/download/1.4.1/nacos-server-1.4.1.tar.gz
-        tar -xvf nacos-server-1.4.1.tar.gz
+        wget https://github.com/alibaba/nacos/releases/download/2.0.0-ALPHA.2/nacos-server-2.0.0-ALPHA.2.tar.gz
+        tar -xvf nacos-server-2.0.0-ALPHA.2.tar.gz
         cd nacos/bin
         chmod 755 startup.sh
         nohup ./startup.sh -m standalone 2>&1 &
