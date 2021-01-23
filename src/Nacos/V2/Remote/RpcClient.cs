@@ -20,6 +20,8 @@
 
         private readonly BlockingCollection<ReconnectContext> _reconnectionSignal = new BlockingCollection<ReconnectContext>(boundedCapacity: 1);
 
+        private readonly BlockingCollection<ConnectionEvent> _eventLinkedBlockingQueue = new BlockingCollection<ConnectionEvent>();
+
         protected ILogger logger;
 
         protected Dictionary<string, string> labels = new Dictionary<string, string>();
@@ -60,7 +62,13 @@
 
         protected CommonRequestMeta BuildMeta(string type)
         {
-            var meta = new CommonRequestMeta { ClientVersion = Nacos.V2.Common.Constants.CLIENT_VERSION, Labels = labels, Type = type };
+            var meta = new CommonRequestMeta
+            {
+                ClientVersion = Constants.CLIENT_VERSION,
+                Labels = labels,
+                ClientIp = NetUtils.LocalIP(),
+                Type = type
+            };
             return meta;
         }
 
@@ -133,6 +141,8 @@
         {
             if (Interlocked.CompareExchange(ref rpcClientStatus, RpcClientStatus.STARTING, RpcClientStatus.INITIALIZED) != RpcClientStatus.INITIALIZED) return;
 
+            StartConnectEvent();
+
             StartReconnect();
 
             RemoteConnection connectToServer = null;
@@ -164,12 +174,39 @@
                 logger?.LogInformation("{0} success to connect to server on start up", this._name);
                 this.currentConnetion = connectToServer;
                 Interlocked.Exchange(ref rpcClientStatus, RpcClientStatus.RUNNING);
-                /*eventLinkedBlockingQueue.offer(new ConnectionEvent(ConnectionEvent.CONNECTED));*/
+                _eventLinkedBlockingQueue.TryAdd(new ConnectionEvent(ConnectionEvent.CONNECTED));
             }
             else
             {
                 SwitchServerAsync();
             }
+        }
+
+        private void StartConnectEvent()
+        {
+            Task.Factory.StartNew(() =>
+            {
+                while (true)
+                {
+                    try
+                    {
+                        // block 5000ms
+                        if (_eventLinkedBlockingQueue.TryTake(out var take, 5000))
+                        {
+                            if (take.IsConnected()) NotifyConnected();
+                            else if (take.IsDisConnected()) NotifyDisConnected();
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        // Do nothing
+                    }
+                }
+            });
         }
 
         private void StartReconnect()
@@ -249,7 +286,7 @@
                             Interlocked.Exchange(ref rpcClientStatus, RpcClientStatus.RUNNING);
                             switchSuccess = true;
 
-                            // var s = eventLinkedBlockingQueue.add(new ConnectionEvent(ConnectionEvent.CONNECTED));
+                            _eventLinkedBlockingQueue.TryAdd(new ConnectionEvent(ConnectionEvent.CONNECTED));
                             return;
                         }
 
@@ -333,15 +370,7 @@
 
         public abstract int RpcPortOffset();
 
-        public RemoteServerInfo GetCurrentServer()
-        {
-            if (this.currentConnetion != null)
-            {
-                return currentConnetion.ServerInfo;
-            }
-
-            return null;
-        }
+        public RemoteServerInfo GetCurrentServer() => this.currentConnetion != null ? this.currentConnetion.ServerInfo : null;
 
         public Task<CommonResponse> Request(CommonRequest request) => Request(request, 3000L);
 
@@ -373,7 +402,6 @@
                             throw new System.Exception("Invalid client status.");
                         }
 
-                        // TODO UNHEALTHY adn switchServerAsync
                         return response;
                     }
                 }
@@ -501,7 +529,7 @@
         {
             if (connection != null)
             {
-                // eventLinkedBlockingQueue.add(new ConnectionEvent(ConnectionEvent.DISCONNECTED));
+                _eventLinkedBlockingQueue.Add(new ConnectionEvent(ConnectionEvent.DISCONNECTED));
                 connection.CloseAsync().GetAwaiter().GetResult();
             }
         }

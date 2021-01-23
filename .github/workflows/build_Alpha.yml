@@ -28,8 +28,8 @@ jobs:
       run: java -version  
     - name: Setup Alpha Nacos Server
       run: |
-        wget https://github.com/alibaba/nacos/releases/download/2.0.0-ALPHA.2/nacos-server-2.0.0-ALPHA.2.tar.gz
-        tar -xvf nacos-server-2.0.0-ALPHA.2.tar.gz
+        wget https://github.com/alibaba/nacos/releases/download/2.0.0-ALPHA.2/nacos-server-2.0.0-ALPHA.1.tar.gz
+        tar -xvf nacos-server-2.0.0-ALPHA.1.tar.gz
         cd nacos/bin
         chmod 755 startup.sh
         nohup ./startup.sh -m standalone 2>&1 &
