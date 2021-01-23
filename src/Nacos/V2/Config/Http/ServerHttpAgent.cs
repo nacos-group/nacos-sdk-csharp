@@ -14,6 +14,7 @@
     {
         private readonly ILogger _logger;
         private ServerListManager _serverListMgr;
+        private HttpClient _httpClient = new HttpClient();
 
         public ServerHttpAgent(ILogger logger, NacosSdkOptions options)
         {
@@ -56,14 +57,16 @@
             {
                 try
                 {
-                    using HttpClient client = new HttpClient();
-                    using HttpRequestMessage reqMsg = new HttpRequestMessage(method, requestUrl);
+                    var cts = new System.Threading.CancellationTokenSource();
+                    cts.CancelAfter(TimeSpan.FromMilliseconds(readTimeoutMs));
+
+                    HttpRequestMessage reqMsg = new HttpRequestMessage(method, requestUrl);
                     foreach (var item in headers)
                     {
                         reqMsg.Headers.TryAddWithoutValidation(item.Key, item.Value);
                     }
 
-                    var resp = await client.SendAsync(reqMsg);
+                    var resp = await _httpClient.SendAsync(reqMsg, cts.Token);
 
                     if (IsFail(resp))
                     {

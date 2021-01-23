@@ -12,6 +12,8 @@
 
     public class ServerListManager : IServerListFactory, IDisposable
     {
+        private static HttpClient _httpClient = new HttpClient();
+
         private readonly ILogger _logger;
 
         private long _refreshServerListInternal = 30000;
@@ -69,30 +71,30 @@
                 var url = $"http://{_endpoint}/nacos/serverlist";
 
                 var header = Utils.NamingHttpUtil.BuildHeader();
-                using (HttpClient client = new HttpClient())
+
+                var cts = new CancellationTokenSource();
+                cts.CancelAfter(TimeSpan.FromMilliseconds(5000));
+
+                HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Get, url);
+                foreach (var item in header) req.Headers.TryAddWithoutValidation(item.Key, item.Value);
+
+                var resp = await _httpClient.SendAsync(req);
+
+                if (!resp.IsSuccessStatusCode)
                 {
-                    client.Timeout = TimeSpan.FromSeconds(5);
-                    using HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Get, url);
-                    foreach (var item in header) req.Headers.TryAddWithoutValidation(item.Key, item.Value);
+                    throw new Exception($"Error while requesting: {url} . Server returned: {resp.StatusCode}");
+                }
 
-                    var resp = await client.SendAsync(req);
+                var str = await resp.Content.ReadAsStringAsync();
 
-                    if (!resp.IsSuccessStatusCode)
-                    {
-                        throw new Exception($"Error while requesting: {url} . Server returned: {resp.StatusCode}");
-                    }
+                using StringReader sr = new StringReader(str);
+                while (true)
+                {
+                    var line = await sr.ReadLineAsync();
+                    if (line == null || line.Length <= 0)
+                        break;
 
-                    var str = await resp.Content.ReadAsStringAsync();
-
-                    using StringReader sr = new StringReader(str);
-                    while (true)
-                    {
-                        var line = await sr.ReadLineAsync();
-                        if (line == null || line.Length <= 0)
-                            break;
-
-                        list.Add(line.Trim());
-                    }
+                    list.Add(line.Trim());
                 }
 
                 return list;

@@ -1,7 +1,6 @@
 ﻿namespace Nacos.AspNetCore
 {
     using Nacos;
-    using System;
     using System.Collections.Generic;
     using System.Linq;
 
