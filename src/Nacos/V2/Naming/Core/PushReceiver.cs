@@ -42,7 +42,7 @@
                 }
                 catch (Exception ex)
                 {
-                    _logger?.LogError(ex, "failed to start udp server {0}", i + 1);
+                    _logger?.LogError(ex, "failed to start udp server {0}, {1}", i + 1, _port);
                 }
             }
 
@@ -50,6 +50,12 @@
             {
                 try
                 {
+                    if (_udpClient == null)
+                    {
+                        _closed = true;
+                        break;
+                    }
+
                     var res = await _udpClient.ReceiveAsync();
 
                     var json = Encoding.UTF8.GetString(TryDecompressData(res.Buffer));

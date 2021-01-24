@@ -58,13 +58,12 @@
         {
             Requests.PlainRequest plainRequest = new Requests.PlainRequest();
 
-            // com.alibaba.nacos.api.config.remote.response.ConfigPubishResponse
             var type = payload.Metadata.Type;
-
+            System.Console.WriteLine($"Parse response, type = {type}");
             if (RemoteRequestType.RemoteResponseTypeMapping.TryGetValue(type, out var classType))
             {
                 var retStr = payload.Body.Value.ToStringUtf8();
-                System.Diagnostics.Trace.WriteLine($"parse response result, {retStr} ");
+                System.Console.WriteLine($"parse response result = {retStr} ");
                 object obj = retStr.ToObj(classType);
                 plainRequest.Body = obj;
             }

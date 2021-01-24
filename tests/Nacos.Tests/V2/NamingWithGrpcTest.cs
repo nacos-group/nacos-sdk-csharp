@@ -1,6 +1,7 @@
 ﻿namespace Nacos.Tests.V2
 {
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Logging;
     using Nacos.V2;
     using Nacos.V2.DependencyInjection;
     using System;
@@ -23,6 +24,8 @@
                 // swich to use http or rpc
                 x.NamingUseRpc = true;
             });
+
+            services.AddLogging(builder => { builder.AddConsole(); });
 
             IServiceProvider serviceProvider = services.BuildServiceProvider();
             _namingSvc = serviceProvider.GetService<INacosNamingService>();

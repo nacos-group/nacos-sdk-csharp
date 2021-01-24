@@ -31,6 +31,9 @@ jobs:
         wget https://github.com/alibaba/nacos/releases/download/2.0.0-ALPHA.1/nacos-server-2.0.0-ALPHA.1.tar.gz
         tar -xvf nacos-server-2.0.0-ALPHA.1.tar.gz
         cd nacos/bin
+        sed -i 's/Xms512m/Xms1024m/g' startup.sh
+        sed -i 's/Xmx512m/Xmx1024m/g' startup.sh
+        sed -i 's/Xmn256m/Xmn512m/g' startup.sh
         chmod 755 startup.sh
         nohup ./startup.sh -m standalone 2>&1 &
         sleep 30
@@ -39,3 +42,9 @@ jobs:
       run: dotnet build
     - name: Test with dotnet
       run: dotnet test
+    - name: Upload Nacos logs
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: nacos-logs
+        path: /home/runner/work/nacos-sdk-csharp/nacos-sdk-csharp/nacos/logs

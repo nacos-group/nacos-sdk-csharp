@@ -31,7 +31,9 @@
 
         public static readonly string Req_Config_ReSync = "com.alibaba.nacos.api.config.remote.request.ConfigReSyncRequest";
 
-        public static readonly string Resp_Config_Pubish = "com.alibaba.nacos.api.config.remote.response.ConfigPublishResponse";
+        public static readonly string Resp_Config_Pubish_Alpha2 = "com.alibaba.nacos.api.config.remote.response.ConfigPublishResponse";
+
+        public static readonly string Resp_Config_Pubish_Alpha1 = "com.alibaba.nacos.api.config.remote.response.ConfigPubishResponse";
 
         public static readonly string Resp_Config_BatchListen = "com.alibaba.nacos.api.config.remote.response.ConfigChangeBatchListenResponse";
 
@@ -57,7 +59,8 @@
 
         public static Dictionary<string, Type> RemoteResponseTypeMapping = new Dictionary<string, Type>
         {
-            { Resp_Config_Pubish, typeof(Nacos.V2.Remote.Responses.ConfigPublishResponse) },
+            { Resp_Config_Pubish_Alpha1, typeof(Nacos.V2.Remote.Responses.ConfigPubishResponse) },
+            { Resp_Config_Pubish_Alpha2, typeof(Nacos.V2.Remote.Responses.ConfigPublishResponse) },
             { Resp_Config_BatchListen, typeof(Nacos.V2.Remote.Responses.ConfigChangeBatchListenResponse) },
             { Resp_Config_ChangeNotify, typeof(Nacos.V2.Remote.Responses.ConfigChangeNotifyResponse) },
             { Resp_Config_Query, typeof(Nacos.V2.Remote.Responses.ConfigQueryResponse) },
