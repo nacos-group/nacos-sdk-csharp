@@ -19,7 +19,7 @@
 
     public class ConfigHttpTransportClient : AbstConfigTransportClient
     {
-        private static readonly long POST_TIMEOUT = 3000L;
+        private static readonly long POST_TIMEOUT = 10000L;
 
         private readonly ILogger _logger;
 
