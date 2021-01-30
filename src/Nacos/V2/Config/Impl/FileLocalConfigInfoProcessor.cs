@@ -104,6 +104,7 @@
 
                     using FileStream fs = new FileStream(file.FullName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
                     byte[] bytes = Encoding.UTF8.GetBytes(config);
+                    fs.SetLength(bytes.Length);
                     await fs.WriteAsync(bytes, 0, bytes.Length);
                     fs.Close();
                 }

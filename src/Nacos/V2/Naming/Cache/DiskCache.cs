@@ -28,6 +28,7 @@
 
                 using FileStream fs = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
                 byte[] bytes = Encoding.UTF8.GetBytes(json);
+                fs.SetLength(bytes.Length);
                 await fs.WriteAsync(bytes, 0, bytes.Length);
                 fs.Close();
             }
