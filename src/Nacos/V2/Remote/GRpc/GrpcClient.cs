@@ -2,6 +2,7 @@
 {
     using Microsoft.Extensions.Logging;
     using Nacos.V2.Remote.Requests;
+    using Nacos.V2.Remote.Responses;
     using System;
 
     public class GrpcClient : RpcClient
@@ -15,31 +16,40 @@
         {
             try
             {
-                var channel = CreateNewChannel(serverInfo.ServerIp, serverInfo.ServerPort);
+                var channel = new Grpc.Core.Channel(serverInfo.ServerIp, serverInfo.ServerPort, Grpc.Core.ChannelCredentials.Insecure);
 
-                if (channel != null)
+                // after nacos alpha2 server check response was changed!!
+                var response = ServerCheck(channel);
+                if (response == null || response is not ServerCheckResponse scResp)
                 {
-                    var streamClient = new Nacos.BiRequestStream.BiRequestStreamClient(channel);
-                    var requestClient = new Nacos.Request.RequestClient(channel);
-
-                    GrpcConnection grpcConn = new GrpcConnection(serverInfo);
-
-
-                    var streamCall = BindRequestStream(streamClient, grpcConn);
-
-                    // stream observer to send response to server
-                    grpcConn.SetBiRequestStreamClient(streamCall);
-                    grpcConn.SetRequestClient(requestClient);
-                    grpcConn.SetChannel(channel);
-
-
-                    ConnectionSetupRequest conconSetupRequest = new ConnectionSetupRequest();
-
-                    grpcConn.SendRequest(conconSetupRequest, BuildMeta(conconSetupRequest.GetRemoteType()));
-                    return grpcConn;
+                    ShuntDownChannel(channel);
+                    return null;
                 }
 
-                return null;
+                var streamClient = new Nacos.BiRequestStream.BiRequestStreamClient(channel);
+                var requestClient = new Nacos.Request.RequestClient(channel);
+
+                GrpcConnection grpcConn = new GrpcConnection(serverInfo);
+                grpcConn.SetConnectionId(scResp.ConnectionId);
+
+                var streamCall = BindRequestStream(streamClient, grpcConn);
+
+                // stream observer to send response to server
+                grpcConn.SetBiRequestStreamClient(streamCall);
+                grpcConn.SetRequestClient(requestClient);
+                grpcConn.SetChannel(channel);
+
+                // after nacos alpha2 setup request was changed!!
+                ConnectionSetupRequest conSetupRequest = new ConnectionSetupRequest
+                {
+                    ClientVersion = ConstValue.ClientVersion,
+                    Labels = labels,
+                    Abilities = clientAbilities,
+                    Tenant = GetTenant()
+                };
+
+                grpcConn.SendRequest(conSetupRequest, BuildMeta(conSetupRequest.GetRemoteType()));
+                return grpcConn;
             }
             catch (Exception ex)
             {
@@ -52,23 +62,6 @@
 
         public override int RpcPortOffset() => 1000;
 
-        private Grpc.Core.ChannelBase CreateNewChannel(string serverIp, int serverPort)
-        {
-            var channel = new Grpc.Core.Channel(serverIp, serverPort, Grpc.Core.ChannelCredentials.Insecure);
-
-            bool checkSucess = ServerCheck(channel);
-
-            if (checkSucess)
-            {
-                return channel;
-            }
-            else
-            {
-                ShuntDownChannel(channel);
-                return null;
-            }
-        }
-
         private void ShuntDownChannel(Grpc.Core.ChannelBase managedChannel)
         {
             if (managedChannel != null)
@@ -77,7 +70,7 @@
             }
         }
 
-        private bool ServerCheck(Grpc.Core.ChannelBase channel)
+        private CommonResponse ServerCheck(Grpc.Core.ChannelBase channel)
         {
             try
             {
@@ -86,12 +79,13 @@
                 var client = new Nacos.Request.RequestClient(channel);
                 var resp = client.request(payload);
 
-                return resp != null;
+                var res = GrpcUtils.Parse(resp);
+                return (CommonResponse)res.Body;
             }
             catch (Exception ex)
             {
                 logger?.LogError(ex, "[{0}]Fail to server check!", GetName());
-                return false;
+                return null;
             }
         }
 

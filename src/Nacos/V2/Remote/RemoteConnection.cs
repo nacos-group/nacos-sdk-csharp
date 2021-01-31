@@ -5,6 +5,8 @@
 
     public abstract class RemoteConnection : IRequester
     {
+        private string connectionId;
+
         private bool abandon = false;
 
         public RemoteServerInfo ServerInfo;
@@ -32,5 +34,9 @@
         public bool IsAbandon() => abandon;
 
         public void SetAbandon(bool abandon) => this.abandon = abandon;
+
+        public string GetConnectionId() => connectionId;
+
+        public void SetConnectionId(string connectionId) => this.connectionId = connectionId;
     }
 }

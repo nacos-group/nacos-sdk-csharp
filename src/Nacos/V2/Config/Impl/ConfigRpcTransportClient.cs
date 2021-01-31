@@ -172,11 +172,20 @@
             if (rpcClient.IsWaitInited())
             {
                 InitHandlerRpcClient(rpcClient);
-
+                rpcClient.SetTenant(GetTenant());
+                rpcClient.SetClientAbilities(InitAbilities());
                 rpcClient.Start();
             }
 
             return rpcClient;
+        }
+
+        private ClientAbilities InitAbilities()
+        {
+            ClientAbilities clientAbilities = new ClientAbilities();
+            clientAbilities.RemoteAbility.SupportRemoteConnection = true;
+            clientAbilities.ConfigAbility.SupportRemoteMetrics = true;
+            return clientAbilities;
         }
 
         private void InitHandlerRpcClient(RpcClient rpcClientInner)

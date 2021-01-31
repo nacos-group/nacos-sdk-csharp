@@ -1,79 +1,96 @@
 ﻿namespace Nacos.V2.Remote
 {
+    using Nacos.V2.Remote.Requests;
+    using Nacos.V2.Remote.Responses;
     using System;
     using System.Collections.Generic;
 
+    /// <summary>
+    /// nacos 2.0.0.alpha1 fullname
+    /// nacos 2.0.0.alpha2 fullname
+    /// after nacos 2.0.0.alpha2 simplename
+    /// </summary>
     public static class RemoteRequestType
     {
-        public static readonly string Req_Config_Publish = "com.alibaba.nacos.api.config.remote.request.ConfigPublishRequest";
+        public static readonly string Req_Config_Publish = "ConfigPublishRequest";
 
-        public static readonly string Req_Config_Remove = "com.alibaba.nacos.api.config.remote.request.ConfigRemoveRequest";
+        public static readonly string Req_Config_Remove = "ConfigRemoveRequest";
 
-        public static readonly string Req_Config_Get = "com.alibaba.nacos.api.config.remote.request.ConfigQueryRequest";
+        public static readonly string Req_Config_Get = "ConfigQueryRequest";
 
-        public static readonly string Req_Config_Listen = "com.alibaba.nacos.api.config.remote.request.ConfigBatchListenRequest";
+        public static readonly string Req_Config_Listen = "ConfigBatchListenRequest";
 
-        public static readonly string Naming_HeartBeat = "com.alibaba.nacos.api.remote.request.HeartBeatRequest";
+        public static readonly string Naming_HeartBeat = "HeartBeatRequest";
 
-        public static readonly string Req_Naming_Instance = "com.alibaba.nacos.api.naming.remote.request.InstanceRequest";
+        public static readonly string Req_Naming_Instance = "InstanceRequest";
 
-        public static readonly string Req_Naming_ServiceQuery = "com.alibaba.nacos.api.naming.remote.request.ServiceQueryRequest";
+        public static readonly string Req_Naming_ServiceQuery = "ServiceQueryRequest";
 
-        public static readonly string Req_Naming_ServiceList = "com.alibaba.nacos.api.naming.remote.request.ServiceListRequest";
+        public static readonly string Req_Naming_ServiceList = "ServiceListRequest";
 
-        public static readonly string Req_Naming_NotifySubscriber = "com.alibaba.nacos.api.naming.remote.request.NotifySubscriberRequest";
+        public static readonly string Req_Naming_NotifySubscriber = "NotifySubscriberRequest";
 
-        public static readonly string Req_Naming_SubscribeService = "com.alibaba.nacos.api.naming.remote.request.SubscribeServiceRequest";
+        public static readonly string Req_Naming_SubscribeService = "SubscribeServiceRequest";
 
-        public static readonly string Req_ConnectionSetup = "com.alibaba.nacos.api.remote.request.ConnectionSetupRequest";
+        public static readonly string Req_ConnectionSetup = "ConnectionSetupRequest";
 
-        public static readonly string Req_ServerCheck = "com.alibaba.nacos.api.remote.request.ServerCheckRequest";
+        public static readonly string Req_ServerCheck = "ServerCheckRequest";
 
-        public static readonly string Req_Config_ReSync = "com.alibaba.nacos.api.config.remote.request.ConfigReSyncRequest";
+        public static readonly string Req_Config_ReSync = "ConfigReSyncRequest";
 
-        public static readonly string Resp_Config_Pubish_Alpha2 = "com.alibaba.nacos.api.config.remote.response.ConfigPublishResponse";
+        public static readonly string Resp_Config_Pubish_Alpha2 = "ConfigPublishResponse";
 
-        public static readonly string Resp_Config_Pubish_Alpha1 = "com.alibaba.nacos.api.config.remote.response.ConfigPubishResponse";
+        public static readonly string Resp_Config_Pubish_Alpha1 = "ConfigPubishResponse";
 
-        public static readonly string Resp_Config_BatchListen = "com.alibaba.nacos.api.config.remote.response.ConfigChangeBatchListenResponse";
+        public static readonly string Resp_Config_BatchListen = "ConfigChangeBatchListenResponse";
 
-        public static readonly string Resp_Config_ChangeNotify = "com.alibaba.nacos.api.config.remote.response.ConfigChangeNotifyResponse";
+        public static readonly string Resp_Config_ChangeNotify = "ConfigChangeNotifyResponse";
 
-        public static readonly string Req_Config_ChangeNotify = "com.alibaba.nacos.api.config.remote.request.ConfigChangeNotifyRequest";
+        public static readonly string Req_Config_ChangeNotify = "ConfigChangeNotifyRequest";
 
-        public static readonly string Resp_Config_Query = "com.alibaba.nacos.api.config.remote.response.ConfigQueryResponse";
+        public static readonly string Resp_Config_Query = "ConfigQueryResponse";
 
-        public static readonly string Resp_Config_Remove = "com.alibaba.nacos.api.config.remote.response.ConfigRemoveResponse";
+        public static readonly string Resp_Config_Remove = "ConfigRemoveResponse";
 
-        public static readonly string Resp_Naming_SubscribeServic = "com.alibaba.nacos.api.naming.remote.response.SubscribeServiceResponse";
+        public static readonly string Resp_Naming_SubscribeServic = "SubscribeServiceResponse";
 
-        public static readonly string Resp_Naming_QueryService = "com.alibaba.nacos.api.naming.remote.response.QueryServiceResponse";
+        public static readonly string Resp_Naming_QueryService = "QueryServiceResponse";
 
-        public static readonly string Resp_Naming_ServiceList = "com.alibaba.nacos.api.naming.remote.response.ServiceListResponse";
+        public static readonly string Resp_Naming_ServiceList = "ServiceListResponse";
 
-        public static readonly string Resp_Naming_Instance = "com.alibaba.nacos.api.naming.remote.response.InstanceResponse";
+        public static readonly string Resp_Naming_Instance = "InstanceResponse";
 
-        public static readonly string Resp_ConnectionUnregister = "com.alibaba.nacos.api.remote.response.ConnectionUnregisterResponse";
+        public static readonly string Resp_ConnectionUnregister = "ConnectionUnregisterResponse";
 
-        public static readonly string Resp_Config_ReSync = "com.alibaba.nacos.api.config.remote.response.ConfigReSyncResponse";
+        public static readonly string Resp_Config_ReSync = "ConfigReSyncResponse";
+
+        public static readonly string Resp_Error = "ErrorResponse";
+
+        public static readonly string Resp_ServerCheck = "ServerCheckResponse";
+
+        public static readonly string Req_PushAck = "PushAckRequest";
+
+        public static readonly string Req_ConnectReset = "ConnectResetRequest";
 
         public static Dictionary<string, Type> RemoteResponseTypeMapping = new Dictionary<string, Type>
         {
-            { Resp_Config_Pubish_Alpha1, typeof(Nacos.V2.Remote.Responses.ConfigPubishResponse) },
-            { Resp_Config_Pubish_Alpha2, typeof(Nacos.V2.Remote.Responses.ConfigPublishResponse) },
-            { Resp_Config_BatchListen, typeof(Nacos.V2.Remote.Responses.ConfigChangeBatchListenResponse) },
-            { Resp_Config_ChangeNotify, typeof(Nacos.V2.Remote.Responses.ConfigChangeNotifyResponse) },
-            { Resp_Config_Query, typeof(Nacos.V2.Remote.Responses.ConfigQueryResponse) },
-            { Resp_Config_Remove, typeof(Nacos.V2.Remote.Responses.ConfigRemoveResponse) },
-            { Req_Config_ChangeNotify, typeof(Nacos.V2.Remote.Requests.ConfigChangeNotifyRequest) },
-            { Req_Naming_NotifySubscriber, typeof(Nacos.V2.Remote.Requests.NotifySubscriberRequest) },
-            { Resp_Naming_SubscribeServic, typeof(Nacos.V2.Remote.Responses.SubscribeServiceResponse) },
-            { Resp_Naming_QueryService, typeof(Nacos.V2.Remote.Responses.QueryServiceResponse) },
-            { Resp_Naming_ServiceList, typeof(Nacos.V2.Remote.Responses.ServiceListResponse) },
-            { Resp_Naming_Instance, typeof(Nacos.V2.Remote.Responses.InstanceResponse) },
-            { Resp_ConnectionUnregister, typeof(Nacos.V2.Remote.Responses.ConnectionUnregisterResponse) },
-            { Resp_Config_ReSync, typeof(Nacos.V2.Remote.Responses.ConfigReSyncResponse) },
-            { Req_Config_ReSync, typeof(Nacos.V2.Remote.Requests.ConfigReSyncRequest) },
+            { Resp_Config_Pubish_Alpha1, typeof(ConfigPubishResponse) },
+            { Resp_Config_Pubish_Alpha2, typeof(ConfigPublishResponse) },
+            { Resp_Config_BatchListen, typeof(ConfigChangeBatchListenResponse) },
+            { Resp_Config_ChangeNotify, typeof(ConfigChangeNotifyResponse) },
+            { Resp_Config_Query, typeof(ConfigQueryResponse) },
+            { Resp_Config_Remove, typeof(ConfigRemoveResponse) },
+            { Req_Config_ChangeNotify, typeof(ConfigChangeNotifyRequest) },
+            { Req_Naming_NotifySubscriber, typeof(NotifySubscriberRequest) },
+            { Resp_Naming_SubscribeServic, typeof(SubscribeServiceResponse) },
+            { Resp_Naming_QueryService, typeof(QueryServiceResponse) },
+            { Resp_Naming_ServiceList, typeof(ServiceListResponse) },
+            { Resp_Naming_Instance, typeof(InstanceResponse) },
+            { Resp_ConnectionUnregister, typeof(ConnectionUnregisterResponse) },
+            { Resp_Config_ReSync, typeof(ConfigReSyncResponse) },
+            { Req_Config_ReSync, typeof(ConfigReSyncRequest) },
+            { Resp_Error, typeof(ErrorResponse) },
+            { Resp_ServerCheck, typeof(ServerCheckResponse) },
         };
     }
 }

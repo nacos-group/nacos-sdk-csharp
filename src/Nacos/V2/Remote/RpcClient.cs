@@ -16,6 +16,8 @@
     {
         private string _name;
 
+        private string _tenant;
+
         private IServerListFactory _serverListFactory;
 
         private readonly BlockingCollection<ReconnectContext> _reconnectionSignal = new BlockingCollection<ReconnectContext>(boundedCapacity: 1);
@@ -29,6 +31,8 @@
         protected int rpcClientStatus = RpcClientStatus.WAIT_INIT;
 
         protected RemoteConnection currentConnetion;
+
+        protected ClientAbilities clientAbilities;
 
         /// <summary>
         /// listener called where connect status changed.
@@ -136,6 +140,12 @@
 
             logger?.LogInformation("RpcClient init label  ,labels={0}", this.labels.ToJsonString());
         }
+
+        public void SetClientAbilities(ClientAbilities clientAbilities) => this.clientAbilities = clientAbilities;
+
+        public string GetTenant() => _tenant;
+
+        public void SetTenant(string tenant) => this._tenant = tenant;
 
         public void Start()
         {
