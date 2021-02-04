@@ -15,8 +15,9 @@
     public abstract class RpcClient : IDisposable
     {
         private string _name;
-
         private string _tenant;
+        private long _lastActiveTimeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        private int _keepAliveTime = 5000;
 
         private IServerListFactory _serverListFactory;
 
@@ -166,22 +167,21 @@
                 try
                 {
                     startUpretyTimes--;
-
                     RemoteServerInfo serverInfo = NextRpcServer();
 
-                    logger?.LogInformation("{0} try to  connect to server on start up,server : {1}", this._name, serverInfo?.ToString());
+                    logger?.LogInformation("[{0}] Try to  connect to server on start up,server : {1}", this._name, serverInfo?.ToString());
 
                     connectToServer = ConnectToServer(serverInfo);
                 }
                 catch (Exception ex)
                 {
-                    logger?.LogWarning("fail to connect to server on start up,error message={0},start up trytimes left :{1}", ex.Message, startUpretyTimes);
+                    logger?.LogWarning("[{0}]fail to connect to server on start up,error message={1},start up trytimes left :{2}", _name, ex.Message, startUpretyTimes);
                 }
             }
 
             if (connectToServer != null)
             {
-                logger?.LogInformation("{0} success to connect to server on start up", this._name);
+                logger?.LogInformation("[{0}] success to connect to server [{1}] on start up, connectionId={2}", this._name, connectToServer.ServerInfo?.GetAddress(), connectToServer.GetConnectionId());
                 this.currentConnetion = connectToServer;
                 Interlocked.Exchange(ref rpcClientStatus, RpcClientStatus.RUNNING);
                 _eventLinkedBlockingQueue.TryAdd(new ConnectionEvent(ConnectionEvent.CONNECTED));
@@ -190,6 +190,9 @@
             {
                 SwitchServerAsync();
             }
+
+            RegisterServerPushResponseHandler(new ConnectResetRequestHandler(this));
+            RegisterServerPushResponseHandler(new ClientDetectionRequestHandler());
         }
 
         private void StartConnectEvent()
@@ -201,15 +204,10 @@
                     try
                     {
                         // block 5000ms
-                        if (_eventLinkedBlockingQueue.TryTake(out var take, 5000))
-                        {
-                            if (take.IsConnected()) NotifyConnected();
-                            else if (take.IsDisConnected()) NotifyDisConnected();
-                        }
-                        else
-                        {
-                            continue;
-                        }
+                        if (!_eventLinkedBlockingQueue.TryTake(out var take, 5000)) continue;
+
+                        if (take.IsConnected()) NotifyConnected();
+                        else if (take.IsDisConnected()) NotifyDisConnected();
                     }
                     catch (Exception)
                     {
@@ -228,21 +226,42 @@
                     try
                     {
                         // block 5000ms
-                        if (_reconnectionSignal.TryTake(out var reconnectContext, 5000))
+                        if (!_reconnectionSignal.TryTake(out var reconnectContext, _keepAliveTime))
                         {
-                            if (reconnectContext.ServerInfo != null)
+                            if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - _lastActiveTimeStamp < _keepAliveTime) continue;
+
+                            bool isHealthy = await DoHealthCheckAsync();
+
+                            if (!isHealthy)
                             {
-                                var address = reconnectContext.ServerInfo.ServerIp + Constants.COLON + reconnectContext.ServerInfo.ServerPort;
+                                if (currentConnetion == null) continue;
 
-                                if (!GetServerListFactory().GetServerList().Contains(address)) reconnectContext.ServerInfo = null;
+                                logger?.LogInformation("[{0}]Server healthy check fail,currentConnection={1}", _name, currentConnetion.GetConnectionId());
+
+                                if (Interlocked.CompareExchange(ref rpcClientStatus, RpcClientStatus.UNHEALTHY, RpcClientStatus.RUNNING) == RpcClientStatus.RUNNING)
+                                {
+                                    reconnectContext = new ReconnectContext(null, false);
+                                }
+                                else
+                                {
+                                    continue;
+                                }
                             }
+                            else
+                            {
+                                _lastActiveTimeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                                continue;
+                            }
+                        }
 
-                            await Reconnect(reconnectContext.ServerInfo, reconnectContext.OnRequestFail);
-                        }
-                        else
+                        if (reconnectContext.ServerInfo != null)
                         {
-                            continue;
+                            var address = reconnectContext.ServerInfo.ServerIp + Constants.COLON + reconnectContext.ServerInfo.ServerPort;
+
+                            if (!GetServerListFactory().GetServerList().Contains(address)) reconnectContext.ServerInfo = null;
                         }
+
+                        await Reconnect(reconnectContext.ServerInfo, reconnectContext.OnRequestFail);
                     }
                     catch (Exception ex)
                     {
@@ -252,12 +271,32 @@
             });
         }
 
+        private async Task<bool> DoHealthCheckAsync()
+        {
+            var healthCheckRequest = new HealthCheckRequest();
+            if (this.currentConnetion == null) return false;
+
+            try
+            {
+                var response = await this.currentConnetion.RequestAsync(healthCheckRequest, BuildMeta(healthCheckRequest.GetRemoteType()), 3000L);
+
+                // not only check server is ok ,also check connection is register.
+                return response != null && response.IsSuccess();
+            }
+            catch
+            {
+                // ignore
+            }
+
+            return false;
+        }
+
         protected async Task Reconnect(RemoteServerInfo recommendServerInfo, bool onRequestFail)
         {
             try
             {
                 var recommendServer = recommendServerInfo;
-                if (onRequestFail && await ServerCheck())
+                if (onRequestFail && await DoHealthCheckAsync())
                 {
                     logger?.LogInformation("[{0}] Server check success : {1}", _name, recommendServer);
                     Interlocked.Exchange(ref rpcClientStatus, RpcClientStatus.RUNNING);
@@ -359,21 +398,6 @@
             }
         }
 
-        private async Task<bool> ServerCheck()
-        {
-            var serverCheckRequest = new ServerCheckRequest();
-            try
-            {
-                var response = await this.currentConnetion.RequestAsync(serverCheckRequest, BuildMeta(serverCheckRequest.GetRemoteType()));
-                return response == null ? false : response.IsSuccess();
-            }
-            catch
-            {
-            }
-
-            return false;
-        }
-
         public abstract RemoteConnection ConnectToServer(RemoteServerInfo serverInfo);
 
         public abstract RemoteConnectionType GetConnectionType();
@@ -386,82 +410,78 @@
 
         public async Task<CommonResponse> Request(CommonRequest request, long timeoutMills)
         {
-            int retryTimes = 3;
+            int retryTimes = 0;
             CommonResponse response = null;
             Exception exceptionToThrow = null;
-
-            while (retryTimes > 0)
+            long start = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            while (retryTimes < 3 && DateTimeOffset.Now.ToUnixTimeMilliseconds() < timeoutMills + start)
             {
+                bool waitReconnect = false;
+
                 try
                 {
-                    if (this.currentConnetion != null && !IsRunning()) throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "client not connected.");
+                    if (this.currentConnetion == null)
+                    {
+                        waitReconnect = true;
+                        throw new NacosException(NacosException.CLIENT_DISCONNECT, $"Client not connected,current status: {rpcClientStatus}");
+                    }
 
                     response = await currentConnetion.RequestAsync(request, BuildMeta(request.GetRemoteType()), timeoutMills);
 
-                    if (response != null)
+                    if (response == null) throw new NacosException(NacosException.SERVER_ERROR, "Unknown Exception.");
+
+                    if (response is Responses.ErrorResponse)
                     {
                         // it means that we are new to this nacos server, because we do not setup the connection!!
                         // here should have a try to reconnect or switch server.
-                        if (response is Responses.ConnectionUnregisterResponse)
+                        if (response.ErrorCode == NacosException.UN_REGISTER)
                         {
-                            if (Interlocked.CompareExchange(ref rpcClientStatus, RpcClientStatus.UNHEALTHY, RpcClientStatus.RUNNING) == RpcClientStatus.RUNNING)
+                            if (Interlocked.CompareExchange(ref rpcClientStatus, RpcClientStatus.UNHEALTHY, RpcClientStatus.RUNNING) == RpcClientStatus.UNHEALTHY)
                             {
                                 SwitchServerAsync();
                             }
-
-                            throw new System.Exception("Invalid client status.");
                         }
 
-                        return response;
+                        throw new NacosException(response.ErrorCode, response.Message);
                     }
+
+                    _lastActiveTimeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                    return response;
                 }
                 catch (Exception ex)
                 {
+                    if (waitReconnect) await Task.Delay((int)Math.Min(100, timeoutMills / 3));
+
                     logger?.LogError("Fail to send request,request={0},errorMesssage={1}", request, ex.Message);
+
+                    exceptionToThrow = ex;
                 }
 
-                retryTimes--;
+                retryTimes++;
             }
 
             if (Interlocked.CompareExchange(ref rpcClientStatus, RpcClientStatus.UNHEALTHY, RpcClientStatus.RUNNING) == RpcClientStatus.RUNNING)
-            {
                 SwitchServerAsyncOnRequestFail();
-            }
 
-            // TODO UNHEALTHY adn switchServerAsync
             if (exceptionToThrow != null)
-            {
-                throw new NacosException(NacosException.SERVER_ERROR, exceptionToThrow.Message);
-            }
-
-            return null;
+                throw (exceptionToThrow is NacosException e) ? e : new NacosException(NacosException.SERVER_ERROR, exceptionToThrow.Message);
+            else
+                throw new NacosException(NacosException.SERVER_ERROR, "Request fail,Unknown Error");
         }
 
-        private void SwitchServerAsyncOnRequestFail()
-        {
-            SwitchServerAsync(null, true);
-        }
+        private void SwitchServerAsyncOnRequestFail() => SwitchServerAsync(null, true);
 
-        public void SwitchServerAsync()
-        {
-            SwitchServerAsync(null, false);
-        }
+        public void SwitchServerAsync() => SwitchServerAsync(null, false);
 
         public void SwitchServerAsync(RemoteServerInfo serverInfo, bool onRequestFail)
-        {
-            _reconnectionSignal.TryAdd(new ReconnectContext(serverInfo, onRequestFail));
-        }
+            => _reconnectionSignal.TryAdd(new ReconnectContext(serverInfo, onRequestFail));
 
-
-        protected CommonResponse HandleServerRequest(CommonRequest request, CommonRequestMeta meta)
+        protected CommonResponse HandleServerRequest(CommonRequest request)
         {
             foreach (var serverRequestHandler in serverRequestHandlers)
             {
-                var response = serverRequestHandler.RequestReply(request, meta);
-                if (response != null)
-                {
-                    return response;
-                }
+                var response = serverRequestHandler.RequestReply(request);
+                if (response != null) return response;
             }
 
             return null;
@@ -493,7 +513,6 @@
 
         public IServerListFactory GetServerListFactory() => _serverListFactory;
 
-
         protected RemoteServerInfo NextRpcServer()
         {
             string serverAddress = GetServerListFactory().GenNextServer();
@@ -506,7 +525,7 @@
             return ResolveServerInfo(serverAddress);
         }
 
-        private RemoteServerInfo ResolveServerInfo(string serverAddress)
+        internal RemoteServerInfo ResolveServerInfo(string serverAddress)
         {
             RemoteServerInfo serverInfo = new RemoteServerInfo();
             serverInfo.ServerPort = RpcPortOffset();

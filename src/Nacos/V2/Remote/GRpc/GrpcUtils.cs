@@ -36,42 +36,30 @@
             return payload;
         }
 
-        public static string Convert(Payload payload)
+        public static object Parse(Payload payload)
         {
-            var retStr = payload.Body.Value.ToStringUtf8();
-
-            System.Diagnostics.Trace.WriteLine($" convert response result, {retStr} ");
-
-            return retStr;
-        }
-
-        public static T Parse<T>(Payload payload)
-        {
-            var retStr = payload.Body.Value.ToStringUtf8();
-
-            System.Diagnostics.Trace.WriteLine($" convert response result, {retStr} ");
-
-            return retStr.ToObj<T>();
-        }
-
-        public static Requests.PlainRequest Parse(Payload payload)
-        {
-            Requests.PlainRequest plainRequest = new Requests.PlainRequest();
-
             var type = payload.Metadata.Type;
-            System.Console.WriteLine($"Parse response, type = {type}");
+            System.Diagnostics.Trace.WriteLine($"Parse response, type = {type}");
             if (RemoteRequestType.RemoteResponseTypeMapping.TryGetValue(type, out var classType))
             {
                 var retStr = payload.Body.Value.ToStringUtf8();
-                System.Console.WriteLine($"parse response result = {retStr} ");
+                System.Diagnostics.Trace.WriteLine($"parse response result = {retStr} ");
                 object obj = retStr.ToObj(classType);
-                plainRequest.Body = obj;
-            }
 
-            plainRequest.Type = type;
-            plainRequest.Metadata = ConvertMeta(payload.Metadata);
-            return plainRequest;
+                if (obj is CommonRequest req)
+                {
+                    foreach (var item in payload.Metadata.Headers) req.PutHeader(item.Key, item.Value);
+                }
+
+                return obj;
+            }
+            else
+            {
+                System.Console.WriteLine($"Unknown payload type = {type} !!!!!");
+                return null;
+            }
         }
+
 
         private static CommonRequestMeta ConvertMeta(Nacos.Metadata metadata)
         {

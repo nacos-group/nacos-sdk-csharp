@@ -14,7 +14,7 @@
             this._serviceInfoHolder = serviceInfoHolder;
         }
 
-        public CommonResponse RequestReply(CommonRequest request, CommonRequestMeta meta)
+        public CommonResponse RequestReply(CommonRequest request)
         {
             if (request is NotifySubscriberRequest)
             {

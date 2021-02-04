@@ -80,7 +80,7 @@
                 var resp = client.request(payload);
 
                 var res = GrpcUtils.Parse(resp);
-                return (CommonResponse)res.Body;
+                return (CommonResponse)res;
             }
             catch (Exception ex)
             {
@@ -103,14 +103,14 @@
                    {
                        var current = call.ResponseStream.Current;
 
-                       var parse = GrpcUtils.Parse(current);
+                       var parseBody = GrpcUtils.Parse(current);
 
-                       var request = (CommonRequest)parse.Body;
+                       var request = (CommonRequest)parseBody;
                        if (request != null)
                        {
                            try
                            {
-                               var response = HandleServerRequest(request, parse.Metadata);
+                               var response = HandleServerRequest(request);
                                response.RequestId = request.RequestId;
                                await call.RequestStream.WriteAsync(GrpcUtils.Convert(response));
                            }

@@ -2,6 +2,6 @@
 {
     public interface IServerRequestHandler
     {
-        CommonResponse RequestReply(CommonRequest request, CommonRequestMeta meta);
+        CommonResponse RequestReply(CommonRequest request);
     }
 }

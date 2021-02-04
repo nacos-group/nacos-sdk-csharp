@@ -19,7 +19,7 @@
             this._func = func;
         }
 
-        public CommonResponse RequestReply(CommonRequest request, CommonRequestMeta meta)
+        public CommonResponse RequestReply(CommonRequest request)
         {
             if (request is ConfigChangeNotifyRequest configChangeNotifyRequest)
             {

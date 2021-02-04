@@ -72,6 +72,16 @@
 
         public static readonly string Req_ConnectReset = "ConnectResetRequest";
 
+        public static readonly string Resp_ConnectReset = "ConnectResetResponse";
+
+        public static readonly string Req_HealthCheck = "HealthCheckRequest";
+
+        public static readonly string Resp_HealthCheck = "HealthCheckResponse";
+
+        public static readonly string Req_ClientDetection = "ClientDetectionRequest";
+
+        public static readonly string Resp_ClientDetection = "ClientDetectionResponse";
+
         public static Dictionary<string, Type> RemoteResponseTypeMapping = new Dictionary<string, Type>
         {
             { Resp_Config_Pubish_Alpha1, typeof(ConfigPubishResponse) },
@@ -91,6 +101,9 @@
             { Req_Config_ReSync, typeof(ConfigReSyncRequest) },
             { Resp_Error, typeof(ErrorResponse) },
             { Resp_ServerCheck, typeof(ServerCheckResponse) },
+            { Req_ClientDetection, typeof(ClientDetectionRequest) },
+            { Req_ConnectReset, typeof(ConnectResetRequest) },
+            { Resp_HealthCheck, typeof(HealthCheckResponse) },
         };
     }
 }

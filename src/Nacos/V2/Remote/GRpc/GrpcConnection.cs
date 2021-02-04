@@ -47,7 +47,7 @@
                 throw new NacosException(NacosException.SERVER_ERROR, ex.Message);
             }
 
-            var response = (CommonResponse)GrpcUtils.Parse(grpcResponse).Body;
+            var response = (CommonResponse)GrpcUtils.Parse(grpcResponse);
             return response;
         }
 
