@@ -170,5 +170,11 @@
         public static string COLON = ":";
 
         public static string TENANT = "tenant";
+
+        public static string VIPSERVER_TAG = "Vipserver-Tag";
+
+        public static string AMORY_TAG = "Amory-Tag";
+
+        public static string LOCATION_TAG = "Location-Tag";
     }
 }

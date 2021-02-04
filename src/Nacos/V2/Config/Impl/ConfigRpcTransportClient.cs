@@ -198,10 +198,14 @@
 
         private Dictionary<string, string> GetLabels()
         {
-            var labels = new Dictionary<string, string>(2)
+            var labels = new Dictionary<string, string>(6)
             {
-                [RemoteConstants.LABEL_SOURCE] = RemoteConstants.LABEL_SOURCE_SDK,
-                [RemoteConstants.LABEL_MODULE] = RemoteConstants.LABEL_MODULE_CONFIG
+                { RemoteConstants.LABEL_SOURCE, RemoteConstants.LABEL_SOURCE_SDK },
+                { RemoteConstants.LABEL_MODULE, RemoteConstants.LABEL_MODULE_CONFIG },
+                { Constants.APPNAME, AppDomain.CurrentDomain.FriendlyName },
+                { Constants.VIPSERVER_TAG, "" },
+                { Constants.AMORY_TAG, "" },
+                { Constants.LOCATION_TAG, "" },
             };
             return labels;
         }
