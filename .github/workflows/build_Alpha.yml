@@ -28,8 +28,8 @@ jobs:
       run: java -version  
     - name: Setup Alpha Nacos Server
       run: |
-        wget https://github.com/alibaba/nacos/releases/download/2.0.0-ALPHA.1/nacos-server-2.0.0-ALPHA.1.tar.gz
-        tar -xvf nacos-server-2.0.0-ALPHA.1.tar.gz
+        wget https://github.com/alibaba/nacos/releases/download/2.0.0-BETA/nacos-server-2.0.0-BETA.tar.gz
+        tar -xvf nacos-server-2.0.0-BETA.tar.gz
         cd nacos/bin
         sed -i 's/Xms512m/Xms1024m/g' startup.sh
         sed -i 's/Xmx512m/Xmx1024m/g' startup.sh
