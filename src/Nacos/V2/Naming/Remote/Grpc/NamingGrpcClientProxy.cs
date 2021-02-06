@@ -68,7 +68,7 @@
         {
             rpcClient.Init(serverListFactory);
             rpcClient.Start();
-            rpcClient.RegisterServerPushResponseHandler(new NamingPushResponseHandler(serviceInfoHolder));
+            rpcClient.RegisterServerPushResponseHandler(new NamingPushRequestHandler(serviceInfoHolder));
             rpcClient.RegisterConnectionListener(namingGrpcConnectionEventListener);
         }
 

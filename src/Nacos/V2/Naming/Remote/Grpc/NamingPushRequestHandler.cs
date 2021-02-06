@@ -5,11 +5,11 @@
     using Nacos.V2.Remote.Requests;
     using Nacos.V2.Remote.Responses;
 
-    public class NamingPushResponseHandler : IServerRequestHandler
+    public class NamingPushRequestHandler : IServerRequestHandler
     {
         private ServiceInfoHolder _serviceInfoHolder;
 
-        public NamingPushResponseHandler(ServiceInfoHolder serviceInfoHolder)
+        public NamingPushRequestHandler(ServiceInfoHolder serviceInfoHolder)
         {
             this._serviceInfoHolder = serviceInfoHolder;
         }
