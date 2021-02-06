@@ -77,7 +77,7 @@
                 var request = new ConfigQueryRequest(dataId, group, tenant);
                 request.PutHeader("notify", notify.ToString());
 
-                var response = (ConfigQueryResponse)(await RequestProxy(GetOneRunningClient(), request));
+                var response = (ConfigQueryResponse)await RequestProxy(GetOneRunningClient(), request);
 
                 string[] ct = new string[2];
 
@@ -184,7 +184,7 @@
         {
             ClientAbilities clientAbilities = new ClientAbilities();
             clientAbilities.RemoteAbility.SupportRemoteConnection = true;
-            clientAbilities.ConfigAbility.SupportRemoteMetrics = true;
+            clientAbilities.ConfigAbility.SupportRemoteMetrics = false;
             return clientAbilities;
         }
 
@@ -221,19 +221,13 @@
         private void BuildRequestHeader(CommonRequest request)
         {
             Dictionary<string, string> securityHeaders = GetSecurityHeaders();
-
-            if (securityHeaders != null)
-            {
-                // put security header to param
-                foreach (var item in securityHeaders) request.PutHeader(item.Key, item.Value);
-            }
+            request.PutAllHeader(securityHeaders);
 
             Dictionary<string, string> spasHeaders = GetSpasHeaders();
-            if (spasHeaders != null)
-            {
-                // put spasHeader to header.
-                foreach (var item in spasHeaders) request.PutHeader(item.Key, item.Value);
-            }
+            request.PutAllHeader(spasHeaders);
+
+            Dictionary<string, string> commonHeaders = GetCommonHeader();
+            request.PutAllHeader(commonHeaders);
         }
 
         private RpcClient GetOneRunningClient() => EnsureRpcClient("0");
@@ -254,6 +248,7 @@
             var listenCachesMap = new Dictionary<string, List<CacheData>>();
             var removeListenCachesMap = new Dictionary<string, List<CacheData>>();
 
+            // TODO: should update logic here.....
             foreach (var item in _cacheMap.Values)
             {
                 if (item.GetListeners() != null && item.GetListeners().Any() && !item.IsListenSuccess)

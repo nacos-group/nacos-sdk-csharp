@@ -37,8 +37,7 @@
             var task = new TaskCompletionSource<bool>();
             if (_updatingMap.TryAdd(serviceKey, task.Task))
             {
-                RunUpdateTask(serviceName, groupName, clusters)
-                    .ConfigureAwait(false).GetAwaiter().GetResult();
+                _ = RunUpdateTask(serviceName, groupName, clusters);
                 task.SetResult(true);
             }
             else
