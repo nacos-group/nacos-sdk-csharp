@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
+    using Nacos.V2.Common;
     using Nacos.V2.Exceptions;
     using Nacos.V2.Naming.Cache;
     using Nacos.V2.Naming.Dtos;
@@ -12,6 +13,7 @@
     using Nacos.V2.Remote;
     using Nacos.V2.Remote.Requests;
     using Nacos.V2.Remote.Responses;
+    using Nacos.V2.Security;
     using Nacos.V2.Utils;
 
     public class NamingGrpcClientProxy : INamingClientProxy, IDisposable
@@ -26,18 +28,25 @@
 
         private RpcClient rpcClient;
 
+        private SecurityProxy _securityProxy;
+
+        private NacosSdkOptions _options;
+
         private NamingGrpcConnectionEventListener namingGrpcConnectionEventListener;
 
         public NamingGrpcClientProxy(
             ILogger logger,
             string namespaceId,
+            SecurityProxy securityProxy,
             IServerListFactory serverListFactory,
-            NacosSdkOptions optionsMonitor,
+            NacosSdkOptions options,
             ServiceInfoHolder serviceInfoHolder)
         {
             this._logger = logger;
             this.namespaceId = namespaceId;
             this.uuid = Guid.NewGuid().ToString();
+            this._options = options;
+            this._securityProxy = securityProxy;
 
             // TODO
             this.requestTimeout = 5000L;
@@ -63,15 +72,9 @@
             rpcClient.RegisterConnectionListener(namingGrpcConnectionEventListener);
         }
 
-        public Task CreateService(Service service, AbstractSelector selector)
-        {
-            return Task.CompletedTask;
-        }
+        public Task CreateService(Service service, AbstractSelector selector) => Task.CompletedTask;
 
-        public Task<bool> DeleteService(string serviceName, string groupName)
-        {
-            return Task.FromResult(false);
-        }
+        public Task<bool> DeleteService(string serviceName, string groupName) => Task.FromResult(false);
 
         public async Task DeregisterService(string serviceName, string groupName, Instance instance)
         {
@@ -108,10 +111,7 @@
             return response.ServiceInfo;
         }
 
-        public Task<Service> QueryService(string serviceName, string groupName)
-        {
-            return Task.FromResult<Service>(null);
-        }
+        public Task<Service> QueryService(string serviceName, string groupName) => Task.FromResult<Service>(null);
 
         public async Task RegisterServiceAsync(string serviceName, string groupName, Instance instance)
         {
@@ -143,26 +143,20 @@
             namingGrpcConnectionEventListener.RemoveSubscriberForRedo(NamingUtils.GetGroupedName(serviceName, groupName), clusters);
         }
 
-        public Task UpdateBeatInfo(List<Instance> modifiedInstances)
-        {
-            return Task.CompletedTask;
-        }
+        public Task UpdateBeatInfo(List<Instance> modifiedInstances) => Task.CompletedTask;
 
-        public Task UpdateInstance(string serviceName, string groupName, Instance instance)
-        {
-            return Task.CompletedTask;
-        }
+        public Task UpdateInstance(string serviceName, string groupName, Instance instance) => Task.CompletedTask;
 
-        public Task UpdateService(Service service, AbstractSelector selector)
-        {
-            return Task.CompletedTask;
-        }
+        public Task UpdateService(Service service, AbstractSelector selector) => Task.CompletedTask;
 
-        private async Task<T> RequestToServer<T>(CommonRequest request)
+        private async Task<T> RequestToServer<T>(AbstractNamingRequest request)
             where T : CommonResponse
         {
             try
             {
+                request.PutAllHeader(GetSecurityHeaders());
+                request.PutAllHeader(GetSpasHeaders(NamingUtils.GetGroupedNameOptional(request.ServiceName, request.GroupName)));
+
                 CommonResponse response =
                         requestTimeout < 0
                         ? await rpcClient.Request(request)
@@ -194,5 +188,38 @@
         }
 
         public void Dispose() => rpcClient.Dispose();
+
+        private Dictionary<string, string> GetSecurityHeaders()
+        {
+            var result = new Dictionary<string, string>(1);
+            if (_securityProxy.GetAccessToken().IsNotNullOrWhiteSpace())
+            {
+                result[Constants.ACCESS_TOKEN] = _securityProxy.GetAccessToken();
+            }
+
+            return result;
+        }
+
+        private Dictionary<string, string> GetSpasHeaders(string serviceName)
+        {
+            var result = new Dictionary<string, string>(2);
+
+            result["app"] = AppDomain.CurrentDomain.FriendlyName;
+
+            if (string.IsNullOrWhiteSpace(_options.AccessKey)
+                && string.IsNullOrWhiteSpace(_options.SecretKey))
+                return result;
+
+            string signData = string.IsNullOrWhiteSpace(serviceName)
+                ? DateTimeOffset.Now.ToUnixTimeSeconds().ToString() + "@@" + serviceName
+                : DateTimeOffset.Now.ToUnixTimeSeconds().ToString();
+
+            string signature = Utilities.HashUtil.GetHMACSHA1(signData, _options.SecretKey);
+            result["signature"] = signature;
+            result["data"] = signData;
+            result["ak"] = _options.AccessKey;
+
+            return result;
+        }
     }
 }

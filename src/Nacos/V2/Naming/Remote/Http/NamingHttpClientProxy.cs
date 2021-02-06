@@ -33,8 +33,6 @@
 
         private SecurityProxy _securityProxy;
 
-        private long _securityInfoRefreshIntervalMills = 5000;
-
         private ServerListManager serverListManager;
 
         private BeatReactor beatReactor;
@@ -47,19 +45,23 @@
 
         private NacosSdkOptions _options;
 
-        private Timer _loginTimer;
-
-        public NamingHttpClientProxy(ILogger logger, string namespaceId, ServerListManager serverListManager, NacosSdkOptions options, ServiceInfoHolder serviceInfoHolder, IHttpClientFactory clientFactory = null)
+        public NamingHttpClientProxy(
+            ILogger logger,
+            string namespaceId,
+            SecurityProxy securityProxy,
+            ServerListManager serverListManager,
+            NacosSdkOptions options,
+            ServiceInfoHolder serviceInfoHolder,
+            IHttpClientFactory clientFactory = null)
         {
             this._logger = logger;
             this._clientFactory = clientFactory;
             this.serverListManager = serverListManager;
-            this._securityProxy = new SecurityProxy(options);
+            this._securityProxy = securityProxy;
             this._options = options;
             this.SetServerPort(DEFAULT_SERVER_PORT);
             this.namespaceId = namespaceId;
             this.beatReactor = new BeatReactor(_logger, this, _options);
-            this.InitRefreshTask();
             this.pushReceiver = new PushReceiver(_logger, serviceInfoHolder);
             this.serviceInfoHolder = serviceInfoHolder;
         }
@@ -93,17 +95,6 @@
             {
                 this.serverPort = port;
             }
-        }
-
-        private void InitRefreshTask()
-        {
-            _loginTimer = new Timer(
-                 async x =>
-                 {
-                     await _securityProxy.LoginAsync(serverListManager.GetServerList());
-                 }, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(_securityInfoRefreshIntervalMills));
-
-            _securityProxy.LoginAsync(serverListManager.GetServerList()).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         public async Task CreateService(Service service, AbstractSelector selector)

@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
@@ -13,6 +14,7 @@
     using Nacos.V2.Naming.Remote.Http;
     using Nacos.V2.Naming.Utils;
     using Nacos.V2.Remote;
+    using Nacos.V2.Security;
 
     public class NamingClientProxyDelegate : INamingClientProxy, IDisposable
     {
@@ -28,14 +30,34 @@
 
         private NamingGrpcClientProxy grpcClientProxy;
 
+        private SecurityProxy securityProxy;
+
+        private Timer _loginTimer;
+
+        private long _securityInfoRefreshIntervalMills = 5000;
+
         public NamingClientProxyDelegate(ILogger logger, string @namespace, ServiceInfoHolder serviceInfoHolder, NacosSdkOptions options, InstancesChangeNotifier changeNotifier)
         {
             this._options = options;
             this.serverListManager = new ServerListManager(logger, options);
             this.serviceInfoHolder = serviceInfoHolder;
+            this.securityProxy = new SecurityProxy(options);
+            InitSecurityProxy();
             this._serviceInfoUpdateService = new ServiceInfoUpdateService(options, serviceInfoHolder, this, changeNotifier);
-            this.grpcClientProxy = new NamingGrpcClientProxy(logger, @namespace, serverListManager, options, serviceInfoHolder);
-            this.httpClientProxy = new NamingHttpClientProxy(logger, @namespace, serverListManager, options, serviceInfoHolder);
+            this.grpcClientProxy = new NamingGrpcClientProxy(logger, @namespace, securityProxy, serverListManager, options, serviceInfoHolder);
+            this.httpClientProxy = new NamingHttpClientProxy(logger, @namespace, securityProxy, serverListManager, options, serviceInfoHolder);
+        }
+
+        private void InitSecurityProxy()
+        {
+            _loginTimer = new Timer(
+                async x =>
+                {
+                    await securityProxy.LoginAsync(serverListManager.GetServerList());
+                }, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(_securityInfoRefreshIntervalMills));
+
+            // init should wait the result.
+            securityProxy.LoginAsync(serverListManager.GetServerList()).Wait();
         }
 
         public Task CreateService(Service service, AbstractSelector selector) => Task.CompletedTask;
@@ -45,10 +67,7 @@
         public async Task DeregisterService(string serviceName, string groupName, Instance instance)
             => await GetExecuteClientProxy().DeregisterService(serviceName, groupName, instance);
 
-        public void Dispose()
-        {
-            grpcClientProxy.Dispose();
-        }
+        public void Dispose() => grpcClientProxy.Dispose();
 
         public async Task<ListView<string>> GetServiceList(int pageNo, int pageSize, string groupName, AbstractSelector selector)
             => await GetExecuteClientProxy().GetServiceList(pageNo, pageSize, groupName, selector);
