@@ -48,8 +48,7 @@
             this._options = options;
             this._securityProxy = securityProxy;
 
-            // TODO
-            this.requestTimeout = 5000L;
+            this.requestTimeout = options.DefaultTimeOut > 0 ? options.DefaultTimeOut : 3000L;
 
             Dictionary<string, string> labels = new Dictionary<string, string>()
             {
