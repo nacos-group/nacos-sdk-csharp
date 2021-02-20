@@ -38,6 +38,9 @@ namespace App3
                 x.ServerAddresses = new System.Collections.Generic.List<string> { "http://localhost:8848/" };
                 x.EndPoint = "";
                 x.Namespace = "cs";
+                x.UserName = "nacos";
+                x.Password = "nacos";
+
 
                 // swich to use http or rpc
                 x.ConfigUseRpc = true;

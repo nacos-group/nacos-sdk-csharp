@@ -12,6 +12,7 @@
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
 
     public class ConfigRpcTransportClient : AbstConfigTransportClient
@@ -26,6 +27,10 @@
 
         private ConcurrentDictionary<string, CacheData> _cacheMap;
         private string uuid = System.Guid.NewGuid().ToString();
+
+        private Timer _loginTimer;
+
+        private long _securityInfoRefreshIntervalMills = 5000;
 
         public ConfigRpcTransportClient(
             ILogger logger,
@@ -134,8 +139,22 @@
             }
         }
 
+        private void InitSecurityProxy()
+        {
+            _loginTimer = new Timer(
+                async x =>
+                {
+                    await _securityProxy.LoginAsync(_serverListManager.GetServerUrls());
+                }, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(_securityInfoRefreshIntervalMills));
+
+            // init should wait the result.
+            _securityProxy.LoginAsync(_serverListManager.GetServerUrls()).Wait();
+        }
+
         protected override void StartInner()
         {
+            InitSecurityProxy();
+
             Task.Factory.StartNew(async () =>
             {
                 while (true)
