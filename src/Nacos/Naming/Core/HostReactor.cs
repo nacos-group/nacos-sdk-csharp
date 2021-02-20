@@ -49,10 +49,7 @@ namespace Nacos
                 : null;
         }
 
-        public ConcurrentDictionary<string, ServiceInfo> GetServiceInfoMap()
-        {
-            return _serviceInfoMap;
-        }
+        public ConcurrentDictionary<string, ServiceInfo> GetServiceInfoMap() => _serviceInfoMap;
 
         public async Task<ServiceInfo> GetServiceInfo(string serviceName, string clusters)
         {

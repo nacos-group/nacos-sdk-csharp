@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net5.0</TargetFrameworks>
-    <PackageId>nacos-sdk-csharp-unofficial</PackageId>
+    <PackageId>nacos-sdk-csharp</PackageId>
     <VersionPrefix>$(NugetVersion)</VersionPrefix>
     <VersionSuffix></VersionSuffix>
     <Authors>nacos-sdk-csharp Contributors</Authors>
@@ -38,8 +38,11 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <!-- <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="3.1.0" /> -->
+    <PackageReference Include="Google.Protobuf" Version="3.14.0" />
+    <PackageReference Include="Grpc.Core" Version="2.34.0" />
+    <!--<PackageReference Include="Grpc.Net.Client" Version="2.33.1" />-->
+    <!--<Protobuf Include="protos\nacos_grpc_service.proto" GrpcServices="Client" />-->
+    <!--<PackageReference Include="Grpc.Tools" Version="2.33.1" PrivateAssets="All" />-->
   </ItemGroup>
 
 </Project>

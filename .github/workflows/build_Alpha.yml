@@ -1,0 +1,50 @@
+name: Build_With_Alpha
+
+on:
+  push:
+    branches: [ dev, master ]
+  pull_request:
+    branches: [ dev, master ]
+
+jobs:
+
+  linux:    
+    name: build on linux
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+    - name: Setup up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Show dotnet Version
+      run: dotnet --version
+    - name: Show java Version
+      run: java -version  
+    - name: Setup Alpha Nacos Server
+      run: |
+        wget https://github.com/alibaba/nacos/releases/download/2.0.0-BETA/nacos-server-2.0.0-BETA.tar.gz
+        tar -xvf nacos-server-2.0.0-BETA.tar.gz
+        cd nacos/bin
+        sed -i 's/Xms512m/Xms1024m/g' startup.sh
+        sed -i 's/Xmx512m/Xmx1024m/g' startup.sh
+        sed -i 's/Xmn256m/Xmn512m/g' startup.sh
+        chmod 755 startup.sh
+        nohup ./startup.sh -m standalone 2>&1 &
+        sleep 30
+        curl "127.0.0.1:8848/nacos/v1/ns/operator/metrics"   
+    - name: Build with dotnet
+      run: dotnet build
+    - name: Test with dotnet
+      run: dotnet test
+    - name: Upload Nacos logs
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: nacos-logs
+        path: /home/runner/work/nacos-sdk-csharp/nacos-sdk-csharp/nacos/logs

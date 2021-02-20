@@ -3,10 +3,13 @@
     using System;
     using System.Collections.Generic;
     using System.Net.Http;
+    using System.Threading;
     using System.Threading.Tasks;
 
     public class SecurityProxy
     {
+        private static HttpClient _httpClient = new HttpClient();
+
         private static readonly string LOGIN_URL = "/v1/auth/users/login";
 
         private string contextPath;
@@ -98,32 +101,30 @@
 
                 try
                 {
-                    using (System.Net.Http.HttpClient client = new System.Net.Http.HttpClient())
+                    var cts = new CancellationTokenSource();
+                    cts.CancelAfter(TimeSpan.FromMilliseconds(5000));
+
+                    var req = new HttpRequestMessage(HttpMethod.Post, url)
                     {
-                        client.Timeout = TimeSpan.FromMilliseconds(5000);
+                        Content = new FormUrlEncodedContent(dict)
+                    };
 
-                        var req = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Post, url)
-                        {
-                            Content = new FormUrlEncodedContent(dict)
-                        };
+                    var resp = await _httpClient.SendAsync(req, cts.Token);
 
-                        var resp = await client.SendAsync(req);
+                    if (!resp.IsSuccessStatusCode)
+                    {
+                        return false;
+                    }
 
-                        if (!resp.IsSuccessStatusCode)
-                        {
-                            return false;
-                        }
+                    var content = await resp.Content.ReadAsStringAsync();
 
-                        var content = await resp.Content.ReadAsStringAsync();
+                    var obj = Newtonsoft.Json.Linq.JObject.Parse(content);
 
-                        var obj = Newtonsoft.Json.Linq.JObject.Parse(content);
-
-                        if (obj.ContainsKey(ConstValue.ACCESS_TOKEN))
-                        {
-                            _accessToken = obj.Value<string>(ConstValue.ACCESS_TOKEN);
-                            _tokenTtl = obj.Value<long>(ConstValue.TOKEN_TTL);
-                            _tokenRefreshWindow = _tokenTtl / 10;
-                        }
+                    if (obj.ContainsKey(ConstValue.ACCESS_TOKEN))
+                    {
+                        _accessToken = obj.Value<string>(ConstValue.ACCESS_TOKEN);
+                        _tokenTtl = obj.Value<long>(ConstValue.TOKEN_TTL);
+                        _tokenRefreshWindow = _tokenTtl / 10;
                     }
                 }
                 catch

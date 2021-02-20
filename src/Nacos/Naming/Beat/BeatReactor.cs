@@ -75,7 +75,7 @@
                     NameSpaceId = _options.Namespace,
                 };
 
-                if (request == null) throw new NacosException(ConstValue.CLIENT_INVALID_PARAM, "request param invalid");
+                if (request == null) throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "request param invalid");
 
                 request.CheckParam();
 

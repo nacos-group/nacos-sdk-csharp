@@ -49,5 +49,7 @@
         /// listen interval, unit is millisecond.
         /// </summary>
         public int ListenInterval { get; set; } = 1000;
+
+        public string NamingLoadCacheAtStart { get; set; }
     }
 }

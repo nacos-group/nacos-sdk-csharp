@@ -1,5 +1,6 @@
 ﻿namespace Nacos.Config
 {
+    using Nacos.Exceptions;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -11,6 +12,8 @@
 
     public class ServerListManager : IDisposable
     {
+        private static System.Net.Http.HttpClient _httpClient = new System.Net.Http.HttpClient();
+
         public const string FIXED_NAME = "fixed";
         private const string HTTP = "http";
         private const string HTTPS = "https";
@@ -62,7 +65,7 @@
             {
                 if (string.IsNullOrWhiteSpace(options.EndPoint))
                 {
-                    throw new Nacos.Exceptions.NacosException(ConstValue.CLIENT_INVALID_PARAM, "endpoint is blank");
+                    throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "endpoint is blank");
                 }
 
                 _isFixed = false;
@@ -138,50 +141,48 @@
             var result = new List<string>();
             try
             {
-                using (System.Net.Http.HttpClient client = new System.Net.Http.HttpClient())
+                var cts = new CancellationTokenSource();
+                cts.CancelAfter(TimeSpan.FromMilliseconds(3000));
+
+                var req = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Get, _addressServerUrl);
+
+                var resp = await _httpClient.SendAsync(req, cts.Token);
+
+                if (resp.IsSuccessStatusCode)
                 {
-                    client.Timeout = TimeSpan.FromMilliseconds(3000);
-
-                    var req = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Get, _addressServerUrl);
-
-                    var resp = await client.SendAsync(req);
-
-                    if (resp.IsSuccessStatusCode)
+                    var str = await resp.Content.ReadAsStringAsync();
+                    using (StringReader sr = new StringReader(str))
                     {
-                        var str = await resp.Content.ReadAsStringAsync();
-                        using (StringReader sr = new StringReader(str))
+                        while (true)
                         {
-                            while (true)
-                            {
-                                var line = await sr.ReadLineAsync();
-                                if (line == null || line.Length <= 0)
-                                    break;
+                            var line = await sr.ReadLineAsync();
+                            if (line == null || line.Length <= 0)
+                                break;
 
-                                list.Add(line.Trim());
-                            }
+                            list.Add(line.Trim());
                         }
+                    }
 
-                        foreach (var item in list)
+                    foreach (var item in list)
+                    {
+                        if (!string.IsNullOrWhiteSpace(item))
                         {
-                            if (!string.IsNullOrWhiteSpace(item))
+                            var ipPort = item.Trim().Split(':');
+                            var ip = ipPort[0].Trim();
+                            if (ipPort.Length == 1)
                             {
-                                var ipPort = item.Trim().Split(':');
-                                var ip = ipPort[0].Trim();
-                                if (ipPort.Length == 1)
-                                {
-                                    result.Add($"{ip}:8848");
-                                }
-                                else
-                                {
-                                    result.Add(item);
-                                }
+                                result.Add($"{ip}:8848");
+                            }
+                            else
+                            {
+                                result.Add(item);
                             }
                         }
                     }
-                    else
-                    {
-                        return null;
-                    }
+                }
+                else
+                {
+                    return null;
                 }
 
                 return result;

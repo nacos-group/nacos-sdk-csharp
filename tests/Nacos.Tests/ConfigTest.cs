@@ -1,4 +1,4 @@
-﻿namespace Nacos.Tests
+﻿/*namespace Nacos.Tests
 {
     using System;
     using System.Collections.Generic;
@@ -86,3 +86,4 @@
         }
     }
 }
+*/

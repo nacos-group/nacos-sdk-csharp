@@ -4,6 +4,8 @@
 
     public interface INacosConfigClient
     {
+        string Name { get; }
+
         /// <summary>
         /// Gets configurations in Nacos
         /// </summary>

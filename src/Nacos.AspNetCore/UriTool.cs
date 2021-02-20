@@ -11,23 +11,23 @@
 
     internal static class UriTool
     {
-        public static IEnumerable<Uri> GetUri(IFeatureCollection features, NacosAspNetCoreOptions config)
+        public static IEnumerable<Uri> GetUri(IFeatureCollection features, string ip, int port, string preferredNetworks)
         {
             var splitChars = new char[] { ',', ';' };
-            var port = config.Port <= 0 ? 80 : config.Port;
+            var appPort = port <= 0 ? 80 : port;
 
             // 1. config
-            if (!string.IsNullOrWhiteSpace(config.Ip))
+            if (!string.IsNullOrWhiteSpace(ip))
             {
                 // it seems that nacos don't return the scheme
                 // so here use http only.
-                return new List<Uri> { new Uri($"http://{config.Ip}:{port}") };
+                return new List<Uri> { new Uri($"http://{ip}:{appPort}") };
             }
 
             // 1.1. Ip is null && Port has value
-            if (string.IsNullOrWhiteSpace(config.Ip) && port != 80)
+            if (string.IsNullOrWhiteSpace(ip) && appPort != 80)
             {
-                return new List<Uri> { new Uri($"http://{GetCurrentIp(config.PreferredNetworks)}:{port}") };
+                return new List<Uri> { new Uri($"http://{GetCurrentIp(preferredNetworks)}:{appPort}") };
             }
 
             var address = string.Empty;
@@ -43,7 +43,7 @@
                     var uris = new List<Uri>();
                     foreach (var item in addressCollection)
                     {
-                        var url = ReplaceAddress(item, config.PreferredNetworks);
+                        var url = ReplaceAddress(item, preferredNetworks);
                         uris.Add(new Uri(url));
                     }
 
@@ -55,7 +55,7 @@
             address = Environment.GetEnvironmentVariable("ASPNETCORE_URLS");
             if (!string.IsNullOrWhiteSpace(address))
             {
-                var url = ReplaceAddress(address, config.PreferredNetworks);
+                var url = ReplaceAddress(address, preferredNetworks);
 
                 return url.Split(splitChars).Select(x => new Uri(x));
             }
@@ -70,14 +70,14 @@
                 {
                     address = cmd.Split('=')[1];
 
-                    var url = ReplaceAddress(address, config.PreferredNetworks);
+                    var url = ReplaceAddress(address, preferredNetworks);
 
                     return url.Split(splitChars).Select(x => new Uri(x));
                 }
             }
 
             // 5. current ip address third
-            address = $"http://{GetCurrentIp(config.PreferredNetworks)}:{port}";
+            address = $"http://{GetCurrentIp(preferredNetworks)}:{appPort}";
 
             return new List<Uri> { new Uri(address) };
         }

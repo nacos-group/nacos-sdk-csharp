@@ -1,8 +1,7 @@
 ﻿namespace Nacos
 {
-    using System.Collections.Generic;
-    using System.Text;
     using Nacos.Utilities;
+    using System.Collections.Generic;
 
     public class PublishConfigRequest : BaseRequest
     {

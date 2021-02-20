@@ -20,6 +20,8 @@
         /// </summary>
         public string Group { get; set; }
 
+        public string Tag { get; set; }
+
         public override void CheckParam()
         {
             ParamUtil.CheckKeyParam(DataId, Group);

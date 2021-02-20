@@ -56,7 +56,7 @@
             {
                 new Host { InstanceId = "instance-1", Weight = 3, Ip = "127.0.0.2", Port = 80, ClusterName = "s", ServiceName = "ss" },
                 new Host { InstanceId = "", Weight = 2, Ip = "127.0.0.1", Port = 80, ClusterName = "s", ServiceName = "ss" },
-                new Host { InstanceId = "", Weight = 2, Ip = "127.0.0.1", Port = 8080, ClusterName = "s", ServiceName = "ss" },
+                new Host { InstanceId = null, Weight = 2, Ip = "127.0.0.1", Port = 8080, ClusterName = "s", ServiceName = "ss" },
             };
 
             HashSet<string> set = new HashSet<string>();

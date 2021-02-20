@@ -1,12 +1,10 @@
 ﻿namespace Nacos
 {
     using Microsoft.Extensions.Logging;
-    using Nacos.Utilities;
+    using Nacos.V2.Utils;
     using System;
     using System.Collections.Concurrent;
-    using System.Collections.Generic;
     using System.IO;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -70,7 +68,7 @@
 
                           if (!string.IsNullOrEmpty(failover))
                           {
-                              var lines = failover.Split(new string[] { _diskCache.GetLineSeparator() }, StringSplitOptions.RemoveEmptyEntries);
+                              var lines = failover.SplitByString(_diskCache.GetLineSeparator());
                               foreach (var line in lines)
                               {
                                   if ("1".Equals(line.Trim()))

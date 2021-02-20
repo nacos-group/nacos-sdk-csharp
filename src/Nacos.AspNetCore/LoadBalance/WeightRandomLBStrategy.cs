@@ -44,11 +44,13 @@
         {
             var dict = new Dictionary<string, double>();
 
+            // aliyun sae, the instanceid returns empty string
+            // when the instanceid is empty, create a new one, but the group was missed.
+            list.ForEach(x => { x.InstanceId = string.IsNullOrWhiteSpace(x.InstanceId) ? $"{x.Ip}#{x.Port}#{x.ClusterName}#{x.ServiceName}" : x.InstanceId; });
+
             var tmp = list.Select(x => new LbKv
             {
-                // aliyun sae, the instanceid returns empty string
-                // when the instanceid is empty, create a new one, but the group was missed.
-                InstanceId = string.IsNullOrWhiteSpace(x.InstanceId) ? $"{x.Ip}#{x.Port}#{x.ClusterName}#{x.ServiceName}" : x.InstanceId,
+                InstanceId = x.InstanceId,
                 Weight = x.Weight
             }).GroupBy(x => x.InstanceId).Select(x => new LbKv
             {
