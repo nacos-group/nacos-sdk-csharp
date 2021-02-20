@@ -19,7 +19,7 @@
 
     public class ConfigHttpTransportClient : AbstConfigTransportClient
     {
-        private static readonly long POST_TIMEOUT = 10000L;
+        private static readonly long POST_TIMEOUT = 3000L;
 
         private readonly ILogger _logger;
 
@@ -255,7 +255,8 @@
             HttpResponseMessage result = null;
             try
             {
-                result = await HttpPost(url, headers, parameters, "", POST_TIMEOUT);
+                var timeOut = _options.DefaultTimeOut > 0 ? _options.DefaultTimeOut : POST_TIMEOUT;
+                result = await HttpPost(url, headers, parameters, "", timeOut);
             }
             catch (Exception ex)
             {

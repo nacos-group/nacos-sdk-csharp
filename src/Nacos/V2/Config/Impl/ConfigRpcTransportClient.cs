@@ -233,8 +233,10 @@
         {
             BuildRequestHeader(request);
 
+            var timeOut = _options.DefaultTimeOut > 0 ? _options.DefaultTimeOut : 3000;
+
             // TODO: 1. limiter
-            return await rpcClientInner.Request(request);
+            return await rpcClientInner.Request(request, timeOut);
         }
 
         private void BuildRequestHeader(CommonRequest request)
