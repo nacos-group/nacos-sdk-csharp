@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net5.0</TargetFrameworks>
-    <PackageId>nacos-sdk-csharp-unofficial</PackageId>
+    <PackageId>nacos-sdk-csharp</PackageId>
     <VersionPrefix>$(NugetVersion)</VersionPrefix>
     <VersionSuffix></VersionSuffix>
     <Authors>nacos-sdk-csharp Contributors</Authors>
