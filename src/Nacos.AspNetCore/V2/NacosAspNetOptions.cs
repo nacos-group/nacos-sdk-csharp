@@ -53,8 +53,43 @@
         public Dictionary<string, string> Metadata { get; set; } = new Dictionary<string, string>();
 
         /// <summary>
+        /// If instance is enabled to accept request. The default value is true.
+        /// </summary>
+        public bool InstanceEnabled { get; set; } = true;
+
+        /// <summary>
+        /// If instance is ephemeral.The default value is true.
+        /// </summary>
+        public bool Ephemeral { get; set; } = true;
+
+        /// <summary>
+        /// whether your service is a https service.
+        /// </summary>
+        public bool Secure { get; set; } = false;
+
+        /// <summary>
         /// Load Balance Strategy
         /// </summary>
         public string LBStrategy { get; set; } = LBStrategyName.WeightRandom.ToString();
+
+        public NacosSdkOptions BuildSdkOptions()
+        {
+            return new NacosSdkOptions
+            {
+                AccessKey = this.AccessKey,
+                ConfigUseRpc = this.ConfigUseRpc,
+                ContextPath = this.ContextPath,
+                DefaultTimeOut = this.DefaultTimeOut,
+                EndPoint = this.EndPoint,
+                ListenInterval = this.ListenInterval,
+                Namespace = this.Namespace,
+                NamingLoadCacheAtStart = this.NamingLoadCacheAtStart,
+                NamingUseRpc = this.NamingUseRpc,
+                Password = this.Password,
+                SecretKey = this.SecretKey,
+                ServerAddresses = this.ServerAddresses,
+                UserName = this.UserName,
+            };
+        }
     }
 }

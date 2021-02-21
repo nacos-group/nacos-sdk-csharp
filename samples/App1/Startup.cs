@@ -5,6 +5,7 @@
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using Nacos.AspNetCore.V2;
 
     public class Startup
     {
@@ -17,7 +18,10 @@
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddNacosAspNetCore(Configuration);
+            // nacos server v1.x
+            // services.AddNacosAspNetCore(Configuration);
+            // nacos server v1.x or v2.x
+            services.AddNacosAspNet(Configuration);
             services.AddControllers();
         }
 

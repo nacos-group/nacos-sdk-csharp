@@ -39,11 +39,16 @@
         public static object Parse(Payload payload)
         {
             var type = payload.Metadata.Type;
-            System.Diagnostics.Trace.WriteLine($"Parse response, type = {type}");
+
+            if (!type.Equals(RemoteRequestType.Resp_HealthCheck, System.StringComparison.OrdinalIgnoreCase))
+                System.Diagnostics.Trace.WriteLine($"Parse response, type = {type}");
+
             if (RemoteRequestType.RemoteResponseTypeMapping.TryGetValue(type, out var classType))
             {
                 var retStr = payload.Body.Value.ToStringUtf8();
-                System.Diagnostics.Trace.WriteLine($"parse response result = {retStr} ");
+                if (!type.Equals(RemoteRequestType.Resp_HealthCheck, System.StringComparison.OrdinalIgnoreCase))
+                    System.Diagnostics.Trace.WriteLine($"parse response result = {retStr} ");
+
                 object obj = retStr.ToObj(classType);
 
                 if (obj is CommonRequest req)

@@ -9,11 +9,16 @@
     [ApiController]
     public class ValuesController : ControllerBase
     {
-        private readonly INacosServerManager _serverManager;
+        // nacos server 1.x
+        // private readonly INacosServerManager _serverManager;
+        // nacos server 1.x and 2.x
+        private readonly Nacos.V2.INacosNamingService _svc;
 
-        public ValuesController(INacosServerManager serverManager)
+        public ValuesController(
+            /*INacosServerManager serverManager,*/ Nacos.V2.INacosNamingService svc)
         {
-            _serverManager = serverManager;
+            // _serverManager = serverManager;
+            _svc = svc;
         }
 
         // GET api/values
@@ -27,7 +32,14 @@
         [HttpGet("test")]
         public ActionResult<string> Test()
         {
-            var baseUrl = _serverManager.GetServerAsync("App2").GetAwaiter().GetResult();
+            /*var baseUrl = _serverManager.GetServerAsync("App2").GetAwaiter().GetResult();*/
+
+            var instance = _svc.SelectOneHealthyInstance("App2", "DEFAULT_GROUP").GetAwaiter().GetResult();
+            var host = $"{instance.Ip}:{instance.Port}";
+
+            var baseUrl = instance.Metadata.TryGetValue("secure", out _)
+                ? $"https://{host}"
+                : $"http://{host}";
 
             if (string.IsNullOrWhiteSpace(baseUrl))
             {

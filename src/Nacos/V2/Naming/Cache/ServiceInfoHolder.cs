@@ -44,7 +44,7 @@
         private bool IsLoadCacheAtStart(NacosSdkOptions nacosOptions)
         {
             bool loadCacheAtStart = false;
-            if (nacosOptions != null && string.IsNullOrWhiteSpace(nacosOptions.NamingLoadCacheAtStart))
+            if (nacosOptions != null && nacosOptions.NamingLoadCacheAtStart.IsNotNullOrWhiteSpace())
             {
                 loadCacheAtStart = Convert.ToBoolean(nacosOptions.NamingLoadCacheAtStart);
             }

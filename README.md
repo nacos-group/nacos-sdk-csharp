@@ -2,7 +2,7 @@
 
 csharp(dotnet core) implementation of [nacos](https://nacos.io/) OpenAPI.
 
-![Build](https://github.com/nacos-group/nacos-sdk-csharp/workflows/Build/badge.svg) ![Release](https://github.com/nacos-group/nacos-sdk-csharp/workflows/Release/badge.svg) ![](https://img.shields.io/nuget/v/nacos-sdk-csharp-unofficial.svg)  ![](https://img.shields.io/nuget/vpre/nacos-sdk-csharp-unofficial.svg) ![](https://img.shields.io/nuget/dt/nacos-sdk-csharp-unofficial) ![](https://img.shields.io/github/license/nacos-group/nacos-sdk-csharp)
+![Build](https://github.com/nacos-group/nacos-sdk-csharp/workflows/Build/badge.svg) ![Release](https://github.com/nacos-group/nacos-sdk-csharp/workflows/Release/badge.svg) ![](https://img.shields.io/nuget/v/nacos-sdk-csharp.svg)  ![](https://img.shields.io/nuget/vpre/nacos-sdk-csharp.svg) ![](https://img.shields.io/nuget/dt/nacos-sdk-csharp) ![](https://img.shields.io/github/license/nacos-group/nacos-sdk-csharp)
 
 ![](./media/prj.png)
 
@@ -11,12 +11,14 @@ csharp(dotnet core) implementation of [nacos](https://nacos.io/) OpenAPI.
 Choose a package that you need.
 
 ```bash
-dotnet add package nacos-sdk-csharp-unofficial
-dotnet add package nacos-sdk-csharp-unofficial.AspNetCore
-dotnet add package nacos-sdk-csharp-unofficial.Extensions.Configuration
-dotnet add package nacos-sdk-csharp-unofficial.YamlParser
-dotnet add package nacos-sdk-csharp-unofficial.IniParser
+dotnet add package nacos-sdk-csharp
+dotnet add package nacos-sdk-csharp.AspNetCore
+dotnet add package nacos-sdk-csharp.Extensions.Configuration
+dotnet add package nacos-sdk-csharp.YamlParser
+dotnet add package nacos-sdk-csharp.IniParser
 ```
+
+> NOTE: The packages' name has remove the suffix `unofficial`.
 
 ## Features
 
@@ -41,7 +43,7 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
 
            // read configuration from config files
             // it will use default json parser to parse the configuration store in nacos server.
-            builder.AddNacosConfiguration(c.GetSection("NacosConfig"));
+            builder.AddNacosV2Configuration(c.GetSection("NacosConfig"));
             // you also can specify ini or yaml parser as well.
             // builder.AddNacosConfiguration(c.GetSection("NacosConfig"), Nacos.IniParser.IniConfigurationStringParser.Instance);
             // builder.AddNacosConfiguration(c.GetSection("NacosConfig"), Nacos.YamlParser.YamlConfigurationStringParser.Instance);
@@ -57,16 +59,25 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
 ```JSON
 {
   "NacosConfig": {
-    "Optional": false,
-    "DataId": "msconfigapp",
-    "Group": "",
-    "Tenant": "f47e0ae1-982a-4a64-aea3-52506492a3d4",
+    "Listeners": [
+      {
+        "Optional": false,
+        "DataId": "common",
+        "Group": "DEFAULT_GROUP"
+      },
+      {
+        "Optional": false,
+        "DataId": "demo",
+        "Group": "DEFAULT_GROUP"
+      }
+    ],    
+    "Tenant": "csharp-demo",
     "ServerAddresses": [ "http://localhost:8848/" ],
     "UserName": "test2",
     "Password": "123456",
     "AccessKey": "",
     "SecretKey": "",
-    "EndPoint": "acm.aliyun.com:8080"
+    "EndPoint": "acm.aliyun.com"
   }
 }
 ```
@@ -128,7 +139,7 @@ public class Startup
     {
         // ...
 
-        services.AddNacosAspNetCore(Configuration);
+        services.AddNacosAspNet(Configuration);
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -142,20 +153,29 @@ Modify `appsettings.json`
 
 ```JSON
 "nacos": {
+    "EndPoint": "sub-domain.aliyun.com:8080",
     "ServerAddresses": [ "http://localhost:8848" ],
     "DefaultTimeOut": 15000,
-    "Namespace": "",
+    "Namespace": "cs",
     "ListenInterval": 1000,
     "ServiceName": "App1",
-    "ClusterName": "",
-    "GroupName": "",
-    "Weight": 100,
+    "GroupName": "DEFAULT_GROUP",
+    "ClusterName": "DEFAULT",
+    "Ip": "",
     "PreferredNetworks": "", // select an IP that matches the prefix as the service registration IP
-    "UserName": "test2",
-    "Password": "123456",
+    "Port": 0,
+    "Weight": 100,
+    "RegisterEnabled": true,
+    "InstanceEnabled": true,
+    "Ephemeral": true,
+    "Secure": false,
     "AccessKey": "",
     "SecretKey": "",
-    "EndPoint": "sub-domain.aliyun.com:8080",
+    "UserName": "",
+    "Password": "",
+    "ConfigUseRpc": true,
+    "NamingUseRpc": true,
+    "NamingLoadCacheAtStart": "",       
     "LBStrategy": "WeightRandom", //WeightRandom WeightRoundRobin
     "Metadata": {
       "aa": "bb",
@@ -171,19 +191,23 @@ Modify `appsettings.json`
 [ApiController]
 public class ValuesController : ControllerBase
 {
-    private readonly INacosServerManager _serverManager;
+    private readonly Nacos.V2.INacosNamingService _svc;
 
-    public ValuesController(INacosServerManager serverManager)
+    public ValuesController(Nacos.V2.INacosNamingService svc)
     {
-        _serverManager = serverManager;
+        _svc = svc;
     }
 
     [HttpGet("test")]
     public async Task<IActionResult> Test()
     {        
         // need to know the service name.
-        // support WeightRandom and WeightRoundRobin.
-        var baseUrl = await _serverManager.GetServerAsync("App2");
+        var instance = await _svc.SelectOneHealthyInstance("App2", "DEFAULT_GROUP");
+        var host = $"{instance.Ip}:{instance.Port}";
+
+        var baseUrl = instance.Metadata.TryGetValue("secure", out _)
+            ? $"https://{host}"
+            : $"http://{host}";
                     
         if(string.IsNullOrWhiteSpace(baseUrl))
         {

@@ -78,7 +78,7 @@ namespace MsConfigApp
                  })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    webBuilder.UseStartup<Startup>().UseUrls("http://*:8787");
                 })
             .UseSerilog();
     }
