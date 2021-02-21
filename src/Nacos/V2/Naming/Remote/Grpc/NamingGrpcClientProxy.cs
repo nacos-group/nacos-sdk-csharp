@@ -77,7 +77,7 @@
 
         public async Task DeregisterService(string serviceName, string groupName, Instance instance)
         {
-            _logger?.LogInformation("[DEREGISTER-SERVICE] {0} registering service {1} with instance {2}", namespaceId, serviceName, instance);
+            _logger?.LogInformation("[DEREGISTER-SERVICE] {0} deregistering service {1} with instance {2}", namespaceId, serviceName, instance);
 
             var request = new InstanceRequest(namespaceId, serviceName, groupName, NamingRemoteConstants.DE_REGISTER_INSTANCE, instance);
 

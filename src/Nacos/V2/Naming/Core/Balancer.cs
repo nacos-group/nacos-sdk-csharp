@@ -41,6 +41,7 @@
             }
 
             Chooser<string, Instance> vipChooser = new Chooser<string, Instance>(_uniqueKey);
+            vipChooser.Refresh(hostsWithWeight);
             return vipChooser.Random();
         }
     }

@@ -18,13 +18,17 @@
         private int _port;
         private bool _closed = false;
 
-        public PushReceiver(ILogger logger, ServiceInfoHolder serviceInfoHolder)
+        public PushReceiver(ILogger logger, ServiceInfoHolder serviceInfoHolder, NacosSdkOptions options)
         {
             this._logger = logger;
             this._serviceInfoHolder = serviceInfoHolder;
 
-            Task.Factory.StartNew(
-               async () => await RunAsync(), TaskCreationOptions.LongRunning);
+            // if using grpc, do not setup a udp client here.
+            if (!options.NamingUseRpc)
+            {
+                Task.Factory.StartNew(
+                   async () => await RunAsync(), TaskCreationOptions.LongRunning);
+            }
         }
 
         public int GetUdpPort() => _port;

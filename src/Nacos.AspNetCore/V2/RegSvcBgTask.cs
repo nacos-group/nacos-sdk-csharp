@@ -13,6 +13,10 @@
 
     public class RegSvcBgTask : IHostedService, IDisposable
     {
+        private static readonly string MetadataNetVersion = "DOTNET_VERSION";
+        private static readonly string MetadataHostOs = "HOST_OS";
+        private static readonly string MetadataSecure = "secure";
+
         private readonly ILogger _logger;
         private readonly INacosNamingService _svc;
         private readonly IFeatureCollection _features;
@@ -49,8 +53,13 @@
 
             var metadata = new Dictionary<string, string>()
             {
-                { PreservedMetadataKeys.REGISTER_SOURCE, "ASPNET_CORE" }
+                { PreservedMetadataKeys.REGISTER_SOURCE, $"ASPNET_CORE" },
+                { MetadataNetVersion, Environment.Version.ToString() },
+                { MetadataHostOs, Environment.OSVersion.ToString() },
             };
+
+            if (_options.Secure) metadata[MetadataSecure] = "true";
+
 
             foreach (var item in _options.Metadata)
             {
@@ -62,21 +71,34 @@
 
             foreach (var uri in uris)
             {
-                var instance = new Nacos.V2.Naming.Dtos.Instance
+                for (int i = 0; i < 3; i++)
                 {
-                    Ephemeral = true,
-                    ServiceName = _options.ServiceName,
-                    ClusterName = _options.ClusterName,
-                    Enabled = true,
-                    Healthy = true,
-                    Ip = uri.Host,
-                    Port = uri.Port,
-                    Weight = _options.Weight,
-                    Metadata = metadata,
-                    InstanceId = ""
-                };
+                    try
+                    {
+                        var instance = new Nacos.V2.Naming.Dtos.Instance
+                        {
+                            Ephemeral = _options.Ephemeral,
+                            ServiceName = _options.ServiceName,
+                            ClusterName = _options.ClusterName,
+                            Enabled = _options.InstanceEnabled,
+                            Healthy = true,
+                            Ip = uri.Host,
+                            Port = uri.Port,
+                            Weight = _options.Weight,
+                            Metadata = metadata,
+                            InstanceId = ""
+                        };
 
-                await _svc.RegisterInstance(_options.ServiceName, _options.GroupName, instance);
+                        _logger.LogInformation("register instance to nacos server, 【{0}】", instance);
+
+                        await _svc.RegisterInstance(_options.ServiceName, _options.GroupName, instance);
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "register instance error, count = {0}", i + 1);
+                    }
+                }
             }
         }
 
@@ -84,7 +106,7 @@
         {
             if (_options.RegisterEnabled)
             {
-                _logger.LogWarning("DeregisterInstance from nacos server, serviceName={0}", _options.ServiceName);
+                _logger.LogWarning("deregister instance from nacos server, serviceName={0}", _options.ServiceName);
 
                 foreach (var uri in uris)
                 {
@@ -99,7 +121,7 @@
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogError(ex, "DeregisterInstance error, count = {0}", i + 1);
+                            _logger.LogError(ex, "deregister instance error, count = {0}", i + 1);
                         }
                     }
                 }
