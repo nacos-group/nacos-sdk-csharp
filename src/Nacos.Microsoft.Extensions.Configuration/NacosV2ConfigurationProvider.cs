@@ -12,7 +12,7 @@
     using System.Linq;
     using System.Threading.Tasks;
 
-    internal class NacosV2ConfigurationProvider : ConfigurationProvider
+    internal class NacosV2ConfigurationProvider : ConfigurationProvider, IDisposable
     {
         private readonly NacosV2ConfigurationSource _configurationSource;
 
@@ -22,11 +22,14 @@
 
         private readonly ConcurrentDictionary<string, string> _configDict;
 
+        private readonly Dictionary<string, MsConfigListener> _listenerDict;
+
         public NacosV2ConfigurationProvider(NacosV2ConfigurationSource configurationSource)
         {
             _configurationSource = configurationSource;
             _parser = configurationSource.NacosConfigurationParser;
             _configDict = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            _listenerDict = new Dictionary<string, MsConfigListener>();
 
             var options = Options.Create(new NacosSdkOptions()
             {
@@ -40,7 +43,7 @@
                 Password = configurationSource.Password,
                 UserName = configurationSource.UserName,
                 ListenInterval = 20000,
-                ConfigUseRpc = configurationSource.ConfigUseRpc
+                ConfigUseRpc = configurationSource.ConfigUseRpc,
             });
 
             _client = new NacosConfigService(NullLoggerFactory.Instance, options);
@@ -50,17 +53,41 @@
 
                 foreach (var item in configurationSource.Listeners)
                 {
-                    tasks.Add(_client.AddListener(item.DataId, item.Group, new MsConfigListener(item.DataId, item.Group, item.Optional, this)));
+                    var listener = new MsConfigListener(item.DataId, item.Group, item.Optional, this);
+
+                    tasks.Add(_client.AddListener(item.DataId, item.Group, listener));
+
+                    _listenerDict.Add($"{item.DataId}#{item.Group}", listener);
                 }
 
-                Task.WhenAll(tasks).ConfigureAwait(false);
+                Task.WaitAll(tasks.ToArray());
             }
             else
             {
 #pragma warning disable CS0618 // 类型或成员已过时
-                _client.AddListener(_configurationSource.DataId, _configurationSource.Group, new MsConfigListener(configurationSource.DataId, _configurationSource.Group, _configurationSource.Optional, this));
+                var listener = new MsConfigListener(_configurationSource.DataId, _configurationSource.Group, _configurationSource.Optional, this);
+                _client.AddListener(_configurationSource.DataId, _configurationSource.Group, listener);
+                _listenerDict.Add($"{_configurationSource.DataId}#{_configurationSource.Group}", listener);
 #pragma warning restore CS0618 // 类型或成员已过时
             }
+        }
+
+        public void Dispose()
+        {
+            var tasks = new List<Task>();
+
+            foreach (var item in _listenerDict)
+            {
+                var arr = item.Key.Split('#');
+                var dataId = arr[0];
+                var group = arr[1];
+
+                tasks.Add(_client.RemoveListener(dataId, group, item.Value));
+            }
+
+            Task.WaitAll(tasks.ToArray());
+
+            System.Diagnostics.Trace.WriteLine($"Remove All Listeners");
         }
 
         public override void Load()
@@ -144,12 +171,14 @@
                 this._group = group;
                 this._optional = optional;
                 this._provider = provider;
-                _key = $"{_dataId}#{_group}";
+                _key = $"{provider._configurationSource.Tenant}#{_group}#{_dataId}";
             }
 
 
             public void ReceiveConfigInfo(string configInfo)
             {
+                System.Diagnostics.Trace.WriteLine($"MsConfigListener Receive ConfigInfo 【{configInfo}】");
+
                 try
                 {
                     _provider._configDict[_key] = configInfo;
