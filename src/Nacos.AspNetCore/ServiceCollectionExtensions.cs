@@ -7,6 +7,7 @@
     using Nacos.AspNetCore;
     using System;
 
+    [Obsolete("This interface is obsolete and will be removed in a future version.")]
     public static class ServiceCollectionExtensions
     {
         /// <summary>

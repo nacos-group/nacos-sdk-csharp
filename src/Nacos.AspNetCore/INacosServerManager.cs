@@ -3,6 +3,7 @@
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
+    [System.Obsolete("This interface is obsolete and will be removed in a future version. Use INacosNamingService instead.")]
     public interface INacosServerManager
     {
         /// <summary>
