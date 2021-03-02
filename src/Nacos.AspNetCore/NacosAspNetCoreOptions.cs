@@ -2,6 +2,7 @@
 {
     using System.Collections.Generic;
 
+    [System.Obsolete("This interface is obsolete and will be removed in a future version.")]
     public class NacosAspNetCoreOptions
     {
         /// <summary>

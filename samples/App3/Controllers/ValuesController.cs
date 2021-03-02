@@ -7,6 +7,7 @@
 
     [ApiController]
     [Route("[controller]")]
+    [System.Obsolete]
     public class ValuesController : ControllerBase
     {
         private readonly INacosServerManager _serverManager;

@@ -32,7 +32,7 @@
         [HttpGet("test")]
         public ActionResult<string> Test()
         {
-            /*var baseUrl = _serverManager.GetServerAsync("App1").GetAwaiter().GetResult();*/
+            /*var baseUrl = _serverManager.GetServerAsync("App1", "DEFAULT_GROUP", "DEFAULT", "cs").GetAwaiter().GetResult();*/
 
             var instance = _svc.SelectOneHealthyInstance("App1", "DEFAULT_GROUP").GetAwaiter().GetResult();
             var host = $"{instance.Ip}:{instance.Port}";

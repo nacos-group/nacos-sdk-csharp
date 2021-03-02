@@ -11,6 +11,7 @@
     using System.Threading;
     using System.Threading.Tasks;
 
+    [Obsolete("This interface is obsolete and will be removed in a future version.")]
     public class StatusReportBgTask : IHostedService, IDisposable
     {
         private readonly ILogger _logger;

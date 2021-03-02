@@ -8,6 +8,7 @@
     using System.Linq;
     using System.Threading.Tasks;
 
+    [Obsolete("This interface is obsolete and will be removed in a future version.")]
     public class NacosServerManager : INacosServerManager
     {
         private readonly INacosNamingClient _client;
