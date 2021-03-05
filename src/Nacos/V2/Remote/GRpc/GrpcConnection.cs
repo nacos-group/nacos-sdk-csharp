@@ -51,12 +51,6 @@
             return response;
         }
 
-        public void SendResponse(CommonResponse response)
-        {
-            /*Payload convert = GrpcUtils.convert(response);
-            payloadStreamObserver.onNext(convert);*/
-        }
-
         public void SendRequest(CommonRequest request, CommonRequestMeta meta)
         {
             Payload convert = GrpcUtils.Convert(request, meta);

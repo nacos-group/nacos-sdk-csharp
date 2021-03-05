@@ -82,7 +82,7 @@
             try
             {
                 var request = new ServerCheckRequest();
-                var payload = GrpcUtils.Convert(request, new RequestMeta { Type = RemoteRequestType.Req_ServerCheck });
+                var payload = GrpcUtils.Convert(request, new CommonRequestMeta { Type = RemoteRequestType.Req_ServerCheck });
 
                 var client = new Nacos.Request.RequestClient(channel);
                 var resp = client.request(payload);
