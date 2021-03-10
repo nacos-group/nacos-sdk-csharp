@@ -256,9 +256,24 @@
 
                         if (reconnectContext.ServerInfo != null)
                         {
-                            var address = reconnectContext.ServerInfo.ServerIp + Constants.COLON + reconnectContext.ServerInfo.ServerPort;
+                            bool serverExist = false;
 
-                            if (!GetServerListFactory().GetServerList().Contains(address)) reconnectContext.ServerInfo = null;
+                            foreach (var server in GetServerListFactory().GetServerList())
+                            {
+                                var serInfo = ResolveServerInfo(server);
+                                if (serInfo.ServerIp.Equals(reconnectContext.ServerInfo.ServerIp))
+                                {
+                                    serverExist = true;
+                                    reconnectContext.ServerInfo.ServerPort = serInfo.ServerPort;
+                                    break;
+                                }
+                            }
+
+                            if (!serverExist)
+                            {
+                                logger?.LogInformation("[{0}] Recommend server is not in server list ,ignore recommend server {1}", _name, reconnectContext.ServerInfo.GetAddress());
+                                reconnectContext.ServerInfo = null;
+                            }
                         }
 
                         await Reconnect(reconnectContext.ServerInfo, reconnectContext.OnRequestFail);

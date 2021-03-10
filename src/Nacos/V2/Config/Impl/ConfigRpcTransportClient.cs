@@ -249,6 +249,34 @@
 
             Dictionary<string, string> commonHeaders = GetCommonHeader();
             request.PutAllHeader(commonHeaders);
+
+            Dictionary<string, string> signHeaders = GetSignHeaders(ResourceBuild(request), _secretKey);
+            request.PutAllHeader(signHeaders);
+        }
+
+        private string ResourceBuild(CommonRequest request)
+        {
+            if (request is ConfigQueryRequest cqReq)
+                return GetResource(cqReq.Tenant, cqReq.Group);
+
+            if (request is ConfigPublishRequest cpReq)
+                return GetResource(cpReq.Tenant, cpReq.Group);
+
+            if (request is ConfigRemoveRequest crReq)
+                return GetResource(crReq.Tenant, crReq.Group);
+
+            return string.Empty;
+        }
+
+        private string GetResource(string tenant, string group)
+        {
+            if (!string.IsNullOrWhiteSpace(tenant) && !string.IsNullOrWhiteSpace(group)) return tenant + "+" + group;
+
+            if (!string.IsNullOrWhiteSpace(group)) return group;
+
+            if (!string.IsNullOrWhiteSpace(tenant)) return tenant;
+
+            return string.Empty;
         }
 
         private RpcClient GetOneRunningClient() => EnsureRpcClient("0");

@@ -1,7 +1,5 @@
 ﻿namespace Nacos.V2.Remote.Responses
 {
-    using System.Collections.Generic;
-
     public class ConfigQueryResponse : CommonResponse
     {
         public static readonly int CONFIG_NOT_FOUND = 300;
@@ -14,8 +12,17 @@
         [Newtonsoft.Json.JsonProperty("contentType")]
         public string ContentType { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("labels")]
-        public Dictionary<string, string> Labels { get; set; }
+        [Newtonsoft.Json.JsonProperty("md5")]
+        public string Md5 { get; set; }
+
+        [Newtonsoft.Json.JsonProperty("isBeta")]
+        public bool IsBeta { get; set; }
+
+        [Newtonsoft.Json.JsonProperty("tag")]
+        public string Tag { get; set; }
+
+        [Newtonsoft.Json.JsonProperty("lastModified")]
+        public long LastModified { get; set; }
 
         public override string GetRemoteType() => RemoteRequestType.Resp_Config_Query;
     }

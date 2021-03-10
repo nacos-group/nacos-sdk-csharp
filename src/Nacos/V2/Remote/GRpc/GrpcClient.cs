@@ -52,6 +52,7 @@
                     ClientVersion = Constants.CLIENT_VERSION,
                     Labels = labels,
                     Abilities = clientAbilities,
+                    ClientIp = Utils.NetUtils.LocalIP(),
                     Tenant = GetTenant()
                 };
 

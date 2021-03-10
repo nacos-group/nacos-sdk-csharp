@@ -129,7 +129,7 @@
             return GetSignHeaders(resource, secretKey);
         }
 
-        private Dictionary<string, string> GetSignHeaders(string resource, string secretKey)
+        protected Dictionary<string, string> GetSignHeaders(string resource, string secretKey)
         {
             var header = new Dictionary<string, string>(2);
 
