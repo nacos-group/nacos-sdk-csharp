@@ -213,7 +213,7 @@
                 ? DateTimeOffset.Now.ToUnixTimeSeconds().ToString() + "@@" + serviceName
                 : DateTimeOffset.Now.ToUnixTimeSeconds().ToString();
 
-            string signature = Utilities.HashUtil.GetHMACSHA1(signData, _options.SecretKey);
+            string signature = HashUtil.GetHMACSHA1(signData, _options.SecretKey);
             result["signature"] = signature;
             result["data"] = signData;
             result["ak"] = _options.AccessKey;
