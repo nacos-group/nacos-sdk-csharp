@@ -31,7 +31,7 @@ namespace Nacos.Config.Http
             _namespaceId = _options.Namespace;
 
             _serverListMgr = new ServerListManager(_options);
-            _securityProxy = new Security.SecurityProxy(_options);
+            _securityProxy = new Security.SecurityProxy(_options, _logger);
 
             _securityProxy.LoginAsync(_serverListMgr.GetServerUrls()).ConfigureAwait(false).GetAwaiter().GetResult();
 
@@ -87,7 +87,7 @@ namespace Nacos.Config.Http
                 || responseMessage.StatusCode == System.Net.HttpStatusCode.BadGateway
                 || responseMessage.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
             {
-                _logger.LogError("[NACOS ConnectException] currentServerAddr: {0}, httpCode: {1}", _serverListMgr.GetCurrentServerAddr(), responseMessage.StatusCode);
+                _logger?.LogError("[NACOS ConnectException] currentServerAddr: {0}, httpCode: {1}", _serverListMgr.GetCurrentServerAddr(), responseMessage.StatusCode);
             }
             else
             {

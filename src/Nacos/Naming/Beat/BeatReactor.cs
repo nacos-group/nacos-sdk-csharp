@@ -38,7 +38,7 @@
         /// <param name="beatInfo">beat information </param>
         public Task AddBeatInfo(string serviceName, BeatInfo beatInfo)
         {
-            _logger.LogInformation("[BEAT] adding beat: {0} to beat map.", beatInfo.ToJsonString());
+            _logger?.LogInformation("[BEAT] adding beat: {0} to beat map.", beatInfo.ToJsonString());
             string key = BuildKey(serviceName, beatInfo.ip, beatInfo.port);
 
             if (_dom2Beat.TryRemove(key, out var existBeat))
@@ -93,22 +93,22 @@
 
                             var flag = code == 10200;
 
-                            if (!flag) _logger.LogWarning($"[CLIENT-BEAT] server return {result} ");
+                            if (!flag) _logger?.LogWarning($"[CLIENT-BEAT] server return {result} ");
                         }
                         else
                         {
-                            _logger.LogWarning($"[CLIENT-BEAT] server return {result} ");
+                            _logger?.LogWarning($"[CLIENT-BEAT] server return {result} ");
                         }
 
                         break;
                     default:
-                        _logger.LogWarning("[CLIENT-BEAT] failed to send beat {0}, {1}", beatInfo.ToJsonString(), responseMessage.StatusCode.ToString());
+                        _logger?.LogWarning("[CLIENT-BEAT] failed to send beat {0}, {1}", beatInfo.ToJsonString(), responseMessage.StatusCode.ToString());
                         throw new NacosException((int)responseMessage.StatusCode, $"Send instance beat failed {responseMessage.StatusCode.ToString()}");
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Send heart beat to Nacos error");
+                _logger?.LogWarning(ex, "Send heart beat to Nacos error");
             }
         }
 
@@ -120,7 +120,7 @@
         /// <param name="port">port of beat information</param>
         public Task RemoveBeatInfo(string serviceName, string ip, int port)
         {
-            _logger.LogInformation("[BEAT] removing beat: {0}:{1}:{2} from beat map.", serviceName, ip, port);
+            _logger?.LogInformation("[BEAT] removing beat: {0}:{1}:{2} from beat map.", serviceName, ip, port);
 
             var key = BuildKey(serviceName, ip, port);
 

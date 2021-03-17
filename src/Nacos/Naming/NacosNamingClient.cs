@@ -61,12 +61,12 @@
                     }
                     else
                     {
-                        _logger.LogWarning($"[client.RegisterInstance] server return {result} ");
+                        _logger?.LogWarning($"[client.RegisterInstance] server return {result} ");
                         return false;
                     }
 
                 default:
-                    _logger.LogWarning($"[client.RegisterInstance] Register an instance to service failed {responseMessage.StatusCode.ToString()}");
+                    _logger?.LogWarning($"[client.RegisterInstance] Register an instance to service failed {responseMessage.StatusCode.ToString()}");
                     throw new NacosException((int)responseMessage.StatusCode, $"Register an instance to service failed {responseMessage.StatusCode.ToString()}");
             }
         }
@@ -94,12 +94,12 @@
                     }
                     else
                     {
-                        _logger.LogWarning($"[client.RemoveInstance] server return {result} ");
+                        _logger?.LogWarning($"[client.RemoveInstance] server return {result} ");
                         return false;
                     }
 
                 default:
-                    _logger.LogWarning($"[client.RemoveInstance] Delete instance from service failed {responseMessage.StatusCode.ToString()}");
+                    _logger?.LogWarning($"[client.RemoveInstance] Delete instance from service failed {responseMessage.StatusCode.ToString()}");
                     throw new NacosException((int)responseMessage.StatusCode, $"Delete instance from service failed {responseMessage.StatusCode.ToString()}");
             }
         }
@@ -122,12 +122,12 @@
                     }
                     else
                     {
-                        _logger.LogWarning($"[client.ModifyInstance] server return {result} ");
+                        _logger?.LogWarning($"[client.ModifyInstance] server return {result} ");
                         return false;
                     }
 
                 default:
-                    _logger.LogWarning($"[client.ModifyInstance] Modify an instance of service failed {responseMessage.StatusCode.ToString()}");
+                    _logger?.LogWarning($"[client.ModifyInstance] Modify an instance of service failed {responseMessage.StatusCode.ToString()}");
                     throw new NacosException((int)responseMessage.StatusCode, $"Modify an instance of service failed {responseMessage.StatusCode.ToString()}");
             }
         }
@@ -147,7 +147,7 @@
                     var obj = result.ToObj<ListInstancesResult>();
                     return obj;
                 default:
-                    _logger.LogWarning($"[client.ListInstances] Query instance list of service failed {responseMessage.StatusCode.ToString()}");
+                    _logger?.LogWarning($"[client.ListInstances] Query instance list of service failed {responseMessage.StatusCode.ToString()}");
                     throw new NacosException((int)responseMessage.StatusCode, $"Query instance list of service failed {responseMessage.StatusCode.ToString()}");
             }
         }
@@ -167,7 +167,7 @@
                     var obj = result.ToObj<GetInstanceResult>();
                     return obj;
                 default:
-                    _logger.LogWarning($"[client.GetInstance] Query instance details of service failed {responseMessage.StatusCode.ToString()}");
+                    _logger?.LogWarning($"[client.GetInstance] Query instance details of service failed {responseMessage.StatusCode.ToString()}");
                     throw new NacosException((int)responseMessage.StatusCode, $"Query instance details of service failed {responseMessage.StatusCode.ToString()}");
             }
         }
@@ -192,18 +192,18 @@
 
                         var flag = code == 10200;
 
-                        if (!flag) _logger.LogWarning($"[client.SendHeartbeat] server return {result} ");
+                        if (!flag) _logger?.LogWarning($"[client.SendHeartbeat] server return {result} ");
 
                         return flag;
                     }
                     else
                     {
-                        _logger.LogWarning($"[client.SendHeartbeat] server return {result} ");
+                        _logger?.LogWarning($"[client.SendHeartbeat] server return {result} ");
                         return false;
                     }
 
                 default:
-                    _logger.LogWarning($"[client.SendHeartbeat] Send instance beat failed {responseMessage.StatusCode.ToString()}");
+                    _logger?.LogWarning($"[client.SendHeartbeat] Send instance beat failed {responseMessage.StatusCode.ToString()}");
                     throw new NacosException((int)responseMessage.StatusCode, $"Send instance beat failed {responseMessage.StatusCode.ToString()}");
             }
         }
@@ -226,15 +226,15 @@
                     }
                     else
                     {
-                        _logger.LogWarning($"[client.ModifyInstanceHealthStatus] server return {result} ");
+                        _logger?.LogWarning($"[client.ModifyInstanceHealthStatus] server return {result} ");
                         return false;
                     }
 
                 case System.Net.HttpStatusCode.BadRequest:
-                    _logger.LogWarning($"[client.ModifyInstanceHealthStatus] health check is still working {responseMessage.StatusCode.ToString()}");
+                    _logger?.LogWarning($"[client.ModifyInstanceHealthStatus] health check is still working {responseMessage.StatusCode.ToString()}");
                     return false;
                 default:
-                    _logger.LogWarning($"[client.ModifyInstanceHealthStatus] Update instance health status failed {responseMessage.StatusCode.ToString()}");
+                    _logger?.LogWarning($"[client.ModifyInstanceHealthStatus] Update instance health status failed {responseMessage.StatusCode.ToString()}");
                     throw new NacosException((int)responseMessage.StatusCode, $"Update instance health status failed {responseMessage.StatusCode.ToString()}");
             }
         }
@@ -252,7 +252,7 @@
                     var obj = result.ToObj<GetMetricsResult>();
                     return obj;
                 default:
-                    _logger.LogWarning($"[client.GetMetrics] Query system metrics failed {responseMessage.StatusCode.ToString()}");
+                    _logger?.LogWarning($"[client.GetMetrics] Query system metrics failed {responseMessage.StatusCode.ToString()}");
                     throw new NacosException((int)responseMessage.StatusCode, $"Query system metrics failed {responseMessage.StatusCode.ToString()}");
             }
         }
@@ -277,12 +277,12 @@
                     }
                     else
                     {
-                        _logger.LogWarning($"[client.CreateService] server return {result} ");
+                        _logger?.LogWarning($"[client.CreateService] server return {result} ");
                         return false;
                     }
 
                 default:
-                    _logger.LogWarning($"[client.CreateService] Create service failed {responseMessage.StatusCode.ToString()}");
+                    _logger?.LogWarning($"[client.CreateService] Create service failed {responseMessage.StatusCode.ToString()}");
                     throw new NacosException((int)responseMessage.StatusCode, $"Create service failed {responseMessage.StatusCode.ToString()}");
             }
         }
@@ -305,12 +305,12 @@
                     }
                     else
                     {
-                        _logger.LogWarning($"[client.RemoveService] server return {result} ");
+                        _logger?.LogWarning($"[client.RemoveService] server return {result} ");
                         return false;
                     }
 
                 default:
-                    _logger.LogWarning($"[client.RemoveService] Delete a service failed {responseMessage.StatusCode.ToString()}");
+                    _logger?.LogWarning($"[client.RemoveService] Delete a service failed {responseMessage.StatusCode.ToString()}");
                     throw new NacosException((int)responseMessage.StatusCode, $"Delete a service failed {responseMessage.StatusCode.ToString()}");
             }
         }
@@ -333,12 +333,12 @@
                     }
                     else
                     {
-                        _logger.LogWarning($"[client.ModifyService] server return {result} ");
+                        _logger?.LogWarning($"[client.ModifyService] server return {result} ");
                         return false;
                     }
 
                 default:
-                    _logger.LogWarning($"[client.ModifyService] Update a service failed {responseMessage.StatusCode.ToString()}");
+                    _logger?.LogWarning($"[client.ModifyService] Update a service failed {responseMessage.StatusCode.ToString()}");
                     throw new NacosException((int)responseMessage.StatusCode, $"Update a service failed {responseMessage.StatusCode.ToString()}");
             }
         }
@@ -358,7 +358,7 @@
                     var obj = result.ToObj<GetServiceResult>();
                     return obj;
                 default:
-                    _logger.LogWarning($"[client.GetService] Query a service failed {responseMessage.StatusCode.ToString()}");
+                    _logger?.LogWarning($"[client.GetService] Query a service failed {responseMessage.StatusCode.ToString()}");
                     throw new NacosException((int)responseMessage.StatusCode, $"Query a service failed {responseMessage.StatusCode.ToString()}");
             }
         }
@@ -378,7 +378,7 @@
                     var obj = result.ToObj<ListServicesResult>();
                     return obj;
                 default:
-                    _logger.LogWarning($"[client.ListServices] Query service list failed {responseMessage.StatusCode.ToString()}");
+                    _logger?.LogWarning($"[client.ListServices] Query service list failed {responseMessage.StatusCode.ToString()}");
                     throw new NacosException((int)responseMessage.StatusCode, $"Query service list failed {responseMessage.StatusCode.ToString()}");
             }
         }
@@ -396,7 +396,7 @@
                     var obj = result.ToObj<GetSwitchesResult>();
                     return obj;
                 default:
-                    _logger.LogWarning($"[client.GetSwitches] Query system switches failed {responseMessage.StatusCode.ToString()}");
+                    _logger?.LogWarning($"[client.GetSwitches] Query system switches failed {responseMessage.StatusCode.ToString()}");
                     throw new NacosException((int)responseMessage.StatusCode, $"Query system switches failed {responseMessage.StatusCode.ToString()}");
             }
         }
@@ -419,12 +419,12 @@
                     }
                     else
                     {
-                        _logger.LogWarning($"[client.ModifySwitches] server return {result} ");
+                        _logger?.LogWarning($"[client.ModifySwitches] server return {result} ");
                         return false;
                     }
 
                 default:
-                    _logger.LogWarning($"[client.ModifySwitches] Update system switch failed {responseMessage.StatusCode.ToString()}");
+                    _logger?.LogWarning($"[client.ModifySwitches] Update system switch failed {responseMessage.StatusCode.ToString()}");
                     throw new NacosException((int)responseMessage.StatusCode, $"Update system switch failed {responseMessage.StatusCode.ToString()}");
             }
         }
@@ -447,7 +447,7 @@
                     var obj = result.ToObj<ListClusterServersResult>();
                     return obj;
                 default:
-                    _logger.LogWarning($"[client.ListClusterServers] Query server list failed {responseMessage.StatusCode.ToString()}");
+                    _logger?.LogWarning($"[client.ListClusterServers] Query server list failed {responseMessage.StatusCode.ToString()}");
                     throw new NacosException((int)responseMessage.StatusCode, $"Query server list failed {responseMessage.StatusCode.ToString()}");
             }
         }
@@ -464,7 +464,7 @@
                     var obj = leader.ToObj<GetCurrentClusterLeaderResult>();
                     return obj;
                 default:
-                    _logger.LogWarning($"[client.GetCurrentClusterLeader] query the leader of current cluster failed {responseMessage.StatusCode.ToString()}");
+                    _logger?.LogWarning($"[client.GetCurrentClusterLeader] query the leader of current cluster failed {responseMessage.StatusCode.ToString()}");
                     throw new NacosException((int)responseMessage.StatusCode, $"query the leader of current cluster failed {responseMessage.StatusCode.ToString()}");
             }
         }

@@ -1,6 +1,6 @@
 ﻿namespace Nacos.V2.Security
 {
-    using Microsoft.Extensions.Options;
+    using Microsoft.Extensions.Logging;
     using Nacos.V2.Utils;
     using System;
     using System.Collections.Generic;
@@ -47,24 +47,18 @@
 
         private readonly NacosSdkOptions _options;
 
-        public SecurityProxy(IOptionsMonitor<NacosSdkOptions> optionsAccs)
+        private readonly ILogger _logger;
+
+        public SecurityProxy(NacosSdkOptions options, ILogger logger)
         {
-            _options = optionsAccs.CurrentValue;
+            _options = options;
 
             _username = _options.UserName ?? "";
             _password = _options.Password ?? "";
             contextPath = _options.ContextPath;
             contextPath = contextPath.StartsWith("/") ? contextPath : "/" + contextPath;
-        }
 
-        public SecurityProxy(NacosSdkOptions optionsAccs)
-        {
-            _options = optionsAccs;
-
-            _username = _options.UserName ?? "";
-            _password = _options.Password ?? "";
-            contextPath = _options.ContextPath;
-            contextPath = contextPath.StartsWith("/") ? contextPath : "/" + contextPath;
+            _logger = logger;
         }
 
         public async Task<bool> LoginAsync(List<string> servers)
@@ -128,6 +122,7 @@
 
                     if (!resp.IsSuccessStatusCode)
                     {
+                        _logger?.LogError("login failed: {0}", await resp.Content.ReadAsStringAsync());
                         return false;
                     }
 
@@ -142,8 +137,9 @@
                         _tokenRefreshWindow = _tokenTtl / 10;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
+                    _logger?.LogError(ex, "[SecurityProxy] login http request failed, url: {0}", url);
                     return false;
                 }
             }
