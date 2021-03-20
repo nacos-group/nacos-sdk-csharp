@@ -55,7 +55,7 @@
                       if (!File.Exists(filePath))
                       {
                           _switchParams.AddOrUpdate(FAILOVER_MODE_NAME, "false", (k, v) => "false");
-                          _logger.LogDebug("failover switch is not found, {0}", filePath);
+                          _logger?.LogDebug("failover switch is not found, {0}", filePath);
                           return;
                       }
 
@@ -74,13 +74,13 @@
                                   if ("1".Equals(line.Trim()))
                                   {
                                       _switchParams.AddOrUpdate(FAILOVER_MODE_NAME, "true", (k, v) => "true");
-                                      _logger.LogInformation($"{FAILOVER_MODE_NAME} is on");
+                                      _logger?.LogInformation($"{FAILOVER_MODE_NAME} is on");
                                       await FailoverFileReader();
                                   }
                                   else if ("0".Equals(line.Trim()))
                                   {
                                       _switchParams.AddOrUpdate(FAILOVER_MODE_NAME, "false", (k, v) => "false");
-                                      _logger.LogInformation($"{FAILOVER_MODE_NAME} is off");
+                                      _logger?.LogInformation($"{FAILOVER_MODE_NAME} is off");
                                   }
                               }
                           }
@@ -92,7 +92,7 @@
                   }
                   catch (Exception ex)
                   {
-                      _logger.LogError(ex, "[NA] failed to read failover switch.");
+                      _logger?.LogError(ex, "[NA] failed to read failover switch.");
                   }
               }, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(5000));
         }
@@ -143,7 +143,7 @@
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[NA] failed to read cache files");
+                _logger?.LogError(ex, "[NA] failed to read cache files");
             }
 
             if (domMap.Count > 0)

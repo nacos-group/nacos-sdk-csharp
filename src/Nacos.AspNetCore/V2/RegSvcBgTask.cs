@@ -60,7 +60,6 @@
 
             if (_options.Secure) metadata[MetadataSecure] = "true";
 
-
             foreach (var item in _options.Metadata)
             {
                 if (!metadata.ContainsKey(item.Key))

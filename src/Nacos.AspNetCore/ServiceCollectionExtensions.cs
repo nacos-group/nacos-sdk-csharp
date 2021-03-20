@@ -16,6 +16,7 @@
         /// <param name="services">services.</param>
         /// <param name="configuration">configuration</param>
         /// <returns>IServiceCollection</returns>
+        [Obsolete("This method is obsolete and will be removed in a future version. Use AddNacosAspNet instead.")]
         public static IServiceCollection AddNacosAspNetCore(
             this IServiceCollection services,
             IConfiguration configuration)
@@ -53,6 +54,7 @@
         /// <param name="nacosAspNetCoreOptions">nacosAspNetCoreOptions.</param>
         /// <param name="nacosOptions">nacosOptions</param>
         /// <returns>IServiceCollection</returns>
+        [Obsolete("This method is obsolete and will be removed in a future version. Use AddNacosAspNet instead.")]
         public static IServiceCollection AddNacosAspNetCore(
           this IServiceCollection services,
           Action<NacosAspNetCoreOptions> nacosAspNetCoreOptions,

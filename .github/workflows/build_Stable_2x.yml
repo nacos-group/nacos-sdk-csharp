@@ -1,4 +1,4 @@
-name: Build_With_Stable
+name: Build_With_Stable_2x
 
 on:
   push:
@@ -37,14 +37,23 @@ jobs:
       run: dotnet --version
     - name: Show java Version
       run: java -version  
-    - name: Setup Stable Nacos Server
+    - name: Setup Stable 2.x Nacos Server
       run: |
-        wget https://github.com/alibaba/nacos/releases/download/1.4.1/nacos-server-1.4.1.tar.gz
-        tar -xvf nacos-server-1.4.1.tar.gz
+        wget https://github.com/alibaba/nacos/releases/download/2.0.0/nacos-server-2.0.0.tar.gz
+        tar -xvf nacos-server-2.0.0.tar.gz
         cd nacos/bin
+        # sed -i 's/nacos.core.auth.enabled=false/nacos.core.auth.enabled=true/g' ../conf/application.properties
         chmod 755 startup.sh
         nohup ./startup.sh -m standalone 2>&1 &
         sleep 30
         curl "127.0.0.1:8848/nacos/v1/ns/operator/metrics"   
     - name: Build with dotnet
-      run: dotnet build --configuration Release
+      run: dotnet build --configuration Release 
+    - name: Test with dotnet
+      run: dotnet test --filter "Category=all|Category=1x|Category=2x"
+    - name: Upload Nacos logs
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: nacos-logs
+        path: /home/runner/work/nacos-sdk-csharp/nacos-sdk-csharp/nacos/logs

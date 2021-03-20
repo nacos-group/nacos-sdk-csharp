@@ -3,6 +3,7 @@
     using System.Collections.Generic;
     using Xunit;
 
+    [Trait("Category", "all")]
     public class WeightRandomLBStrategyTest
     {
         [Fact]

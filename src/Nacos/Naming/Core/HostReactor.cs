@@ -120,7 +120,7 @@ namespace Nacos
             {
                 if (oldService.lastRefTime > newService.lastRefTime)
                 {
-                    _logger.LogWarning("out of date data received, old-t: {0}, new-t: {1}", oldService.lastRefTime, newService.lastRefTime);
+                    _logger?.LogWarning("out of date data received, old-t: {0}, new-t: {1}", oldService.lastRefTime, newService.lastRefTime);
                 }
 
                 _serviceInfoMap.AddOrUpdate(newService.GetKey(), newService, (k, v) => newService);
@@ -138,7 +138,7 @@ namespace Nacos
                 if (newHosts.Count > 0)
                 {
                     changed = true;
-                    _logger.LogInformation(
+                    _logger?.LogInformation(
                         "new ips ({0}) service: {1} -> {2}",
                         newHosts.Count(),
                         newService.GetKey(),
@@ -148,7 +148,7 @@ namespace Nacos
                 if (removeHosts.Count() > 0)
                 {
                     changed = true;
-                    _logger.LogInformation(
+                    _logger?.LogInformation(
                       "removed ips ({0}) service: {1} -> {2}",
                       removeHosts.Count(),
                       newService.GetKey(),
@@ -158,7 +158,7 @@ namespace Nacos
                 if (modHosts.Count() > 0)
                 {
                     changed = true;
-                    _logger.LogInformation(
+                    _logger?.LogInformation(
                      "modified ips ({0}) service: {1} -> {2}",
                      modHosts.Count(),
                      newService.GetKey(),
@@ -173,7 +173,7 @@ namespace Nacos
             else
             {
                 changed = true;
-                _logger.LogInformation(
+                _logger?.LogInformation(
                     "init new ips({0}) service: {1} -> {2}",
                     newService.IpCount(),
                     newService.GetKey(),
@@ -184,7 +184,7 @@ namespace Nacos
 
             if (changed)
             {
-                _logger.LogInformation(
+                _logger?.LogInformation(
                     "current ips({0}) service: {1} -> {2}",
                     newService.IpCount(),
                     newService.GetKey(),
@@ -208,7 +208,7 @@ namespace Nacos
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[NA] failed to update serviceName: {0}", serviceName);
+                _logger?.LogError(ex, "[NA] failed to update serviceName: {0}", serviceName);
             }
         }
 

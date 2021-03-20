@@ -5,37 +5,6 @@
 
     public static class GrpcUtils
     {
-        public static Payload Convert<T>(T request, RequestMeta meta)
-        {
-            var body = new Google.Protobuf.WellKnownTypes.Any
-            {
-                // convert the request paramter to a json string, as the body
-                Value = Google.Protobuf.ByteString.CopyFromUtf8(request.ToJsonString())
-            };
-
-            var payload = new Payload
-            {
-                Body = body
-            };
-
-            if (meta != null)
-            {
-                payload.Metadata = new Metadata
-                {
-                    ClientIp = meta.ClientIp,
-                    ClientPort = meta.ClientPort,
-                    ClientVersion = meta.ClientVersion,
-                    ConnectionId = meta.ConnectionId,
-                    Type = meta.Type,
-                };
-
-                if (meta.Labels != null && meta.Labels.Any())
-                    foreach (var item in meta.Labels) payload.Metadata.Labels.Add(item.Key, item.Value);
-            }
-
-            return payload;
-        }
-
         public static object Parse(Payload payload)
         {
             var type = payload.Metadata.Type;
@@ -65,30 +34,6 @@
             }
         }
 
-
-        private static CommonRequestMeta ConvertMeta(Nacos.Metadata metadata)
-        {
-            var requestMeta = new CommonRequestMeta()
-            {
-                ClientIp = metadata.ClientIp,
-                ClientPort = metadata.ClientPort,
-                ConnectionId = metadata.ConnectionId,
-                ClientVersion = metadata.ClientVersion,
-                Type = metadata.Type
-            };
-
-            if (metadata.Labels != null && metadata.Labels.Any())
-            {
-                foreach (var item in metadata.Labels)
-                {
-                    requestMeta.Labels[item.Key] = item.Value;
-                }
-            }
-
-
-            return requestMeta;
-        }
-
         public static Payload Convert(CommonRequest request, CommonRequestMeta meta)
         {
             var body = new Google.Protobuf.WellKnownTypes.Any
@@ -106,15 +51,11 @@
             {
                 payload.Metadata = new Metadata
                 {
-                    ClientIp = meta.ClientIp,
-                    ClientPort = meta.ClientPort,
-                    ClientVersion = meta.ClientVersion,
-                    ConnectionId = meta.ConnectionId,
                     Type = meta.Type,
                 };
 
-                if (meta.Labels != null && meta.Labels.Any())
-                    foreach (var item in meta.Labels) payload.Metadata.Labels.Add(item.Key, item.Value);
+                if (request.Headers != null && request.Headers.Any())
+                    foreach (var item in request.Headers) payload.Metadata.Headers.Add(item.Key, item.Value);
             }
 
             return payload;
@@ -135,7 +76,6 @@
 
             payload.Metadata = new Metadata
             {
-                ClientVersion = Common.Constants.CLIENT_VERSION,
                 Type = response.GetRemoteType(),
             };
 

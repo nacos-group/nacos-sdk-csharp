@@ -4,6 +4,7 @@
     using System.Linq;
     using Xunit;
 
+    [Trait("Category", "all")]
     public class WeightRoundRobinLBStrategyTest
     {
         [Fact]

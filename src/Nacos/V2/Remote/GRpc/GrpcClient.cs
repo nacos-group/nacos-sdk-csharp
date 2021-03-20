@@ -1,9 +1,11 @@
 ﻿namespace Nacos.V2.Remote.GRpc
 {
     using Microsoft.Extensions.Logging;
+    using Nacos.V2.Common;
     using Nacos.V2.Remote.Requests;
     using Nacos.V2.Remote.Responses;
     using System;
+    using System.Collections.Generic;
 
     public class GrpcClient : RpcClient
     {
@@ -16,7 +18,12 @@
         {
             try
             {
-                var channel = new Grpc.Core.Channel(serverInfo.ServerIp, serverInfo.ServerPort, Grpc.Core.ChannelCredentials.Insecure);
+                var channel = new Grpc.Core.Channel(
+                    serverInfo.ServerIp,
+                    serverInfo.ServerPort,
+                    Grpc.Core.ChannelCredentials.Insecure,
+                    /* keep config and naming using diff channel */
+                    new List<Grpc.Core.ChannelOption> { new Grpc.Core.ChannelOption(GetName(), 1) });
 
                 // after nacos alpha2 server check response was changed!!
                 var response = ServerCheck(channel);
@@ -42,9 +49,10 @@
                 // after nacos alpha2 setup request was changed!!
                 ConnectionSetupRequest conSetupRequest = new ConnectionSetupRequest
                 {
-                    ClientVersion = ConstValue.ClientVersion,
+                    ClientVersion = Constants.CLIENT_VERSION,
                     Labels = labels,
                     Abilities = clientAbilities,
+                    ClientIp = Utils.NetUtils.LocalIP(),
                     Tenant = GetTenant()
                 };
 
@@ -74,7 +82,8 @@
         {
             try
             {
-                var payload = GrpcUtils.Convert<object>(new { }, new RequestMeta { Type = RemoteRequestType.Req_ServerCheck });
+                var request = new ServerCheckRequest();
+                var payload = GrpcUtils.Convert(request, new CommonRequestMeta { Type = RemoteRequestType.Req_ServerCheck });
 
                 var client = new Nacos.Request.RequestClient(channel);
                 var resp = client.request(payload);
@@ -88,7 +97,6 @@
                 return null;
             }
         }
-
 
         private Grpc.Core.AsyncDuplexStreamingCall<Nacos.Payload, Nacos.Payload> BindRequestStream(Nacos.BiRequestStream.BiRequestStreamClient client, GrpcConnection grpcConn)
         {

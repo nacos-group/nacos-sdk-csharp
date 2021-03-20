@@ -1,11 +1,6 @@
 ﻿namespace Nacos.V2.Naming.Remote
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Options;
     using Nacos.V2.Naming.Cache;
     using Nacos.V2.Naming.Core;
     using Nacos.V2.Naming.Dtos;
@@ -15,6 +10,10 @@
     using Nacos.V2.Naming.Utils;
     using Nacos.V2.Remote;
     using Nacos.V2.Security;
+    using System;
+    using System.Collections.Generic;
+    using System.Threading;
+    using System.Threading.Tasks;
 
     public class NamingClientProxyDelegate : INamingClientProxy, IDisposable
     {
@@ -41,7 +40,7 @@
             this._options = options;
             this.serverListManager = new ServerListManager(logger, options);
             this.serviceInfoHolder = serviceInfoHolder;
-            this.securityProxy = new SecurityProxy(options);
+            this.securityProxy = new SecurityProxy(options, logger);
             InitSecurityProxy();
             this._serviceInfoUpdateService = new ServiceInfoUpdateService(options, serviceInfoHolder, this, changeNotifier);
             this.grpcClientProxy = new NamingGrpcClientProxy(logger, @namespace, securityProxy, serverListManager, options, serviceInfoHolder);

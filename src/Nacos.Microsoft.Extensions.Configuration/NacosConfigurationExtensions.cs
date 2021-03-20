@@ -63,6 +63,12 @@
             return builder.Add(source);
         }
 
+        /// <summary>
+        /// Add Nacos Configuration that integrate with Microsoft.Extensions.Configuration
+        /// </summary>
+        /// <param name="builder">IConfigurationBuilder</param>
+        /// <param name="action">setup NacosConfigurationSource</param>
+        /// <returns>IConfigurationBuilder</returns>
         public static IConfigurationBuilder AddNacosV2Configuration(
            this IConfigurationBuilder builder, Action<NacosV2ConfigurationSource> action)
         {
@@ -85,6 +91,13 @@
             return builder.Add(source);
         }
 
+        /// <summary>
+        /// Add Nacos Configuration that integrate with Microsoft.Extensions.Configuration
+        /// </summary>
+        /// <param name="builder">IConfigurationBuilder</param>
+        /// <param name="configuration">Configuration binding nacos configuration source</param>
+        /// <param name="parser">The parser.</param>
+        /// <returns>IConfigurationBuilder</returns>
         public static IConfigurationBuilder AddNacosV2Configuration(
            this IConfigurationBuilder builder,
            IConfiguration configuration,

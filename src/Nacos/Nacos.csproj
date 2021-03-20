@@ -41,8 +41,8 @@
     <PackageReference Include="Google.Protobuf" Version="3.14.0" />
     <PackageReference Include="Grpc.Core" Version="2.34.0" />
     <!--<PackageReference Include="Grpc.Net.Client" Version="2.33.1" />-->
-    <!--<Protobuf Include="protos\nacos_grpc_service.proto" GrpcServices="Client" />-->
-    <!--<PackageReference Include="Grpc.Tools" Version="2.33.1" PrivateAssets="All" />-->
+    <!--<Protobuf Include="V2\protos\nacos_grpc_service.proto" GrpcServices="Client" />-->
+    <!--<PackageReference Include="Grpc.Tools" Version="2.36.1" PrivateAssets="All" />-->
   </ItemGroup>
 
 </Project>

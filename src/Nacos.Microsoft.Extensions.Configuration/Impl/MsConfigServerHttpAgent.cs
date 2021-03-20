@@ -27,7 +27,7 @@ namespace Nacos.Microsoft.Extensions.Configuration
             _namespaceId = _options.Namespace;
 
             _serverListMgr = new ServerListManager(_options);
-            _securityProxy = new Security.SecurityProxy(_options);
+            _securityProxy = new Security.SecurityProxy(_options, null);
 
             _securityProxy.LoginAsync(_serverListMgr.GetServerUrls()).ConfigureAwait(false).GetAwaiter().GetResult();
 

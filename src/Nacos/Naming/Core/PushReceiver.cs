@@ -39,12 +39,12 @@
                 {
                     _port = new Random((int)DateTimeOffset.Now.ToUnixTimeSeconds()).Next(0, 1000) + 54951;
                     _udpClient = new UdpClient(_port);
-                    _logger.LogInformation($"start up udp server....., port: {_port}");
+                    _logger?.LogInformation($"start up udp server....., port: {_port}");
                     break;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "failed to start udp server {0}", i + 1);
+                    _logger?.LogError(ex, "failed to start udp server {0}", i + 1);
                 }
             }
 
@@ -55,7 +55,7 @@
                     var res = await _udpClient.ReceiveAsync();
 
                     var json = Encoding.UTF8.GetString(TryDecompressData(res.Buffer));
-                    _logger.LogInformation("received push data: {0} from {1}", json, res.RemoteEndPoint.ToString());
+                    _logger?.LogInformation("received push data: {0} from {1}", json, res.RemoteEndPoint.ToString());
 
                     var pushPacket = json.ToObj<PushPacket>();
 
@@ -81,7 +81,7 @@
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "[NA] error while receiving push data");
+                    _logger?.LogError(ex, "[NA] error while receiving push data");
                 }
             }
         }

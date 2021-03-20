@@ -40,7 +40,7 @@
 
             if (!string.IsNullOrWhiteSpace(config))
             {
-                _logger.LogInformation($"[get-config] get failover ok, envname={GetAgent().GetName()}, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, config ={config}");
+                _logger?.LogInformation($"[get-config] get failover ok, envname={GetAgent().GetName()}, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, config ={config}");
                 return config;
             }
 
@@ -54,12 +54,12 @@
             }
             catch (Exception ex)
             {
-                _logger.LogWarning($"[get-config] get from server error, envname={GetAgent().GetName()}, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, msg={ex.Message}");
+                _logger?.LogWarning($"[get-config] get from server error, envname={GetAgent().GetName()}, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, msg={ex.Message}");
             }
 
             if (!string.IsNullOrWhiteSpace(config))
             {
-                _logger.LogInformation($"[get-config] content from server {config}, envname={GetAgent().GetName()}, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}");
+                _logger?.LogInformation($"[get-config] content from server {config}, envname={GetAgent().GetName()}, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}");
                 await GetProcessor().SaveSnapshotAsync(GetAgent().GetName(), request.DataId, request.Group, request.Tenant, config);
                 return config;
             }
@@ -102,14 +102,14 @@
             switch (responseMessage.StatusCode)
             {
                 case System.Net.HttpStatusCode.OK:
-                    _logger.LogInformation($"[publish-single] ok, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, config={request.Content}");
+                    _logger?.LogInformation($"[publish-single] ok, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, config={request.Content}");
                     var result = await responseMessage.Content.ReadAsStringAsync();
                     return result.Equals("true", StringComparison.OrdinalIgnoreCase);
                 case System.Net.HttpStatusCode.Forbidden:
-                    _logger.LogWarning($"[publish-single] error, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, code={(int)responseMessage.StatusCode} msg={responseMessage.StatusCode.ToString()}");
+                    _logger?.LogWarning($"[publish-single] error, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, code={(int)responseMessage.StatusCode} msg={responseMessage.StatusCode.ToString()}");
                     throw new NacosException(NacosException.NO_RIGHT, $"Insufficient privilege.");
                 default:
-                    _logger.LogWarning($"[publish-single] error, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, code={(int)responseMessage.StatusCode} msg={responseMessage.StatusCode.ToString()}");
+                    _logger?.LogWarning($"[publish-single] error, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, code={(int)responseMessage.StatusCode} msg={responseMessage.StatusCode.ToString()}");
                     return false;
             }
         }
@@ -128,14 +128,14 @@
             switch (responseMessage.StatusCode)
             {
                 case System.Net.HttpStatusCode.OK:
-                    _logger.LogInformation($"[remove] ok, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}");
+                    _logger?.LogInformation($"[remove] ok, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}");
                     var result = await responseMessage.Content.ReadAsStringAsync();
                     return result.Equals("true", StringComparison.OrdinalIgnoreCase);
                 case System.Net.HttpStatusCode.Forbidden:
-                    _logger.LogWarning($"[remove] error, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, code={(int)responseMessage.StatusCode} msg={responseMessage.StatusCode.ToString()}");
+                    _logger?.LogWarning($"[remove] error, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, code={(int)responseMessage.StatusCode} msg={responseMessage.StatusCode.ToString()}");
                     throw new NacosException(NacosException.NO_RIGHT, $"Insufficient privilege.");
                 default:
-                    _logger.LogWarning($"[remove] error, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, code={(int)responseMessage.StatusCode} msg={responseMessage.StatusCode.ToString()}");
+                    _logger?.LogWarning($"[remove] error, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, code={(int)responseMessage.StatusCode} msg={responseMessage.StatusCode.ToString()}");
                     return false;
             }
         }
@@ -153,7 +153,7 @@
 
             if (listeners.Any(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
             {
-                _logger.LogWarning($"[add-listener] error, {name} has been added.");
+                _logger?.LogWarning($"[add-listener] error, {name} has been added.");
                 return Task.CompletedTask;
             }
 
@@ -185,7 +185,7 @@
 
             if (!listeners.Any(x => x.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
             {
-                _logger.LogWarning($"[remove-listener] error, {name} was not added.");
+                _logger?.LogWarning($"[remove-listener] error, {name} was not added.");
                 return Task.CompletedTask;
             }
 
@@ -209,7 +209,7 @@
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, $"[remove-listener] call back throw exception, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}");
+                    _logger?.LogError(ex, $"[remove-listener] call back throw exception, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}");
                 }
             }
 
@@ -247,18 +247,18 @@
                         break;
                     case System.Net.HttpStatusCode.Forbidden:
                         SetHealthServer(false);
-                        _logger.LogWarning($"[listener] error, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, code={(int)responseMessage.StatusCode} msg={responseMessage.StatusCode.ToString()}");
+                        _logger?.LogWarning($"[listener] error, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, code={(int)responseMessage.StatusCode} msg={responseMessage.StatusCode.ToString()}");
                         throw new NacosException(NacosException.NO_RIGHT, $"Insufficient privilege.");
                     default:
                         SetHealthServer(false);
-                        _logger.LogWarning($"[listener] error, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, code={(int)responseMessage.StatusCode} msg={responseMessage.StatusCode.ToString()}");
+                        _logger?.LogWarning($"[listener] error, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, code={(int)responseMessage.StatusCode} msg={responseMessage.StatusCode.ToString()}");
                         throw new NacosException((int)responseMessage.StatusCode, responseMessage.StatusCode.ToString());
                 }
             }
             catch (Exception ex)
             {
                 SetHealthServer(false);
-                _logger.LogError(ex, $"[listener] error, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}");
+                _logger?.LogError(ex, $"[listener] error, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}");
             }
         }
 
@@ -286,7 +286,7 @@
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, $"[listener] call back throw exception, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}");
+                        _logger?.LogError(ex, $"[listener] call back throw exception, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}");
                     }
                 }
             }
