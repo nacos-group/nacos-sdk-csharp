@@ -1,4 +1,4 @@
-name: Build_With_Stable
+name: Build_With_Stable_2x
 
 on:
   push:
@@ -37,7 +37,7 @@ jobs:
       run: dotnet --version
     - name: Show java Version
       run: java -version  
-    - name: Setup Stable Nacos Server
+    - name: Setup Stable 2.x Nacos Server
       run: |
         wget https://github.com/alibaba/nacos/releases/download/2.0.0/nacos-server-2.0.0.tar.gz
         tar -xvf nacos-server-2.0.0.tar.gz
