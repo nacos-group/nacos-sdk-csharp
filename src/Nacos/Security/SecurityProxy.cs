@@ -68,7 +68,7 @@
 
                 foreach (var server in servers)
                 {
-                    var flag = await LoginAsync(server);
+                    var flag = await LoginAsync(server.TrimEnd('/'));
                     if (flag)
                     {
                         _lastRefreshTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
