@@ -35,6 +35,10 @@
 
         private Timer _executeConfigListenTimer;
 
+        private Timer _loginTimer;
+
+        private long _securityInfoRefreshIntervalMills = 5000;
+
         public ConfigHttpTransportClient(
             ILogger logger,
             NacosSdkOptions options,
@@ -492,8 +496,22 @@
             }
         }
 
+        private void InitSecurityProxy()
+        {
+            _loginTimer = new Timer(
+                async x =>
+                {
+                    await _securityProxy.LoginAsync(_serverListManager.GetServerUrls());
+                }, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(_securityInfoRefreshIntervalMills));
+
+            // init should wait the result.
+            _securityProxy.LoginAsync(_serverListManager.GetServerUrls()).Wait();
+        }
+
         protected override void StartInner()
         {
+            InitSecurityProxy();
+
             _executeConfigListenTimer = new Timer(
                    async x =>
                    {

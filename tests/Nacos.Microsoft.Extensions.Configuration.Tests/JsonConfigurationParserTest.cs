@@ -3,6 +3,7 @@ namespace Nacos.Microsoft.Extensions.Configuration.Tests
     using System;
     using Xunit;
 
+    [Trait("Category", "all")]
     public class JsonConfigurationParserTest
     {
         [Fact]

@@ -5,8 +5,10 @@
     using Nacos.V2;
     using Nacos.V2.DependencyInjection;
     using System;
+    using Xunit;
     using Xunit.Abstractions;
 
+    [Trait("Category", "2x")]
     public class ConfigWithGrpcTest : ConfigBaseTest
     {
         public ConfigWithGrpcTest(ITestOutputHelper output)
@@ -21,6 +23,9 @@
                 x.EndPoint = "";
                 x.Namespace = "cs-test";
 
+                /*x.UserName = "nacos";
+                x.Password = "nacos";*/
+
                 // swich to use http or rpc
                 x.ConfigUseRpc = true;
             });
@@ -28,7 +33,9 @@
             services.AddLogging(builder => { builder.AddConsole(); });
 
             IServiceProvider serviceProvider = services.BuildServiceProvider();
+            _output.WriteLine($"{nameof(ConfigWithGrpcTest)} BuildServiceProvider");
             _configSvc = serviceProvider.GetService<INacosConfigService>();
+            _output.WriteLine($"{nameof(ConfigWithGrpcTest)} Get INacosConfigService");
         }
     }
 }

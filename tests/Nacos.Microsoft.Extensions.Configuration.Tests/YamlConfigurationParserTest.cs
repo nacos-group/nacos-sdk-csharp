@@ -3,6 +3,7 @@
     using System;
     using Xunit;
 
+    [Trait("Category", "all")]
     public class YamlConfigurationParserTest
     {
         [Fact]

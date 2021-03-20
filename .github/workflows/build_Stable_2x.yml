@@ -42,6 +42,7 @@ jobs:
         wget https://github.com/alibaba/nacos/releases/download/2.0.0/nacos-server-2.0.0.tar.gz
         tar -xvf nacos-server-2.0.0.tar.gz
         cd nacos/bin
+        # sed -i 's/nacos.core.auth.enabled=false/nacos.core.auth.enabled=true/g' ../conf/application.properties
         chmod 755 startup.sh
         nohup ./startup.sh -m standalone 2>&1 &
         sleep 30
@@ -49,7 +50,7 @@ jobs:
     - name: Build with dotnet
       run: dotnet build --configuration Release 
     - name: Test with dotnet
-      run: dotnet test
+      run: dotnet test --filter "Category=all|Category=1x|Category=2x"
     - name: Upload Nacos logs
       if: always()
       uses: actions/upload-artifact@v2

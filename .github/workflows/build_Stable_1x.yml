@@ -1,4 +1,4 @@
-name: Build_With_Alpha
+name: Build_With_Stable
 
 on:
   push:
@@ -7,7 +7,18 @@ on:
     branches: [ dev, master ]
 
 jobs:
-
+  windows:    
+    name: build on windows
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+    - name: Build with dotnet
+      run: dotnet build --configuration Release
+      
   linux:    
     name: build on linux
     runs-on: ubuntu-latest
@@ -26,22 +37,20 @@ jobs:
       run: dotnet --version
     - name: Show java Version
       run: java -version  
-    - name: Setup Alpha Nacos Server
+    - name: Setup Stable Nacos Server
       run: |
-        wget https://github.com/alibaba/nacos/releases/download/2.0.0/nacos-server-2.0.0.tar.gz
-        tar -xvf nacos-server-2.0.0.tar.gz
+        wget https://github.com/alibaba/nacos/releases/download/2.0.0/nacos-server-1.4.1.tar.gz
+        tar -xvf nacos-server-1.4.1.tar.gz
         cd nacos/bin
-        sed -i 's/Xms512m/Xms1024m/g' startup.sh
-        sed -i 's/Xmx512m/Xmx1024m/g' startup.sh
-        sed -i 's/Xmn256m/Xmn512m/g' startup.sh
+        # sed -i 's/nacos.core.auth.enabled=false/nacos.core.auth.enabled=true/g' ../conf/application.properties
         chmod 755 startup.sh
         nohup ./startup.sh -m standalone 2>&1 &
         sleep 30
         curl "127.0.0.1:8848/nacos/v1/ns/operator/metrics"   
     - name: Build with dotnet
-      run: dotnet build
+      run: dotnet build --configuration Release 
     - name: Test with dotnet
-      run: dotnet test
+      run: dotnet test --filter "Category=all|Category=1x"
     - name: Upload Nacos logs
       if: always()
       uses: actions/upload-artifact@v2
