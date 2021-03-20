@@ -178,9 +178,13 @@
 
                 _logger?.LogError("Server return unexpected response '{0}', expected response should be '{1}'", response.GetType().Name, typeof(T).Name);
             }
+            catch (NacosException e)
+            {
+                throw new NacosException(e.ErrorCode, $"Request nacos server failed: {e.ErrorCode}, {e.Message}");
+            }
             catch (Exception e)
             {
-                throw new NacosException(NacosException.SERVER_ERROR, "Request nacos server failed: " + e.Message);
+                throw new NacosException(NacosException.SERVER_ERROR, $"Request nacos server failed: {e.Message}");
             }
 
             throw new NacosException(NacosException.SERVER_ERROR, "Server return invalid response");
