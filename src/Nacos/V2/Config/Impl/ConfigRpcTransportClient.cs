@@ -44,7 +44,7 @@
             this._accessKey = _options.AccessKey;
             this._secretKey = _options.SecretKey;
             this._cacheMap = cacheMap;
-            this._securityProxy = new Security.SecurityProxy(options);
+            this._securityProxy = new Security.SecurityProxy(options, logger);
 
             StartInner();
         }

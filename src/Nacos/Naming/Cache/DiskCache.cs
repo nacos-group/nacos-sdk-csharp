@@ -31,7 +31,7 @@
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[NA] failed to write cache for file: {0}", path);
+                _logger?.LogError(ex, "[NA] failed to write cache for file: {0}", path);
             }
         }
 
@@ -48,7 +48,7 @@
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[NA] failed to write cache for dom: {0}", info.name);
+                _logger?.LogError(ex, "[NA] failed to write cache for dom: {0}", info.name);
             }
         }
 
@@ -90,7 +90,7 @@
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[NA] failed to read cache file");
+                _logger?.LogError(ex, "[NA] failed to read cache file");
             }
 
             return infos;
@@ -109,7 +109,7 @@
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[NA] failed to read cache for file: {0}", path);
+                _logger?.LogError(ex, "[NA] failed to read cache for file: {0}", path);
             }
 
             return string.Empty;

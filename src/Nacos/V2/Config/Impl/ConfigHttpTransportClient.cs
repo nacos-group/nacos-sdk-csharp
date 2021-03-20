@@ -45,7 +45,7 @@
             this._options = options;
             this._serverListManager = serverListManager;
             this._cacheMap = cacheMap;
-            this._securityProxy = new Security.SecurityProxy(options);
+            this._securityProxy = new Security.SecurityProxy(options, logger);
             Init();
 
             _agent = new ServerHttpAgent(_logger, options);

@@ -47,7 +47,7 @@
             _serverUrls = new List<string>();
             _namespace = _options.Namespace;
             _endpoint = _options.EndPoint;
-            _securityProxy = new Security.SecurityProxy(_options);
+            _securityProxy = new Security.SecurityProxy(_options, _logger);
 
             var serverAddresses = _options.ServerAddresses;
 
@@ -90,7 +90,7 @@
             {
                 if (_serverUrls != null && _serverUrls.Count > 0)
                 {
-                    _logger.LogDebug("server list provided by user: {0}", string.Join(",", _serverUrls));
+                    _logger?.LogDebug("server list provided by user: {0}", string.Join(",", _serverUrls));
                     return;
                 }
 
@@ -124,7 +124,7 @@
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "failed to update server list");
+                _logger?.LogWarning(ex, "failed to update server list");
             }
         }
 
@@ -169,7 +169,7 @@
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "error GetServerListFromEndpointAsync");
+                _logger?.LogError(ex, "error GetServerListFromEndpointAsync");
                 return null;
             }
         }
@@ -194,7 +194,7 @@
                     }
                     catch (Nacos.Exceptions.NacosException ex)
                     {
-                        _logger.LogDebug(ex, "request {0} failed.", server);
+                        _logger?.LogDebug(ex, "request {0} failed.", server);
                     }
 
                     index = (index + 1) % _serverUrls.Count;
@@ -211,12 +211,12 @@
                     }
                     catch (Nacos.Exceptions.NacosException ex)
                     {
-                        _logger.LogDebug(ex, "request {0} failed.", _nacosDomain);
+                        _logger?.LogDebug(ex, "request {0} failed.", _nacosDomain);
                     }
                 }
             }
 
-            _logger.LogError("request: {0} failed, servers: {1}", path, string.Join(",", _serverUrls));
+            _logger?.LogError("request: {0} failed, servers: {1}", path, string.Join(",", _serverUrls));
 
             throw new Nacos.Exceptions.NacosException(0, $"failed to req API:{path} after all servers(" + string.Join(",", _serverUrls) + ") tried: ");
         }
