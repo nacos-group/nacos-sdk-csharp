@@ -5,6 +5,6 @@
         [Newtonsoft.Json.JsonProperty("serviceInfo")]
         public Nacos.V2.Naming.Dtos.ServiceInfo ServiceInfo { get; set; }
 
-        public override string GetRemoteType() => "";
+        public override string GetRemoteType() => RemoteRequestType.Resp_Naming_QueryService;
     }
 }

@@ -10,6 +10,6 @@
         [Newtonsoft.Json.JsonProperty("serviceNames")]
         public List<string> ServiceNames { get; set; }
 
-        public override string GetRemoteType() => "";
+        public override string GetRemoteType() => RemoteRequestType.Resp_Naming_ServiceList;
     }
 }
