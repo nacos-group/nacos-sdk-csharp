@@ -52,7 +52,7 @@
 
         public static readonly string Resp_Config_Remove = "ConfigRemoveResponse";
 
-        public static readonly string Resp_Naming_SubscribeServic = "SubscribeServiceResponse";
+        public static readonly string Resp_Naming_SubscribeService = "SubscribeServiceResponse";
 
         public static readonly string Resp_Naming_QueryService = "QueryServiceResponse";
 
@@ -82,6 +82,8 @@
 
         public static readonly string Resp_ClientDetection = "ClientDetectionResponse";
 
+        public static readonly string Resp_Naming_NotifySubscriber = "NotifySubscriberResponse";
+
         public static Dictionary<string, Type> RemoteResponseTypeMapping = new Dictionary<string, Type>
         {
             { Resp_Config_Pubish_Alpha1, typeof(ConfigPubishResponse) },
@@ -92,7 +94,7 @@
             { Resp_Config_Remove, typeof(ConfigRemoveResponse) },
             { Req_Config_ChangeNotify, typeof(ConfigChangeNotifyRequest) },
             { Req_Naming_NotifySubscriber, typeof(NotifySubscriberRequest) },
-            { Resp_Naming_SubscribeServic, typeof(SubscribeServiceResponse) },
+            { Resp_Naming_SubscribeService, typeof(SubscribeServiceResponse) },
             { Resp_Naming_QueryService, typeof(QueryServiceResponse) },
             { Resp_Naming_ServiceList, typeof(ServiceListResponse) },
             { Resp_Naming_Instance, typeof(InstanceResponse) },
@@ -104,6 +106,7 @@
             { Req_ClientDetection, typeof(ClientDetectionRequest) },
             { Req_ConnectReset, typeof(ConnectResetRequest) },
             { Resp_HealthCheck, typeof(HealthCheckResponse) },
+            { Resp_Naming_NotifySubscriber, typeof(NotifySubscriberResponse) },
         };
     }
 }
