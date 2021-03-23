@@ -189,9 +189,7 @@
                 { CommonParams.SERVICE_NAME, groupedServiceName },
                 { CommonParams.CLUSTER_NAME, clusters },
                 { "udpPort", udpPort.ToString() },
-
-                // TODO:
-                { "clientIP", "127.0.0.1" },
+                { "clientIP", NetUtils.LocalIP() },
                 { "healthyOnly", healthyOnly.ToString() },
             };
 
