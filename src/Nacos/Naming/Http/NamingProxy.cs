@@ -291,10 +291,10 @@
 
             paramValues["app"] = AppDomain.CurrentDomain.FriendlyName;
             if (string.IsNullOrWhiteSpace(_options.AccessKey)
-                && string.IsNullOrWhiteSpace(_options.SecretKey))
+                || string.IsNullOrWhiteSpace(_options.SecretKey))
                 return;
 
-            string signData = string.IsNullOrWhiteSpace(paramValues["serviceName"])
+            string signData = !string.IsNullOrWhiteSpace(paramValues["serviceName"])
                 ? DateTimeOffset.Now.ToUnixTimeSeconds().ToString() + "@@" + paramValues["serviceName"]
                 : DateTimeOffset.Now.ToUnixTimeSeconds().ToString();
 

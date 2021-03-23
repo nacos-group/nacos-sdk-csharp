@@ -49,6 +49,8 @@
             this._options = options;
             this._serverListManager = serverListManager;
             this._cacheMap = cacheMap;
+            this._accessKey = _options.AccessKey;
+            this._secretKey = _options.SecretKey;
             this._securityProxy = new Security.SecurityProxy(options, logger);
             Init();
 

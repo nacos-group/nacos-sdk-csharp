@@ -189,9 +189,7 @@
                 { CommonParams.SERVICE_NAME, groupedServiceName },
                 { CommonParams.CLUSTER_NAME, clusters },
                 { "udpPort", udpPort.ToString() },
-
-                // TODO:
-                { "clientIP", "127.0.0.1" },
+                { "clientIP", NetUtils.LocalIP() },
                 { "healthyOnly", healthyOnly.ToString() },
             };
 
@@ -369,10 +367,10 @@
 
             paramters["app"] = AppDomain.CurrentDomain.FriendlyName;
             if (string.IsNullOrWhiteSpace(_options.AccessKey)
-                && string.IsNullOrWhiteSpace(_options.SecretKey))
+                || string.IsNullOrWhiteSpace(_options.SecretKey))
                 return;
 
-            string signData = string.IsNullOrWhiteSpace(paramters["serviceName"])
+            string signData = !string.IsNullOrWhiteSpace(paramters["serviceName"])
                 ? DateTimeOffset.Now.ToUnixTimeSeconds().ToString() + "@@" + paramters["serviceName"]
                 : DateTimeOffset.Now.ToUnixTimeSeconds().ToString();
 

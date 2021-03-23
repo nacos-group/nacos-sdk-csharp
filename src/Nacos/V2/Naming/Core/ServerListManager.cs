@@ -101,7 +101,7 @@
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                _logger?.LogError(ex, "GetServerListFromEndpoint error.");
                 return null;
             }
         }

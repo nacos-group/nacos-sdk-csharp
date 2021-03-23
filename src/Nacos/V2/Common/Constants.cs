@@ -2,7 +2,7 @@
 {
     public class Constants
     {
-        public static string CLIENT_VERSION = "Nacos-CSharp-Client:v1.0.1";
+        public static string CLIENT_VERSION = "Nacos-CSharp-Client:v1.0.3";
 
         public static int DATA_IN_BODY_VERSION = 204;
 
