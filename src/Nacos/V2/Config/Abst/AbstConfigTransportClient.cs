@@ -70,7 +70,7 @@
                 // _accessKey = stsCredential.accessKeyId;
                 // _secretKey = stsCredential.accessKeySecret;
                 // stsCredential.securityToken
-                spasHeaders["Spas-SecurityToken"] = string.Empty;
+                // spasHeaders["Spas-SecurityToken"] = string.Empty;
             }
 
             if (_accessKey.IsNotNullOrWhiteSpace() && _secretKey.IsNotNullOrWhiteSpace())

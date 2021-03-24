@@ -110,11 +110,9 @@
         {
             try
             {
-                if (_serverList != null && _serverList.Count > 0)
-                {
-                    _logger?.LogDebug("server list provided by user: {0}", string.Join(",", _serverList));
-                    return;
-                }
+                if (_serverList != null && _serverList.Count > 0) return;
+
+                _logger?.LogDebug("server list provided by user: {0}", string.Join(",", _serverList));
 
                 if (DateTimeOffset.Now.ToUnixTimeSeconds() - _lastServerListRefreshTime < _refreshServerListInternal) return;
 

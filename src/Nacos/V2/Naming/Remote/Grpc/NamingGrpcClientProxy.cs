@@ -213,7 +213,7 @@
                 && string.IsNullOrWhiteSpace(_options.SecretKey))
                 return result;
 
-            string signData = string.IsNullOrWhiteSpace(serviceName)
+            string signData = !string.IsNullOrWhiteSpace(serviceName)
                 ? DateTimeOffset.Now.ToUnixTimeSeconds().ToString() + "@@" + serviceName
                 : DateTimeOffset.Now.ToUnixTimeSeconds().ToString();
 

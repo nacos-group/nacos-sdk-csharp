@@ -108,11 +108,9 @@
 
             try
             {
-                if (_serverUrls != null && _serverUrls.Count > 0)
-                {
-                    _logger?.LogWarning("[update-serverlist] current serverlist from address server is empty!!!");
-                    return;
-                }
+                if (_serverUrls != null && _serverUrls.Count > 0) return;
+
+                _logger?.LogWarning("[update-serverlist] current serverlist from address server is empty!!!");
 
                 var list = await GetServerListFromEndpointAsync();
 
