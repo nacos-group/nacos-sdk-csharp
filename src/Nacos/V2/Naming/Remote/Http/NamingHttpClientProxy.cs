@@ -349,7 +349,10 @@
                     return string.Empty;
                 }
 
-                throw new NacosException((int)responseMessage.StatusCode, responseMessage.StatusCode.ToString());
+                // response body will contains some error message
+                var msg = await responseMessage.Content.ReadAsStringAsync();
+
+                throw new NacosException((int)responseMessage.StatusCode, $"{responseMessage.StatusCode}--{msg}");
             }
             catch (Exception ex)
             {
