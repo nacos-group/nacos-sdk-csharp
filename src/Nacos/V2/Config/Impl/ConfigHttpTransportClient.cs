@@ -230,7 +230,7 @@
 
         protected override string GetTenantInner() => _agent.GetTenant();
 
-        protected override async Task<bool> PublishConfig(string dataId, string group, string tenant, string appName, string tag, string betaIps, string content)
+        protected override async Task<bool> PublishConfig(string dataId, string group, string tenant, string appName, string tag, string betaIps, string content, string type)
         {
             group = ParamUtils.Null2DefaultGroup(group);
             ParamUtils.CheckParam(dataId, group, content);
@@ -254,6 +254,7 @@
             if (tenant.IsNotNullOrWhiteSpace()) parameters["tenant"] = tenant;
             if (appName.IsNotNullOrWhiteSpace()) parameters["appName"] = appName;
             if (tag.IsNotNullOrWhiteSpace()) parameters["tag"] = tag;
+            if (type.IsNotNullOrWhiteSpace()) parameters["type"] = type;
 
             var headers = new Dictionary<string, string>(1);
             if (betaIps.IsNotNullOrWhiteSpace()) headers["betaIps"] = betaIps;

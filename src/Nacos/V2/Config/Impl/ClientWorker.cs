@@ -140,8 +140,8 @@
             => await _agent.RemoveConfigAsync(dataId, group, tenant, tag);
 
         public async Task<bool> PublishConfig(string dataId, string group, string tenant, string appName, string tag, string betaIps,
-            string content)
-            => await _agent.PublishConfigAsync(dataId, group, tenant, appName, tag, betaIps, content);
+            string content, string type)
+            => await _agent.PublishConfigAsync(dataId, group, tenant, appName, tag, betaIps, content, type);
 
         public Task<List<string>> GetServerConfig(string dataId, string group, string tenant, long readTimeout, bool notify)
         {

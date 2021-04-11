@@ -124,7 +124,7 @@
             _configFilterChainManager.DoFilter(cr, null);
             content = cr.GetContent();
 
-            return await _worker.PublishConfig(dataId, group, tenant, appName, tag, betaIps, content);
+            return await _worker.PublishConfig(dataId, group, tenant, appName, tag, betaIps, content, type);
         }
 
         private async Task<bool> RemoveConfigInner(string tenant, string dataId, string group, string tag)
