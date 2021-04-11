@@ -42,7 +42,7 @@
             this.serviceInfoHolder = serviceInfoHolder;
             this.securityProxy = new SecurityProxy(options, logger);
             InitSecurityProxy();
-            this._serviceInfoUpdateService = new ServiceInfoUpdateService(options, serviceInfoHolder, this, changeNotifier);
+            this._serviceInfoUpdateService = new ServiceInfoUpdateService(logger, options, serviceInfoHolder, this, changeNotifier);
             this.grpcClientProxy = new NamingGrpcClientProxy(logger, @namespace, securityProxy, serverListManager, options, serviceInfoHolder);
             this.httpClientProxy = new NamingHttpClientProxy(logger, @namespace, securityProxy, serverListManager, options, serviceInfoHolder);
         }
