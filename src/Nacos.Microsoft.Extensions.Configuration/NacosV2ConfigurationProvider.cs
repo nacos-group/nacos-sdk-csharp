@@ -48,9 +48,9 @@
                 ConfigUseRpc = configurationSource.ConfigUseRpc,
             });
 
-            _logger = Nacos.Microsoft.Extensions.Configuration.Log.NacosLoggerFactory.Instance.CreateLogger<NacosV2ConfigurationProvider>();
+            _logger = Nacos.Microsoft.Extensions.Configuration.NacosLog.NacosLoggerFactory.Instance.CreateLogger<NacosV2ConfigurationProvider>();
 
-            _client = new NacosConfigService(Nacos.Microsoft.Extensions.Configuration.Log.NacosLoggerFactory.Instance, options);
+            _client = new NacosConfigService(Nacos.Microsoft.Extensions.Configuration.NacosLog.NacosLoggerFactory.Instance, options);
             if (configurationSource.Listeners != null && configurationSource.Listeners.Any())
             {
                 var tasks = new List<Task>();
