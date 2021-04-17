@@ -26,20 +26,20 @@ namespace Nacos {
           string.Concat(
             "CiJWMi9wcm90b3MvbmFjb3NfZ3JwY19zZXJ2aWNlLnByb3RvGhlnb29nbGUv",
             "cHJvdG9idWYvYW55LnByb3RvGh9nb29nbGUvcHJvdG9idWYvdGltZXN0YW1w",
-            "LnByb3RvInEKCE1ldGFkYXRhEgwKBHR5cGUYAyABKAkSJwoHaGVhZGVycxgH",
-            "IAMoCzIWLk1ldGFkYXRhLkhlYWRlcnNFbnRyeRouCgxIZWFkZXJzRW50cnkS",
-            "CwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASJKCgdQYXlsb2FkEhsK",
-            "CG1ldGFkYXRhGAIgASgLMgkuTWV0YWRhdGESIgoEYm9keRgDIAEoCzIULmdv",
-            "b2dsZS5wcm90b2J1Zi5BbnkyOAoNUmVxdWVzdFN0cmVhbRInCg1yZXF1ZXN0",
-            "U3RyZWFtEgguUGF5bG9hZBoILlBheWxvYWQiADABMioKB1JlcXVlc3QSHwoH",
-            "cmVxdWVzdBIILlBheWxvYWQaCC5QYXlsb2FkIgAyPgoPQmlSZXF1ZXN0U3Ry",
-            "ZWFtEisKD3JlcXVlc3RCaVN0cmVhbRIILlBheWxvYWQaCC5QYXlsb2FkIgAo",
-            "ATABQisKH2NvbS5hbGliYWJhLm5hY29zLmFwaS5ncnBjLmF1dG9QAaoCBU5h",
-            "Y29zYgZwcm90bzM="));
+            "LnByb3RvIoMBCghNZXRhZGF0YRIMCgR0eXBlGAMgASgJEhAKCGNsaWVudElw",
+            "GAggASgJEicKB2hlYWRlcnMYByADKAsyFi5NZXRhZGF0YS5IZWFkZXJzRW50",
+            "cnkaLgoMSGVhZGVyc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEo",
+            "CToCOAEiSgoHUGF5bG9hZBIbCghtZXRhZGF0YRgCIAEoCzIJLk1ldGFkYXRh",
+            "EiIKBGJvZHkYAyABKAsyFC5nb29nbGUucHJvdG9idWYuQW55MjgKDVJlcXVl",
+            "c3RTdHJlYW0SJwoNcmVxdWVzdFN0cmVhbRIILlBheWxvYWQaCC5QYXlsb2Fk",
+            "IgAwATIqCgdSZXF1ZXN0Eh8KB3JlcXVlc3QSCC5QYXlsb2FkGgguUGF5bG9h",
+            "ZCIAMj4KD0JpUmVxdWVzdFN0cmVhbRIrCg9yZXF1ZXN0QmlTdHJlYW0SCC5Q",
+            "YXlsb2FkGgguUGF5bG9hZCIAKAEwAUIrCh9jb20uYWxpYmFiYS5uYWNvcy5h",
+            "cGkuZ3JwYy5hdXRvUAGqAgVOYWNvc2IGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Google.Protobuf.WellKnownTypes.AnyReflection.Descriptor, global::Google.Protobuf.WellKnownTypes.TimestampReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Nacos.Metadata), global::Nacos.Metadata.Parser, new[]{ "Type", "Headers" }, null, null, null, new pbr::GeneratedClrTypeInfo[] { null, }),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Nacos.Metadata), global::Nacos.Metadata.Parser, new[]{ "Type", "ClientIp", "Headers" }, null, null, null, new pbr::GeneratedClrTypeInfo[] { null, }),
             new pbr::GeneratedClrTypeInfo(typeof(global::Nacos.Payload), global::Nacos.Payload.Parser, new[]{ "Metadata", "Body" }, null, null, null, null)
           }));
     }
@@ -77,6 +77,7 @@ namespace Nacos {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public Metadata(Metadata other) : this() {
       type_ = other.type_;
+      clientIp_ = other.clientIp_;
       headers_ = other.headers_.Clone();
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
@@ -94,6 +95,17 @@ namespace Nacos {
       get { return type_; }
       set {
         type_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "clientIp" field.</summary>
+    public const int ClientIpFieldNumber = 8;
+    private string clientIp_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string ClientIp {
+      get { return clientIp_; }
+      set {
+        clientIp_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
       }
     }
 
@@ -121,6 +133,7 @@ namespace Nacos {
         return true;
       }
       if (Type != other.Type) return false;
+      if (ClientIp != other.ClientIp) return false;
       if (!Headers.Equals(other.Headers)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
@@ -129,6 +142,7 @@ namespace Nacos {
     public override int GetHashCode() {
       int hash = 1;
       if (Type.Length != 0) hash ^= Type.GetHashCode();
+      if (ClientIp.Length != 0) hash ^= ClientIp.GetHashCode();
       hash ^= Headers.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
@@ -151,6 +165,10 @@ namespace Nacos {
         output.WriteString(Type);
       }
       headers_.WriteTo(output, _map_headers_codec);
+      if (ClientIp.Length != 0) {
+        output.WriteRawTag(66);
+        output.WriteString(ClientIp);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -165,6 +183,10 @@ namespace Nacos {
         output.WriteString(Type);
       }
       headers_.WriteTo(ref output, _map_headers_codec);
+      if (ClientIp.Length != 0) {
+        output.WriteRawTag(66);
+        output.WriteString(ClientIp);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -176,6 +198,9 @@ namespace Nacos {
       int size = 0;
       if (Type.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Type);
+      }
+      if (ClientIp.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(ClientIp);
       }
       size += headers_.CalculateSize(_map_headers_codec);
       if (_unknownFields != null) {
@@ -191,6 +216,9 @@ namespace Nacos {
       }
       if (other.Type.Length != 0) {
         Type = other.Type;
+      }
+      if (other.ClientIp.Length != 0) {
+        ClientIp = other.ClientIp;
       }
       headers_.Add(other.headers_);
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
@@ -215,6 +243,10 @@ namespace Nacos {
             headers_.AddEntriesFrom(input, _map_headers_codec);
             break;
           }
+          case 66: {
+            ClientIp = input.ReadString();
+            break;
+          }
         }
       }
     #endif
@@ -235,6 +267,10 @@ namespace Nacos {
           }
           case 58: {
             headers_.AddEntriesFrom(ref input, _map_headers_codec);
+            break;
+          }
+          case 66: {
+            ClientIp = input.ReadString();
             break;
           }
         }

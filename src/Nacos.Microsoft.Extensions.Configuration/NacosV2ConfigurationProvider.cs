@@ -1,7 +1,7 @@
 ﻿namespace Nacos.Microsoft.Extensions.Configuration
 {
     using global::Microsoft.Extensions.Configuration;
-    using global::Microsoft.Extensions.Logging.Abstractions;
+    using global::Microsoft.Extensions.Logging;
     using global::Microsoft.Extensions.Options;
     using Nacos.Config;
     using Nacos.V2;
@@ -23,6 +23,8 @@
         private readonly ConcurrentDictionary<string, string> _configDict;
 
         private readonly Dictionary<string, MsConfigListener> _listenerDict;
+
+        private readonly ILogger _logger;
 
         public NacosV2ConfigurationProvider(NacosV2ConfigurationSource configurationSource)
         {
@@ -46,14 +48,16 @@
                 ConfigUseRpc = configurationSource.ConfigUseRpc,
             });
 
-            _client = new NacosConfigService(NullLoggerFactory.Instance, options);
+            _logger = Nacos.Microsoft.Extensions.Configuration.NacosLog.NacosLoggerFactory.Instance.CreateLogger<NacosV2ConfigurationProvider>();
+
+            _client = new NacosConfigService(Nacos.Microsoft.Extensions.Configuration.NacosLog.NacosLoggerFactory.Instance, options);
             if (configurationSource.Listeners != null && configurationSource.Listeners.Any())
             {
                 var tasks = new List<Task>();
 
                 foreach (var item in configurationSource.Listeners)
                 {
-                    var listener = new MsConfigListener(item.DataId, item.Group, item.Optional, this);
+                    var listener = new MsConfigListener(item.DataId, item.Group, item.Optional, this, _logger);
 
                     tasks.Add(_client.AddListener(item.DataId, item.Group, listener));
 
@@ -65,7 +69,7 @@
             else
             {
 #pragma warning disable CS0618 // 类型或成员已过时
-                var listener = new MsConfigListener(_configurationSource.DataId, _configurationSource.Group, _configurationSource.Optional, this);
+                var listener = new MsConfigListener(_configurationSource.DataId, _configurationSource.Group, _configurationSource.Optional, this, _logger);
                 _client.AddListener(_configurationSource.DataId, _configurationSource.Group, listener);
                 _listenerDict.Add($"{_configurationSource.DataId}#{_configurationSource.Group}", listener);
 #pragma warning restore CS0618 // 类型或成员已过时
@@ -87,7 +91,7 @@
 
             Task.WaitAll(tasks.ToArray());
 
-            System.Diagnostics.Trace.WriteLine($"Remove All Listeners");
+            _logger?.LogInformation($"Remove All Listeners");
         }
 
         public override void Load()
@@ -116,7 +120,7 @@
                         }
                         catch (Exception ex)
                         {
-                            System.Diagnostics.Trace.WriteLine($"MS Config Query config error, {listener.DataId} ,{ex.Message}");
+                            _logger?.LogWarning(ex, "MS Config Query config error, dataid={0}", listener.DataId);
                             if (!listener.Optional)
                             {
                                 throw;
@@ -142,7 +146,7 @@
                     }
                     catch (Exception ex)
                     {
-                        System.Diagnostics.Trace.WriteLine($"MS Config Query config error, {_configurationSource.DataId} ,{ex.Message}");
+                        _logger?.LogWarning(ex, "MS Config Query config error, dataid={0}", _configurationSource.DataId);
                         if (!_configurationSource.Optional)
                         {
                             throw;
@@ -153,7 +157,7 @@
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Trace.WriteLine($"Load config error, {ex.Message}");
+                _logger?.LogError(ex, "Load config error");
             }
         }
 
@@ -164,21 +168,22 @@
             private bool _optional;
             private NacosV2ConfigurationProvider _provider;
             private string _key;
+            private ILogger _logger;
 
-            internal MsConfigListener(string dataId, string group, bool optional, NacosV2ConfigurationProvider provider)
+            internal MsConfigListener(string dataId, string group, bool optional, NacosV2ConfigurationProvider provider, ILogger logger)
             {
                 this._dataId = dataId;
                 this._group = group;
                 this._optional = optional;
                 this._provider = provider;
+                this._logger = logger;
                 _key = $"{provider._configurationSource.Tenant}#{_group}#{_dataId}";
             }
 
 
             public void ReceiveConfigInfo(string configInfo)
             {
-                System.Diagnostics.Trace.WriteLine($"MsConfigListener Receive ConfigInfo 【{configInfo}】");
-
+                _logger?.LogDebug("MsConfigListener Receive ConfigInfo 【{0}】", configInfo);
                 try
                 {
                     _provider._configDict[_key] = configInfo;
@@ -200,7 +205,7 @@
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Trace.WriteLine($"call back reload config error, {ex.Message}");
+                    _logger?.LogWarning(ex, $"call back reload config error");
                     if (!_optional)
                     {
                         throw;

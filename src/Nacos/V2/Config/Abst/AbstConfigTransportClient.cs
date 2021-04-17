@@ -23,8 +23,8 @@
 
         public string GetTenant() => GetTenantInner();
 
-        public Task<bool> PublishConfigAsync(string dataId, string group, string tenant, string appName, string tag, string betaIps, string content)
-            => PublishConfig(dataId, group, tenant, appName, tag, betaIps, content);
+        public Task<bool> PublishConfigAsync(string dataId, string group, string tenant, string appName, string tag, string betaIps, string content, string type)
+            => PublishConfig(dataId, group, tenant, appName, tag, betaIps, content, type);
 
         public Task<List<string>> QueryConfigAsync(string dataId, string group, string tenat, long readTimeous, bool notify)
             => QueryConfig(dataId, group, tenat, readTimeous, notify);
@@ -40,7 +40,7 @@
 
         protected abstract string GetTenantInner();
 
-        protected abstract Task<bool> PublishConfig(string dataId, string group, string tenant, string appName, string tag, string betaIps, string content);
+        protected abstract Task<bool> PublishConfig(string dataId, string group, string tenant, string appName, string tag, string betaIps, string content, string type);
 
         protected abstract Task<bool> RemoveConfig(string dataId, string group, string tenat, string tag);
 
@@ -70,7 +70,7 @@
                 // _accessKey = stsCredential.accessKeyId;
                 // _secretKey = stsCredential.accessKeySecret;
                 // stsCredential.securityToken
-                spasHeaders["Spas-SecurityToken"] = string.Empty;
+                // spasHeaders["Spas-SecurityToken"] = string.Empty;
             }
 
             if (_accessKey.IsNotNullOrWhiteSpace() && _secretKey.IsNotNullOrWhiteSpace())

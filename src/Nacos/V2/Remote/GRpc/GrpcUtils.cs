@@ -52,6 +52,7 @@
                 payload.Metadata = new Metadata
                 {
                     Type = meta.Type,
+                    ClientIp = NetUtils.LocalIP(),
                 };
 
                 if (request.Headers != null && request.Headers.Any())

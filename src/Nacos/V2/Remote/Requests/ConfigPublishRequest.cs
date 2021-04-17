@@ -37,12 +37,12 @@
         public string Content { get; private set; }
 
 
-        [Newtonsoft.Json.JsonProperty("additonMap")]
-        public Dictionary<string, string> AdditonMap { get; set; } = new Dictionary<string, string>();
+        [Newtonsoft.Json.JsonProperty("additionMap")]
+        public Dictionary<string, string> AdditionMap { get; set; } = new Dictionary<string, string>();
 
         public void PutAdditonalParam(string key, string value)
         {
-            AdditonMap[key] = value;
+            AdditionMap[key] = value;
         }
 
         public override string GetRemoteType() => RemoteRequestType.Req_Config_Publish;

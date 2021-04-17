@@ -55,7 +55,7 @@
 
         protected override string GetTenantInner() => _options.Namespace;
 
-        protected override async Task<bool> PublishConfig(string dataId, string group, string tenant, string appName, string tag, string betaIps, string content)
+        protected override async Task<bool> PublishConfig(string dataId, string group, string tenant, string appName, string tag, string betaIps, string content, string type)
         {
             try
             {
@@ -63,6 +63,7 @@
                 request.PutAdditonalParam("tag", tag);
                 request.PutAdditonalParam("appName", appName);
                 request.PutAdditonalParam("betaIps", betaIps);
+                request.PutAdditonalParam("type", type);
 
                 var response = await RequestProxy(GetOneRunningClient(), request);
 
