@@ -8,21 +8,28 @@
     public class NetUtils
     {
         private static readonly string ResolveFailed = "resolve_failed";
-
+        private static readonly string LocalIpKey = "com.alibaba.nacos.client.naming.local.ip";
         private static string localIp;
 
         public static string LocalIP()
         {
+            if (localIp.IsNotNullOrWhiteSpace()) return localIp;
+
+            var val = EnvUtil.GetEnvValue(LocalIpKey);
+
+            var ip = val.IsNullOrWhiteSpace() ? FindFirstNonLoopbackAddress() : val;
+
+            return localIp = ip;
+        }
+
+        private static string FindFirstNonLoopbackAddress()
+        {
+            var instanceIp = string.Empty;
+
             try
             {
-                if (localIp.IsNotNullOrWhiteSpace()) return localIp;
-
-                var instanceIp = string.Empty;
-
-                // 获取可用网卡
                 var nics = NetworkInterface.GetAllNetworkInterfaces()?.Where(network => network.OperationalStatus == OperationalStatus.Up);
 
-                // 获取所有可用网卡IP信息
                 var ipCollection = nics?.Select(x => x.GetIPProperties())?.SelectMany(x => x.UnicastAddresses);
 
                 foreach (var ipadd in ipCollection)
@@ -38,8 +45,10 @@
             }
             catch
             {
-                return ResolveFailed;
+                // ignore
             }
+
+            return ResolveFailed;
         }
     }
 }

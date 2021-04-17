@@ -27,7 +27,7 @@ option csharp_namespace = "Nacos";
 message Metadata {
 
     string type = 3;
-
+    string clientIp = 8;
     map<string, string> headers = 7;
 }
 
