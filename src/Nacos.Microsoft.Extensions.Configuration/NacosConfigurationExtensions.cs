@@ -1,5 +1,6 @@
 ﻿namespace Microsoft.Extensions.Configuration
 {
+    using Microsoft.Extensions.Logging;
     using Nacos.Config;
     using Nacos.Microsoft.Extensions.Configuration;
     using System;
@@ -40,11 +41,13 @@
         /// <param name="builder">IConfigurationBuilder</param>
         /// <param name="configuration">Configuration binding nacos configuration source</param>
         /// <param name="parser">The parser.</param>
+        /// <param name="logAction">The logging action.</param>
         /// <returns>IConfigurationBuilder</returns>
         public static IConfigurationBuilder AddNacosConfiguration(
            this IConfigurationBuilder builder,
            IConfiguration configuration,
-           INacosConfigurationParser parser = null)
+           INacosConfigurationParser parser = null,
+           Action<ILoggingBuilder> logAction = null)
         {
             if (builder == null)
             {
@@ -59,6 +62,7 @@
             var source = new NacosConfigurationSource();
             configuration.Bind(source);
             source.NacosConfigurationParser = parser ?? DefaultJsonConfigurationStringParser.Instance;
+            source.LoggingBuilder = logAction;
 
             return builder.Add(source);
         }
@@ -97,11 +101,13 @@
         /// <param name="builder">IConfigurationBuilder</param>
         /// <param name="configuration">Configuration binding nacos configuration source</param>
         /// <param name="parser">The parser.</param>
+        /// <param name="logAction">The logging action.</param>
         /// <returns>IConfigurationBuilder</returns>
         public static IConfigurationBuilder AddNacosV2Configuration(
            this IConfigurationBuilder builder,
            IConfiguration configuration,
-           INacosConfigurationParser parser = null)
+           INacosConfigurationParser parser = null,
+           Action<ILoggingBuilder> logAction = null)
         {
             if (builder == null)
             {
@@ -116,6 +122,7 @@
             var source = new NacosV2ConfigurationSource();
             configuration.Bind(source);
             source.NacosConfigurationParser = parser ?? DefaultJsonConfigurationStringParser.Instance;
+            source.LoggingBuilder = logAction;
 
             return builder.Add(source);
         }

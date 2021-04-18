@@ -2,25 +2,14 @@
 {
     using global::Microsoft.Extensions.DependencyInjection;
     using global::Microsoft.Extensions.Logging;
+    using System;
 
     public class NacosLoggerFactory : ILoggerFactory
     {
-        public NacosLoggerFactory()
-        {
-        }
-
-        static NacosLoggerFactory()
-        {
-            _factory = GetLoggerFactory();
-        }
-
-        public static readonly NacosLoggerFactory Instance = new NacosLoggerFactory();
-
         public ILogger CreateLogger(string name)
         {
             return _factory.CreateLogger(name);
         }
-
 
         public void AddProvider(ILoggerProvider provider)
         {
@@ -31,14 +20,32 @@
             _factory?.Dispose();
         }
 
-        private static ILoggerFactory _factory;
+        public static NacosLoggerFactory GetInstance(Action<ILoggingBuilder> builder = null)
+        {
+            if (_loggingFactory != null) return _loggingFactory;
 
-        private static ILoggerFactory GetLoggerFactory()
+            _factory = GetLoggerFactory(builder);
+            var obj = new NacosLoggerFactory();
+            return _loggingFactory = obj;
+        }
+
+        private static ILoggerFactory _factory;
+        private static NacosLoggerFactory _loggingFactory;
+
+        private static ILoggerFactory GetLoggerFactory(Action<ILoggingBuilder> builder = null)
         {
             if (_factory != null) return _factory;
 
             var serviceCollection = new ServiceCollection();
-            serviceCollection.AddLogging(x => x.AddConsole());
+            if (builder != null)
+            {
+                serviceCollection.AddLogging(builder);
+            }
+            else
+            {
+                serviceCollection.AddLogging(x => x.AddConsole());
+            }
+
             ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
             ILoggerFactory loggerFactory = serviceProvider.GetService<ILoggerFactory>();
             return loggerFactory;
