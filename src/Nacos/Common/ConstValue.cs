@@ -11,7 +11,7 @@
         /// nacos csharp client version
         /// public const string ClientVersion = "Nacos-Java-Client:v1.3.0";
         /// </summary>
-        public const string ClientVersion = "Nacos-CSharp-Client:v1.0.3";
+        public const string ClientVersion = "Nacos-CSharp-Client:v1.1.0";
 
         /// <summary>
         /// nacos request module
