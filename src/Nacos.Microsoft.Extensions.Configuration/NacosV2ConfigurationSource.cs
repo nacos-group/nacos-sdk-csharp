@@ -1,7 +1,10 @@
 ﻿namespace Nacos.Microsoft.Extensions.Configuration
 {
     using global::Microsoft.Extensions.Configuration;
+    using global::Microsoft.Extensions.DependencyInjection;
+    using global::Microsoft.Extensions.Logging;
     using Nacos.Config;
+    using System;
     using System.Collections.Generic;
 
     public class NacosV2ConfigurationSource : Nacos.V2.NacosSdkOptions, IConfigurationSource
@@ -38,6 +41,11 @@
         /// The configuration parser, default is json
         /// </summary>
         public INacosConfigurationParser NacosConfigurationParser { get; set; }
+
+        /// <summary>
+        /// The logging builder, default will use AddConsole
+        /// </summary>
+        public Action<ILoggingBuilder> LoggingBuilder { get; set; }
 
         /// <summary>
         /// Build the provider

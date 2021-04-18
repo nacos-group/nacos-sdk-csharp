@@ -1,7 +1,7 @@
 ﻿namespace Nacos.Microsoft.Extensions.Configuration
 {
     using global::Microsoft.Extensions.Configuration;
-    using global::Microsoft.Extensions.Logging.Abstractions;
+    using global::Microsoft.Extensions.Logging;
     using Nacos.Config;
     using System;
     using System.Collections.Concurrent;
@@ -19,13 +19,18 @@
 
         private readonly ConcurrentDictionary<string, string> _configDict;
 
+        private readonly ILogger _logger;
+
         public NacosConfigurationProvider(NacosConfigurationSource configurationSource)
         {
             _configurationSource = configurationSource;
             _parser = configurationSource.NacosConfigurationParser;
             _configDict = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-            _client = new NacosMsConfigClient(NullLoggerFactory.Instance, new NacosOptions
+            var nacosLoggerFactory = Nacos.Microsoft.Extensions.Configuration.NacosLog.NacosLoggerFactory.GetInstance(configurationSource.LoggingBuilder);
+            _logger = nacosLoggerFactory.CreateLogger<NacosConfigurationProvider>();
+
+            _client = new NacosMsConfigClient(nacosLoggerFactory, new NacosOptions
             {
                 ServerAddresses = configurationSource.ServerAddresses,
                 Namespace = configurationSource.Tenant,
@@ -100,7 +105,7 @@
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Trace.WriteLine($"call back reload config error, {ex.Message}");
+                _logger?.LogWarning(ex, $"call back reload config error");
                 if (!optional)
                 {
                     throw;
@@ -138,7 +143,7 @@
                         }
                         catch (Exception ex)
                         {
-                            System.Diagnostics.Trace.WriteLine($"MS Config Query config error, {listener.DataId} ,{ex.Message}");
+                            _logger?.LogWarning(ex, "MS Config Query config error, dataid={0}, group={1}, tenant={2}", listener.DataId, listener.Group, listener.Tenant);
                             if (!listener.Optional)
                             {
                                 throw;
@@ -168,7 +173,7 @@
                     }
                     catch (Exception ex)
                     {
-                        System.Diagnostics.Trace.WriteLine($"MS Config Query config error, {_configurationSource.DataId} ,{ex.Message}");
+                        _logger?.LogWarning(ex, "MS Config Query config error, dataid={0}, group={1}, tenant={2}", _configurationSource.DataId, _configurationSource.Group, _configurationSource.Tenant);
                         if (!_configurationSource.Optional)
                         {
                             throw;
@@ -179,7 +184,7 @@
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Trace.WriteLine($"Load config error, {ex.Message}");
+                _logger?.LogError(ex, "Load config error");
             }
         }
     }

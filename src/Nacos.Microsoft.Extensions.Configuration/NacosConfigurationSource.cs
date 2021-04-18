@@ -1,7 +1,9 @@
 ﻿namespace Nacos.Microsoft.Extensions.Configuration
 {
     using global::Microsoft.Extensions.Configuration;
+    using global::Microsoft.Extensions.Logging;
     using Nacos.Config;
+    using System;
     using System.Collections.Generic;
 
     public class NacosConfigurationSource : IConfigurationSource
@@ -11,7 +13,6 @@
         /// </summary>
         public List<string> ServerAddresses { get; set; }
 
-
         /// <summary>
         /// The configuration listeners
         /// </summary>
@@ -20,19 +21,19 @@
         /// <summary>
         /// Determines if the Nacos Server is optional
         /// </summary>
-        [System.Obsolete("please use Listeners to configure")]
+        [Obsolete("please use Listeners to configure")]
         public bool Optional { get; set; }
 
         /// <summary>
         /// Configuration ID
         /// </summary>
-        [System.Obsolete("please use Listeners to configure")]
+        [Obsolete("please use Listeners to configure")]
         public string DataId { get; set; }
 
         /// <summary>
         /// Configuration group
         /// </summary>
-        [System.Obsolete("please use Listeners to configure")]
+        [Obsolete("please use Listeners to configure")]
         public string Group { get; set; }
 
         /// <summary>
@@ -78,6 +79,11 @@
         /// The configuration parser, default is json
         /// </summary>
         public INacosConfigurationParser NacosConfigurationParser { get; set; }
+
+        /// <summary>
+        /// The logging builder, default will use AddConsole
+        /// </summary>
+        public Action<ILoggingBuilder> LoggingBuilder { get; set; }
 
         /// <summary>
         /// Build the provider

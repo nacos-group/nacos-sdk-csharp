@@ -48,9 +48,9 @@
                 ConfigUseRpc = configurationSource.ConfigUseRpc,
             });
 
-            _logger = Nacos.Microsoft.Extensions.Configuration.NacosLog.NacosLoggerFactory.Instance.CreateLogger<NacosV2ConfigurationProvider>();
-
-            _client = new NacosConfigService(Nacos.Microsoft.Extensions.Configuration.NacosLog.NacosLoggerFactory.Instance, options);
+            var nacosLoggerFactory = Nacos.Microsoft.Extensions.Configuration.NacosLog.NacosLoggerFactory.GetInstance(configurationSource.LoggingBuilder);
+            _logger = nacosLoggerFactory.CreateLogger<NacosV2ConfigurationProvider>();
+            _client = new NacosConfigService(nacosLoggerFactory, options);
             if (configurationSource.Listeners != null && configurationSource.Listeners.Any())
             {
                 var tasks = new List<Task>();
@@ -68,11 +68,11 @@
             }
             else
             {
-#pragma warning disable CS0618 // 类型或成员已过时
+#pragma warning disable CS0618
                 var listener = new MsConfigListener(_configurationSource.DataId, _configurationSource.Group, _configurationSource.Optional, this, _logger);
                 _client.AddListener(_configurationSource.DataId, _configurationSource.Group, listener);
                 _listenerDict.Add($"{_configurationSource.DataId}#{_configurationSource.Group}", listener);
-#pragma warning restore CS0618 // 类型或成员已过时
+#pragma warning restore CS0618
             }
         }
 
@@ -120,7 +120,7 @@
                         }
                         catch (Exception ex)
                         {
-                            _logger?.LogWarning(ex, "MS Config Query config error, dataid={0}", listener.DataId);
+                            _logger?.LogWarning(ex, "MS Config Query config error, dataid={0}, group={1}, tenant={2}", listener.DataId, listener.Group, listener.Tenant);
                             if (!listener.Optional)
                             {
                                 throw;
@@ -146,7 +146,7 @@
                     }
                     catch (Exception ex)
                     {
-                        _logger?.LogWarning(ex, "MS Config Query config error, dataid={0}", _configurationSource.DataId);
+                        _logger?.LogWarning(ex, "MS Config Query config error, dataid={0}, group={1}, tenant={2}", _configurationSource.DataId, _configurationSource.Group, _configurationSource.Tenant);
                         if (!_configurationSource.Optional)
                         {
                             throw;

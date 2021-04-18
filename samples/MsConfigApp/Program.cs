@@ -33,7 +33,7 @@ namespace MsConfigApp
             try
             {
                 Log.ForContext<Program>().Information("Application starting...");
-                CreateHostBuilder(args).Build().Run();
+                CreateHostBuilder(args, Log.Logger).Build().Run();
             }
             catch (System.Exception ex)
             {
@@ -45,7 +45,7 @@ namespace MsConfigApp
             }
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
+        public static IHostBuilder CreateHostBuilder(string[] args, Serilog.ILogger logger) =>
             Host.CreateDefaultBuilder(args)
                  .ConfigureAppConfiguration((context, builder) =>
                  {
@@ -60,7 +60,7 @@ namespace MsConfigApp
                      // read configuration from config files
                      // default is json
                      // builder.AddNacosConfiguration(c.GetSection("NacosConfig"));
-                     builder.AddNacosV2Configuration(c.GetSection("NacosConfig"));
+                     builder.AddNacosV2Configuration(c.GetSection("NacosConfig"), logAction: x => x.AddSerilog(logger));
 
                      // specify ini or yaml
                      // builder.AddNacosConfiguration(c.GetSection("NacosConfig"), Nacos.IniParser.IniConfigurationStringParser.Instance);
