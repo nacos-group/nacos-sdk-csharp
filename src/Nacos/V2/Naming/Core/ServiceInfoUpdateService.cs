@@ -9,7 +9,6 @@
     using System.Collections.Concurrent;
     using System.Linq;
     using System.Threading;
-    using System.Threading.Tasks;
 
     public class ServiceInfoUpdateService
     {
@@ -18,7 +17,6 @@
         private static readonly int DEFAULT_UPDATE_CACHE_TIME_MULTIPLE = 6;
 
         private ConcurrentDictionary<string, Timer> _timerMap = new ConcurrentDictionary<string, Timer>();
-        private ConcurrentDictionary<string, Task> _updatingMap = new ConcurrentDictionary<string, Task>();
 
         private readonly ILogger _logger;
 
@@ -41,39 +39,11 @@
         {
             string serviceKey = ServiceInfo.GetKey(NamingUtils.GetGroupedName(serviceName, groupName), clusters);
 
-            var task = new TaskCompletionSource<bool>();
-            if (_updatingMap.TryAdd(serviceKey, task.Task))
-            {
-                _ = RunUpdateTask(serviceName, groupName, clusters);
-                task.SetResult(true);
-            }
-            else
-            {
-                // hold a moment waiting for update finish
-                if (_updatingMap.TryGetValue(serviceKey, out var waitTask)) waitTask.Wait(DEFAULT_DELAY);
-            }
+            if (_timerMap.TryGetValue(serviceKey, out _)) return;
 
-            if (_timerMap.ContainsKey(serviceKey)) return;
+            var task = UpdateTask(serviceName, groupName, clusters);
 
-            var t = UpdateTask(serviceName, groupName, clusters);
-            _timerMap.TryAdd(serviceKey, t);
-        }
-
-        private async Task RunUpdateTask(string serviceName, string groupName, string clusters)
-        {
-            try
-            {
-                var serviceObj = await namingClientProxy.QueryInstancesOfService(serviceName, groupName, clusters, 0, false);
-
-                if (serviceObj != null)
-                {
-                    serviceInfoHolder.ProcessServiceInfo(serviceObj);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger?.LogWarning(ex, "[NA] failed to update serviceName: {0}", NamingUtils.GetGroupedName(serviceName, groupName));
-            }
+            _timerMap.TryAdd(serviceKey, task);
         }
 
         private Timer UpdateTask(string serviceName, string groupName, string clusters)
@@ -81,76 +51,74 @@
             return new Timer(
                 async x =>
             {
-                var state = x as UpdateState;
+                var state = x as UpdateModel;
 
-                int delayTime = -1;
-                long lastRefTime = long.MaxValue;
-                int failCount = 0;
-                var serviceKey = ServiceInfo.GetKey(NamingUtils.GetGroupedName(state.ServiceName, state.GroupName), state.Clusters);
-                _timerMap.TryGetValue(serviceKey, out var self);
+                int delayTime = DEFAULT_DELAY;
+
                 try
                 {
-                    if (!changeNotifier.IsSubscribed(state.GroupName, state.ServiceName, state.Clusters) && !_updatingMap.ContainsKey(serviceKey))
+                    if (!changeNotifier.IsSubscribed(state.GroupName, state.ServiceName, state.Clusters) && !_timerMap.ContainsKey(state.ServiceKey))
                     {
-                        _logger?.LogInformation("update task is stopped, service:{0}, clusters:{1}", NamingUtils.GetGroupedName(state.ServiceName, state.GroupName), state.Clusters);
+                        _logger?.LogInformation("update task is stopped, service:{0}, clusters:{1}", state.GroupedServiceName, state.Clusters);
                         return;
                     }
 
-                    if (!serviceInfoHolder.GetServiceInfoMap().TryGetValue(serviceKey, out var serviceObj))
+                    if (!serviceInfoHolder.GetServiceInfoMap().TryGetValue(state.ServiceKey, out var serviceObj))
                     {
                         serviceObj = await namingClientProxy.QueryInstancesOfService(state.ServiceName, state.GroupName, state.Clusters, 0, false);
+
                         serviceInfoHolder.ProcessServiceInfo(serviceObj);
                         delayTime = DEFAULT_DELAY;
-                        lastRefTime = serviceObj.LastRefTime;
+                        state.LastRefTime = serviceObj.LastRefTime;
                         return;
                     }
 
-                    if (serviceObj.LastRefTime <= lastRefTime)
+                    if (serviceObj.LastRefTime <= state.LastRefTime)
                     {
                         serviceObj = await namingClientProxy.QueryInstancesOfService(serviceName, groupName, clusters, 0, false);
                         serviceInfoHolder.ProcessServiceInfo(serviceObj);
                     }
 
-                    lastRefTime = serviceObj.LastRefTime;
-                    if (serviceObj.Hosts == null || serviceObj.Hosts.Any())
+                    state.LastRefTime = serviceObj.LastRefTime;
+                    if (serviceObj.Hosts == null || !serviceObj.Hosts.Any())
                     {
-                        IncFailCount(ref failCount);
+                        state.IncFailCount();
                         return;
                     }
 
                     delayTime = (int)serviceObj.CacheMillis * DEFAULT_UPDATE_CACHE_TIME_MULTIPLE;
-                    ResetFailCount(ref failCount);
+                    state.ResetFailCount();
                 }
                 catch (Exception ex)
                 {
-                    IncFailCount(ref failCount);
+                    state.IncFailCount();
                     _logger?.LogWarning(ex, "[NA] failed to update serviceName: {0}", NamingUtils.GetGroupedName(state.ServiceName, state.GroupName));
                 }
                 finally
                 {
-                    self?.Change(Math.Min(delayTime << failCount, DEFAULT_DELAY * 60), Timeout.Infinite);
+                    _timerMap.TryGetValue(state.ServiceKey, out var self);
+                    var due = Math.Min(delayTime << state.FailCount, DEFAULT_DELAY * 60);
+
+                    // _logger?.LogInformation("update service info due = {0}, {1}, {2}, {3}", due, delayTime << state.FailCount, delayTime, state.FailCount);
+                    self?.Change(due, Timeout.Infinite);
                 }
-            }, new UpdateState(serviceName, groupName, clusters), DEFAULT_DELAY * 60, Timeout.Infinite);
+            }, new UpdateModel(serviceName, groupName, clusters), DEFAULT_DELAY, Timeout.Infinite);
         }
-
-        private void IncFailCount(ref int failCount)
-        {
-            int limit = 6;
-            if (failCount == limit) return;
-
-            failCount++;
-        }
-
-        private void ResetFailCount(ref int failCount) => failCount = 0;
 
         public void StopUpdateIfContain(string serviceName, string groupName, string clusters)
         {
             string serviceKey = ServiceInfo.GetKey(NamingUtils.GetGroupedName(serviceName, groupName), clusters);
 
-            _updatingMap.TryRemove(serviceKey, out _);
+            if (_timerMap.TryRemove(serviceKey, out var t))
+            {
+                t?.Change(Timeout.Infinite, Timeout.Infinite);
+                t?.Dispose();
+
+                _logger?.LogInformation("stop update task, servicekey:{0}", serviceKey);
+            }
         }
 
-        public class UpdateState
+        public class UpdateModel
         {
             public string ServiceName { get; set; }
 
@@ -160,12 +128,30 @@
 
             public long LastRefTime { get; set; } = long.MaxValue;
 
-            public UpdateState(string serviceName, string groupName, string clusters)
+            public int FailCount { get; set; }
+
+            public string ServiceKey { get; set; }
+
+            public string GroupedServiceName { get; set; }
+
+            public UpdateModel(string serviceName, string groupName, string clusters)
             {
                 this.ServiceName = serviceName;
                 this.GroupName = groupName;
                 this.Clusters = clusters;
+                this.GroupedServiceName = NamingUtils.GetGroupedName(serviceName, groupName);
+                this.ServiceKey = ServiceInfo.GetKey(GroupedServiceName, clusters);
             }
+
+            internal void IncFailCount()
+            {
+                int limit = 6;
+                if (FailCount == limit) return;
+
+                FailCount++;
+            }
+
+            internal void ResetFailCount() => FailCount = 0;
         }
     }
 }
