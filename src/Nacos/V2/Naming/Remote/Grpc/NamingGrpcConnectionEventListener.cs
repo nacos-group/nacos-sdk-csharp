@@ -31,6 +31,8 @@
 
         private void RedoRegisterEachService()
         {
+            _logger?.LogInformation("Grpc re-connect, redo register services");
+
             foreach (var item in _registeredInstanceCached)
             {
                 var serviceName = NamingUtils.GetServiceName(item.Key);
@@ -57,6 +59,8 @@
 
         private void RedoSubscribe()
         {
+            _logger?.LogInformation("Grpc re-connect, redo subscribe services");
+
             foreach (var item in _subscribes)
             {
                 var serviceInfo = ServiceInfo.FromKey(item);
@@ -74,6 +78,7 @@
 
         public void OnDisConnected()
         {
+            _logger?.LogWarning("Grpc connection disconnect");
         }
 
         internal void RemoveSubscriberForRedo(string fullServiceName, string clusters)
