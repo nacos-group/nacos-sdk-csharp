@@ -1,6 +1,7 @@
 ﻿namespace Nacos.V2.Naming.Core
 {
     using Microsoft.Extensions.Logging;
+    using Nacos.V2.Common;
     using Nacos.V2.Naming.Cache;
     using Nacos.V2.Utils;
     using System;
@@ -33,20 +34,33 @@
 
         public int GetUdpPort() => _port;
 
+        private string GetPushReceiverUdpPort() => EnvUtil.GetEnvValue(PropertyKeyConst.PUSH_RECEIVER_UDP_PORT);
+
         private async Task RunAsync()
         {
-            for (int i = 0; i < 3; i++)
+            string udpPort = GetPushReceiverUdpPort();
+
+            if (udpPort.IsNotNullOrWhiteSpace())
             {
-                try
+                _port = Convert.ToInt32(udpPort);
+                _udpClient = new UdpClient(_port);
+                _logger?.LogInformation($"start up udp server....., port: {_port}");
+            }
+            else
+            {
+                for (int i = 0; i < 3; i++)
                 {
-                    _port = new Random((int)DateTimeOffset.Now.ToUnixTimeSeconds()).Next(0, 1000) + 54951;
-                    _udpClient = new UdpClient(_port);
-                    _logger?.LogInformation($"start up udp server....., port: {_port}");
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    _logger?.LogError(ex, "failed to start udp server {0}, {1}", i + 1, _port);
+                    try
+                    {
+                        _port = new Random((int)DateTimeOffset.Now.ToUnixTimeSeconds()).Next(0, 1000) + 54951;
+                        _udpClient = new UdpClient(_port);
+                        _logger?.LogInformation($"start up udp server....., port: {_port}");
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger?.LogError(ex, "failed to start udp server {0}, {1}", i + 1, _port);
+                    }
                 }
             }
 
