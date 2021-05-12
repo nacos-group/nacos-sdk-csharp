@@ -1,6 +1,7 @@
 ﻿namespace Nacos.V2.Config.Abst
 {
     using Nacos.V2.Common;
+    using Nacos.V2.Config.FilterImpl;
     using Nacos.V2.Config.Impl;
     using Nacos.V2.Security;
     using Nacos.V2.Utils;
@@ -23,10 +24,10 @@
 
         public string GetTenant() => GetTenantInner();
 
-        public Task<bool> PublishConfigAsync(string dataId, string group, string tenant, string appName, string tag, string betaIps, string content, string type)
-            => PublishConfig(dataId, group, tenant, appName, tag, betaIps, content, type);
+        public Task<bool> PublishConfigAsync(string dataId, string group, string tenant, string appName, string tag, string betaIps, string content, string encryptedDataKey, string casMd5, string type)
+            => PublishConfig(dataId, group, tenant, appName, tag, betaIps, content, encryptedDataKey, casMd5, type);
 
-        public Task<List<string>> QueryConfigAsync(string dataId, string group, string tenat, long readTimeous, bool notify)
+        public Task<ConfigResponse> QueryConfigAsync(string dataId, string group, string tenat, long readTimeous, bool notify)
             => QueryConfig(dataId, group, tenat, readTimeous, notify);
 
         public Task<bool> RemoveConfigAsync(string dataId, string group, string tenat, string tag)
@@ -40,11 +41,11 @@
 
         protected abstract string GetTenantInner();
 
-        protected abstract Task<bool> PublishConfig(string dataId, string group, string tenant, string appName, string tag, string betaIps, string content, string type);
+        protected abstract Task<bool> PublishConfig(string dataId, string group, string tenant, string appName, string tag, string betaIps, string content, string encryptedDataKey, string casMd5, string type);
 
         protected abstract Task<bool> RemoveConfig(string dataId, string group, string tenat, string tag);
 
-        protected abstract Task<List<string>> QueryConfig(string dataId, string group, string tenat, long readTimeous, bool notify);
+        protected abstract Task<ConfigResponse> QueryConfig(string dataId, string group, string tenat, long readTimeous, bool notify);
 
         protected abstract Task RemoveCache(string dataId, string group);
 

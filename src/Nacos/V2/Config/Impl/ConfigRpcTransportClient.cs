@@ -3,6 +3,7 @@
     using Microsoft.Extensions.Logging;
     using Nacos.V2.Common;
     using Nacos.V2.Config.Abst;
+    using Nacos.V2.Config.FilterImpl;
     using Nacos.V2.Exceptions;
     using Nacos.V2.Remote;
     using Nacos.V2.Remote.Requests;
@@ -55,7 +56,7 @@
 
         protected override string GetTenantInner() => _options.Namespace;
 
-        protected override async Task<bool> PublishConfig(string dataId, string group, string tenant, string appName, string tag, string betaIps, string content, string type)
+        protected override async Task<bool> PublishConfig(string dataId, string group, string tenant, string appName, string tag, string betaIps, string content, string encryptedDataKey, string casMd5, string type)
         {
             try
             {
@@ -76,7 +77,7 @@
             }
         }
 
-        protected override async Task<List<string>> QueryConfig(string dataId, string group, string tenant, long readTimeous, bool notify)
+        protected override async Task<ConfigResponse> QueryConfig(string dataId, string group, string tenant, long readTimeous, bool notify)
         {
             try
             {
@@ -85,21 +86,28 @@
 
                 var response = (ConfigQueryResponse)await RequestProxy(GetOneRunningClient(), request);
 
-                string[] ct = new string[2];
+                ConfigResponse configResponse = new ConfigResponse();
 
                 if (response.IsSuccess())
                 {
                     await FileLocalConfigInfoProcessor.SaveSnapshotAsync(this.GetName(), dataId, group, tenant, response.Content);
 
-                    ct[0] = response.Content;
-                    ct[1] = response.ContentType.IsNotNullOrWhiteSpace() ? response.ContentType : "text";
+                    configResponse.SetContent(response.Content);
+                    configResponse.SetConfigType(response.ContentType.IsNotNullOrWhiteSpace() ? response.ContentType : "text");
 
-                    return ct.ToList();
+                    string encryptedDataKey = response.EncryptedDataKey;
+
+                    // TODO: LocalEncryptedDataKeyProcessor.saveEncryptDataKeySnapshot(agent.getName(), dataId, group, tenant, encryptedDataKey);
+                    configResponse.SetEncryptedDataKey(encryptedDataKey);
+
+                    return configResponse;
                 }
                 else if (response.ErrorCode.Equals(ConfigQueryResponse.CONFIG_NOT_FOUND))
                 {
                     await FileLocalConfigInfoProcessor.SaveSnapshotAsync(this.GetName(), dataId, group, tenant, null);
-                    return ct.ToList();
+
+                    // TODO: LocalEncryptedDataKeyProcessor.saveEncryptDataKeySnapshot(agent.getName(), dataId, group, tenant, null);
+                    return configResponse;
                 }
                 else if (response.ErrorCode.Equals(ConfigQueryResponse.CONFIG_QUERY_CONFLICT))
                 {
@@ -428,9 +436,10 @@
         {
             try
             {
-                var ct = await GetServerConfig(cacheData.DataId, cacheData.Group, cacheData.Tenant, 3000L, notify);
-                cacheData.SetContent(ct[0]);
-                if (ct.Count > 1 && ct[1] != null) cacheData.Type = ct[1];
+                var resp = await GetServerConfig(cacheData.DataId, cacheData.Group, cacheData.Tenant, 3000L, notify);
+                cacheData.SetContent(resp.GetContent());
+
+                if (resp.GetConfigType().IsNotNullOrWhiteSpace()) cacheData.Type = resp.GetConfigType();
 
                 cacheData.CheckListenerMd5();
             }
@@ -440,7 +449,7 @@
             }
         }
 
-        public async Task<List<string>> GetServerConfig(string dataId, string group, string tenant, long readTimeout, bool notify)
+        public async Task<ConfigResponse> GetServerConfig(string dataId, string group, string tenant, long readTimeout, bool notify)
         {
             if (group.IsNullOrWhiteSpace()) group = Constants.DEFAULT_GROUP;
 

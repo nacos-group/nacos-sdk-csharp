@@ -1,5 +1,6 @@
 ﻿namespace Nacos.V2.Config.Abst
 {
+    using Nacos.V2.Config.FilterImpl;
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
@@ -25,11 +26,11 @@
 
         bool GetIsHealthServer();
 
-        Task<bool> PublishConfigAsync(string dataId, string group, string tenant, string appName, string tag, string betaIps, string content, string type);
+        Task<bool> PublishConfigAsync(string dataId, string group, string tenant, string appName, string tag, string betaIps, string content, string encryptedDataKey, string casMd5, string type);
 
         Task<bool> RemoveConfigAsync(string dataId, string group, string tenat, string tag);
 
-        Task<List<string>> QueryConfigAsync(string dataId, string group, string tenat, long readTimeous, bool notify);
+        Task<ConfigResponse> QueryConfigAsync(string dataId, string group, string tenat, long readTimeous, bool notify);
 
         Task RemoveCacheAsync(string dataId, string group);
 

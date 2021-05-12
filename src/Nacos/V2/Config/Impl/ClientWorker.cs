@@ -140,10 +140,10 @@
             => await _agent.RemoveConfigAsync(dataId, group, tenant, tag);
 
         public async Task<bool> PublishConfig(string dataId, string group, string tenant, string appName, string tag, string betaIps,
-            string content, string type)
-            => await _agent.PublishConfigAsync(dataId, group, tenant, appName, tag, betaIps, content, type);
+            string content, string encryptedDataKey, string casMd5, string type)
+            => await _agent.PublishConfigAsync(dataId, group, tenant, appName, tag, betaIps, content, encryptedDataKey, casMd5, type);
 
-        public Task<List<string>> GetServerConfig(string dataId, string group, string tenant, long readTimeout, bool notify)
+        public Task<ConfigResponse> GetServerConfig(string dataId, string group, string tenant, long readTimeout, bool notify)
         {
             if (group.IsNullOrWhiteSpace()) group = Constants.DEFAULT_GROUP;
 

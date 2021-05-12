@@ -90,7 +90,7 @@
             return Task.CompletedTask;
         }
 
-        private async Task<List<string>> GetServerConfig(string dataId, string group, string tenant, long readTimeout, bool notify)
+        private async Task<ConfigResponse> GetServerConfig(string dataId, string group, string tenant, long readTimeout, bool notify)
         {
             if (group.IsNullOrWhiteSpace()) group = Constants.DEFAULT_GROUP;
 
@@ -230,7 +230,7 @@
 
         protected override string GetTenantInner() => _agent.GetTenant();
 
-        protected override async Task<bool> PublishConfig(string dataId, string group, string tenant, string appName, string tag, string betaIps, string content, string type)
+        protected override async Task<bool> PublishConfig(string dataId, string group, string tenant, string appName, string tag, string betaIps, string content, string encryptedDataKey, string casMd5, string type)
         {
             group = ParamUtils.Null2DefaultGroup(group);
             ParamUtils.CheckParam(dataId, group, content);
@@ -299,9 +299,9 @@
             }
         }
 
-        protected override async Task<List<string>> QueryConfig(string dataId, string group, string tenant, long readTimeout, bool notify)
+        protected override async Task<ConfigResponse> QueryConfig(string dataId, string group, string tenant, long readTimeout, bool notify)
         {
-            string[] ct = new string[2];
+            ConfigResponse resp = new ConfigResponse();
             if (group.IsNullOrWhiteSpace()) group = Constants.DEFAULT_GROUP;
 
             HttpResponseMessage result = null;
@@ -341,24 +341,25 @@
                     var content = await result.Content.ReadAsStringAsync();
 
                     await FileLocalConfigInfoProcessor.SaveSnapshotAsync(_agent.GetName(), dataId, group, tenant, content);
-                    ct[0] = content;
+
+                    resp.SetContent(content);
 
                     if (result.Headers.TryGetValues(Constants.CONFIG_TYPE, out var values))
                     {
                         var t = values.FirstOrDefault();
 
-                        if (t.IsNotNullOrWhiteSpace()) ct[1] = t;
-                        else ct[1] = "text";
+                        if (t.IsNotNullOrWhiteSpace()) resp.SetConfigType(t);
+                        else resp.SetConfigType("text");
                     }
                     else
                     {
-                        ct[1] = "text";
+                        resp.SetConfigType("text");
                     }
 
-                    return ct.ToList();
+                    return resp;
                 case System.Net.HttpStatusCode.NotFound:
                     await FileLocalConfigInfoProcessor.SaveSnapshotAsync(_agent.GetName(), dataId, group, tenant, null);
-                    return ct.ToList();
+                    return resp;
                 case System.Net.HttpStatusCode.Conflict:
                     {
                         _logger?.LogError(
@@ -629,16 +630,16 @@
 
                         try
                         {
-                            List<string> ct = await GetServerConfig(dataId, group, tenant, 3000L, true);
+                            var resp = await GetServerConfig(dataId, group, tenant, 3000L, true);
 
                             if (_cacheMap.TryGetValue(GroupKey.GetKeyTenant(dataId, group, tenant), out var cache))
                             {
-                                cache.SetContent(ct[0]);
+                                cache.SetContent(resp.GetContent());
 
-                                if (ct[1] != null) cache.Type = ct[1];
+                                if (resp.GetConfigType().IsNotNullOrWhiteSpace()) cache.Type = resp.GetConfigType();
 
                                 _logger?.LogInformation("[{0}] [data-received] dataId={1}, group={2}, tenant={3}, md5={4}, content={5}, type={6}", _agent.GetName(), dataId, group, tenant, cache.Md5,
-                                       ContentUtils.TruncateContent(ct[0]), ct[1]);
+                                       ContentUtils.TruncateContent(resp.GetContent()), resp.GetConfigType());
                             }
                         }
                         catch (Exception ioe)

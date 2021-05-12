@@ -2,7 +2,6 @@
 {
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
-    using Nacos.V2.Common;
     using Nacos.V2.Config.FilterImpl;
     using Nacos.V2.Config.Impl;
     using Nacos.V2.Config.Utils;
@@ -45,7 +44,13 @@
             => await PublishConfig(dataId, group, content, "text");
 
         public async Task<bool> PublishConfig(string dataId, string group, string content, string type)
-            => await PublishConfigInner(_namespace, dataId, group, null, null, null, content, type);
+            => await PublishConfigInner(_namespace, dataId, group, null, null, null, content, type, null);
+
+        public async Task<bool> PublishConfigCas(string dataId, string group, string content, string casMd5)
+            => await PublishConfigInner(_namespace, dataId, group, null, null, null, content, "text", casMd5);
+
+        public async Task<bool> PublishConfigCas(string dataId, string group, string content, string casMd5, string type)
+            => await PublishConfigInner(_namespace, dataId, group, null, null, null, content, type, casMd5);
 
         public async Task<bool> RemoveConfig(string dataId, string group)
             => await RemoveConfigInner(_namespace, dataId, group, null);
@@ -65,6 +70,8 @@
             cr.SetTenant(tenant);
             cr.SetGroup(group);
 
+            string encryptedDataKey = string.Empty;
+
             // 优先使用本地配置
             string content = await FileLocalConfigInfoProcessor.GetFailoverAsync(_worker.GetAgentName(), dataId, group, tenant);
             if (content != null)
@@ -74,6 +81,11 @@
                     _worker.GetAgentName(), dataId, group, tenant, ContentUtils.TruncateContent(content));
 
                 cr.SetContent(content);
+
+                // TODO: LocalEncryptedDataKeyProcessor.getEncryptDataKeyFailover(agent.getName(), dataId, group, tenant);
+                encryptedDataKey = string.Empty;
+                cr.SetEncryptedDataKey(encryptedDataKey);
+
                 _configFilterChainManager.DoFilter(null, cr);
                 content = cr.GetContent();
                 return content;
@@ -81,8 +93,9 @@
 
             try
             {
-                List<string> ct = await _worker.GetServerConfig(dataId, group, tenant, timeoutMs, false);
-                cr.SetContent(ct[0]);
+                ConfigResponse response = await _worker.GetServerConfig(dataId, group, tenant, timeoutMs, false);
+                cr.SetContent(response.GetContent());
+                cr.SetEncryptedDataKey(response.GetEncryptedDataKey());
 
                 _configFilterChainManager.DoFilter(null, cr);
                 content = cr.GetContent();
@@ -104,13 +117,18 @@
 
             content = await FileLocalConfigInfoProcessor.GetSnapshotAync(_worker.GetAgentName(), dataId, group, tenant);
             cr.SetContent(content);
+
+            // TODO LocalEncryptedDataKeyProcessor.getEncryptDataKeyFailover(agent.getName(), dataId, group, tenant);
+            encryptedDataKey = string.Empty;
+            cr.SetEncryptedDataKey(encryptedDataKey);
+
             _configFilterChainManager.DoFilter(null, cr);
             content = cr.GetContent();
             return content;
         }
 
         private async Task<bool> PublishConfigInner(string tenant, string dataId, string group, string tag, string appName,
-            string betaIps, string content, string type)
+            string betaIps, string content, string type, string casMd5)
         {
             group = ParamUtils.Null2DefaultGroup(group);
             ParamUtils.CheckParam(dataId, group, content);
@@ -123,8 +141,9 @@
             cr.SetType(type);
             _configFilterChainManager.DoFilter(cr, null);
             content = cr.GetContent();
+            string encryptedDataKey = (string)cr.GetParameter("encryptedDataKey");
 
-            return await _worker.PublishConfig(dataId, group, tenant, appName, tag, betaIps, content, type);
+            return await _worker.PublishConfig(dataId, group, tenant, appName, tag, betaIps, content, encryptedDataKey, casMd5, type);
         }
 
         private async Task<bool> RemoveConfigInner(string tenant, string dataId, string group, string tag)

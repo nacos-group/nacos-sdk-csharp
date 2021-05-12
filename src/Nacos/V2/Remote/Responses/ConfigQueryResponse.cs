@@ -24,6 +24,9 @@
         [Newtonsoft.Json.JsonProperty("lastModified")]
         public long LastModified { get; set; }
 
+        [Newtonsoft.Json.JsonProperty("encryptedDataKey")]
+        public string EncryptedDataKey { get; set; }
+
         public override string GetRemoteType() => RemoteRequestType.Resp_Config_Query;
     }
 }

@@ -48,6 +48,26 @@
             param["content"] = content;
         }
 
+        public string GetConfigType()
+        {
+            return (string)param["configType"];
+        }
+
+        public void SetConfigType(string configType)
+        {
+            param["configType"] = configType;
+        }
+
+        public string GetEncryptedDataKey()
+        {
+            return (string)param["encryptedDataKey"];
+        }
+
+        public void SetEncryptedDataKey(string encryptedDataKey)
+        {
+            param["encryptedDataKey"] = encryptedDataKey;
+        }
+
         public object GetParameter(string key)
         {
             return param[key];
@@ -56,6 +76,11 @@
         public IConfigContext GetConfigContext()
         {
             return configContext;
+        }
+
+        public void PutParameter(string key, object value)
+        {
+            param[key] = value;
         }
     }
 }
