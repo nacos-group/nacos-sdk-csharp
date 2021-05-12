@@ -60,7 +60,7 @@
 
         public object GetParameter(string key)
         {
-            return param[key];
+            return param.TryGetValue(key, out var obj) ? obj : null;
         }
 
         public IConfigContext GetConfigContext()

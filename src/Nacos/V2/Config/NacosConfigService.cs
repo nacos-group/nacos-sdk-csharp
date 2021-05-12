@@ -127,8 +127,7 @@
             return content;
         }
 
-        private async Task<bool> PublishConfigInner(string tenant, string dataId, string group, string tag, string appName,
-            string betaIps, string content, string type, string casMd5)
+        private async Task<bool> PublishConfigInner(string tenant, string dataId, string group, string tag, string appName, string betaIps, string content, string type, string casMd5)
         {
             group = ParamUtils.Null2DefaultGroup(group);
             ParamUtils.CheckParam(dataId, group, content);
@@ -141,7 +140,7 @@
             cr.SetType(type);
             _configFilterChainManager.DoFilter(cr, null);
             content = cr.GetContent();
-            string encryptedDataKey = (string)cr.GetParameter("encryptedDataKey");
+            string encryptedDataKey = (string)(cr.GetParameter("encryptedDataKey") ?? string.Empty);
 
             return await _worker.PublishConfig(dataId, group, tenant, appName, tag, betaIps, content, encryptedDataKey, casMd5, type);
         }
