@@ -107,6 +107,10 @@
             {
                 _logger?.LogError(ex, "[CLIENT-BEAT] failed to send beat: {0}, code: {1}, msg: {2}", beatInfo, ex.ErrorCode, ex.ErrorMsg);
             }
+            catch (Exception unknownEx)
+            {
+                _logger?.LogError(unknownEx, "[CLIENT-BEAT] failed to send beat: {0}, unknown exception msg: {1}", beatInfo, unknownEx.Message);
+            }
 
             string key = BuildKey(beatInfo.ServiceName, beatInfo.Ip, beatInfo.Port);
 
