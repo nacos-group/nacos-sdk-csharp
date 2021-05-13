@@ -97,7 +97,7 @@
 
                     string encryptedDataKey = response.EncryptedDataKey;
 
-                    // TODO: LocalEncryptedDataKeyProcessor.saveEncryptDataKeySnapshot(agent.getName(), dataId, group, tenant, encryptedDataKey);
+                    await FileLocalConfigInfoProcessor.SaveEncryptDataKeySnapshot(this.GetName(), dataId, group, tenant, encryptedDataKey);
                     configResponse.SetEncryptedDataKey(encryptedDataKey);
 
                     return configResponse;
@@ -105,8 +105,8 @@
                 else if (response.ErrorCode.Equals(ConfigQueryResponse.CONFIG_NOT_FOUND))
                 {
                     await FileLocalConfigInfoProcessor.SaveSnapshotAsync(this.GetName(), dataId, group, tenant, null);
+                    await FileLocalConfigInfoProcessor.SaveEncryptDataKeySnapshot(this.GetName(), dataId, group, tenant, null);
 
-                    // TODO: LocalEncryptedDataKeyProcessor.saveEncryptDataKeySnapshot(agent.getName(), dataId, group, tenant, null);
                     return configResponse;
                 }
                 else if (response.ErrorCode.Equals(ConfigQueryResponse.CONFIG_QUERY_CONFLICT))
