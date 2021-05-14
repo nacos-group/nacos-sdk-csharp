@@ -82,7 +82,7 @@
 
                 cr.SetContent(content);
 
-                // TODO: LocalEncryptedDataKeyProcessor.getEncryptDataKeyFailover(agent.getName(), dataId, group, tenant);
+                await FileLocalConfigInfoProcessor.GetEncryptDataKeyFailover(_worker.GetAgentName(), dataId, group, tenant);
                 encryptedDataKey = string.Empty;
                 cr.SetEncryptedDataKey(encryptedDataKey);
 
@@ -118,8 +118,7 @@
             content = await FileLocalConfigInfoProcessor.GetSnapshotAync(_worker.GetAgentName(), dataId, group, tenant);
             cr.SetContent(content);
 
-            // TODO LocalEncryptedDataKeyProcessor.getEncryptDataKeyFailover(agent.getName(), dataId, group, tenant);
-            encryptedDataKey = string.Empty;
+            encryptedDataKey = await FileLocalConfigInfoProcessor.GetEncryptDataKeyFailover(_worker.GetAgentName(), dataId, group, tenant);
             cr.SetEncryptedDataKey(encryptedDataKey);
 
             _configFilterChainManager.DoFilter(null, cr);

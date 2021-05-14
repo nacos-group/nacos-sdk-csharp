@@ -114,5 +114,131 @@
                 }
             }
         }
+
+        /// <summary>
+        /// 获取容灾配置的 EncryptedDataKey。NULL表示没有本地文件或抛出异常.
+        /// </summary>
+        /// <param name="envName">envName</param>
+        /// <param name="dataId">dataId</param>
+        /// <param name="group">group</param>
+        /// <param name="tenant">tenant</param>
+        /// <returns>EncryptedDataKey</returns>
+        public static async Task<string> GetEncryptDataKeyFailover(string envName, string dataId, string group, string tenant)
+        {
+            FileInfo file = GetEncryptDataKeyFailoverFile(envName, dataId, group, tenant);
+
+            if (!file.Exists) return null;
+
+            try
+            {
+                return await ReadFileAsync(file);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static FileInfo GetEncryptDataKeyFailoverFile(string envName, string dataId, string group, string tenant)
+        {
+            string snapshotFile;
+            snapshotFile = Path.Combine(LOCAL_SNAPSHOT_PATH, envName + "_nacos", "encrypted-data-key");
+
+            snapshotFile = !string.IsNullOrEmpty(tenant)
+                ? Path.Combine(snapshotFile, "failover-tenant", tenant, group, dataId)
+                : Path.Combine(snapshotFile, "failover", group, dataId);
+
+            var file = new FileInfo(snapshotFile);
+            return file;
+        }
+
+        private static FileInfo GetEncryptDataKeySnapshotFile(string envName, string dataId, string group, string tenant)
+        {
+            string snapshotFile;
+            snapshotFile = Path.Combine(LOCAL_SNAPSHOT_PATH, envName + "_nacos", "encrypted-data-key");
+
+            snapshotFile = !string.IsNullOrEmpty(tenant)
+                ? Path.Combine(snapshotFile, "snapshot-tenant", tenant, group, dataId)
+                : Path.Combine(snapshotFile, "snapshot", group, dataId);
+
+            var file = new FileInfo(snapshotFile);
+            return file;
+        }
+
+        /// <summary>
+        /// 保存 encryptDataKey 的snapshot。如果内容为NULL，则删除snapshot.
+        /// </summary>
+        /// <param name="envName">envName</param>
+        /// <param name="dataId">dataId</param>
+        /// <param name="group">group</param>
+        /// <param name="tenant">tenant</param>
+        /// <param name="encryptDataKey">encryptDataKey</param>
+        /// <returns>Task</returns>
+        public static async Task SaveEncryptDataKeySnapshot(string envName, string dataId, string group, string tenant, string encryptDataKey)
+        {
+            /*if (!SnapShotSwitch.getIsSnapShot())
+            {
+                return;
+            }*/
+
+            var file = GetEncryptDataKeySnapshotFile(envName, dataId, group, tenant);
+            try
+            {
+                if (encryptDataKey == null)
+                {
+                    try
+                    {
+                        file.Delete();
+                    }
+                    catch
+                    {
+                    }
+                }
+                else
+                {
+                    if (file.Directory != null && !file.Directory.Exists)
+                    {
+                        file.Directory.Create();
+                    }
+
+                    using FileStream fs = new FileStream(file.FullName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
+                    byte[] bytes = Encoding.UTF8.GetBytes(encryptDataKey);
+                    fs.SetLength(bytes.Length);
+                    await fs.WriteAsync(bytes, 0, bytes.Length);
+                    fs.Close();
+                }
+            }
+            catch
+            {
+            }
+        }
+
+        /// <summary>
+        /// 获取本地缓存文件的 EncryptedDataKey。NULL表示没有本地文件或抛出异常.
+        /// </summary>
+        /// <param name="envName">envName</param>
+        /// <param name="dataId">dataId</param>
+        /// <param name="group">group</param>
+        /// <param name="tenant">tenant</param>
+        /// <returns>EncryptedDataKey</returns>
+        public static async Task<string> GetEncryptDataKeySnapshot(string envName, string dataId, string group, string tenant)
+        {
+            /*if (!SnapShotSwitch.getIsSnapShot())
+            {
+                return null;
+            }*/
+
+            FileInfo file = GetEncryptDataKeySnapshotFile(envName, dataId, group, tenant);
+            if (!file.Exists) return null;
+
+            try
+            {
+                return await ReadFileAsync(file);
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 }
