@@ -39,7 +39,7 @@
             var options = new NacosAspNetOptions();
             optionsAccs.Invoke(options);
 
-            services.AddNacosV2Naming(x => options.BuildSdkOptions());
+            services.AddNacosV2Naming(options.BuildSdkOptions());
 
             services.AddHostedService<RegSvcBgTask>();
 
