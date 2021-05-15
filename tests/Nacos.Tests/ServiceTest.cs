@@ -14,7 +14,7 @@
                 ProtectThreshold = 0.1f
             };
 
-            var res = await _namingClient.CreateServiceAsync(request);
+            var res = await _namingClient.CreateServiceAsync(request).ConfigureAwait(false);
             Assert.True(res);
         }
 
@@ -26,7 +26,7 @@
                 ServiceName = "testservice"
             };
 
-            var res = await _namingClient.RemoveServiceAsync(request);
+            var res = await _namingClient.RemoveServiceAsync(request).ConfigureAwait(false);
             Assert.True(res);
         }
 
@@ -39,7 +39,7 @@
                 ProtectThreshold = 0.5f,
             };
 
-            var res = await _namingClient.ModifyServiceAsync(request);
+            var res = await _namingClient.ModifyServiceAsync(request).ConfigureAwait(false);
             Assert.True(res);
         }
 
@@ -51,7 +51,7 @@
                 ServiceName = "testservice",
             };
 
-            var res = await _namingClient.GetServiceAsync(request);
+            var res = await _namingClient.GetServiceAsync(request).ConfigureAwait(false);
             Assert.NotNull(res);
         }
 
@@ -64,7 +64,7 @@
                 PageSize = 2,
             };
 
-            var res = await _namingClient.ListServicesAsync(request);
+            var res = await _namingClient.ListServicesAsync(request).ConfigureAwait(false);
             Assert.NotNull(res);
         }
     }
