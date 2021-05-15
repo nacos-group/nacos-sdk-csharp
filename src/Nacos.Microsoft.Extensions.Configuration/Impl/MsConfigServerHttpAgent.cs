@@ -2,19 +2,22 @@ namespace Nacos.Microsoft.Extensions.Configuration
 {
     using Nacos.Config;
     using Nacos.Config.Http;
+    using Nacos.Security;
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
+    using System.Net;
     using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
 
     public class MsConfigServerHttpAgent : HttpAgent, IDisposable
     {
-        private static HttpClient _httpClient = new HttpClient();
+        private static readonly HttpClient HttpClient = new HttpClient() { Timeout = Timeout.InfiniteTimeSpan };
         private readonly NacosOptions _options;
         private readonly ServerListManager _serverListMgr;
-        private readonly Nacos.Security.SecurityProxy _securityProxy;
+        private readonly SecurityProxy _securityProxy;
 
         private readonly string _namespaceId;
         private readonly Timer _timer;
@@ -27,7 +30,7 @@ namespace Nacos.Microsoft.Extensions.Configuration
             _namespaceId = _options.Namespace;
 
             _serverListMgr = new ServerListManager(_options);
-            _securityProxy = new Security.SecurityProxy(_options, null);
+            _securityProxy = new SecurityProxy(_options, null);
 
             _securityProxy.LoginAsync(_serverListMgr.GetServerUrls()).ConfigureAwait(false).GetAwaiter().GetResult();
 
@@ -50,11 +53,8 @@ namespace Nacos.Microsoft.Extensions.Configuration
             _timer?.Dispose();
         }
 
-        public override async Task<HttpResponseMessage> ReqApiAsync(HttpMethod httpMethod, string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, int timeout)
+        public override async Task<HttpResponseMessage> ReqApiAsync(HttpMethod httpMethod, string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, CancellationToken cancellationToken)
         {
-            var cts = new CancellationTokenSource();
-            cts.CancelAfter(TimeSpan.FromSeconds(timeout));
-
             var requestMessage = new HttpRequestMessage
             {
                 Method = httpMethod
@@ -83,13 +83,13 @@ namespace Nacos.Microsoft.Extensions.Configuration
             HttpAgentCommon.BuildHeader(requestMessage, headers);
             HttpAgentCommon.BuildSpasHeaders(requestMessage, paramValues, _options.AccessKey, _options.SecretKey);
 
-            var responseMessage = await _httpClient.SendAsync(requestMessage, cts.Token);
+            var responseMessage = await HttpClient.SendAsync(requestMessage, cancellationToken);
 
-            if (responseMessage.StatusCode == System.Net.HttpStatusCode.InternalServerError
-                || responseMessage.StatusCode == System.Net.HttpStatusCode.BadGateway
-                || responseMessage.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
+            if (responseMessage.StatusCode == HttpStatusCode.InternalServerError
+                || responseMessage.StatusCode == HttpStatusCode.BadGateway
+                || responseMessage.StatusCode == HttpStatusCode.ServiceUnavailable)
             {
-                System.Diagnostics.Trace.TraceError("[NACOS ConnectException] currentServerAddr: {0}, httpCode: {1}", _serverListMgr.GetCurrentServerAddr(), responseMessage.StatusCode);
+                Trace.TraceError("[NACOS ConnectException] currentServerAddr: {0}, httpCode: {1}", _serverListMgr.GetCurrentServerAddr(), responseMessage.StatusCode);
             }
             else
             {
