@@ -1,13 +1,15 @@
 namespace Nacos.Microsoft.Extensions.Configuration
 {
-    using Nacos.Config;
-    using Nacos.Config.Http;
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
+    using System.Net;
     using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
+    using Nacos.Config;
+    using Nacos.Config.Http;
 
     public class MsConfigServerHttpAgent : HttpAgent, IDisposable
     {
@@ -49,11 +51,11 @@ namespace Nacos.Microsoft.Extensions.Configuration
             _timer?.Dispose();
         }
 
-        public override async Task<HttpResponseMessage> ReqApiAsync(HttpMethod httpMethod, string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, int timeout)
+        public override async Task<HttpResponseMessage> ReqApiAsync(HttpMethod httpMethod, string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, CancellationToken cancellationToken)
         {
             using (HttpClient client = new HttpClient())
             {
-                client.Timeout = TimeSpan.FromSeconds(timeout);
+                client.Timeout = Timeout.InfiniteTimeSpan;
 
                 var requestMessage = new HttpRequestMessage
                 {
@@ -83,13 +85,13 @@ namespace Nacos.Microsoft.Extensions.Configuration
                 HttpAgentCommon.BuildHeader(requestMessage, headers);
                 HttpAgentCommon.BuildSpasHeaders(requestMessage, paramValues, _options.AccessKey, _options.SecretKey);
 
-                var responseMessage = await client.SendAsync(requestMessage);
+                var responseMessage = await client.SendAsync(requestMessage, cancellationToken);
 
-                if (responseMessage.StatusCode == System.Net.HttpStatusCode.InternalServerError
-                    || responseMessage.StatusCode == System.Net.HttpStatusCode.BadGateway
-                    || responseMessage.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
+                if (responseMessage.StatusCode == HttpStatusCode.InternalServerError
+                    || responseMessage.StatusCode == HttpStatusCode.BadGateway
+                    || responseMessage.StatusCode == HttpStatusCode.ServiceUnavailable)
                 {
-                    System.Diagnostics.Trace.TraceError("[NACOS ConnectException] currentServerAddr: {0}, httpCode: {1}", _serverListMgr.GetCurrentServerAddr(), responseMessage.StatusCode);
+                    Trace.TraceError("[NACOS ConnectException] currentServerAddr: {0}, httpCode: {1}", _serverListMgr.GetCurrentServerAddr(), responseMessage.StatusCode);
                 }
                 else
                 {
@@ -97,7 +99,7 @@ namespace Nacos.Microsoft.Extensions.Configuration
                     return responseMessage;
                 }
 
-                throw new System.Net.Http.HttpRequestException($"no available server, currentServerAddr : {currentServerAddr}");
+                throw new HttpRequestException($"no available server, currentServerAddr : {currentServerAddr}");
             }
         }
 
