@@ -1,13 +1,13 @@
 namespace Nacos.Microsoft.Extensions.Configuration
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Linq;
-    using System.Net;
-    using System.Net.Http;
-    using System.Threading;
-    using System.Threading.Tasks;
+    using global::System;
+    using global::System.Collections.Generic;
+    using global::System.Diagnostics;
+    using global::System.Linq;
+    using global::System.Net;
+    using global::System.Net.Http;
+    using global::System.Threading;
+    using global::System.Threading.Tasks;
     using Nacos.Config;
     using Nacos.Config.Http;
 
