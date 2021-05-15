@@ -4,14 +4,14 @@
 
     public class Listener
     {
-        public Listener(string name, Timer timer)
+        public Listener(string name, CancellationTokenSource cts)
         {
             this.Name = name;
-            this.Timer = timer;
+            this.Cts = cts;
         }
 
         public string Name { get; private set; }
 
-        public Timer Timer { get; set; }
+        public CancellationTokenSource Cts { get; set; }
     }
 }
