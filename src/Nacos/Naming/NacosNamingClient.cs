@@ -46,15 +46,15 @@
             if (request.Ephemeral.HasValue && request.Ephemeral.Value)
             {
                 BeatInfo beatInfo = _beatReactor.BuildBeatInfo(request.ServiceName, request);
-                await _beatReactor.AddBeatInfo(GetGroupedName(request.ServiceName, request.GroupName), beatInfo);
+                await _beatReactor.AddBeatInfo(GetGroupedName(request.ServiceName, request.GroupName), beatInfo).ConfigureAwait(false);
             }
 
-            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Post, RequestPathValue.INSTANCE, null, request.ToDict(), _options.DefaultTimeOut);
+            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Post, RequestPathValue.INSTANCE, null, request.ToDict(), _options.DefaultTimeOut).ConfigureAwait(false);
 
             switch (responseMessage.StatusCode)
             {
                 case System.Net.HttpStatusCode.OK:
-                    var result = await responseMessage.Content.ReadAsStringAsync();
+                    var result = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                     if (result.Equals("ok", StringComparison.OrdinalIgnoreCase))
                     {
                         return true;
@@ -79,15 +79,15 @@
 
             if (request.Ephemeral == true)
             {
-                await _beatReactor.RemoveBeatInfo(request.ServiceName, request.Ip, request.Port);
+                await _beatReactor.RemoveBeatInfo(request.ServiceName, request.Ip, request.Port).ConfigureAwait(false);
             }
 
-            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Delete, RequestPathValue.INSTANCE, null, request.ToDict(), _options.DefaultTimeOut);
+            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Delete, RequestPathValue.INSTANCE, null, request.ToDict(), _options.DefaultTimeOut).ConfigureAwait(false);
 
             switch (responseMessage.StatusCode)
             {
                 case System.Net.HttpStatusCode.OK:
-                    var result = await responseMessage.Content.ReadAsStringAsync();
+                    var result = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                     if (result.Equals("ok", StringComparison.OrdinalIgnoreCase))
                     {
                         return true;
@@ -110,12 +110,12 @@
 
             request.CheckParam();
 
-            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Put, RequestPathValue.INSTANCE, null, request.ToDict(), _options.DefaultTimeOut);
+            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Put, RequestPathValue.INSTANCE, null, request.ToDict(), _options.DefaultTimeOut).ConfigureAwait(false);
 
             switch (responseMessage.StatusCode)
             {
                 case System.Net.HttpStatusCode.OK:
-                    var result = await responseMessage.Content.ReadAsStringAsync();
+                    var result = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                     if (result.Equals("ok", StringComparison.OrdinalIgnoreCase))
                     {
                         return true;
@@ -138,12 +138,12 @@
 
             request.CheckParam();
 
-            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Get, RequestPathValue.INSTANCE_LIST, null, request.ToDict(), _options.DefaultTimeOut);
+            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Get, RequestPathValue.INSTANCE_LIST, null, request.ToDict(), _options.DefaultTimeOut).ConfigureAwait(false);
 
             switch (responseMessage.StatusCode)
             {
                 case System.Net.HttpStatusCode.OK:
-                    var result = await responseMessage.Content.ReadAsStringAsync();
+                    var result = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                     var obj = result.ToObj<ListInstancesResult>();
                     return obj;
                 default:
@@ -158,12 +158,12 @@
 
             request.CheckParam();
 
-            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Get, RequestPathValue.INSTANCE, null, request.ToDict(), _options.DefaultTimeOut);
+            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Get, RequestPathValue.INSTANCE, null, request.ToDict(), _options.DefaultTimeOut).ConfigureAwait(false);
 
             switch (responseMessage.StatusCode)
             {
                 case System.Net.HttpStatusCode.OK:
-                    var result = await responseMessage.Content.ReadAsStringAsync();
+                    var result = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                     var obj = result.ToObj<GetInstanceResult>();
                     return obj;
                 default:
@@ -178,12 +178,12 @@
 
             request.CheckParam();
 
-            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Put, RequestPathValue.INSTANCE_BEAT, null, request.ToDict(), _options.DefaultTimeOut);
+            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Put, RequestPathValue.INSTANCE_BEAT, null, request.ToDict(), _options.DefaultTimeOut).ConfigureAwait(false);
 
             switch (responseMessage.StatusCode)
             {
                 case System.Net.HttpStatusCode.OK:
-                    var result = await responseMessage.Content.ReadAsStringAsync();
+                    var result = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                     var jObj = Newtonsoft.Json.Linq.JObject.Parse(result);
 
                     if (jObj.ContainsKey("code"))
@@ -214,12 +214,12 @@
 
             request.CheckParam();
 
-            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Put, RequestPathValue.INSTANCE_HEALTH, null, request.ToDict(), _options.DefaultTimeOut);
+            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Put, RequestPathValue.INSTANCE_HEALTH, null, request.ToDict(), _options.DefaultTimeOut).ConfigureAwait(false);
 
             switch (responseMessage.StatusCode)
             {
                 case System.Net.HttpStatusCode.OK:
-                    var result = await responseMessage.Content.ReadAsStringAsync();
+                    var result = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                     if (result.Equals("ok", StringComparison.OrdinalIgnoreCase))
                     {
                         return true;
@@ -243,12 +243,12 @@
         #region Metrics
         public async Task<GetMetricsResult> GetMetricsAsync()
         {
-            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Get, RequestPathValue.METRICS, null, new System.Collections.Generic.Dictionary<string, string>(), _options.DefaultTimeOut);
+            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Get, RequestPathValue.METRICS, null, new System.Collections.Generic.Dictionary<string, string>(), _options.DefaultTimeOut).ConfigureAwait(false);
 
             switch (responseMessage.StatusCode)
             {
                 case System.Net.HttpStatusCode.OK:
-                    var result = await responseMessage.Content.ReadAsStringAsync();
+                    var result = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                     var obj = result.ToObj<GetMetricsResult>();
                     return obj;
                 default:
@@ -265,12 +265,12 @@
 
             request.CheckParam();
 
-            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Post, RequestPathValue.SERVICE, null, request.ToDict(), _options.DefaultTimeOut);
+            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Post, RequestPathValue.SERVICE, null, request.ToDict(), _options.DefaultTimeOut).ConfigureAwait(false);
 
             switch (responseMessage.StatusCode)
             {
                 case System.Net.HttpStatusCode.OK:
-                    var result = await responseMessage.Content.ReadAsStringAsync();
+                    var result = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                     if (result.Equals("ok", StringComparison.OrdinalIgnoreCase))
                     {
                         return true;
@@ -293,12 +293,12 @@
 
             request.CheckParam();
 
-            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Delete, RequestPathValue.SERVICE, null, request.ToDict(), _options.DefaultTimeOut);
+            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Delete, RequestPathValue.SERVICE, null, request.ToDict(), _options.DefaultTimeOut).ConfigureAwait(false);
 
             switch (responseMessage.StatusCode)
             {
                 case System.Net.HttpStatusCode.OK:
-                    var result = await responseMessage.Content.ReadAsStringAsync();
+                    var result = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                     if (result.Equals("ok", StringComparison.OrdinalIgnoreCase))
                     {
                         return true;
@@ -321,12 +321,12 @@
 
             request.CheckParam();
 
-            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Put, RequestPathValue.SERVICE, null, request.ToDict(), _options.DefaultTimeOut);
+            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Put, RequestPathValue.SERVICE, null, request.ToDict(), _options.DefaultTimeOut).ConfigureAwait(false);
 
             switch (responseMessage.StatusCode)
             {
                 case System.Net.HttpStatusCode.OK:
-                    var result = await responseMessage.Content.ReadAsStringAsync();
+                    var result = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                     if (result.Equals("ok", StringComparison.OrdinalIgnoreCase))
                     {
                         return true;
@@ -349,12 +349,12 @@
 
             request.CheckParam();
 
-            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Get, RequestPathValue.SERVICE, null, request.ToDict(), _options.DefaultTimeOut);
+            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Get, RequestPathValue.SERVICE, null, request.ToDict(), _options.DefaultTimeOut).ConfigureAwait(false);
 
             switch (responseMessage.StatusCode)
             {
                 case System.Net.HttpStatusCode.OK:
-                    var result = await responseMessage.Content.ReadAsStringAsync();
+                    var result = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                     var obj = result.ToObj<GetServiceResult>();
                     return obj;
                 default:
@@ -369,12 +369,12 @@
 
             request.CheckParam();
 
-            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Get, RequestPathValue.SERVICE_LIST, null, request.ToDict(), _options.DefaultTimeOut);
+            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Get, RequestPathValue.SERVICE_LIST, null, request.ToDict(), _options.DefaultTimeOut).ConfigureAwait(false);
 
             switch (responseMessage.StatusCode)
             {
                 case System.Net.HttpStatusCode.OK:
-                    var result = await responseMessage.Content.ReadAsStringAsync();
+                    var result = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                     var obj = result.ToObj<ListServicesResult>();
                     return obj;
                 default:
@@ -387,12 +387,12 @@
         #region Switches
         public async Task<GetSwitchesResult> GetSwitchesAsync()
         {
-            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Get, RequestPathValue.SWITCHES, null, new System.Collections.Generic.Dictionary<string, string>(), _options.DefaultTimeOut);
+            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Get, RequestPathValue.SWITCHES, null, new System.Collections.Generic.Dictionary<string, string>(), _options.DefaultTimeOut).ConfigureAwait(false);
 
             switch (responseMessage.StatusCode)
             {
                 case System.Net.HttpStatusCode.OK:
-                    var result = await responseMessage.Content.ReadAsStringAsync();
+                    var result = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                     var obj = result.ToObj<GetSwitchesResult>();
                     return obj;
                 default:
@@ -407,12 +407,12 @@
 
             request.CheckParam();
 
-            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Put, RequestPathValue.SWITCHES, null, request.ToDict(), _options.DefaultTimeOut);
+            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Put, RequestPathValue.SWITCHES, null, request.ToDict(), _options.DefaultTimeOut).ConfigureAwait(false);
 
             switch (responseMessage.StatusCode)
             {
                 case System.Net.HttpStatusCode.OK:
-                    var result = await responseMessage.Content.ReadAsStringAsync();
+                    var result = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                     if (result.Equals("ok", StringComparison.OrdinalIgnoreCase))
                     {
                         return true;
@@ -438,12 +438,12 @@
 
             request.CheckParam();
 
-            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Get, RequestPathValue.SERVERS, null, request.ToDict(), _options.DefaultTimeOut);
+            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Get, RequestPathValue.SERVERS, null, request.ToDict(), _options.DefaultTimeOut).ConfigureAwait(false);
 
             switch (responseMessage.StatusCode)
             {
                 case System.Net.HttpStatusCode.OK:
-                    var result = await responseMessage.Content.ReadAsStringAsync();
+                    var result = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                     var obj = result.ToObj<ListClusterServersResult>();
                     return obj;
                 default:
@@ -454,12 +454,12 @@
 
         public async Task<GetCurrentClusterLeaderResult> GetCurrentClusterLeaderAsync()
         {
-            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Get, RequestPathValue.LEADER, null, new System.Collections.Generic.Dictionary<string, string>(), _options.DefaultTimeOut);
+            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Get, RequestPathValue.LEADER, null, new System.Collections.Generic.Dictionary<string, string>(), _options.DefaultTimeOut).ConfigureAwait(false);
 
             switch (responseMessage.StatusCode)
             {
                 case System.Net.HttpStatusCode.OK:
-                    var result = await responseMessage.Content.ReadAsStringAsync();
+                    var result = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                     var leader = result.GetPropValue("leader");
                     var obj = leader.ToObj<GetCurrentClusterLeaderResult>();
                     return obj;
@@ -472,23 +472,23 @@
 
         public async Task SubscribeAsync(string serviceName, Action<IEvent> listener)
         {
-            await SubscribeAsync(serviceName, new List<string>(), listener);
+            await SubscribeAsync(serviceName, new List<string>(), listener).ConfigureAwait(false);
         }
 
         public async Task SubscribeAsync(string serviceName, string groupName, Action<IEvent> listener)
         {
-            await SubscribeAsync(serviceName, groupName, new List<string>(), listener);
+            await SubscribeAsync(serviceName, groupName, new List<string>(), listener).ConfigureAwait(false);
         }
 
         public async Task SubscribeAsync(string serviceName, List<string> clusters, Action<IEvent> listener)
         {
-            await SubscribeAsync(serviceName, ConstValue.DefaultGroup, clusters, listener);
+            await SubscribeAsync(serviceName, ConstValue.DefaultGroup, clusters, listener).ConfigureAwait(false);
         }
 
         public async Task SubscribeAsync(string serviceName, string groupName, List<string> clusters, Action<IEvent> listener)
         {
             var cluster = string.Join(",", clusters);
-            _eventDispatcher.AddListener(await _hostReactor.GetServiceInfo(GetGroupedName(serviceName, groupName), cluster), cluster, listener);
+            _eventDispatcher.AddListener(await _hostReactor.GetServiceInfo(GetGroupedName(serviceName, groupName), cluster).ConfigureAwait(false), cluster, listener);
         }
 
         public Task UnSubscribeAsync(string serviceName, Action<IEvent> listener)

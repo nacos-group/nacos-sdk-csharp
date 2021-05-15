@@ -7,13 +7,13 @@
     public abstract class HttpAgent : IHttpAgent
     {
         public async Task<HttpResponseMessage> DeleteAsync(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, int timeout = 8000)
-            => await ReqApiAsync(HttpMethod.Delete, path, headers, paramValues, timeout);
+            => await ReqApiAsync(HttpMethod.Delete, path, headers, paramValues, timeout).ConfigureAwait(false);
 
         public async Task<HttpResponseMessage> GetAsync(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, int timeout = 8000)
-            => await ReqApiAsync(HttpMethod.Get, path, headers, paramValues, timeout);
+            => await ReqApiAsync(HttpMethod.Get, path, headers, paramValues, timeout).ConfigureAwait(false);
 
         public async Task<HttpResponseMessage> PostAsync(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, int timeout = 8000)
-            => await ReqApiAsync(HttpMethod.Post, path, headers, paramValues, timeout);
+            => await ReqApiAsync(HttpMethod.Post, path, headers, paramValues, timeout).ConfigureAwait(false);
 
         public string GetName() => AbstGetName();
 

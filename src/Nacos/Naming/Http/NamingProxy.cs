@@ -69,13 +69,13 @@
             t = new Timer(
                 async x =>
                 {
-                    await RefreshSrvIfNeedAsync();
+                    await RefreshSrvIfNeedAsync().ConfigureAwait(false);
                 }, null, 0, _vipSrvRefInterMillis);
 
             _timer = new Timer(
                 async x =>
                 {
-                    await _securityProxy.LoginAsync(_serverUrls);
+                    await _securityProxy.LoginAsync(_serverUrls).ConfigureAwait(false);
                 }, null, 0, _securityInfoRefreshIntervalMills);
 
             RefreshSrvIfNeedAsync().ConfigureAwait(false).GetAwaiter().GetResult();
@@ -96,7 +96,7 @@
                 if (DateTimeOffset.Now.ToUnixTimeSeconds() - _lastSrvRefTime < _vipSrvRefInterMillis)
                     return;
 
-                var list = await GetServerListFromEndpointAsync();
+                var list = await GetServerListFromEndpointAsync().ConfigureAwait(false);
 
                 if (list == null || list.Count <= 0)
                     throw new Exception("Can not acquire Nacos list");
@@ -144,19 +144,19 @@
                 req.Headers.TryAddWithoutValidation("RequestId", Guid.NewGuid().ToString());
                 req.Headers.TryAddWithoutValidation("Request-Module", ConstValue.RequestModule);
 
-                var resp = await client.SendAsync(req);
+                var resp = await client.SendAsync(req).ConfigureAwait(false);
 
                 if (!resp.IsSuccessStatusCode)
                 {
                     throw new Exception($"Error while requesting: {url} . Server returned: {resp.StatusCode}");
                 }
 
-                var str = await resp.Content.ReadAsStringAsync();
+                var str = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
                 using (StringReader sr = new StringReader(str))
                 {
                     while (true)
                     {
-                        var line = await sr.ReadLineAsync();
+                        var line = await sr.ReadLineAsync().ConfigureAwait(false);
                         if (line == null || line.Length <= 0)
                             break;
 
@@ -189,7 +189,7 @@
                     var server = _serverUrls[index];
                     try
                     {
-                        return await CallServerAsync(httpMethod, server, path, headers, paramValues, timeout);
+                        return await CallServerAsync(httpMethod, server, path, headers, paramValues, timeout).ConfigureAwait(false);
                     }
                     catch (Nacos.Exceptions.NacosException ex)
                     {
@@ -206,7 +206,7 @@
                 {
                     try
                     {
-                        return await CallServerAsync(httpMethod, _nacosDomain, path, headers, paramValues, timeout);
+                        return await CallServerAsync(httpMethod, _nacosDomain, path, headers, paramValues, timeout).ConfigureAwait(false);
                     }
                     catch (Nacos.Exceptions.NacosException ex)
                     {
@@ -267,7 +267,7 @@
                 }
             }
 
-            var responseMessage = await client.SendAsync(requestMessage);
+            var responseMessage = await client.SendAsync(requestMessage).ConfigureAwait(false);
 
             if (responseMessage.IsSuccessStatusCode
                 || responseMessage.StatusCode == System.Net.HttpStatusCode.NotModified)

@@ -25,7 +25,7 @@
             {
                 using FileStream fs = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
                 byte[] bytes = Encoding.UTF8.GetBytes(content);
-                await fs.WriteAsync(bytes, 0, bytes.Length);
+                await fs.WriteAsync(bytes, 0, bytes.Length).ConfigureAwait(false);
                 fs.Close();
             }
             catch (Exception ex)
@@ -43,7 +43,7 @@
                 var fileName = info.GetKeyEncoded();
                 var content = info.ToJsonString();
 
-                await WriteFileAsync(Path.Combine(dir, fileName), content);
+                await WriteFileAsync(Path.Combine(dir, fileName), content).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -81,7 +81,7 @@
 
                     if (!(fileName.EndsWith(ConstValue.ServiceInfoSplitter + "meta") || fileName.EndsWith(ConstValue.ServiceInfoSplitter + "special-url")))
                     {
-                        var content = await ReadFile(filePath);
+                        var content = await ReadFile(filePath).ConfigureAwait(false);
                         var info = content.ToObj<ServiceInfo>();
                         infos.Add(info.GetKey(), info);
                     }
@@ -101,7 +101,7 @@
             {
                 using FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                 byte[] readByte = new byte[fs.Length];
-                await fs.ReadAsync(readByte, 0, readByte.Length);
+                await fs.ReadAsync(readByte, 0, readByte.Length).ConfigureAwait(false);
                 string readStr = Encoding.UTF8.GetString(readByte);
                 fs.Close();
                 return readStr;

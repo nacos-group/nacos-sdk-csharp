@@ -8,7 +8,7 @@
         [Fact]
         public async Task GetMetrics_Should_Succeed()
         {
-            var res = await _namingClient.GetMetricsAsync();
+            var res = await _namingClient.GetMetricsAsync().ConfigureAwait(false);
             Assert.NotNull(res);
         }
     }
