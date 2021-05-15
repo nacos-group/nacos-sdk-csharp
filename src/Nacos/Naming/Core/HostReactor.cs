@@ -37,7 +37,7 @@ namespace Nacos
             // has limititation on different clients, c# was not support, so disable here.
             // _pushReceiver = new PushReceiver(loggerFactory, this);
             Task.Factory.StartNew(
-                async () => await UpdateTask());
+                async () => await UpdateTask().ConfigureAwait(false));
         }
 
         private ServiceInfo GetServiceInfo0(string serviceName, string clusters)
@@ -66,7 +66,7 @@ namespace Nacos
                 var task = new TaskCompletionSource<bool>();
                 if (_updatingMap.TryAdd(key, task.Task))
                 {
-                    await UpdateServiceNowAsync(serviceName, clusters);
+                    await UpdateServiceNowAsync(serviceName, clusters).ConfigureAwait(false);
                     task.SetResult(true);
                 }
                 else
@@ -92,16 +92,16 @@ namespace Nacos
 
                 if (_updatingMap.ContainsKey(key))
                 {
-                    await UpdateServiceNowAsync(service.name, service.clusters);
+                    await UpdateServiceNowAsync(service.name, service.clusters).ConfigureAwait(false);
                 }
             }
 
-            await Task.Delay(5000);
+            await Task.Delay(5000).ConfigureAwait(false);
         }
 
         public async Task<ServiceInfo> GetServiceInfoDirectlyFromServerAsync(string serviceName, string clusters)
         {
-            var result = await QueryListAsync(serviceName, clusters, 0, false);
+            var result = await QueryListAsync(serviceName, clusters, 0, false).ConfigureAwait(false);
 
             return !string.IsNullOrWhiteSpace(result)
                 ? result.ToObj<ServiceInfo>()
@@ -202,7 +202,7 @@ namespace Nacos
                 // disable upd
                 // var port = _pushReveiver.GetUdpPort();
                 var port = 0;
-                var result = await QueryListAsync(serviceName, clusters, port, false);
+                var result = await QueryListAsync(serviceName, clusters, port, false).ConfigureAwait(false);
 
                 if (!string.IsNullOrWhiteSpace(result))
                 {
@@ -227,11 +227,11 @@ namespace Nacos
                 ClientIp = GetCurrentIp()
             };
 
-            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Get, RequestPathValue.INSTANCE_LIST, null, request.ToDict(), _options.DefaultTimeOut);
+            var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Get, RequestPathValue.INSTANCE_LIST, null, request.ToDict(), _options.DefaultTimeOut).ConfigureAwait(false);
 
             responseMessage.EnsureSuccessStatusCode();
 
-            return await responseMessage.Content.ReadAsStringAsync();
+            return await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
         }
 
         private string GetCurrentIp()

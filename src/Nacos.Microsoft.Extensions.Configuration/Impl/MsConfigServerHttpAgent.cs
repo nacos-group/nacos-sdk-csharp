@@ -35,7 +35,7 @@ namespace Nacos.Microsoft.Extensions.Configuration
             _timer = new Timer(
                 async x =>
                 {
-                    await _securityProxy.LoginAsync(_serverListMgr.GetServerUrls());
+                    await _securityProxy.LoginAsync(_serverListMgr.GetServerUrls()).ConfigureAwait(false);
                 }, null, 0, _securityInfoRefreshIntervalMills);
         }
 
@@ -85,7 +85,7 @@ namespace Nacos.Microsoft.Extensions.Configuration
                 HttpAgentCommon.BuildHeader(requestMessage, headers);
                 HttpAgentCommon.BuildSpasHeaders(requestMessage, paramValues, _options.AccessKey, _options.SecretKey);
 
-                var responseMessage = await client.SendAsync(requestMessage, cancellationToken);
+                var responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
 
                 if (responseMessage.StatusCode == HttpStatusCode.InternalServerError
                     || responseMessage.StatusCode == HttpStatusCode.BadGateway

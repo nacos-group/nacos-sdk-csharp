@@ -93,7 +93,7 @@
                     }
 
                     _reporting = true;
-                    await ReportAsync();
+                    await ReportAsync().ConfigureAwait(false);
                     _reporting = false;
                 }, null, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(10));
 
@@ -109,7 +109,7 @@
                 try
                 {
                     // send heart beat will register instance
-                    flag = await _client.SendHeartbeatAsync(beatRequest);
+                    flag = await _client.SendHeartbeatAsync(beatRequest).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -144,7 +144,7 @@
                         try
                         {
                             _logger.LogWarning("begin to remove instance, {0}", JsonConvert.SerializeObject(removeRequest));
-                            var flag = await _client.RemoveInstanceAsync(removeRequest);
+                            var flag = await _client.RemoveInstanceAsync(removeRequest).ConfigureAwait(false);
                             _logger.LogWarning("remove instance, status = {0}", flag);
                             break;
                         }

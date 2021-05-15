@@ -17,12 +17,12 @@
                 Port = 9999
             };
 
-            var res = await _namingClient.RegisterInstanceAsync(request);
+            var res = await _namingClient.RegisterInstanceAsync(request).ConfigureAwait(false);
             Assert.True(res);
-            await Task.Delay(1000);
+            await Task.Delay(1000).ConfigureAwait(false);
 
             // await _namingClient.(rRequest);
-            await Task.Delay(10000);
+            await Task.Delay(10000).ConfigureAwait(false);
         }
 
         [Fact]
@@ -41,11 +41,11 @@
                 Port = 9999
             };
 
-            await _namingClient.SubscribeAsync("testservice", "", action);
-            await Task.Delay(10000);
+            await _namingClient.SubscribeAsync("testservice", "", action).ConfigureAwait(false);
+            await Task.Delay(10000).ConfigureAwait(false);
 
-            var resA = await _namingClient.RegisterInstanceAsync(requestA);
-            await Task.Delay(5000);
+            var resA = await _namingClient.RegisterInstanceAsync(requestA).ConfigureAwait(false);
+            await Task.Delay(5000).ConfigureAwait(false);
 
             var requestB = new RegisterInstanceRequest
             {
@@ -55,11 +55,11 @@
                 Port = 9999
             };
 
-            var resB = await _namingClient.RegisterInstanceAsync(requestB);
-            await Task.Delay(5000);
+            var resB = await _namingClient.RegisterInstanceAsync(requestB).ConfigureAwait(false);
+            await Task.Delay(5000).ConfigureAwait(false);
 
-            await _namingClient.UnSubscribeAsync("testservice", "", action);
-            await Task.Delay(10000);
+            await _namingClient.UnSubscribeAsync("testservice", "", action).ConfigureAwait(false);
+            await Task.Delay(10000).ConfigureAwait(false);
 
             var requestC = new RegisterInstanceRequest
             {
@@ -69,8 +69,8 @@
                 Port = 9999
             };
 
-            var resC = await _namingClient.RegisterInstanceAsync(requestC);
-            await Task.Delay(5000);
+            var resC = await _namingClient.RegisterInstanceAsync(requestC).ConfigureAwait(false);
+            await Task.Delay(5000).ConfigureAwait(false);
             Assert.True(true);
         }
 
@@ -85,8 +85,8 @@
                 Port = 9999
             };
 
-            var resA = await _namingClient.RegisterInstanceAsync(request);
-            await Task.Delay(10000);
+            var resA = await _namingClient.RegisterInstanceAsync(request).ConfigureAwait(false);
+            await Task.Delay(10000).ConfigureAwait(false);
 
             var requestA = new RemoveInstanceRequest
             {
@@ -95,8 +95,8 @@
                 Ephemeral = true,
                 Port = 9999
             };
-            var resB = await _namingClient.RemoveInstanceAsync(requestA);
-            await Task.Delay(10000);
+            var resB = await _namingClient.RemoveInstanceAsync(requestA).ConfigureAwait(false);
+            await Task.Delay(10000).ConfigureAwait(false);
             Assert.True(true);
         }
 
@@ -111,7 +111,7 @@
                 Port = 9999
             };
 
-            var res = await _namingClient.RemoveInstanceAsync(request);
+            var res = await _namingClient.RemoveInstanceAsync(request).ConfigureAwait(false);
             Assert.True(res);
         }
 
@@ -125,7 +125,7 @@
                 Port = 5000
             };
 
-            var res = await _namingClient.ModifyInstanceAsync(request);
+            var res = await _namingClient.ModifyInstanceAsync(request).ConfigureAwait(false);
             Assert.True(res);
         }
 
@@ -137,7 +137,7 @@
                 ServiceName = "testservice",
             };
 
-            var res = await _namingClient.ListInstancesAsync(request);
+            var res = await _namingClient.ListInstancesAsync(request).ConfigureAwait(false);
             Assert.NotNull(res);
         }
 
@@ -151,7 +151,7 @@
                 Port = 9999,
             };
 
-            var res = await _namingClient.GetInstanceAsync(request);
+            var res = await _namingClient.GetInstanceAsync(request).ConfigureAwait(false);
             Assert.NotNull(res);
         }
 
@@ -169,7 +169,7 @@
                 }
             };
 
-            var res = await _namingClient.SendHeartbeatAsync(request);
+            var res = await _namingClient.SendHeartbeatAsync(request).ConfigureAwait(false);
             Assert.True(res);
         }
 
@@ -184,7 +184,7 @@
                 Healthy = false,
             };
 
-            var res = await _namingClient.ModifyInstanceHealthStatusAsync(request);
+            var res = await _namingClient.ModifyInstanceHealthStatusAsync(request).ConfigureAwait(false);
 
             // 集群配置了健康检查时,该接口会返回错误
             Assert.False(res);

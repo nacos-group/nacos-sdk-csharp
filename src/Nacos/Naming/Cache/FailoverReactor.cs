@@ -66,7 +66,7 @@
                       if (lastModifiedMillis < modified)
                       {
                           lastModifiedMillis = modified;
-                          string failover = await _diskCache.ReadFile(filePath);
+                          string failover = await _diskCache.ReadFile(filePath).ConfigureAwait(false);
 
                           if (!string.IsNullOrEmpty(failover))
                           {
@@ -77,7 +77,7 @@
                                   {
                                       _switchParams.AddOrUpdate(FAILOVER_MODE_NAME, "true", (k, v) => "true");
                                       _logger.LogInformation($"{FAILOVER_MODE_NAME} is on");
-                                      await FailoverFileReader();
+                                      await FailoverFileReader().ConfigureAwait(false);
                                   }
                                   else if ("0".Equals(line.Trim()))
                                   {
@@ -118,7 +118,7 @@
                             continue;
                         }
 
-                        await _diskCache.WriteServiceInfoAsync(_failoverDir, serviceInfo);
+                        await _diskCache.WriteServiceInfoAsync(_failoverDir, serviceInfo).ConfigureAwait(false);
                     }
                 }, null, TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(24 * 60));
         }
@@ -135,7 +135,7 @@
                     var fi = new FileInfo(filePath);
                     if (fi.Name.Equals(ConstValue.FAILOVER_SWITCH)) continue;
 
-                    string content = await _diskCache.ReadFile(filePath);
+                    string content = await _diskCache.ReadFile(filePath).ConfigureAwait(false);
                     ServiceInfo serviceInfo = content.ToObj<ServiceInfo>();
                     if (serviceInfo.Hosts != null && serviceInfo.Hosts.Count > 0)
                     {

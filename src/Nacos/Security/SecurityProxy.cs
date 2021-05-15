@@ -60,7 +60,7 @@
 
                 foreach (var server in servers)
                 {
-                    var flag = await LoginAsync(server);
+                    var flag = await LoginAsync(server).ConfigureAwait(false);
                     if (flag)
                     {
                         _lastRefreshTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
@@ -107,14 +107,14 @@
                             Content = new FormUrlEncodedContent(dict)
                         };
 
-                        var resp = await client.SendAsync(req);
+                        var resp = await client.SendAsync(req).ConfigureAwait(false);
 
                         if (!resp.IsSuccessStatusCode)
                         {
                             return false;
                         }
 
-                        var content = await resp.Content.ReadAsStringAsync();
+                        var content = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
 
                         var obj = Newtonsoft.Json.Linq.JObject.Parse(content);
 
