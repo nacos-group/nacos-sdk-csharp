@@ -1,9 +1,9 @@
 ﻿namespace Nacos.Microsoft.Extensions.Configuration
 {
     using global::Microsoft.Extensions.Logging;
+    using global::System.Collections.Generic;
     using Nacos;
     using Nacos.Config.Http;
-    using System.Collections.Generic;
 
     public class NacosMsConfigClient : AbstNacosConfigClient
     {
