@@ -72,7 +72,7 @@
 
                 foreach (var server in servers)
                 {
-                    var flag = await LoginAsync(server.TrimEnd('/'));
+                    var flag = await LoginAsync(server.TrimEnd('/')).ConfigureAwait(false);
                     if (flag)
                     {
                         _lastRefreshTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
@@ -118,15 +118,15 @@
                         Content = new FormUrlEncodedContent(dict)
                     };
 
-                    var resp = await _httpClient.SendAsync(req, cts.Token);
+                    var resp = await _httpClient.SendAsync(req, cts.Token).ConfigureAwait(false);
 
                     if (!resp.IsSuccessStatusCode)
                     {
-                        _logger?.LogError("login failed: {0}", await resp.Content.ReadAsStringAsync());
+                        _logger?.LogError("login failed: {0}", await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
                         return false;
                     }
 
-                    var content = await resp.Content.ReadAsStringAsync();
+                    var content = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
 
                     var obj = Newtonsoft.Json.Linq.JObject.Parse(content);
 

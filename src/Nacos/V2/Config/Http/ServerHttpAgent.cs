@@ -36,13 +36,13 @@
         public string GetTenant() => _serverListMgr.GetTenant();
 
         public async Task<HttpResponseMessage> HttpDelete(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, string encoding, long readTimeoutMs)
-            => await HttpRequest(path, headers, paramValues, encoding, readTimeoutMs, HttpMethod.Delete);
+            => await HttpRequest(path, headers, paramValues, encoding, readTimeoutMs, HttpMethod.Delete).ConfigureAwait(false);
 
         public async Task<HttpResponseMessage> HttpGet(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, string encoding, long readTimeoutMs)
-            => await HttpRequest(path, headers, paramValues, encoding, readTimeoutMs, HttpMethod.Get);
+            => await HttpRequest(path, headers, paramValues, encoding, readTimeoutMs, HttpMethod.Get).ConfigureAwait(false);
 
         public async Task<HttpResponseMessage> HttpPost(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, string encoding, long readTimeoutMs)
-            => await HttpRequest(path, headers, paramValues, encoding, readTimeoutMs, HttpMethod.Post);
+            => await HttpRequest(path, headers, paramValues, encoding, readTimeoutMs, HttpMethod.Post).ConfigureAwait(false);
 
         public async Task<HttpResponseMessage> HttpRequest(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, string encoding, long readTimeoutMs, HttpMethod method)
         {
@@ -66,7 +66,7 @@
                         reqMsg.Headers.TryAddWithoutValidation(item.Key, item.Value);
                     }
 
-                    var resp = await _httpClient.SendAsync(reqMsg, cts.Token);
+                    var resp = await _httpClient.SendAsync(reqMsg, cts.Token).ConfigureAwait(false);
 
                     if (IsFail(resp))
                     {

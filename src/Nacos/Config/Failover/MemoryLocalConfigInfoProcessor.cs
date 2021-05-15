@@ -23,7 +23,7 @@
 
             _cache.TryGetValue(cacheKey, out string config);
 
-            return await Task.FromResult(config);
+            return await Task.FromResult(config).ConfigureAwait(false);
         }
 
         public async Task<string> GetSnapshotAync(string name, string dataId, string group, string tenant)
@@ -32,7 +32,7 @@
 
             _cache.TryGetValue(cacheKey, out string config);
 
-            return await Task.FromResult(config);
+            return await Task.FromResult(config).ConfigureAwait(false);
         }
 
         public async Task SaveSnapshotAsync(string envName, string dataId, string group, string tenant, string config)

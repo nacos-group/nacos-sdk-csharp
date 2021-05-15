@@ -87,7 +87,7 @@
                 t = new Timer(
                     async x =>
                     {
-                        await RefreshSrvAsync();
+                        await RefreshSrvAsync().ConfigureAwait(false);
                     }, null, TimeSpan.Zero, TimeSpan.FromSeconds(10));
 
                 RefreshSrvAsync().ConfigureAwait(false).GetAwaiter().GetResult();
@@ -102,7 +102,7 @@
             {
                 if (_serverUrls != null && _serverUrls.Count > 0) return;
 
-                var list = await GetServerListFromEndpointAsync();
+                var list = await GetServerListFromEndpointAsync().ConfigureAwait(false);
 
                 if (list == null || list.Count <= 0)
                 {
@@ -146,16 +146,16 @@
 
                 var req = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Get, _addressServerUrl);
 
-                var resp = await _httpClient.SendAsync(req, cts.Token);
+                var resp = await _httpClient.SendAsync(req, cts.Token).ConfigureAwait(false);
 
                 if (resp.IsSuccessStatusCode)
                 {
-                    var str = await resp.Content.ReadAsStringAsync();
+                    var str = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
                     using (StringReader sr = new StringReader(str))
                     {
                         while (true)
                         {
-                            var line = await sr.ReadLineAsync();
+                            var line = await sr.ReadLineAsync().ConfigureAwait(false);
                             if (line == null || line.Length <= 0)
                                 break;
 

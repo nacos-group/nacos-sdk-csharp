@@ -52,7 +52,7 @@
                 async x =>
                 {
                     var info = x as BeatInfo;
-                    await BeatTask(info);
+                    await BeatTask(info).ConfigureAwait(false);
                 }, beatInfo, beatInfo.period, beatInfo.period);
 
             _beatTimer.AddOrUpdate(key, timer, (x, y) => timer);
@@ -79,12 +79,12 @@
 
                 request.CheckParam();
 
-                var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Put, RequestPathValue.INSTANCE_BEAT, null, request.ToDict(), _options.DefaultTimeOut);
+                var responseMessage = await _proxy.ReqApiAsync(HttpMethod.Put, RequestPathValue.INSTANCE_BEAT, null, request.ToDict(), _options.DefaultTimeOut).ConfigureAwait(false);
 
                 switch (responseMessage.StatusCode)
                 {
                     case System.Net.HttpStatusCode.OK:
-                        var result = await responseMessage.Content.ReadAsStringAsync();
+                        var result = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                         var jObj = Newtonsoft.Json.Linq.JObject.Parse(result);
 
                         if (jObj.ContainsKey("code"))

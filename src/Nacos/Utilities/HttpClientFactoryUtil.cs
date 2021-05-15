@@ -23,7 +23,7 @@
                 BuildSignHeader(requestMessage, param, secretKey);
             }
 
-            var responseMessage = await client.SendAsync(requestMessage);
+            var responseMessage = await client.SendAsync(requestMessage).ConfigureAwait(false);
             return responseMessage;
         }
 

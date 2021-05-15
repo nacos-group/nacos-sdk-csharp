@@ -19,7 +19,7 @@
         [HttpGet("g")]
         public async Task<string> Get(string d)
         {
-            var res = await _svc.GetConfig(d, "g", 3000);
+            var res = await _svc.GetConfig(d, "g", 3000).ConfigureAwait(false);
 
             return res ?? "empty config";
         }
@@ -28,7 +28,7 @@
         [HttpGet("d")]
         public async Task<string> Delete(string d)
         {
-            var res = await _svc.RemoveConfig(d, "g");
+            var res = await _svc.RemoveConfig(d, "g").ConfigureAwait(false);
 
             return "d ok" + res;
         }
@@ -37,7 +37,7 @@
         [HttpGet("p")]
         public async Task<string> Publish(string d)
         {
-            var res = await _svc.PublishConfig(d, "g", new System.Random().Next(1, 9999999).ToString());
+            var res = await _svc.PublishConfig(d, "g", new System.Random().Next(1, 9999999).ToString()).ConfigureAwait(false);
 
             return "p ok" + res;
         }
@@ -46,7 +46,7 @@
         [HttpGet("a")]
         public async Task<string> Listen(string d)
         {
-            await _svc.AddListener(d, "g", _configListen);
+            await _svc.AddListener(d, "g", _configListen).ConfigureAwait(false);
             return "al ok";
         }
 
@@ -54,7 +54,7 @@
         [HttpGet("r")]
         public async Task<string> UnListen(string d)
         {
-            await _svc.RemoveListener(d, "g", _configListen);
+            await _svc.RemoveListener(d, "g", _configListen).ConfigureAwait(false);
 
             return "rl ok";
         }

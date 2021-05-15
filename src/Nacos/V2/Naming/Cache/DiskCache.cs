@@ -29,7 +29,7 @@
                 using FileStream fs = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
                 byte[] bytes = Encoding.UTF8.GetBytes(json);
                 fs.SetLength(bytes.Length);
-                await fs.WriteAsync(bytes, 0, bytes.Length);
+                await fs.WriteAsync(bytes, 0, bytes.Length).ConfigureAwait(false);
                 fs.Close();
             }
             catch (Exception ex)
@@ -60,14 +60,14 @@
 
                         using FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                         byte[] readByte = new byte[fs.Length];
-                        await fs.ReadAsync(readByte, 0, readByte.Length);
+                        await fs.ReadAsync(readByte, 0, readByte.Length).ConfigureAwait(false);
                         string readStr = Encoding.UTF8.GetString(readByte);
                         fs.Close();
 
                         using StringReader sr = new StringReader(readStr);
                         while (true)
                         {
-                            var line = await sr.ReadLineAsync();
+                            var line = await sr.ReadLineAsync().ConfigureAwait(false);
                             if (line == null || line.Length <= 0)
                                 break;
 

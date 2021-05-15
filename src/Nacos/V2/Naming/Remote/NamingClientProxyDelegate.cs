@@ -52,7 +52,7 @@
             _loginTimer = new Timer(
                 async x =>
                 {
-                    await securityProxy.LoginAsync(serverListManager.GetServerList());
+                    await securityProxy.LoginAsync(serverListManager.GetServerList()).ConfigureAwait(false);
                 }, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(_securityInfoRefreshIntervalMills));
 
             // init should wait the result.
@@ -64,20 +64,20 @@
         public Task<bool> DeleteService(string serviceName, string groupName) => Task.FromResult(false);
 
         public async Task DeregisterService(string serviceName, string groupName, Instance instance)
-            => await GetExecuteClientProxy().DeregisterService(serviceName, groupName, instance);
+            => await GetExecuteClientProxy().DeregisterService(serviceName, groupName, instance).ConfigureAwait(false);
 
         public void Dispose() => grpcClientProxy.Dispose();
 
         public async Task<ListView<string>> GetServiceList(int pageNo, int pageSize, string groupName, AbstractSelector selector)
-            => await GetExecuteClientProxy().GetServiceList(pageNo, pageSize, groupName, selector);
+            => await GetExecuteClientProxy().GetServiceList(pageNo, pageSize, groupName, selector).ConfigureAwait(false);
 
         public async Task<ServiceInfo> QueryInstancesOfService(string serviceName, string groupName, string clusters, int udpPort, bool healthyOnly)
-            => await GetExecuteClientProxy().QueryInstancesOfService(serviceName, groupName, clusters, udpPort, healthyOnly);
+            => await GetExecuteClientProxy().QueryInstancesOfService(serviceName, groupName, clusters, udpPort, healthyOnly).ConfigureAwait(false);
 
         public Task<Service> QueryService(string serviceName, string groupName) => Task.FromResult<Service>(null);
 
         public async Task RegisterServiceAsync(string serviceName, string groupName, Instance instance)
-            => await GetExecuteClientProxy().RegisterServiceAsync(serviceName, groupName, instance);
+            => await GetExecuteClientProxy().RegisterServiceAsync(serviceName, groupName, instance).ConfigureAwait(false);
 
         public bool ServerHealthy() => grpcClientProxy.ServerHealthy();
 
@@ -88,7 +88,7 @@
 
             if (!serviceInfoHolder.GetServiceInfoMap().TryGetValue(serviceKey, out var result))
             {
-                result = await GetExecuteClientProxy().Subscribe(serviceName, groupName, clusters);
+                result = await GetExecuteClientProxy().Subscribe(serviceName, groupName, clusters).ConfigureAwait(false);
             }
 
             _serviceInfoUpdateService.ScheduleUpdateIfAbsent(serviceName, groupName, clusters);
@@ -99,11 +99,11 @@
         public async Task Unsubscribe(string serviceName, string groupName, string clusters)
         {
             _serviceInfoUpdateService.StopUpdateIfContain(serviceName, groupName, clusters);
-            await GetExecuteClientProxy().Unsubscribe(serviceName, groupName, clusters);
+            await GetExecuteClientProxy().Unsubscribe(serviceName, groupName, clusters).ConfigureAwait(false);
         }
 
         public async Task UpdateBeatInfo(List<Instance> modifiedInstances)
-            => await httpClientProxy.UpdateBeatInfo(modifiedInstances);
+            => await httpClientProxy.UpdateBeatInfo(modifiedInstances).ConfigureAwait(false);
 
         public Task UpdateInstance(string serviceName, string groupName, Instance instance) => Task.CompletedTask;
 
