@@ -3,22 +3,26 @@
     using global::Microsoft.Configuration.ConfigurationBuilders;
     using global::Microsoft.Extensions.Logging;
     using global::Microsoft.Extensions.Logging.Abstractions;
+    using global::Microsoft.Extensions.Options;
     using global::System;
     using global::System.Collections.Concurrent;
     using global::System.Collections.Generic;
     using global::System.Collections.Specialized;
     using global::System.Configuration;
+    using global::System.Diagnostics;
     using global::System.Linq;
     using global::System.Reflection;
     using global::System.Threading.Tasks;
     using Nacos.Microsoft.Extensions.Configuration;
+    using Nacos.V2;
+    using Nacos.V2.Config;
 
     public class NacosConfigurationBuilder : KeyValueConfigBuilder
     {
         public static ILoggerFactory LoggerFactory { get; set; }
 
         private static readonly FieldInfo ConfigurationManagerReset = typeof(ConfigurationManager).GetField("s_initState", BindingFlags.NonPublic | BindingFlags.Static)!;
-        private static readonly Dictionary<string, (NacosConfigurationSection, INacosConfigClient)> ClientCache = new Dictionary<string, (NacosConfigurationSection, INacosConfigClient)>(StringComparer.OrdinalIgnoreCase);
+        private static readonly Dictionary<string, Tuple<NacosConfigurationSection, object>> ClientCache = new Dictionary<string, Tuple<NacosConfigurationSection, object>>(StringComparer.OrdinalIgnoreCase);
         private static readonly ConcurrentDictionary<string, string> ConfigCache = new ConcurrentDictionary<string, string>();
 
         private Task<IDictionary<string, string>[]> _data;
@@ -39,63 +43,126 @@
         {
             base.LazyInitialize(name, config);
 
-            var sectionName = string.IsNullOrWhiteSpace(config["nacosConfig"]) ? "nacosConfig" : config["nacosConfig"];
+            var sectionName = string.IsNullOrWhiteSpace(config["nacosConfig"]) ? "nacos" : config["nacosConfig"];
             if (!ClientCache.TryGetValue(sectionName, out var cache))
             {
                 lock (ClientCache)
                 {
                     if (!ClientCache.TryGetValue(sectionName, out cache))
                     {
-                        var configurationSource = NacosConfigurationSection.GetConfig(sectionName);
-
-                        var client = new NacosMsConfigClient(LoggerFactory ?? NullLoggerFactory.Instance, new NacosOptions
+                        var nacosConfig = NacosConfigurationSection.GetConfig(sectionName);
+                        if (nacosConfig == null)
                         {
-                            ServerAddresses = configurationSource.ServerAddresses.Split(';', ',').ToList(),
-                            Namespace = configurationSource.Tenant,
-                            AccessKey = configurationSource.AccessKey,
-                            ClusterName = configurationSource.ClusterName,
-                            ContextPath = configurationSource.ContextPath,
-                            EndPoint = configurationSource.EndPoint,
-                            DefaultTimeOut = configurationSource.DefaultTimeOut,
-                            SecretKey = configurationSource.SecretKey,
-                            Password = configurationSource.Password,
-                            UserName = configurationSource.UserName,
-                            ListenInterval = 20000
-                        });
+                            LoggerFactory?.CreateLogger<NacosConfigurationBuilder>().LogWarning($"Can't found `{sectionName}` config");
 
-                        if (configurationSource.Listeners != null && configurationSource.Listeners.Count > 0)
-                        {
-                            _ = Task.WhenAll(configurationSource.Listeners
-                                  .OfType<ConfigListener>()
-                                  .Select(item => client.AddListenerAsync(new AddListenerRequest
-                                  {
-                                      DataId = item.DataId,
-                                      Group = item.Group,
-                                      Tenant = configurationSource.Tenant,
-                                      Callbacks = new List<Action<string>> { x => CallBackReload($"{configurationSource.Tenant}#{item.Group}#{item.DataId}", x) }
-                                  })).ToArray());
+                            Trace.TraceWarning($"Can't found `{sectionName}` config");
+
+                            ClientCache[sectionName] = null;
+
+                            return;
                         }
 
-                        ClientCache[sectionName] = cache = (configurationSource, client);
+                        if (nacosConfig.UseGrpc)
+                        {
+                            var client = new NacosConfigService(LoggerFactory ?? NullLoggerFactory.Instance, Options.Create(new NacosSdkOptions
+                            {
+                                ServerAddresses = nacosConfig.ServerAddresses.Split(';', ',').ToList(),
+                                Namespace = nacosConfig.Tenant,
+                                AccessKey = nacosConfig.AccessKey,
+                                ContextPath = nacosConfig.ContextPath,
+                                EndPoint = nacosConfig.EndPoint,
+                                DefaultTimeOut = nacosConfig.DefaultTimeOut,
+                                SecretKey = nacosConfig.SecretKey,
+                                Password = nacosConfig.Password,
+                                UserName = nacosConfig.UserName,
+                                ListenInterval = 20000
+                            }));
+
+                            ClientCache[sectionName] = cache = Tuple.Create(nacosConfig, (object)client);
+                        }
+                        else
+                        {
+                            var client = new NacosMsConfigClient(LoggerFactory ?? NullLoggerFactory.Instance, new NacosOptions
+                            {
+                                ServerAddresses = nacosConfig.ServerAddresses.Split(';', ',').ToList(),
+                                Namespace = nacosConfig.Tenant,
+                                AccessKey = nacosConfig.AccessKey,
+                                ClusterName = nacosConfig.ClusterName,
+                                ContextPath = nacosConfig.ContextPath,
+                                EndPoint = nacosConfig.EndPoint,
+                                DefaultTimeOut = nacosConfig.DefaultTimeOut,
+                                SecretKey = nacosConfig.SecretKey,
+                                Password = nacosConfig.Password,
+                                UserName = nacosConfig.UserName,
+                                ListenInterval = 20000
+                            });
+
+                            ClientCache[sectionName] = cache = Tuple.Create(nacosConfig, (object)client);
+                        }
+
+                        if (nacosConfig.Listeners != null && nacosConfig.Listeners.Count > 0)
+                        {
+                            try
+                            {
+                                _ = Task.WhenAll(nacosConfig.Listeners
+                                    .OfType<ConfigListener>()
+                                    .Select(item => cache.Item2 is INacosConfigClient ncc
+                                        ? ncc.AddListenerAsync(new AddListenerRequest
+                                        {
+                                            DataId = item.DataId,
+                                            Group = item.Group,
+                                            Tenant = nacosConfig.Tenant,
+                                            Callbacks = new List<Action<string>> { x => CallBackReload($"{nacosConfig.Tenant}#{item.Group}#{item.DataId}", x) }
+                                        })
+                                        : ((INacosConfigService)cache.Item2).AddListener(item.DataId, item.Group ?? ConstValue.DefaultGroup, new MsConfigListener($"{nacosConfig.Tenant}#{item.Group}#{item.DataId}"))));
+                            }
+                            catch (Exception ex)
+                            {
+                                LoggerFactory?.CreateLogger<NacosConfigurationBuilder>().LogError(ex, "AddListener fail.");
+
+                                Trace.TraceError("AddListener fail" + Environment.NewLine + ex);
+                            }
+                        }
                     }
                 }
             }
 
-            _data = GetConfig(cache.Item1, cache.Item2);
+            _data = cache == null ? Task.FromResult(Array.Empty<IDictionary<string, string>>()) : GetConfig(cache.Item1, cache.Item2);
         }
 
-        private static Task<IDictionary<string, string>[]> GetConfig(NacosConfigurationSection configurationSource, INacosConfigClient client) =>
-            Task.WhenAll(configurationSource.Listeners
-                .OfType<ConfigListener>()
-                .Select(async item => item.NacosConfigurationParser.Parse(
-                    ConfigCache.TryGetValue($"{configurationSource.Tenant}#{item.Group}#{item.DataId}", out var data)
-                        ? data
-                        : await client.GetConfigAsync(new GetConfigRequest
+        private static Task<IDictionary<string, string>[]> GetConfig(NacosConfigurationSection config, object client) =>
+            Task.WhenAll(config.Listeners.OfType<ConfigListener>()
+                .Select(async item =>
+                {
+                    if (!ConfigCache.TryGetValue($"{config.Tenant}#{item.Group}#{item.DataId}", out var data))
+                    {
+                        try
                         {
-                            DataId = item.DataId,
-                            Group = item.Group,
-                            Tenant = configurationSource.Tenant
-                        }).ConfigureAwait(false))));
+                            data = await (client is INacosConfigClient ncc
+                                    ? ncc.GetConfigAsync(new GetConfigRequest
+                                    {
+                                        DataId = item.DataId,
+                                        Group = item.Group,
+                                        Tenant = config.Tenant
+                                    })
+                                    : ((INacosConfigService)client).GetConfig(item.DataId, item.Group ?? ConstValue.DefaultGroup, 3000))
+                                .ConfigureAwait(false);
+
+                            if (data == null)
+                            {
+                                LoggerFactory?.CreateLogger<NacosConfigurationBuilder>().LogWarning($"Can't get config {item.Group}#{item.DataId}");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            LoggerFactory?.CreateLogger<NacosConfigurationBuilder>().LogError(ex, $"GetConfig({item.Group}#{item.DataId}) fail.");
+
+                            Trace.TraceError($"GetConfig({item.Group}#{item.DataId}) fail" + Environment.NewLine + ex);
+                        }
+                    }
+
+                    return data == null ? new Dictionary<string, string>() : item.NacosConfigurationParser.Parse(data);
+                }));
 
         private static void CallBackReload(string key, string data)
         {
@@ -123,5 +190,14 @@
 
         public override ICollection<KeyValuePair<string, string>> GetAllValues(string prefix) =>
             _data.GetAwaiter().GetResult().SelectMany(dic => dic).ToArray();
+
+        private class MsConfigListener : IListener
+        {
+            private readonly string _key;
+
+            public MsConfigListener(string key) => _key = key;
+
+            public void ReceiveConfigInfo(string configInfo) => CallBackReload(_key, configInfo);
+        }
     }
 }

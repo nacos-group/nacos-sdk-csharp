@@ -16,7 +16,7 @@
         /// <summary>
         /// Configuration group
         /// </summary>
-        [ConfigurationProperty("group", IsRequired = false)]
+        [ConfigurationProperty("group", DefaultValue = "DEFAULT_GROUP", IsRequired = false)]
         public string Group => this["group"]?.ToString();
 
         [ConfigurationProperty("parserType", IsRequired = false)]

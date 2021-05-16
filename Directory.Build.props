@@ -1,18 +1,16 @@
-  
-<Project>
+﻿<Project>
   <PropertyGroup>
     <LangVersion>latest</LangVersion>
     <RepositoryType>git</RepositoryType>
+
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn),1573,1591,1712</NoWarn>
+    <CodeAnalysisRuleSet>..\..\_stylecop\codeanalysis.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
-    <PropertyGroup>
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <NoWarn>$(NoWarn),1573,1591,1712</NoWarn>
-        <CodeAnalysisRuleSet>..\..\_stylecop\codeanalysis.ruleset</CodeAnalysisRuleSet>
-    </PropertyGroup>
-   <ItemGroup>
-	<PackageReference Include="ConfigureAwaitChecker.Analyzer" Version="5.*" PrivateAssets="All" />
+  <ItemGroup>
+    <PackageReference Include="ConfigureAwaitChecker.Analyzer" Version="5.*" PrivateAssets="All" />
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.*" PrivateAssets="All" Condition="'$(OS)' != 'Windows_NT'" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.*" PrivateAssets="All"/>
     <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.164">
@@ -20,4 +18,5 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
+
 </Project>

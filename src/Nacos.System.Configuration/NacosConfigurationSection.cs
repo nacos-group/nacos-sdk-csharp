@@ -26,7 +26,7 @@
         /// <summary>
         /// EndPoint
         /// </summary>
-        [ConfigurationProperty("endPoint", IsRequired = true)]
+        [ConfigurationProperty("endPoint", IsRequired = false)]
         public string EndPoint => this["endPoint"]?.ToString();
 
         [ConfigurationProperty("contextPath", DefaultValue = "nacos")]
@@ -52,6 +52,12 @@
         /// </summary>
         [ConfigurationProperty("secretKey")]
         public string SecretKey => this["secretKey"]?.ToString();
+
+        /// <summary>
+        /// secretKey
+        /// </summary>
+        [ConfigurationProperty("useGrpc", DefaultValue = false)]
+        public bool UseGrpc => Convert.ToBoolean(this["useGrpc"]);
 
         /// <summary>
         /// username

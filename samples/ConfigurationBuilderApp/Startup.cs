@@ -1,4 +1,4 @@
-﻿using Apollo.AspNet.Demo;
+﻿using ConfigurationBuilderApp;
 using Microsoft.Owin;
 using Owin;
 using System.Configuration;
@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 [assembly: OwinStartup(typeof(Startup))]
 
-namespace Apollo.AspNet.Demo
+namespace ConfigurationBuilderApp
 {
     public class Startup
     {
