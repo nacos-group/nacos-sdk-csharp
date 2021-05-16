@@ -17,7 +17,7 @@
                 Group = "DEFAULT_GROUP",
             };
 
-            var res = await _configClient.GetConfigAsync(request);
+            var res = await _configClient.GetConfigAsync(request).ConfigureAwait(false);
             Assert.NotNull(res);
             Assert.Equal("test", res);
         }
@@ -36,7 +36,7 @@
                 AppName = "appdemo"
             };
 
-            var res = await _configClient.PublishConfigAsync(request);
+            var res = await _configClient.PublishConfigAsync(request).ConfigureAwait(false);
             Assert.True(res);
         }
 
@@ -50,7 +50,7 @@
                 Group = "DEFAULT_GROUP",
             };
 
-            var res = await _configClient.RemoveConfigAsync(request);
+            var res = await _configClient.RemoveConfigAsync(request).ConfigureAwait(false);
             Assert.True(res);
         }
 
@@ -69,20 +69,20 @@
                 }
             };
 
-            await _configClient.AddListenerAsync(request);
+            await _configClient.AddListenerAsync(request).ConfigureAwait(false);
 
             Assert.True(true);
 
-            await Task.Delay(1000);
+            await Task.Delay(1000).ConfigureAwait(false);
 
             var rRequest = new RemoveListenerRequest
             {
                 DataId = "dataId",
             };
 
-            await _configClient.RemoveListenerAsync(rRequest);
+            await _configClient.RemoveListenerAsync(rRequest).ConfigureAwait(false);
 
-            await Task.Delay(50000);
+            await Task.Delay(50000).ConfigureAwait(false);
         }
     }
 }

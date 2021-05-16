@@ -29,62 +29,62 @@
 
         public async Task<string> GetServerAsync(string serviceName)
         {
-            return await GetUrlAsync(serviceName, null, null, null);
+            return await GetUrlAsync(serviceName, null, null, null).ConfigureAwait(false);
         }
 
         public async Task<string> GetServerAsync(string serviceName, string groupName)
         {
-            return await GetUrlAsync(serviceName, groupName, null, null);
+            return await GetUrlAsync(serviceName, groupName, null, null).ConfigureAwait(false);
         }
 
         public async Task<string> GetServerAsync(string serviceName, string groupName, string clusters)
         {
-            return await GetUrlAsync(serviceName, groupName, clusters, null);
+            return await GetUrlAsync(serviceName, groupName, clusters, null).ConfigureAwait(false);
         }
 
         public async Task<string> GetServerAsync(string serviceName, string groupName, string clusters, string namespaceId)
         {
-            return await GetUrlAsync(serviceName, groupName, clusters, namespaceId);
+            return await GetUrlAsync(serviceName, groupName, clusters, namespaceId).ConfigureAwait(false);
         }
 
         public async Task<List<Host>> GetServerListAsync(string serviceName)
         {
-            return await GetServerListInnerAsync(serviceName, null, null, null);
+            return await GetServerListInnerAsync(serviceName, null, null, null).ConfigureAwait(false);
         }
 
         public async Task<List<Host>> GetServerListAsync(string serviceName, string groupName)
         {
-            return await GetServerListInnerAsync(serviceName, groupName, null, null);
+            return await GetServerListInnerAsync(serviceName, groupName, null, null).ConfigureAwait(false);
         }
 
         public async Task<List<Host>> GetServerListAsync(string serviceName, string groupName, string clusters)
         {
-            return await GetServerListInnerAsync(serviceName, groupName, clusters, null);
+            return await GetServerListInnerAsync(serviceName, groupName, clusters, null).ConfigureAwait(false);
         }
 
         public async Task<List<Host>> GetServerListAsync(string serviceName, string groupName, string clusters, string namespaceId)
         {
-            return await GetServerListInnerAsync(serviceName, groupName, clusters, namespaceId);
+            return await GetServerListInnerAsync(serviceName, groupName, clusters, namespaceId).ConfigureAwait(false);
         }
 
         public async Task<Host> GetServerInfoAsync(string serviceName)
         {
-            return await GetHostAsync(serviceName, null, null, null);
+            return await GetHostAsync(serviceName, null, null, null).ConfigureAwait(false);
         }
 
         public async Task<Host> GetServerInfoAsync(string serviceName, string groupName)
         {
-            return await GetHostAsync(serviceName, groupName, null, null);
+            return await GetHostAsync(serviceName, groupName, null, null).ConfigureAwait(false);
         }
 
         public async Task<Host> GetServerInfoAsync(string serviceName, string groupName, string clusters)
         {
-            return await GetHostAsync(serviceName, groupName, clusters, null);
+            return await GetHostAsync(serviceName, groupName, clusters, null).ConfigureAwait(false);
         }
 
         public async Task<Host> GetServerInfoAsync(string serviceName, string groupName, string clusters, string namespaceId)
         {
-            return await GetHostAsync(serviceName, groupName, clusters, namespaceId);
+            return await GetHostAsync(serviceName, groupName, clusters, namespaceId).ConfigureAwait(false);
         }
 
         private async Task<List<Host>> GetServerListInnerAsync(string serviceName, string groupName, string clusters, string namespaceId)
@@ -100,19 +100,19 @@
                     Clusters = clusters,
                     NamespaceId = namespaceId,
                     HealthyOnly = true,
-                });
+                }).ConfigureAwait(false);
 
                 if (serviceInstances?.Hosts == null || !serviceInstances.Hosts.Any())
                     return null;
                 return serviceInstances.Hosts.ToList();
-            }, TimeSpan.FromSeconds(8));
+            }, TimeSpan.FromSeconds(8)).ConfigureAwait(false);
 
             return cached.HasValue ? cached.Value : null;
         }
 
         private async Task<string> GetUrlAsync(string serviceName, string groupName, string clusters, string namespaceId)
         {
-            var list = await GetServerListInnerAsync(serviceName, groupName, clusters, namespaceId);
+            var list = await GetServerListInnerAsync(serviceName, groupName, clusters, namespaceId).ConfigureAwait(false);
 
             if (list != null && list.Any())
             {
@@ -128,7 +128,7 @@
 
         private async Task<Host> GetHostAsync(string serviceName, string groupName, string clusters, string namespaceId)
         {
-            var list = await GetServerListInnerAsync(serviceName, groupName, clusters, namespaceId);
+            var list = await GetServerListInnerAsync(serviceName, groupName, clusters, namespaceId).ConfigureAwait(false);
 
             if (list != null && list.Any())
             {

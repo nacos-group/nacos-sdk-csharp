@@ -53,7 +53,7 @@
         protected virtual async Task Naming_Should_Succeed()
         {
             var serviceName = $"auth-{Guid.NewGuid().ToString()}";
-            var instances = await _namingSvc.GetAllInstances(serviceName, false);
+            var instances = await _namingSvc.GetAllInstances(serviceName, false).ConfigureAwait(false);
             _output.WriteLine($"Naming_Should_Succeed, GetAllInstances, {serviceName}, {instances?.ToJsonString()}");
             Assert.Empty(instances);
         }
@@ -64,7 +64,7 @@
             var dataId = $"get-{Guid.NewGuid().ToString()}";
             var group = Nacos.V2.Common.Constants.DEFAULT_GROUP;
 
-            var config = await _configSvc.GetConfig(dataId, group, 10000L);
+            var config = await _configSvc.GetConfig(dataId, group, 10000L).ConfigureAwait(false);
             _output.WriteLine($"Config_Should_Succeed, GetConfig {dataId} return {config}");
             Assert.Null(config);
         }

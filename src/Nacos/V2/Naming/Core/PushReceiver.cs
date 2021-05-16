@@ -28,7 +28,7 @@
             if (!options.NamingUseRpc)
             {
                 Task.Factory.StartNew(
-                   async () => await RunAsync(), TaskCreationOptions.LongRunning);
+                   async () => await RunAsync().ConfigureAwait(false), TaskCreationOptions.LongRunning);
             }
         }
 
@@ -74,7 +74,7 @@
                         break;
                     }
 
-                    var res = await _udpClient.ReceiveAsync();
+                    var res = await _udpClient.ReceiveAsync().ConfigureAwait(false);
 
                     var json = Encoding.UTF8.GetString(TryDecompressData(res.Buffer));
                     _logger?.LogInformation("received push data: {0} from {1}", json, res.RemoteEndPoint.ToString());
@@ -100,7 +100,7 @@
                     }
 
                     var ackByte = Encoding.UTF8.GetBytes(ack);
-                    await _udpClient.SendAsync(ackByte, ackByte.Length, res.RemoteEndPoint);
+                    await _udpClient.SendAsync(ackByte, ackByte.Length, res.RemoteEndPoint).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {

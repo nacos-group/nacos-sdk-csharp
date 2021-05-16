@@ -66,7 +66,7 @@
                 request.PutAdditonalParam("betaIps", betaIps);
                 request.PutAdditonalParam("type", type);
 
-                var response = await RequestProxy(GetOneRunningClient(), request);
+                var response = await RequestProxy(GetOneRunningClient(), request).ConfigureAwait(false);
 
                 return response.IsSuccess();
             }
@@ -84,28 +84,28 @@
                 var request = new ConfigQueryRequest(dataId, group, tenant);
                 request.PutHeader("notify", notify.ToString());
 
-                var response = (ConfigQueryResponse)await RequestProxy(GetOneRunningClient(), request);
+                var response = (ConfigQueryResponse)await RequestProxy(GetOneRunningClient(), request).ConfigureAwait(false);
 
                 ConfigResponse configResponse = new ConfigResponse();
 
                 if (response.IsSuccess())
                 {
-                    await FileLocalConfigInfoProcessor.SaveSnapshotAsync(this.GetName(), dataId, group, tenant, response.Content);
+                    await FileLocalConfigInfoProcessor.SaveSnapshotAsync(this.GetName(), dataId, group, tenant, response.Content).ConfigureAwait(false);
 
                     configResponse.SetContent(response.Content);
                     configResponse.SetConfigType(response.ContentType.IsNotNullOrWhiteSpace() ? response.ContentType : "text");
 
                     string encryptedDataKey = response.EncryptedDataKey;
 
-                    await FileLocalConfigInfoProcessor.SaveEncryptDataKeySnapshot(this.GetName(), dataId, group, tenant, encryptedDataKey);
+                    await FileLocalConfigInfoProcessor.SaveEncryptDataKeySnapshot(this.GetName(), dataId, group, tenant, encryptedDataKey).ConfigureAwait(false);
                     configResponse.SetEncryptedDataKey(encryptedDataKey);
 
                     return configResponse;
                 }
                 else if (response.ErrorCode.Equals(ConfigQueryResponse.CONFIG_NOT_FOUND))
                 {
-                    await FileLocalConfigInfoProcessor.SaveSnapshotAsync(this.GetName(), dataId, group, tenant, null);
-                    await FileLocalConfigInfoProcessor.SaveEncryptDataKeySnapshot(this.GetName(), dataId, group, tenant, null);
+                    await FileLocalConfigInfoProcessor.SaveSnapshotAsync(this.GetName(), dataId, group, tenant, null).ConfigureAwait(false);
+                    await FileLocalConfigInfoProcessor.SaveEncryptDataKeySnapshot(this.GetName(), dataId, group, tenant, null).ConfigureAwait(false);
 
                     return configResponse;
                 }
@@ -137,7 +137,7 @@
             {
                 var request = new ConfigRemoveRequest(dataId, group, tenant, tag);
 
-                var response = await RequestProxy(GetOneRunningClient(), request);
+                var response = await RequestProxy(GetOneRunningClient(), request).ConfigureAwait(false);
 
                 return response.IsSuccess();
             }
@@ -153,7 +153,7 @@
             _loginTimer = new Timer(
                 async x =>
                 {
-                    await _securityProxy.LoginAsync(_serverListManager.GetServerUrls());
+                    await _securityProxy.LoginAsync(_serverListManager.GetServerUrls()).ConfigureAwait(false);
                 }, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(_securityInfoRefreshIntervalMills));
 
             // init should wait the result.
@@ -173,7 +173,7 @@
                         // block 5000ms
                         if (_listenExecutebell.TryTake(out _, 5000))
                         {
-                            await ExecuteConfigListen();
+                            await ExecuteConfigListen().ConfigureAwait(false);
                         }
                         else
                         {
@@ -245,7 +245,7 @@
             var timeOut = _options.DefaultTimeOut > 0 ? _options.DefaultTimeOut : 3000;
 
             // TODO: 1. limiter
-            return await rpcClientInner.Request(request, timeOut);
+            return await rpcClientInner.Request(request, timeOut).ConfigureAwait(false);
         }
 
         private void BuildRequestHeader(CommonRequest request)
@@ -355,7 +355,7 @@
                         {
                             var rpcClient = EnsureRpcClient(taskId);
 
-                            var configChangeBatchListenResponse = (ConfigChangeBatchListenResponse)(await RequestProxy(rpcClient, request));
+                            var configChangeBatchListenResponse = (ConfigChangeBatchListenResponse)(await RequestProxy(rpcClient, request).ConfigureAwait(false));
 
                             if (configChangeBatchListenResponse != null && configChangeBatchListenResponse.IsSuccess())
                             {
@@ -369,7 +369,7 @@
 
                                         changeKeys.Add(changeKey);
 
-                                        await RefreshContentAndCheck(changeKey, true);
+                                        await RefreshContentAndCheck(changeKey, true).ConfigureAwait(false);
                                     }
                                 }
 
@@ -407,7 +407,7 @@
                         try
                         {
                             RpcClient rpcClient = EnsureRpcClient(taskId);
-                            var response = await RequestProxy(rpcClient, request);
+                            var response = await RequestProxy(rpcClient, request).ConfigureAwait(false);
 
                             if (response != null && response.IsSuccess())
                             {
@@ -428,7 +428,7 @@
             if (_cacheMap != null && _cacheMap.ContainsKey(groupKey))
             {
                 _cacheMap.TryGetValue(groupKey, out var cache);
-                await RefreshContentAndCheck(cache, notify);
+                await RefreshContentAndCheck(cache, notify).ConfigureAwait(false);
             }
         }
 
@@ -436,7 +436,7 @@
         {
             try
             {
-                var resp = await GetServerConfig(cacheData.DataId, cacheData.Group, cacheData.Tenant, 3000L, notify);
+                var resp = await GetServerConfig(cacheData.DataId, cacheData.Group, cacheData.Tenant, 3000L, notify).ConfigureAwait(false);
                 cacheData.SetContent(resp.GetContent());
 
                 if (resp.GetConfigType().IsNotNullOrWhiteSpace()) cacheData.Type = resp.GetConfigType();
@@ -453,7 +453,7 @@
         {
             if (group.IsNullOrWhiteSpace()) group = Constants.DEFAULT_GROUP;
 
-            return await QueryConfig(dataId, group, tenant, readTimeout, notify);
+            return await QueryConfig(dataId, group, tenant, readTimeout, notify).ConfigureAwait(false);
         }
 
         private void RemoveCache(string dataId, string group, string tenant)
