@@ -54,7 +54,7 @@
         public string SecretKey => this["secretKey"]?.ToString();
 
         /// <summary>
-        /// secretKey
+        /// useGrpc
         /// </summary>
         [ConfigurationProperty("useGrpc", DefaultValue = false)]
         public bool UseGrpc => Convert.ToBoolean(this["useGrpc"]);
