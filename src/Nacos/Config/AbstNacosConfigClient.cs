@@ -221,7 +221,7 @@
             while (!cancellationToken.IsCancellationRequested)
             {
                 // read the last config
-                var lastConfig = await GetProcessor().GetSnapshotAync(GetAgent().GetName(), request.DataId, request.Group, request.Tenant);
+                var lastConfig = await GetProcessor().GetSnapshotAync(GetAgent().GetName(), request.DataId, request.Group, request.Tenant).ConfigureAwait(false);
                 request.Content = lastConfig;
 
                 try
@@ -231,14 +231,14 @@
                         { "Long-Pulling-Timeout", (ConstValue.LongPullingTimeout * 1000).ToString() }
                     };
 
-                    var responseMessage = await GetAgent().PostAsync(RequestPathValue.CONFIGS_LISTENER, headers, request.ToDict(), cancellationToken);
+                    var responseMessage = await GetAgent().PostAsync(RequestPathValue.CONFIGS_LISTENER, headers, request.ToDict(), cancellationToken).ConfigureAwait(false);
 
                     switch (responseMessage.StatusCode)
                     {
                         case System.Net.HttpStatusCode.OK:
                             SetHealthServer(true);
-                            var content = await responseMessage.Content.ReadAsStringAsync();
-                            await ConfigChangeAsync(content, request);
+                            var content = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            await ConfigChangeAsync(content, request).ConfigureAwait(false);
                             break;
                         case System.Net.HttpStatusCode.Forbidden:
                             SetHealthServer(false);
