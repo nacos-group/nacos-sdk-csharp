@@ -49,7 +49,7 @@
                 this._refreshServerListTimer = new Timer(
                     async x =>
                     {
-                        await RefreshSrvIfNeedAsync();
+                        await RefreshSrvIfNeedAsync().ConfigureAwait(false);
                     }, null, 0, _refreshServerListInternal);
             }
             else
@@ -78,19 +78,19 @@
                 HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Get, url);
                 foreach (var item in header) req.Headers.TryAddWithoutValidation(item.Key, item.Value);
 
-                var resp = await _httpClient.SendAsync(req);
+                var resp = await _httpClient.SendAsync(req).ConfigureAwait(false);
 
                 if (!resp.IsSuccessStatusCode)
                 {
                     throw new Exception($"Error while requesting: {url} . Server returned: {resp.StatusCode}");
                 }
 
-                var str = await resp.Content.ReadAsStringAsync();
+                var str = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
 
                 using StringReader sr = new StringReader(str);
                 while (true)
                 {
-                    var line = await sr.ReadLineAsync();
+                    var line = await sr.ReadLineAsync().ConfigureAwait(false);
                     if (line == null || line.Length <= 0)
                         break;
 
@@ -116,7 +116,7 @@
 
                 if (DateTimeOffset.Now.ToUnixTimeSeconds() - _lastServerListRefreshTime < _refreshServerListInternal) return;
 
-                var list = await GetServerListFromEndpoint();
+                var list = await GetServerListFromEndpoint().ConfigureAwait(false);
 
                 if (list == null || list.Count <= 0)
                     throw new Exception("Can not acquire Nacos list");

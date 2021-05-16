@@ -90,7 +90,7 @@
 
                         _logger.LogInformation("register instance to nacos server, 【{0}】", instance);
 
-                        await _svc.RegisterInstance(_options.ServiceName, _options.GroupName, instance);
+                        await _svc.RegisterInstance(_options.ServiceName, _options.GroupName, instance).ConfigureAwait(false);
                         break;
                     }
                     catch (Exception ex)
@@ -114,7 +114,7 @@
                         try
                         {
                             _logger.LogWarning("begin to remove instance");
-                            await _svc.DeregisterInstance(_options.ServiceName, _options.GroupName, uri.Host, uri.Port, _options.ClusterName);
+                            await _svc.DeregisterInstance(_options.ServiceName, _options.GroupName, uri.Host, uri.Port, _options.ClusterName).ConfigureAwait(false);
                             _logger.LogWarning("removed instance");
                             break;
                         }

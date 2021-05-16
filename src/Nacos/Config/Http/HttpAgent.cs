@@ -11,25 +11,25 @@
         {
             using var cts = new CancellationTokenSource(timeout);
 
-            return await ReqApiAsync(HttpMethod.Delete, path, headers, paramValues, cts.Token);
+            return await ReqApiAsync(HttpMethod.Delete, path, headers, paramValues, cts.Token).ConfigureAwait(false);
         }
 
         public async Task<HttpResponseMessage> GetAsync(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, int timeout = 8000)
         {
             using var cts = new CancellationTokenSource(timeout);
 
-            return await ReqApiAsync(HttpMethod.Get, path, headers, paramValues, cts.Token);
+            return await ReqApiAsync(HttpMethod.Get, path, headers, paramValues, cts.Token).ConfigureAwait(false);
         }
 
         public async Task<HttpResponseMessage> PostAsync(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, int timeout = 8000)
         {
             using var cts = new CancellationTokenSource(timeout);
 
-            return await ReqApiAsync(HttpMethod.Post, path, headers, paramValues, cts.Token);
+            return await ReqApiAsync(HttpMethod.Post, path, headers, paramValues, cts.Token).ConfigureAwait(false);
         }
 
         public async Task<HttpResponseMessage> PostAsync(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, CancellationToken cancellationToken)
-            => await ReqApiAsync(HttpMethod.Post, path, headers, paramValues, cancellationToken);
+            => await ReqApiAsync(HttpMethod.Post, path, headers, paramValues, cancellationToken).ConfigureAwait(false);
 
         public string GetName() => AbstGetName();
 

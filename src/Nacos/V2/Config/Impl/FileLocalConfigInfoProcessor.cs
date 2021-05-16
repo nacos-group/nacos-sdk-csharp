@@ -17,7 +17,7 @@
 
             try
             {
-                return await ReadFileAsync(file);
+                return await ReadFileAsync(file).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -47,7 +47,7 @@
 
             try
             {
-                return await ReadFileAsync(file);
+                return await ReadFileAsync(file).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -60,7 +60,7 @@
         {
             using FileStream fs = new FileStream(file.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             byte[] readByte = new byte[fs.Length];
-            await fs.ReadAsync(readByte, 0, readByte.Length);
+            await fs.ReadAsync(readByte, 0, readByte.Length).ConfigureAwait(false);
             string readStr = Encoding.UTF8.GetString(readByte);
             fs.Close();
             return readStr;
@@ -105,7 +105,7 @@
                     using FileStream fs = new FileStream(file.FullName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
                     byte[] bytes = Encoding.UTF8.GetBytes(config);
                     fs.SetLength(bytes.Length);
-                    await fs.WriteAsync(bytes, 0, bytes.Length);
+                    await fs.WriteAsync(bytes, 0, bytes.Length).ConfigureAwait(false);
                     fs.Close();
                 }
                 catch (Exception ex)
@@ -131,7 +131,7 @@
 
             try
             {
-                return await ReadFileAsync(file);
+                return await ReadFileAsync(file).ConfigureAwait(false);
             }
             catch
             {
@@ -204,7 +204,7 @@
                     using FileStream fs = new FileStream(file.FullName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
                     byte[] bytes = Encoding.UTF8.GetBytes(encryptDataKey);
                     fs.SetLength(bytes.Length);
-                    await fs.WriteAsync(bytes, 0, bytes.Length);
+                    await fs.WriteAsync(bytes, 0, bytes.Length).ConfigureAwait(false);
                     fs.Close();
                 }
             }
@@ -233,7 +233,7 @@
 
             try
             {
-                return await ReadFileAsync(file);
+                return await ReadFileAsync(file).ConfigureAwait(false);
             }
             catch
             {
