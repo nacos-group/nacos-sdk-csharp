@@ -46,7 +46,7 @@
 
             if (!cache.IsListenSuccess)
             {
-                await _agent.NotifyListenConfigAsync();
+                await _agent.NotifyListenConfigAsync().ConfigureAwait(false);
             }
         }
 
@@ -64,7 +64,7 @@
             // if current cache is already at listening status,do not notify.
             if (!cache.IsListenSuccess)
             {
-                await _agent.NotifyListenConfigAsync();
+                await _agent.NotifyListenConfigAsync().ConfigureAwait(false);
             }
         }
 
@@ -79,7 +79,7 @@
                 cache.RemoveListener(listener);
                 if ((cache.GetListeners()?.Count ?? 0) > 0)
                 {
-                    await _agent.RemoveCacheAsync(dataId, group);
+                    await _agent.RemoveCacheAsync(dataId, group).ConfigureAwait(false);
                 }
             }
         }
@@ -137,13 +137,13 @@
         }
 
         public async Task<bool> RemoveConfig(string dataId, string group, string tenant, string tag)
-            => await _agent.RemoveConfigAsync(dataId, group, tenant, tag);
+            => await _agent.RemoveConfigAsync(dataId, group, tenant, tag).ConfigureAwait(false);
 
         public async Task<bool> PublishConfig(string dataId, string group, string tenant, string appName, string tag, string betaIps,
-            string content, string type)
-            => await _agent.PublishConfigAsync(dataId, group, tenant, appName, tag, betaIps, content, type);
+            string content, string encryptedDataKey, string casMd5, string type)
+            => await _agent.PublishConfigAsync(dataId, group, tenant, appName, tag, betaIps, content, encryptedDataKey, casMd5, type).ConfigureAwait(false);
 
-        public Task<List<string>> GetServerConfig(string dataId, string group, string tenant, long readTimeout, bool notify)
+        public Task<ConfigResponse> GetServerConfig(string dataId, string group, string tenant, long readTimeout, bool notify)
         {
             if (group.IsNullOrWhiteSpace()) group = Constants.DEFAULT_GROUP;
 

@@ -38,7 +38,7 @@ namespace Nacos.Config.Http
             _timer = new Timer(
                 async x =>
                 {
-                    await _securityProxy.LoginAsync(_serverListMgr.GetServerUrls());
+                    await _securityProxy.LoginAsync(_serverListMgr.GetServerUrls()).ConfigureAwait(false);
                 }, null, 0, _securityInfoRefreshIntervalMills);
         }
 
@@ -48,10 +48,10 @@ namespace Nacos.Config.Http
 
         public override string AbstGetTenant() => _serverListMgr.GetTenant();
 
-        public override async Task<HttpResponseMessage> ReqApiAsync(HttpMethod httpMethod, string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, int timeout)
+        public override async Task<HttpResponseMessage> ReqApiAsync(HttpMethod httpMethod, string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, CancellationToken cancellationToken)
         {
             var client = _clientFactory.CreateClient(ConstValue.ClientName);
-            client.Timeout = TimeSpan.FromMilliseconds(timeout);
+            client.Timeout = Timeout.InfiniteTimeSpan;
 
             var requestMessage = new HttpRequestMessage
             {
@@ -81,7 +81,7 @@ namespace Nacos.Config.Http
             HttpAgentCommon.BuildHeader(requestMessage, headers);
             HttpAgentCommon.BuildSpasHeaders(requestMessage, paramValues, _options.AccessKey, _options.SecretKey);
 
-            var responseMessage = await client.SendAsync(requestMessage);
+            var responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
 
             if (responseMessage.StatusCode == System.Net.HttpStatusCode.InternalServerError
                 || responseMessage.StatusCode == System.Net.HttpStatusCode.BadGateway

@@ -19,7 +19,7 @@
         [HttpGet("g")]
         public async Task<string> GetAllInstances()
         {
-            var list = await _client.GetAllInstances("mysvc2", false);
+            var list = await _client.GetAllInstances("mysvc2", false).ConfigureAwait(false);
 
             var res = list.ToJsonString();
 
@@ -39,7 +39,7 @@
                 ServiceName = "mysvc2"
             };
 
-            await _client.RegisterInstance("mysvc2", instance);
+            await _client.RegisterInstance("mysvc2", instance).ConfigureAwait(false);
 
             return "RegisterInstance ok";
         }
@@ -57,7 +57,7 @@
                 ServiceName = "mysvc2"
             };
 
-            await _client.RegisterInstance("mysvc2", instance);
+            await _client.RegisterInstance("mysvc2", instance).ConfigureAwait(false);
 
             return "RegisterInstance ok";
         }
@@ -75,7 +75,7 @@
                 ServiceName = "mysvc2"
             };
 
-            await _client.DeregisterInstance("mysvc2", instance);
+            await _client.DeregisterInstance("mysvc2", instance).ConfigureAwait(false);
 
             return "DeregisterInstance ok";
         }
@@ -84,7 +84,7 @@
         [HttpGet("si")]
         public async Task<string> SelectInstances()
         {
-            var list = await _client.SelectInstances("mysvc2", true, false);
+            var list = await _client.SelectInstances("mysvc2", true, false).ConfigureAwait(false);
 
             var res = list.ToJsonString();
 
@@ -95,7 +95,7 @@
         [HttpGet("gs")]
         public async Task<string> GetServicesOfServer()
         {
-            var list = await _client.GetServicesOfServer(1, 10);
+            var list = await _client.GetServicesOfServer(1, 10).ConfigureAwait(false);
 
             var res = list.ToJsonString();
 
@@ -106,7 +106,7 @@
         [HttpGet("sub")]
         public async Task<string> Subscribe()
         {
-            await _client.Subscribe("mysvc2", listener);
+            await _client.Subscribe("mysvc2", listener).ConfigureAwait(false);
             return "Subscribe";
         }
 
@@ -114,7 +114,7 @@
         [HttpGet("unsub")]
         public async Task<string> Unsubscribe()
         {
-            await _client.Unsubscribe("mysvc2", listener);
+            await _client.Unsubscribe("mysvc2", listener).ConfigureAwait(false);
             return "Subscribe";
         }
 

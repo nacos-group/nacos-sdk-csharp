@@ -23,7 +23,7 @@
             using (FileStream fs = new FileStream(file.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 byte[] readByte = new byte[fs.Length];
-                await fs.ReadAsync(readByte, 0, readByte.Length);
+                await fs.ReadAsync(readByte, 0, readByte.Length).ConfigureAwait(false);
                 string readStr = Encoding.UTF8.GetString(readByte);
                 fs.Close();
                 return readStr;
@@ -59,7 +59,7 @@
             using (FileStream fs = new FileStream(file.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 byte[] readByte = new byte[fs.Length];
-                await fs.ReadAsync(readByte, 0, readByte.Length);
+                await fs.ReadAsync(readByte, 0, readByte.Length).ConfigureAwait(false);
                 string readStr = Encoding.UTF8.GetString(readByte);
                 fs.Close();
                 return readStr;
@@ -104,7 +104,7 @@
                 {
                     byte[] bytes = Encoding.UTF8.GetBytes(config);
                     fs.SetLength(bytes.Length);
-                    await fs.WriteAsync(bytes, 0, bytes.Length);
+                    await fs.WriteAsync(bytes, 0, bytes.Length).ConfigureAwait(false);
                     fs.Close();
                 }
             }

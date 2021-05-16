@@ -53,5 +53,10 @@
         public bool NamingUseRpc { get; set; } = true;
 
         public string NamingLoadCacheAtStart { get; set; }
+
+        /// <summary>
+        /// Whether enable protecting naming push empty data, default is false.
+        /// </summary>
+        public bool NamingPushEmptyProtection { get; set; } = false;
     }
 }

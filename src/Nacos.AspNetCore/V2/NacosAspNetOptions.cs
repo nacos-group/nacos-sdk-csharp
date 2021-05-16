@@ -72,23 +72,23 @@
         /// </summary>
         public string LBStrategy { get; set; } = LBStrategyName.WeightRandom.ToString();
 
-        public NacosSdkOptions BuildSdkOptions()
+        public System.Action<NacosSdkOptions> BuildSdkOptions()
         {
-            return new NacosSdkOptions
+            return x =>
             {
-                AccessKey = this.AccessKey,
-                ConfigUseRpc = this.ConfigUseRpc,
-                ContextPath = this.ContextPath,
-                DefaultTimeOut = this.DefaultTimeOut,
-                EndPoint = this.EndPoint,
-                ListenInterval = this.ListenInterval,
-                Namespace = this.Namespace,
-                NamingLoadCacheAtStart = this.NamingLoadCacheAtStart,
-                NamingUseRpc = this.NamingUseRpc,
-                Password = this.Password,
-                SecretKey = this.SecretKey,
-                ServerAddresses = this.ServerAddresses,
-                UserName = this.UserName,
+                x.AccessKey = this.AccessKey;
+                x.ConfigUseRpc = this.ConfigUseRpc;
+                x.ContextPath = this.ContextPath;
+                x.DefaultTimeOut = this.DefaultTimeOut;
+                x.EndPoint = this.EndPoint;
+                x.ListenInterval = this.ListenInterval;
+                x.Namespace = this.Namespace;
+                x.NamingLoadCacheAtStart = this.NamingLoadCacheAtStart;
+                x.NamingUseRpc = this.NamingUseRpc;
+                x.Password = this.Password;
+                x.SecretKey = this.SecretKey;
+                x.ServerAddresses = this.ServerAddresses;
+                x.UserName = this.UserName;
             };
         }
     }

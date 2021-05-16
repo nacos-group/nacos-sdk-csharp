@@ -24,7 +24,7 @@
         {
             if (reqClient != null) reqClient = null;
 
-            if (channel != null) await channel.ShutdownAsync();
+            if (channel != null) await channel.ShutdownAsync().ConfigureAwait(false);
         }
 
         protected override Task<CommonResponse> Request(CommonRequest req, CommonRequestMeta meta) => Request(req, meta, 3000L);

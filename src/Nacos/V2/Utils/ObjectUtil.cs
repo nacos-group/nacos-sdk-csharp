@@ -18,5 +18,8 @@
 
         public static object ToObj(this string json, Type type)
             => json.IsNullOrWhiteSpace() || type == null ? null : JsonConvert.DeserializeObject(json, type);
+
+        public static string SafeGetValue(this System.Collections.Generic.Dictionary<string, object> dict, string key, string defaultVal = "")
+            => dict.TryGetValue(key, out var val) ? (string)val : defaultVal;
     }
 }

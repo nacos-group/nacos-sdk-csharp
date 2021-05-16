@@ -48,7 +48,7 @@
                 async x =>
                 {
                     var info = x as BeatInfo;
-                    await BeatTask(info);
+                    await BeatTask(info).ConfigureAwait(false);
                 }, beatInfo, beatInfo.Period, beatInfo.Period);
 
             _beatTimer.AddOrUpdate(key, timer, (x, y) => timer);
@@ -62,7 +62,7 @@
 
             try
             {
-                Newtonsoft.Json.Linq.JObject result = await _serverProxy.SendBeat(beatInfo, false);
+                Newtonsoft.Json.Linq.JObject result = await _serverProxy.SendBeat(beatInfo, false).ConfigureAwait(false);
 
                 long interval = result.GetValue("clientBeatInterval").ToObject<long>();
 
@@ -96,7 +96,7 @@
 
                     try
                     {
-                        await _serverProxy.RegisterServiceAsync(beatInfo.ServiceName, NamingUtils.GetGroupName(beatInfo.ServiceName), instance);
+                        await _serverProxy.RegisterServiceAsync(beatInfo.ServiceName, NamingUtils.GetGroupName(beatInfo.ServiceName), instance).ConfigureAwait(false);
                     }
                     catch
                     {
@@ -106,6 +106,10 @@
             catch (NacosException ex)
             {
                 _logger?.LogError(ex, "[CLIENT-BEAT] failed to send beat: {0}, code: {1}, msg: {2}", beatInfo, ex.ErrorCode, ex.ErrorMsg);
+            }
+            catch (Exception unknownEx)
+            {
+                _logger?.LogError(unknownEx, "[CLIENT-BEAT] failed to send beat: {0}, unknown exception msg: {1}", beatInfo, unknownEx.Message);
             }
 
             string key = BuildKey(beatInfo.ServiceName, beatInfo.Ip, beatInfo.Port);

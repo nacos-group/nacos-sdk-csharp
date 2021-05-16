@@ -90,11 +90,11 @@
             return Task.CompletedTask;
         }
 
-        private async Task<List<string>> GetServerConfig(string dataId, string group, string tenant, long readTimeout, bool notify)
+        private async Task<ConfigResponse> GetServerConfig(string dataId, string group, string tenant, long readTimeout, bool notify)
         {
             if (group.IsNullOrWhiteSpace()) group = Constants.DEFAULT_GROUP;
 
-            return await QueryConfig(dataId, group, tenant, readTimeout, notify);
+            return await QueryConfig(dataId, group, tenant, readTimeout, notify).ConfigureAwait(false);
         }
 
         private async Task<List<string>> CheckUpdateDataIds(List<CacheData> cacheDatas, List<string> inInitializingCacheList)
@@ -126,7 +126,7 @@
             }
 
             var isInitializingCacheList = inInitializingCacheList != null && inInitializingCacheList.Any();
-            return await CheckUpdateConfigStr(sb.ToString(), isInitializingCacheList);
+            return await CheckUpdateConfigStr(sb.ToString(), isInitializingCacheList).ConfigureAwait(false);
         }
 
         private async Task<List<string>> CheckUpdateConfigStr(string probeUpdateString, bool isInitializingCacheList)
@@ -155,12 +155,12 @@
                 // increase the client's read timeout to avoid this problem.
                 long readTimeoutMs = _timeout + (long)Math.Round((_timeout >> 1) * 1d);
 
-                var result = await _agent.HttpPost(Constants.CONFIG_CONTROLLER_PATH + "/listener", headers, parameters, "", readTimeoutMs);
+                var result = await _agent.HttpPost(Constants.CONFIG_CONTROLLER_PATH + "/listener", headers, parameters, "", readTimeoutMs).ConfigureAwait(false);
 
                 if (result.IsSuccessStatusCode)
                 {
                     _isHealthServer = true;
-                    var data = await result.Content.ReadAsStringAsync();
+                    var data = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
                     return ParseUpdateDataIdResponse(data);
                 }
                 else
@@ -230,7 +230,7 @@
 
         protected override string GetTenantInner() => _agent.GetTenant();
 
-        protected override async Task<bool> PublishConfig(string dataId, string group, string tenant, string appName, string tag, string betaIps, string content, string type)
+        protected override async Task<bool> PublishConfig(string dataId, string group, string tenant, string appName, string tag, string betaIps, string content, string encryptedDataKey, string casMd5, string type)
         {
             group = ParamUtils.Null2DefaultGroup(group);
             ParamUtils.CheckParam(dataId, group, content);
@@ -263,7 +263,7 @@
             try
             {
                 var timeOut = _options.DefaultTimeOut > 0 ? _options.DefaultTimeOut : POST_TIMEOUT;
-                result = await HttpPost(url, headers, parameters, "", timeOut);
+                result = await HttpPost(url, headers, parameters, "", timeOut).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -299,9 +299,9 @@
             }
         }
 
-        protected override async Task<List<string>> QueryConfig(string dataId, string group, string tenant, long readTimeout, bool notify)
+        protected override async Task<ConfigResponse> QueryConfig(string dataId, string group, string tenant, long readTimeout, bool notify)
         {
-            string[] ct = new string[2];
+            ConfigResponse resp = new ConfigResponse();
             if (group.IsNullOrWhiteSpace()) group = Constants.DEFAULT_GROUP;
 
             HttpResponseMessage result = null;
@@ -323,7 +323,7 @@
                 var headers = new Dictionary<string, string>(16);
                 headers["notify"] = notify.ToString();
 
-                result = await HttpGet(Constants.CONFIG_CONTROLLER_PATH, headers, paramters, _agent.GetEncode(), readTimeout);
+                result = await HttpGet(Constants.CONFIG_CONTROLLER_PATH, headers, paramters, _agent.GetEncode(), readTimeout).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -338,27 +338,28 @@
             switch (result.StatusCode)
             {
                 case System.Net.HttpStatusCode.OK:
-                    var content = await result.Content.ReadAsStringAsync();
+                    var content = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-                    await FileLocalConfigInfoProcessor.SaveSnapshotAsync(_agent.GetName(), dataId, group, tenant, content);
-                    ct[0] = content;
+                    await FileLocalConfigInfoProcessor.SaveSnapshotAsync(_agent.GetName(), dataId, group, tenant, content).ConfigureAwait(false);
+
+                    resp.SetContent(content);
 
                     if (result.Headers.TryGetValues(Constants.CONFIG_TYPE, out var values))
                     {
                         var t = values.FirstOrDefault();
 
-                        if (t.IsNotNullOrWhiteSpace()) ct[1] = t;
-                        else ct[1] = "text";
+                        if (t.IsNotNullOrWhiteSpace()) resp.SetConfigType(t);
+                        else resp.SetConfigType("text");
                     }
                     else
                     {
-                        ct[1] = "text";
+                        resp.SetConfigType("text");
                     }
 
-                    return ct.ToList();
+                    return resp;
                 case System.Net.HttpStatusCode.NotFound:
-                    await FileLocalConfigInfoProcessor.SaveSnapshotAsync(_agent.GetName(), dataId, group, tenant, null);
-                    return ct.ToList();
+                    await FileLocalConfigInfoProcessor.SaveSnapshotAsync(_agent.GetName(), dataId, group, tenant, null).ConfigureAwait(false);
+                    return resp;
                 case System.Net.HttpStatusCode.Conflict:
                     {
                         _logger?.LogError(
@@ -392,7 +393,7 @@
             if (headers == null) headers = new Dictionary<string, string>(16);
 
             AssembleHttpParams(paramValues, headers);
-            return await _agent.HttpPost(path, headers, paramValues, encoding, readTimeoutMs);
+            return await _agent.HttpPost(path, headers, paramValues, encoding, readTimeoutMs).ConfigureAwait(false);
         }
 
         private async Task<HttpResponseMessage> HttpGet(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, string encoding, long readTimeoutMs)
@@ -400,7 +401,7 @@
             if (headers == null) headers = new Dictionary<string, string>(16);
 
             AssembleHttpParams(paramValues, headers);
-            return await _agent.HttpGet(path, headers, paramValues, encoding, readTimeoutMs);
+            return await _agent.HttpGet(path, headers, paramValues, encoding, readTimeoutMs).ConfigureAwait(false);
         }
 
         private async Task<HttpResponseMessage> HttpDelete(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, string encoding, long readTimeoutMs)
@@ -408,7 +409,7 @@
             if (headers == null) headers = new Dictionary<string, string>(16);
 
             AssembleHttpParams(paramValues, headers);
-            return await _agent.HttpDelete(path, headers, paramValues, encoding, readTimeoutMs);
+            return await _agent.HttpDelete(path, headers, paramValues, encoding, readTimeoutMs).ConfigureAwait(false);
         }
 
         private void AssembleHttpParams(Dictionary<string, string> paramValues, Dictionary<string, string> headers)
@@ -464,7 +465,7 @@
             HttpResponseMessage result = null;
             try
             {
-                result = await HttpDelete(url, null, parameters, "", POST_TIMEOUT);
+                result = await HttpDelete(url, null, parameters, "", POST_TIMEOUT).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -504,7 +505,7 @@
             _loginTimer = new Timer(
                 async x =>
                 {
-                    await _securityProxy.LoginAsync(_serverListManager.GetServerUrls());
+                    await _securityProxy.LoginAsync(_serverListManager.GetServerUrls()).ConfigureAwait(false);
                 }, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(_securityInfoRefreshIntervalMills));
 
             // init should wait the result.
@@ -520,7 +521,7 @@
                    {
                        try
                        {
-                           await ExecuteConfigListen();
+                           await ExecuteConfigListen().ConfigureAwait(false);
                        }
                        catch (Exception ex)
                        {
@@ -546,7 +547,7 @@
 
             if (!cacheData.IsUseLocalConfig && path.Exists)
             {
-                string content = await FileLocalConfigInfoProcessor.GetFailoverAsync(agentName, dataId, group, tenant);
+                string content = await FileLocalConfigInfoProcessor.GetFailoverAsync(agentName, dataId, group, tenant).ConfigureAwait(false);
                 string md5 = HashUtil.GetMd5(content);
                 cacheData.SetUseLocalConfigInfo(true);
                 cacheData.SetLocalConfigInfoVersion(path.LastWriteTimeUtc.ToTimestamp());
@@ -575,7 +576,7 @@
                 && path.Exists
                 && cacheData.GetLocalConfigInfoVersion() != path.LastWriteTimeUtc.ToTimestamp())
             {
-                string content = await FileLocalConfigInfoProcessor.GetFailoverAsync(agentName, dataId, group, tenant);
+                string content = await FileLocalConfigInfoProcessor.GetFailoverAsync(agentName, dataId, group, tenant).ConfigureAwait(false);
                 string md5 = HashUtil.GetMd5(content);
                 cacheData.SetUseLocalConfigInfo(true);
                 cacheData.SetLocalConfigInfoVersion(path.LastWriteTimeUtc.ToTimestamp());
@@ -606,7 +607,7 @@
                             cacheDatas.Add(cacheData);
                             try
                             {
-                                await CheckLocalConfig(_agent.GetName(), cacheData);
+                                await CheckLocalConfig(_agent.GetName(), cacheData).ConfigureAwait(false);
 
                                 if (cacheData.IsUseLocalConfig) cacheData.CheckListenerMd5();
                             }
@@ -617,7 +618,7 @@
                         }
                     }
 
-                    var changedGroupKeys = await CheckUpdateDataIds(cacheDatas, inInitializingCacheList);
+                    var changedGroupKeys = await CheckUpdateDataIds(cacheDatas, inInitializingCacheList).ConfigureAwait(false);
 
                     foreach (string groupKey in changedGroupKeys)
                     {
@@ -629,16 +630,16 @@
 
                         try
                         {
-                            List<string> ct = await GetServerConfig(dataId, group, tenant, 3000L, true);
+                            var resp = await GetServerConfig(dataId, group, tenant, 3000L, true).ConfigureAwait(false);
 
                             if (_cacheMap.TryGetValue(GroupKey.GetKeyTenant(dataId, group, tenant), out var cache))
                             {
-                                cache.SetContent(ct[0]);
+                                cache.SetContent(resp.GetContent());
 
-                                if (ct[1] != null) cache.Type = ct[1];
+                                if (resp.GetConfigType().IsNotNullOrWhiteSpace()) cache.Type = resp.GetConfigType();
 
                                 _logger?.LogInformation("[{0}] [data-received] dataId={1}, group={2}, tenant={3}, md5={4}, content={5}, type={6}", _agent.GetName(), dataId, group, tenant, cache.Md5,
-                                       ContentUtils.TruncateContent(ct[0]), ct[1]);
+                                       ContentUtils.TruncateContent(resp.GetContent()), resp.GetConfigType());
                             }
                         }
                         catch (Exception ioe)

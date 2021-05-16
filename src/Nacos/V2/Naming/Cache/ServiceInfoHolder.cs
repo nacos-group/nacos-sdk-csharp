@@ -21,6 +21,8 @@
 
         private ILogger _logger;
 
+        private bool _pushEmptyProtection;
+
         public ServiceInfoHolder(ILogger logger, string @namespace, NacosSdkOptions nacosOptions, InstancesChangeNotifier notifier = null)
         {
             this._logger = logger;
@@ -39,6 +41,7 @@
             }
 
             this.failoverReactor = new FailoverReactor(this, cacheDir);
+            this._pushEmptyProtection = nacosOptions.NamingPushEmptyProtection;
         }
 
         private bool IsLoadCacheAtStart(NacosSdkOptions nacosOptions)
@@ -61,15 +64,17 @@
 
         internal Dtos.ServiceInfo ProcessServiceInfo(Dtos.ServiceInfo serviceInfo)
         {
+            if (serviceInfo.GetKey().IsNullOrWhiteSpace()) return null;
+
             serviceInfoMap.TryGetValue(serviceInfo.GetKey(), out var oldService);
 
-            if (serviceInfo.Hosts == null || !serviceInfo.Hosts.Any() || !serviceInfo.Validate()) return oldService;
+            if (IsEmptyOrErrorPush(serviceInfo)) return oldService;
 
             serviceInfoMap.AddOrUpdate(serviceInfo.GetKey(), serviceInfo, (x, y) => serviceInfo);
 
             bool changed = IsChangedServiceInfo(oldService, serviceInfo);
 
-            if (string.IsNullOrWhiteSpace(serviceInfo.JsonFromServer))
+            if (serviceInfo.JsonFromServer.IsNullOrWhiteSpace())
             {
                 serviceInfo.JsonFromServer = serviceInfo.ToJsonString();
             }
@@ -89,6 +94,9 @@
 
             return serviceInfo;
         }
+
+        private bool IsEmptyOrErrorPush(Dtos.ServiceInfo serviceInfo)
+            => serviceInfo.Hosts == null || !serviceInfo.Hosts.Any() || (_pushEmptyProtection && !serviceInfo.Validate());
 
         private bool IsChangedServiceInfo(Dtos.ServiceInfo oldService, Dtos.ServiceInfo newService)
         {

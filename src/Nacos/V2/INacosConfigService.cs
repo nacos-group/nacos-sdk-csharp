@@ -58,6 +58,27 @@
         Task<bool> PublishConfig(string dataId, string group, string content, string type);
 
         /// <summary>
+        /// Publish config.
+        /// </summary>
+        /// <param name="dataId">dataId</param>
+        /// <param name="group">group</param>
+        /// <param name="content">content</param>
+        /// <param name="casMd5">casMd5 prev content's md5 to cas</param>
+        /// <returns>Whether publish</returns>
+        Task<bool> PublishConfigCas(string dataId, string group, string content, string casMd5);
+
+        /// <summary>
+        /// Publish config.
+        /// </summary>
+        /// <param name="dataId">dataId</param>
+        /// <param name="group">group</param>
+        /// <param name="content">content</param>
+        /// <param name="casMd5">casMd5 prev content's md5 to cas</param>
+        /// <param name="type">config type</param>
+        /// <returns>Whether publish</returns>
+        Task<bool> PublishConfigCas(string dataId, string group, string content, string casMd5, string type);
+
+        /// <summary>
         /// Remove config.
         /// </summary>
         /// <param name="dataId">dataId</param>
