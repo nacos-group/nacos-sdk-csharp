@@ -230,7 +230,7 @@
                         {
                             if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - _lastActiveTimeStamp < _keepAliveTime) continue;
 
-                            bool isHealthy = await DoHealthCheckAsync();
+                            bool isHealthy = await DoHealthCheckAsync().ConfigureAwait(false);
 
                             if (!isHealthy)
                             {
@@ -276,7 +276,7 @@
                             }
                         }
 
-                        await Reconnect(reconnectContext.ServerInfo, reconnectContext.OnRequestFail);
+                        await Reconnect(reconnectContext.ServerInfo, reconnectContext.OnRequestFail).ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {
@@ -293,7 +293,7 @@
 
             try
             {
-                var response = await this.currentConnetion.RequestAsync(healthCheckRequest, BuildMeta(healthCheckRequest.GetRemoteType()), 3000L);
+                var response = await this.currentConnetion.RequestAsync(healthCheckRequest, BuildMeta(healthCheckRequest.GetRemoteType()), 3000L).ConfigureAwait(false);
 
                 // not only check server is ok ,also check connection is register.
                 return response != null && response.IsSuccess();
@@ -311,7 +311,7 @@
             try
             {
                 var recommendServer = recommendServerInfo;
-                if (onRequestFail && await DoHealthCheckAsync())
+                if (onRequestFail && await DoHealthCheckAsync().ConfigureAwait(false))
                 {
                     logger?.LogInformation("[{0}] Server check success : {1}", _name, recommendServer);
                     Interlocked.Exchange(ref rpcClientStatus, RpcClientStatus.RUNNING);
@@ -441,7 +441,7 @@
                         throw new NacosException(NacosException.CLIENT_DISCONNECT, $"Client not connected,current status: {rpcClientStatus}");
                     }
 
-                    response = await currentConnetion.RequestAsync(request, BuildMeta(request.GetRemoteType()), timeoutMills);
+                    response = await currentConnetion.RequestAsync(request, BuildMeta(request.GetRemoteType()), timeoutMills).ConfigureAwait(false);
 
                     if (response == null) throw new NacosException(NacosException.SERVER_ERROR, "Unknown Exception.");
 
@@ -465,7 +465,7 @@
                 }
                 catch (Exception ex)
                 {
-                    if (waitReconnect) await Task.Delay((int)Math.Min(100, timeoutMills / 3));
+                    if (waitReconnect) await Task.Delay((int)Math.Min(100, timeoutMills / 3)).ConfigureAwait(false);
 
                     logger?.LogError("Fail to send request,request={0},errorMesssage={1}", request, ex.Message);
 

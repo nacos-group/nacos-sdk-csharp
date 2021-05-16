@@ -107,7 +107,7 @@
                {
                    var cts = new System.Threading.CancellationTokenSource();
 
-                   while (await call.ResponseStream.MoveNext(cts.Token))
+                   while (await call.ResponseStream.MoveNext(cts.Token).ConfigureAwait(false))
                    {
                        var current = call.ResponseStream.Current;
 
@@ -120,7 +120,7 @@
                            {
                                var response = HandleServerRequest(request);
                                response.RequestId = request.RequestId;
-                               await call.RequestStream.WriteAsync(GrpcUtils.Convert(response));
+                               await call.RequestStream.WriteAsync(GrpcUtils.Convert(response)).ConfigureAwait(false);
                            }
                            catch (Exception)
                            {

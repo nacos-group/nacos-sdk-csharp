@@ -20,7 +20,7 @@
             var ip = "127.0.0.1";
             var port = 9999;
 
-            await AssertRegisterSingleInstance(serviceName, ip, port, nameof(RegisterInstance_Should_Succeed));
+            await AssertRegisterSingleInstance(serviceName, ip, port, nameof(RegisterInstance_Should_Succeed)).ConfigureAwait(false);
         }
 
         [Fact]
@@ -30,11 +30,11 @@
             var ip = "127.0.0.2";
             var port = 9999;
 
-            await AssertRegisterSingleInstance(serviceName, ip, port, nameof(DeregisterInstance_Should_Succeed));
+            await AssertRegisterSingleInstance(serviceName, ip, port, nameof(DeregisterInstance_Should_Succeed)).ConfigureAwait(false);
 
-            await _namingSvc.DeregisterInstance(serviceName, ip, port);
-            await Task.Delay(1000);
-            var instances = await _namingSvc.GetAllInstances(serviceName, false);
+            await _namingSvc.DeregisterInstance(serviceName, ip, port).ConfigureAwait(false);
+            await Task.Delay(1000).ConfigureAwait(false);
+            var instances = await _namingSvc.GetAllInstances(serviceName, false).ConfigureAwait(false);
             _output.WriteLine($"DeregisterInstance_Should_Succeed, GetAllInstances, {serviceName}, {instances?.ToJsonString()}");
             Assert.Empty(instances);
         }
@@ -46,23 +46,23 @@
             var ip = "127.0.0.3";
             var port = 9999;
 
-            await AssertRegisterSingleInstance(serviceName, ip, port, nameof(DeregisterInstance_Should_Succeed));
+            await AssertRegisterSingleInstance(serviceName, ip, port, nameof(DeregisterInstance_Should_Succeed)).ConfigureAwait(false);
 
             var listerner = new NamingListerner(_output);
 
-            await _namingSvc.Subscribe(serviceName, listerner);
+            await _namingSvc.Subscribe(serviceName, listerner).ConfigureAwait(false);
 
-            await _namingSvc.RegisterInstance(serviceName, "127.0.0.4", 9999);
+            await _namingSvc.RegisterInstance(serviceName, "127.0.0.4", 9999).ConfigureAwait(false);
 
-            await Task.Delay(500);
+            await Task.Delay(500).ConfigureAwait(false);
         }
 
         private async Task AssertRegisterSingleInstance(string serviceName, string ip, int port, string testName)
         {
             _output.WriteLine($"{testName}, register instance, {serviceName} ,{ip} , {port}");
-            await _namingSvc.RegisterInstance(serviceName, ip, port);
-            await Task.Delay(500);
-            var instances = await _namingSvc.GetAllInstances(serviceName, false);
+            await _namingSvc.RegisterInstance(serviceName, ip, port).ConfigureAwait(false);
+            await Task.Delay(500).ConfigureAwait(false);
+            var instances = await _namingSvc.GetAllInstances(serviceName, false).ConfigureAwait(false);
             _output.WriteLine($"{testName}, GetAllInstances, {serviceName}, {instances?.ToJsonString()}");
             Assert.Single(instances);
 

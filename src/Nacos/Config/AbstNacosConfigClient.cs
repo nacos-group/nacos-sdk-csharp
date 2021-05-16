@@ -36,7 +36,7 @@
             request.CheckParam();
 
             // read from local cache at first
-            var config = await GetProcessor().GetFailoverAsync(GetAgent().GetName(), request.DataId, request.Group, request.Tenant);
+            var config = await GetProcessor().GetFailoverAsync(GetAgent().GetName(), request.DataId, request.Group, request.Tenant).ConfigureAwait(false);
 
             if (!string.IsNullOrWhiteSpace(config))
             {
@@ -46,7 +46,7 @@
 
             try
             {
-                config = await DoGetConfigAsync(request);
+                config = await DoGetConfigAsync(request).ConfigureAwait(false);
             }
             catch (NacosException e) when (e.ErrorCode == NacosException.NO_RIGHT)
             {
@@ -60,26 +60,26 @@
             if (!string.IsNullOrWhiteSpace(config))
             {
                 _logger?.LogInformation($"[get-config] content from server {config}, envname={GetAgent().GetName()}, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}");
-                await GetProcessor().SaveSnapshotAsync(GetAgent().GetName(), request.DataId, request.Group, request.Tenant, config);
+                await GetProcessor().SaveSnapshotAsync(GetAgent().GetName(), request.DataId, request.Group, request.Tenant, config).ConfigureAwait(false);
                 return config;
             }
 
-            config = await GetProcessor().GetSnapshotAync(GetAgent().GetName(), request.DataId, request.Group, request.Tenant);
+            config = await GetProcessor().GetSnapshotAync(GetAgent().GetName(), request.DataId, request.Group, request.Tenant).ConfigureAwait(false);
 
             return config;
         }
 
         private async Task<string> DoGetConfigAsync(GetConfigRequest request)
         {
-            var responseMessage = await GetAgent().GetAsync(RequestPathValue.CONFIGS, null, request.ToDict());
+            var responseMessage = await GetAgent().GetAsync(RequestPathValue.CONFIGS, null, request.ToDict()).ConfigureAwait(false);
 
             switch (responseMessage.StatusCode)
             {
                 case System.Net.HttpStatusCode.OK:
-                    var result = await responseMessage.Content.ReadAsStringAsync();
+                    var result = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                     return result;
                 case System.Net.HttpStatusCode.NotFound:
-                    await GetProcessor().SaveSnapshotAsync(GetAgent().GetName(), request.DataId, request.Group, request.Tenant, null);
+                    await GetProcessor().SaveSnapshotAsync(GetAgent().GetName(), request.DataId, request.Group, request.Tenant, null).ConfigureAwait(false);
                     return null;
                 case System.Net.HttpStatusCode.Forbidden:
                     throw new NacosException(NacosException.NO_RIGHT, $"Insufficient privilege.");
@@ -97,13 +97,13 @@
 
             request.CheckParam();
 
-            var responseMessage = await GetAgent().PostAsync(RequestPathValue.CONFIGS, null, request.ToDict());
+            var responseMessage = await GetAgent().PostAsync(RequestPathValue.CONFIGS, null, request.ToDict()).ConfigureAwait(false);
 
             switch (responseMessage.StatusCode)
             {
                 case System.Net.HttpStatusCode.OK:
                     _logger?.LogInformation($"[publish-single] ok, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, config={request.Content}");
-                    var result = await responseMessage.Content.ReadAsStringAsync();
+                    var result = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                     return result.Equals("true", StringComparison.OrdinalIgnoreCase);
                 case System.Net.HttpStatusCode.Forbidden:
                     _logger?.LogWarning($"[publish-single] error, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, code={(int)responseMessage.StatusCode} msg={responseMessage.StatusCode.ToString()}");
@@ -123,13 +123,13 @@
 
             request.CheckParam();
 
-            var responseMessage = await GetAgent().DeleteAsync(RequestPathValue.CONFIGS, null, request.ToDict());
+            var responseMessage = await GetAgent().DeleteAsync(RequestPathValue.CONFIGS, null, request.ToDict()).ConfigureAwait(false);
 
             switch (responseMessage.StatusCode)
             {
                 case System.Net.HttpStatusCode.OK:
                     _logger?.LogInformation($"[remove] ok, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}");
-                    var result = await responseMessage.Content.ReadAsStringAsync();
+                    var result = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                     return result.Equals("true", StringComparison.OrdinalIgnoreCase);
                 case System.Net.HttpStatusCode.Forbidden:
                     _logger?.LogWarning($"[remove] error, dataId={request.DataId}, group={request.Group}, tenant={request.Tenant}, code={(int)responseMessage.StatusCode} msg={responseMessage.StatusCode.ToString()}");
@@ -268,10 +268,10 @@
                     DataId = request.DataId,
                     Group = request.Group,
                     Tenant = request.Tenant
-                });
+                }).ConfigureAwait(false);
 
                 // update local cache
-                await GetProcessor().SaveSnapshotAsync(GetAgent().GetName(), request.DataId, request.Group, request.Tenant, config);
+                await GetProcessor().SaveSnapshotAsync(GetAgent().GetName(), request.DataId, request.Group, request.Tenant, config).ConfigureAwait(false);
 
                 // callback
                 foreach (var cb in request.Callbacks)

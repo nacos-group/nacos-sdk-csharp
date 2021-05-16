@@ -8,7 +8,7 @@
         [Fact]
         public async Task GetSwitches_Should_Succeed()
         {
-            var res = await _namingClient.GetSwitchesAsync();
+            var res = await _namingClient.GetSwitchesAsync().ConfigureAwait(false);
             Assert.NotNull(res);
         }
 
@@ -22,7 +22,7 @@
                  Value = "test"
             };
 
-            var res = await _namingClient.ModifySwitchesAsync(request);
+            var res = await _namingClient.ModifySwitchesAsync(request).ConfigureAwait(false);
             Assert.True(res);
         }
     }

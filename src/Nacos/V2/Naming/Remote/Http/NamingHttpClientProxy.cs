@@ -81,7 +81,7 @@
 
             if (!lightBeatEnabled) body["beat"] = beatInfo.ToJsonString();
 
-            var result = await ReqApi(UtilAndComs.NacosUrlBase + "/instance/beat", parameters, body, HttpMethod.Put);
+            var result = await ReqApi(UtilAndComs.NacosUrlBase + "/instance/beat", parameters, body, HttpMethod.Put).ConfigureAwait(false);
             return Newtonsoft.Json.Linq.JObject.Parse(result);
         }
 
@@ -111,7 +111,7 @@
                 { "selector", selector.ToJsonString() },
             };
 
-            await ReqApi(UtilAndComs.NacosUrlService, paramters, HttpMethod.Post);
+            await ReqApi(UtilAndComs.NacosUrlService, paramters, HttpMethod.Post).ConfigureAwait(false);
         }
 
         public async Task<bool> DeleteService(string serviceName, string groupName)
@@ -125,7 +125,7 @@
                 { CommonParams.GROUP_NAME, groupName },
             };
 
-            var result = await ReqApi(UtilAndComs.NacosUrlService, paramters, HttpMethod.Delete);
+            var result = await ReqApi(UtilAndComs.NacosUrlService, paramters, HttpMethod.Delete).ConfigureAwait(false);
             return "ok".Equals(result);
         }
 
@@ -151,7 +151,7 @@
                 { "ephemeral", instance.Ephemeral.ToString() },
             };
 
-            await ReqApi(UtilAndComs.NacosUrlInstance, paramters, HttpMethod.Delete);
+            await ReqApi(UtilAndComs.NacosUrlInstance, paramters, HttpMethod.Delete).ConfigureAwait(false);
         }
 
         public async Task<ListView<string>> GetServiceList(int pageNo, int pageSize, string groupName, AbstractSelector selector)
@@ -169,7 +169,7 @@
                 paramters["selector"] = selector.ToJsonString();
             }
 
-            var result = await ReqApi(UtilAndComs.NacosUrlBase + "/service/list", paramters, HttpMethod.Get);
+            var result = await ReqApi(UtilAndComs.NacosUrlBase + "/service/list", paramters, HttpMethod.Get).ConfigureAwait(false);
 
             var json = Newtonsoft.Json.Linq.JObject.Parse(result);
             var count = json.GetValue("count")?.ToObject<int>() ?? 0;
@@ -193,7 +193,7 @@
                 { "healthyOnly", healthyOnly.ToString() },
             };
 
-            var result = await ReqApi(UtilAndComs.NacosUrlBase + "/instance/list", paramters, HttpMethod.Get);
+            var result = await ReqApi(UtilAndComs.NacosUrlBase + "/instance/list", paramters, HttpMethod.Get).ConfigureAwait(false);
             if (!string.IsNullOrWhiteSpace(result))
             {
                 return result.ToObj<ServiceInfo>();
@@ -214,7 +214,7 @@
             };
 
 
-            var result = await ReqApi(UtilAndComs.NacosUrlService, paramters, HttpMethod.Get);
+            var result = await ReqApi(UtilAndComs.NacosUrlService, paramters, HttpMethod.Get).ConfigureAwait(false);
             return result.ToObj<Service>();
         }
 
@@ -244,14 +244,14 @@
                 { "metadata", instance.Metadata.ToJsonString() },
             };
 
-            await ReqApi(UtilAndComs.NacosUrlInstance, paramters, HttpMethod.Post);
+            await ReqApi(UtilAndComs.NacosUrlInstance, paramters, HttpMethod.Post).ConfigureAwait(false);
         }
 
         private async Task<string> ReqApi(string url, Dictionary<string, string> paramters, HttpMethod method)
-            => await ReqApi(url, paramters, new Dictionary<string, string>(), method);
+            => await ReqApi(url, paramters, new Dictionary<string, string>(), method).ConfigureAwait(false);
 
         private async Task<string> ReqApi(string url, Dictionary<string, string> paramters, Dictionary<string, string> body, HttpMethod method)
-            => await ReqApi(url, paramters, body, serverListManager.GetServerList(), method);
+            => await ReqApi(url, paramters, body, serverListManager.GetServerList(), method).ConfigureAwait(false);
 
         private async Task<string> ReqApi(string url, Dictionary<string, string> paramters, Dictionary<string, string> body, List<string> servers, HttpMethod method)
         {
@@ -272,7 +272,7 @@
                     var server = servers[i];
                     try
                     {
-                        return await CallServer(url, paramters, body, server, method);
+                        return await CallServer(url, paramters, body, server, method).ConfigureAwait(false);
                     }
                     catch (NacosException e)
                     {
@@ -290,7 +290,7 @@
                 {
                     try
                     {
-                        return await CallServer(url, paramters, body, serverListManager.GetNacosDomain(), method);
+                        return await CallServer(url, paramters, body, serverListManager.GetNacosDomain(), method).ConfigureAwait(false);
                     }
                     catch (NacosException e)
                     {
@@ -337,11 +337,11 @@
 
                 BuildHeader(requestMessage, headers);
 
-                var responseMessage = await client.SendAsync(requestMessage);
+                var responseMessage = await client.SendAsync(requestMessage).ConfigureAwait(false);
 
                 if (responseMessage.IsSuccessStatusCode)
                 {
-                    var content = await responseMessage.Content.ReadAsStringAsync();
+                    var content = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
                     return content;
                 }
                 else if (responseMessage.StatusCode == System.Net.HttpStatusCode.NotModified)
@@ -350,7 +350,7 @@
                 }
 
                 // response body will contains some error message
-                var msg = await responseMessage.Content.ReadAsStringAsync();
+                var msg = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
 
                 throw new NacosException((int)responseMessage.StatusCode, $"{responseMessage.StatusCode}--{msg}");
             }
@@ -416,7 +416,7 @@
 
         public async Task<ServiceInfo> Subscribe(string serviceName, string groupName, string clusters)
         {
-            return await QueryInstancesOfService(serviceName, groupName, clusters, pushReceiver.GetUdpPort(), false);
+            return await QueryInstancesOfService(serviceName, groupName, clusters, pushReceiver.GetUdpPort(), false).ConfigureAwait(false);
         }
 
         public Task Unsubscribe(string serviceName, string groupName, string clusters)
@@ -458,7 +458,7 @@
                 { "metadata", instance.Metadata.ToJsonString() },
             };
 
-            await ReqApi(UtilAndComs.NacosUrlInstance, paramters, HttpMethod.Put);
+            await ReqApi(UtilAndComs.NacosUrlInstance, paramters, HttpMethod.Put).ConfigureAwait(false);
         }
 
         public async Task UpdateService(Service service, AbstractSelector selector)
@@ -475,7 +475,7 @@
                 { "selector", selector.ToJsonString() },
             };
 
-            await ReqApi(UtilAndComs.NacosUrlService, paramters, HttpMethod.Put);
+            await ReqApi(UtilAndComs.NacosUrlService, paramters, HttpMethod.Put).ConfigureAwait(false);
         }
 
         private string InitParams(Dictionary<string, string> dict, Dictionary<string, string> body)

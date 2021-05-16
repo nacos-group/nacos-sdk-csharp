@@ -28,32 +28,32 @@
             => _worker.AddTenantListeners(dataId, group, new List<IListener> { listener });
 
         public async Task<string> GetConfig(string dataId, string group, long timeoutMs)
-            => await GetConfigInner(_namespace, dataId, group, timeoutMs);
+            => await GetConfigInner(_namespace, dataId, group, timeoutMs).ConfigureAwait(false);
 
         public async Task<string> GetConfigAndSignListener(string dataId, string group, long timeoutMs, IListener listener)
         {
-            string content = await GetConfig(dataId, group, timeoutMs);
+            string content = await GetConfig(dataId, group, timeoutMs).ConfigureAwait(false);
 
-            await _worker.AddTenantListenersWithContent(dataId, group, content, new List<IListener> { listener });
+            await _worker.AddTenantListenersWithContent(dataId, group, content, new List<IListener> { listener }).ConfigureAwait(false);
             return content;
         }
 
         public Task<string> GetServerStatus() => Task.FromResult(_worker.IsHealthServer() ? "UP" : "DOWN");
 
         public async Task<bool> PublishConfig(string dataId, string group, string content)
-            => await PublishConfig(dataId, group, content, "text");
+            => await PublishConfig(dataId, group, content, "text").ConfigureAwait(false);
 
         public async Task<bool> PublishConfig(string dataId, string group, string content, string type)
-            => await PublishConfigInner(_namespace, dataId, group, null, null, null, content, type, null);
+            => await PublishConfigInner(_namespace, dataId, group, null, null, null, content, type, null).ConfigureAwait(false);
 
         public async Task<bool> PublishConfigCas(string dataId, string group, string content, string casMd5)
-            => await PublishConfigInner(_namespace, dataId, group, null, null, null, content, "text", casMd5);
+            => await PublishConfigInner(_namespace, dataId, group, null, null, null, content, "text", casMd5).ConfigureAwait(false);
 
         public async Task<bool> PublishConfigCas(string dataId, string group, string content, string casMd5, string type)
-            => await PublishConfigInner(_namespace, dataId, group, null, null, null, content, type, casMd5);
+            => await PublishConfigInner(_namespace, dataId, group, null, null, null, content, type, casMd5).ConfigureAwait(false);
 
         public async Task<bool> RemoveConfig(string dataId, string group)
-            => await RemoveConfigInner(_namespace, dataId, group, null);
+            => await RemoveConfigInner(_namespace, dataId, group, null).ConfigureAwait(false);
 
         public Task RemoveListener(string dataId, string group, IListener listener)
             => _worker.RemoveTenantListener(dataId, group, listener);
@@ -73,7 +73,7 @@
             string encryptedDataKey = string.Empty;
 
             // 优先使用本地配置
-            string content = await FileLocalConfigInfoProcessor.GetFailoverAsync(_worker.GetAgentName(), dataId, group, tenant);
+            string content = await FileLocalConfigInfoProcessor.GetFailoverAsync(_worker.GetAgentName(), dataId, group, tenant).ConfigureAwait(false);
             if (content != null)
             {
                 _logger?.LogWarning(
@@ -82,7 +82,7 @@
 
                 cr.SetContent(content);
 
-                await FileLocalConfigInfoProcessor.GetEncryptDataKeyFailover(_worker.GetAgentName(), dataId, group, tenant);
+                await FileLocalConfigInfoProcessor.GetEncryptDataKeyFailover(_worker.GetAgentName(), dataId, group, tenant).ConfigureAwait(false);
                 encryptedDataKey = string.Empty;
                 cr.SetEncryptedDataKey(encryptedDataKey);
 
@@ -93,7 +93,7 @@
 
             try
             {
-                ConfigResponse response = await _worker.GetServerConfig(dataId, group, tenant, timeoutMs, false);
+                ConfigResponse response = await _worker.GetServerConfig(dataId, group, tenant, timeoutMs, false).ConfigureAwait(false);
                 cr.SetContent(response.GetContent());
                 cr.SetEncryptedDataKey(response.GetEncryptedDataKey());
 
@@ -115,10 +115,10 @@
                  "[{0}] [get-config] get snapshot ok, dataId={1}, group={2}, tenant={3}, config={4}",
                  _worker.GetAgentName(), dataId, group, tenant, ContentUtils.TruncateContent(content));
 
-            content = await FileLocalConfigInfoProcessor.GetSnapshotAync(_worker.GetAgentName(), dataId, group, tenant);
+            content = await FileLocalConfigInfoProcessor.GetSnapshotAync(_worker.GetAgentName(), dataId, group, tenant).ConfigureAwait(false);
             cr.SetContent(content);
 
-            encryptedDataKey = await FileLocalConfigInfoProcessor.GetEncryptDataKeyFailover(_worker.GetAgentName(), dataId, group, tenant);
+            encryptedDataKey = await FileLocalConfigInfoProcessor.GetEncryptDataKeyFailover(_worker.GetAgentName(), dataId, group, tenant).ConfigureAwait(false);
             cr.SetEncryptedDataKey(encryptedDataKey);
 
             _configFilterChainManager.DoFilter(null, cr);
@@ -141,14 +141,14 @@
             content = cr.GetContent();
             string encryptedDataKey = (string)(cr.GetParameter("encryptedDataKey") ?? string.Empty);
 
-            return await _worker.PublishConfig(dataId, group, tenant, appName, tag, betaIps, content, encryptedDataKey, casMd5, type);
+            return await _worker.PublishConfig(dataId, group, tenant, appName, tag, betaIps, content, encryptedDataKey, casMd5, type).ConfigureAwait(false);
         }
 
         private async Task<bool> RemoveConfigInner(string tenant, string dataId, string group, string tag)
         {
             group = ParamUtils.Null2DefaultGroup(group);
             ParamUtils.CheckKeyParam(dataId, group);
-            return await _worker.RemoveConfig(dataId, group, tenant, tag);
+            return await _worker.RemoveConfig(dataId, group, tenant, tag).ConfigureAwait(false);
         }
     }
 }

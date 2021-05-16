@@ -38,7 +38,7 @@ namespace Nacos.Config.Http
             _timer = new Timer(
                 async x =>
                 {
-                    await _securityProxy.LoginAsync(_serverListMgr.GetServerUrls());
+                    await _securityProxy.LoginAsync(_serverListMgr.GetServerUrls()).ConfigureAwait(false);
                 }, null, 0, _securityInfoRefreshIntervalMills);
         }
 

@@ -81,7 +81,7 @@
 
             var request = new InstanceRequest(namespaceId, serviceName, groupName, NamingRemoteConstants.DE_REGISTER_INSTANCE, instance);
 
-            await RequestToServer<CommonResponse>(request);
+            await RequestToServer<CommonResponse>(request).ConfigureAwait(false);
             namingGrpcConnectionEventListener.RemoveInstanceForRedo(serviceName, groupName, instance);
         }
 
@@ -91,7 +91,7 @@
 
             if (selector != null && selector.Type.Equals("label")) request.Selector = selector.ToJsonString();
 
-            var response = await RequestToServer<ServiceListResponse>(request);
+            var response = await RequestToServer<ServiceListResponse>(request).ConfigureAwait(false);
 
             var result = new ListView<string>(response.Count, response.ServiceNames);
             return result;
@@ -106,7 +106,7 @@
                 UdpPort = udpPort
             };
 
-            var response = await RequestToServer<QueryServiceResponse>(request);
+            var response = await RequestToServer<QueryServiceResponse>(request).ConfigureAwait(false);
             return response.ServiceInfo;
         }
 
@@ -118,7 +118,7 @@
 
             var request = new InstanceRequest(namespaceId, serviceName, groupName, NamingRemoteConstants.REGISTER_INSTANCE, instance);
 
-            await RequestToServer<CommonResponse>(request);
+            await RequestToServer<CommonResponse>(request).ConfigureAwait(false);
 
             namingGrpcConnectionEventListener.CacheInstanceForRedo(serviceName, groupName, instance);
         }
@@ -128,7 +128,7 @@
         public async Task<ServiceInfo> Subscribe(string serviceName, string groupName, string clusters)
         {
             var request = new SubscribeServiceRequest(namespaceId, serviceName, groupName, clusters, true);
-            var response = await RequestToServer<SubscribeServiceResponse>(request);
+            var response = await RequestToServer<SubscribeServiceResponse>(request).ConfigureAwait(false);
 
             namingGrpcConnectionEventListener.CacheSubscriberForRedo(NamingUtils.GetGroupedName(serviceName, groupName), clusters);
             return response.ServiceInfo;
@@ -137,7 +137,7 @@
         public async Task Unsubscribe(string serviceName, string groupName, string clusters)
         {
             var request = new SubscribeServiceRequest(namespaceId, serviceName, groupName, clusters, true);
-            await RequestToServer<SubscribeServiceResponse>(request);
+            await RequestToServer<SubscribeServiceResponse>(request).ConfigureAwait(false);
 
             namingGrpcConnectionEventListener.RemoveSubscriberForRedo(NamingUtils.GetGroupedName(serviceName, groupName), clusters);
         }
@@ -159,7 +159,7 @@
                 CommonResponse response =
                         requestTimeout < 0
                         ? await rpcClient.Request(request)
-                        : await rpcClient.Request(request, requestTimeout);
+.ConfigureAwait(false) : await rpcClient.Request(request, requestTimeout).ConfigureAwait(false);
 
                 if (response == null)
                 {
