@@ -41,13 +41,13 @@ jobs:
         curl "127.0.0.1:8848/nacos/v1/ns/operator/metrics"   
     - name: Build with dotnet
       run: |
-        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json src\Nacos\Nacos.csproj
-        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json src\Nacos.AspNetCore\Nacos.AspNetCore.csproj
-        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json src\Nacos.Microsoft.Extensions.Configuration\Nacos.Microsoft.Extensions.Configuration.csproj
-        dotnet msbuild -p:Configuration=Release -t:Build src\Nacos.System.Configuration\Nacos.System.Configuration.csproj
-        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json tests\Nacos.AspNetCore.Tests\Nacos.AspNetCore.Tests.csproj
-        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json tests\Nacos.Microsoft.Extensions.Configuration.Tests\Nacos.Microsoft.Extensions.Configuration.Tests.csproj
-        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json tests\Nacos.Tests\Nacos.Tests.csproj
+        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json src/Nacos/Nacos.csproj
+        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json src/Nacos.AspNetCore/Nacos.AspNetCore.csproj
+        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json src/Nacos.Microsoft.Extensions.Configuration/Nacos.Microsoft.Extensions.Configuration.csproj
+        dotnet msbuild -p:Configuration=Release -p:RestoreSources=https://api.nuget.org/v3/index.json -r -t:Build src/Nacos.System.Configuration/Nacos.System.Configuration.csproj
+        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json tests/Nacos.AspNetCore.Tests/Nacos.AspNetCore.Tests.csproj
+        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json tests/Nacos.Microsoft.Extensions.Configuration.Tests/Nacos.Microsoft.Extensions.Configuration.Tests.csproj
+        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json tests/Nacos.Tests/Nacos.Tests.csproj
     - name: Test with dotnet
       run: dotnet test --filter "Category=all|Category=1x|Category=2x"
     - name: Upload Nacos logs
