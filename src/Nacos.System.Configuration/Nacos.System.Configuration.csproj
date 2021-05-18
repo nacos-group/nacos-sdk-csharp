@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../build/version.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net471</TargetFramework>
+    <PackageId>nacos-sdk-csharp.ConfigurationManger</PackageId>
+    <VersionPrefix>$(NugetVersion)</VersionPrefix>
+    <VersionSuffix></VersionSuffix>
+    <Authors>nacos-sdk-csharp Contributors</Authors>
+    <Description>nacos csharp sdk</Description>
+    <PackageTags>nacos,csharp,sdk,msconfig,ConfigurationBuilder</PackageTags>
+    <PackageProjectUrl>https://github.com/nacos-group/nacos-sdk-csharp</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/nacos-group/nacos-sdk-csharp</RepositoryUrl>
+    <ProjectUrl>https://github.com/nacos-group/nacos-sdk-csharp</ProjectUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReleaseNotes>
+    </PackageReleaseNotes>
+
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../Nacos.Microsoft.Extensions.Configuration/DefaultJsonConfigurationStringParser.cs" />
+    <Compile Include="../Nacos.Microsoft.Extensions.Configuration/Impl/*.cs" />
+
+    <None Include="../../LICENSE" Pack="true" Visible="false" PackagePath="" />
+
+    <ProjectReference Include="..\Nacos\Nacos.csproj" />
+
+    <PackageReference Include="Microsoft.Configuration.ConfigurationBuilders.Base" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.0" />
+    <Reference Include="System.Configuration" />
+  </ItemGroup>
+
+</Project>

@@ -39,7 +39,7 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="Google.Protobuf" Version="3.14.0" />
-    <PackageReference Include="Grpc.Core" Version="2.34.0" />
+    <PackageReference Include="Grpc.Core" Version="2.34.1" />
     <!--<PackageReference Include="Grpc.Net.Client" Version="2.33.1" />-->
     <!--<Protobuf Include="V2\protos\nacos_grpc_service.proto" GrpcServices="Client" />-->
     <!--<PackageReference Include="Grpc.Tools" Version="2.36.1" PrivateAssets="All" />-->
