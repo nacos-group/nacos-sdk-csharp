@@ -17,7 +17,14 @@ jobs:
       with:
         dotnet-version: 5.0.x
     - name: Build with dotnet
-      run: dotnet build --configuration Release --source https://api.nuget.org/v3/index.json
+      run: |
+        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json src\Nacos\Nacos.csproj
+        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json src\Nacos.AspNetCore\Nacos.AspNetCore.csproj
+        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json src\Nacos.Microsoft.Extensions.Configuration\Nacos.Microsoft.Extensions.Configuration.csproj
+        dotnet msbuild -p:Configuration=Release -t:Build src\Nacos.System.Configuration\Nacos.System.Configuration.csproj
+        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json tests\Nacos.AspNetCore.Tests\Nacos.AspNetCore.Tests.csproj
+        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json tests\Nacos.Microsoft.Extensions.Configuration.Tests\Nacos.Microsoft.Extensions.Configuration.Tests.csproj
+        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json tests\Nacos.Tests\Nacos.Tests.csproj
       
   linux:    
     name: build on linux
