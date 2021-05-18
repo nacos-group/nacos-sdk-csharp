@@ -49,7 +49,10 @@ jobs:
         dotnet build --configuration Release --source https://api.nuget.org/v3/index.json tests/Nacos.Microsoft.Extensions.Configuration.Tests/Nacos.Microsoft.Extensions.Configuration.Tests.csproj
         dotnet build --configuration Release --source https://api.nuget.org/v3/index.json tests/Nacos.Tests/Nacos.Tests.csproj
     - name: Test with dotnet
-      run: dotnet test --filter "Category=all|Category=1x|Category=2x"
+      run: |
+        dotnet test tests/Nacos.AspNetCore.Tests/Nacos.AspNetCore.Tests.csproj --filter "Category=all|Category=1x|Category=2x" --no-restore
+        dotnet test tests/Nacos.Microsoft.Extensions.Configuration.Tests/Nacos.Microsoft.Extensions.Configuration.Tests.csproj --filter "Category=all|Category=1x|Category=2x" --no-restore
+        dotnet test tests/Nacos.Tests/Nacos.Tests.csproj --filter "Category=all|Category=1x|Category=2x" --no-restore
     - name: Upload Nacos logs
       if: always()
       uses: actions/upload-artifact@v2
