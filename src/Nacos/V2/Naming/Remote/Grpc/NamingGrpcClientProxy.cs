@@ -79,10 +79,10 @@
         {
             _logger?.LogInformation("[DEREGISTER-SERVICE] {0} deregistering service {1} with instance {2}", namespaceId, serviceName, instance);
 
-            var request = new InstanceRequest(namespaceId, serviceName, groupName, NamingRemoteConstants.DE_REGISTER_INSTANCE, instance);
-
-            await RequestToServer<CommonResponse>(request).ConfigureAwait(false);
             namingGrpcConnectionEventListener.RemoveInstanceForRedo(serviceName, groupName, instance);
+
+            var request = new InstanceRequest(namespaceId, serviceName, groupName, NamingRemoteConstants.DE_REGISTER_INSTANCE, instance);
+            await RequestToServer<CommonResponse>(request).ConfigureAwait(false);
         }
 
         public async Task<ListView<string>> GetServiceList(int pageNo, int pageSize, string groupName, AbstractSelector selector)
@@ -116,11 +116,10 @@
         {
             _logger?.LogInformation("[REGISTER-SERVICE] {0} registering service {1} with instance {2}", namespaceId, serviceName, instance);
 
-            var request = new InstanceRequest(namespaceId, serviceName, groupName, NamingRemoteConstants.REGISTER_INSTANCE, instance);
-
-            await RequestToServer<CommonResponse>(request).ConfigureAwait(false);
-
             namingGrpcConnectionEventListener.CacheInstanceForRedo(serviceName, groupName, instance);
+
+            var request = new InstanceRequest(namespaceId, serviceName, groupName, NamingRemoteConstants.REGISTER_INSTANCE, instance);
+            await RequestToServer<CommonResponse>(request).ConfigureAwait(false);
         }
 
         public bool ServerHealthy() => rpcClient.IsRunning();
