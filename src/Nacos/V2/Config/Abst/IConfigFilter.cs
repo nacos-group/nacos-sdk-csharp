@@ -2,11 +2,9 @@
 {
     public interface IConfigFilter
     {
-        void Init(IFilterConfig filterConfig);
+        void Init(NacosSdkOptions options);
 
         void DoFilter(IConfigRequest request, IConfigResponse response, IConfigFilterChain filterChain);
-
-        void Deploy();
 
         int GetOrder();
 

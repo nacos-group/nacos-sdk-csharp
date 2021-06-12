@@ -60,5 +60,15 @@
         /// Whether enable protecting naming push empty data, default is false.
         /// </summary>
         public bool NamingPushEmptyProtection { get; set; } = false;
+
+        /// <summary>
+        /// Specify the assemblies that contains the impl of IConfigFilter.
+        /// </summary>
+        public List<string> ConfigFilterAssemblies { get; set; }
+
+        /// <summary>
+        /// Specify some extension info of IConfigFilter.
+        /// </summary>
+        public string ConfigFilterExtInfo { get; set; }
     }
 }

@@ -119,6 +119,8 @@
                     configResponse.SetContent(response.Content);
                     configResponse.SetConfigType(response.ContentType.IsNotNullOrWhiteSpace() ? response.ContentType : "text");
 
+                    // in nacos 2.0.2 still do not return the EncryptedDataKey
+                    // so this always be null at this time!!!
                     string encryptedDataKey = response.EncryptedDataKey;
 
                     await FileLocalConfigInfoProcessor.SaveEncryptDataKeySnapshot(this.GetName(), dataId, group, tenant, encryptedDataKey).ConfigureAwait(false);

@@ -15,12 +15,13 @@
         private readonly ClientWorker _worker;
         private string _namespace;
 
-        private readonly ConfigFilterChainManager _configFilterChainManager = new ConfigFilterChainManager();
+        private readonly ConfigFilterChainManager _configFilterChainManager;
 
         public NacosConfigService(ILoggerFactory loggerFactory, IOptions<NacosSdkOptions> optionsAccs)
         {
             this._logger = loggerFactory.CreateLogger<NacosConfigService>();
             this._namespace = optionsAccs.Value.Namespace;
+            this._configFilterChainManager = new ConfigFilterChainManager(optionsAccs.Value);
             this._worker = new ClientWorker(_logger, _configFilterChainManager, optionsAccs.Value);
         }
 
