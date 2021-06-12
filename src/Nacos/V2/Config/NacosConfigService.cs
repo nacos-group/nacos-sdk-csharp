@@ -82,8 +82,7 @@
 
                 cr.SetContent(content);
 
-                await FileLocalConfigInfoProcessor.GetEncryptDataKeyFailover(_worker.GetAgentName(), dataId, group, tenant).ConfigureAwait(false);
-                encryptedDataKey = string.Empty;
+                encryptedDataKey = await FileLocalConfigInfoProcessor.GetEncryptDataKeyFailover(_worker.GetAgentName(), dataId, group, tenant).ConfigureAwait(false);
                 cr.SetEncryptedDataKey(encryptedDataKey);
 
                 _configFilterChainManager.DoFilter(null, cr);
@@ -139,7 +138,7 @@
             cr.SetType(type);
             _configFilterChainManager.DoFilter(cr, null);
             content = cr.GetContent();
-            string encryptedDataKey = (string)(cr.GetParameter("encryptedDataKey") ?? string.Empty);
+            string encryptedDataKey = (string)(cr.GetParameter(ConfigConstants.ENCRYPTED_DATA_KEY) ?? string.Empty);
 
             return await _worker.PublishConfig(dataId, group, tenant, appName, tag, betaIps, content, encryptedDataKey, casMd5, type).ConfigureAwait(false);
         }

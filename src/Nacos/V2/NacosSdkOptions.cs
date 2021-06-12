@@ -43,6 +43,8 @@
 
         public string Password { get; set; }
 
+        public string RamRoleName { get; set; }
+
         /// <summary>
         /// listen interval, unit is millisecond.
         /// </summary>

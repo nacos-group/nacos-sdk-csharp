@@ -26,6 +26,7 @@
             this.IsInitializing = true;
             this.Content = LoadCacheContentFromDiskLocal(name, dataId, group, Tenant);
             this.Md5 = GetMd5String(this.Content);
+            this.EncryptedDataKey = LoadEncryptedDataKeyFromDiskLocal(name, dataId, group, Tenant);
         }
 
         public CacheData(ConfigFilterChainManager configFilterChainManager, string name, string dataId, string group, string tenant)
@@ -44,6 +45,7 @@
             this.IsInitializing = true;
             this.Content = LoadCacheContentFromDiskLocal(name, dataId, group, Tenant);
             this.Md5 = GetMd5String(this.Content);
+            this.EncryptedDataKey = LoadEncryptedDataKeyFromDiskLocal(name, dataId, group, Tenant);
         }
 
         public string Name { get; set; }
@@ -72,6 +74,8 @@
 
         public long LocalConfigLastModified { get; set; }
 
+        public string EncryptedDataKey { get; set; }
+
         public ConfigFilterChainManager ConfigFilterChainManager { get; set; }
 
         private List<ManagerListenerWrap> Listeners { get; set; }
@@ -82,19 +86,31 @@
             {
                 if (!wrap.LastCallMd5.Equals(Md5))
                 {
-                    SafeNotifyListener(Content, Md5, wrap);
+                    SafeNotifyListener(DataId, Group, Content, Type, Md5, EncryptedDataKey, wrap);
                 }
             }
         }
 
-        private void SafeNotifyListener(string content, string md5, ManagerListenerWrap wrap)
+        private void SafeNotifyListener(string dataId, string group, string content, string type,
+            string md5, string encryptedDataKey, ManagerListenerWrap wrap)
         {
             var listener = wrap.Listener;
+
+            ConfigResponse cr = new ConfigResponse();
+            cr.SetDataId(dataId);
+            cr.SetGroup(group);
+            cr.SetContent(content);
+            cr.SetEncryptedDataKey(encryptedDataKey);
+            ConfigFilterChainManager.DoFilter(null, cr);
+
+            // after filter, such as decrypted value
+            string contentTmp = cr.GetContent();
 
             wrap.LastContent = content;
             wrap.LastCallMd5 = md5;
 
-            listener.ReceiveConfigInfo(content);
+            // should pass the value after filter
+            listener.ReceiveConfigInfo(contentTmp);
         }
 
         public void AddListener(IListener listener)
@@ -171,6 +187,17 @@
                 : FileLocalConfigInfoProcessor.GetSnapshotAync(name, dataId, group, tenant).ConfigureAwait(false).GetAwaiter().GetResult();
 
             return content;
+        }
+
+        private string LoadEncryptedDataKeyFromDiskLocal(string name, string dataId, string group, string tenant)
+        {
+            var encryptedDataKey = FileLocalConfigInfoProcessor.GetEncryptDataKeyFailover(name, dataId, group, tenant).ConfigureAwait(false).GetAwaiter().GetResult();
+
+            encryptedDataKey = encryptedDataKey != null
+                ? encryptedDataKey
+                : FileLocalConfigInfoProcessor.GetEncryptDataKeySnapshot(name, dataId, group, tenant).ConfigureAwait(false).GetAwaiter().GetResult();
+
+            return encryptedDataKey;
         }
 
         internal class ManagerListenerWrap

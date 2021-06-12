@@ -25,12 +25,14 @@
 
         public void SetContent(string content) => param[ConfigConstants.CONTENT] = content;
 
-        public string GetConfigRequestType() => param.SafeGetValue("type", null);
+        public string GetConfigRequestType() => param.SafeGetValue(ConfigConstants.TYPE, null);
 
-        public void SetType(string type) => param["type"] = type;
+        public void SetType(string type) => param[ConfigConstants.TYPE] = type;
 
         public object GetParameter(string key) => param.TryGetValue(key, out var obj) ? obj : null;
 
         public IConfigContext GetConfigContext() => configContext;
+
+        public void PutParameter(string key, object value) => param[key] = value;
     }
 }

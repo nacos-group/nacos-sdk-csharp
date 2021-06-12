@@ -5,6 +5,16 @@
 
     public class GroupKey
     {
+        private static readonly char PLUS = '+';
+
+        private static readonly char PERCENT = '%';
+
+        private static readonly char TWO = '2';
+
+        private static readonly char B = 'B';
+
+        private static readonly char FIVE = '5';
+
         public static string GetKey(string dataId, string group) => GetKey(dataId, group, "");
 
         public static string GetKey(string dataId, string group, string datumStr) => DoGetKey(dataId, group, datumStr);
@@ -15,11 +25,11 @@
         {
             StringBuilder sb = new StringBuilder();
             UrlEncode(dataId, sb);
-            sb.Append('+');
+            sb.Append(PLUS);
             UrlEncode(group, sb);
             if (datumStr.IsNotNullOrWhiteSpace())
             {
-                sb.Append('+');
+                sb.Append(PLUS);
                 UrlEncode(datumStr, sb);
             }
 
@@ -38,7 +48,7 @@
             for (int i = 0; i < groupKey.Length; ++i)
             {
                 char c = arr[i];
-                if (c == '+')
+                if (c == PLUS)
                 {
                     if (dataId == null)
                     {
@@ -55,17 +65,17 @@
                         throw new System.ArgumentException("invalid groupkey:" + groupKey);
                     }
                 }
-                else if (c == '%')
+                else if (c == PERCENT)
                 {
                     char next = arr[++i];
                     char nextnext = arr[++i];
-                    if (next == '2' && nextnext == 'B')
+                    if (next == TWO && nextnext == B)
                     {
-                        sb.Append('+');
+                        sb.Append(PLUS);
                     }
-                    else if (next == '2' && nextnext == '5')
+                    else if (next == TWO && nextnext == FIVE)
                     {
-                        sb.Append('%');
+                        sb.Append(PERCENT);
                     }
                     else
                     {
@@ -110,11 +120,11 @@
             for (int idx = 0; idx < str.Length; ++idx)
             {
                 char c = arr[idx];
-                if (c == '+')
+                if (c == PLUS)
                 {
                     sb.Append("%2B");
                 }
-                else if (c == '%')
+                else if (c == PERCENT)
                 {
                     sb.Append("%25");
                 }
