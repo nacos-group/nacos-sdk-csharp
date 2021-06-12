@@ -140,7 +140,7 @@ public class Startup
     {
         // ...
 
-        services.AddNacosAspNet(Configuration);
+        services.AddNacosAspNet(Configuration, "nacos");
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
