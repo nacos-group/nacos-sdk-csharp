@@ -15,6 +15,9 @@
 
     public class NacosNamingService : INacosNamingService
     {
+        private static readonly string UP = "UP";
+        private static readonly string DOWN = "DOWN";
+
         private readonly ILogger _logger;
         private readonly NacosSdkOptions _options;
 
@@ -113,7 +116,7 @@
         }
 
         public Task<string> GetServerStatus()
-            => Task.FromResult(_clientProxy.ServerHealthy() ? "UP" : "DOWN");
+            => Task.FromResult(_clientProxy.ServerHealthy() ? UP : DOWN);
 
         public async Task<ListView<string>> GetServicesOfServer(int pageNo, int pageSize)
             => await GetServicesOfServer(pageNo, pageSize, Constants.DEFAULT_GROUP).ConfigureAwait(false);

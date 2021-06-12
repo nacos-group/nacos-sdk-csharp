@@ -1,10 +1,6 @@
 ﻿namespace Nacos.V2.Naming.Remote.Grpc
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
     using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Options;
     using Nacos.V2.Common;
     using Nacos.V2.Exceptions;
     using Nacos.V2.Naming.Cache;
@@ -15,6 +11,9 @@
     using Nacos.V2.Remote.Responses;
     using Nacos.V2.Security;
     using Nacos.V2.Utils;
+    using System;
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
 
     public class NamingGrpcClientProxy : INamingClientProxy, IDisposable
     {
@@ -206,20 +205,20 @@
         {
             var result = new Dictionary<string, string>(2);
 
-            result["app"] = AppDomain.CurrentDomain.FriendlyName;
+            result[CommonParams.APP_FILED] = AppDomain.CurrentDomain.FriendlyName;
 
             if (string.IsNullOrWhiteSpace(_options.AccessKey)
                 && string.IsNullOrWhiteSpace(_options.SecretKey))
                 return result;
 
             string signData = !string.IsNullOrWhiteSpace(serviceName)
-                ? DateTimeOffset.Now.ToUnixTimeSeconds().ToString() + "@@" + serviceName
+                ? DateTimeOffset.Now.ToUnixTimeSeconds().ToString() + CommonParams.SEPARATOR + serviceName
                 : DateTimeOffset.Now.ToUnixTimeSeconds().ToString();
 
             string signature = HashUtil.GetHMACSHA1(signData, _options.SecretKey);
-            result["signature"] = signature;
-            result["data"] = signData;
-            result["ak"] = _options.AccessKey;
+            result[CommonParams.SIGNATURE_FILED] = signature;
+            result[CommonParams.DATA_FILED] = signData;
+            result[CommonParams.AK_FILED] = _options.AccessKey;
 
             return result;
         }

@@ -73,8 +73,8 @@
                 { CommonParams.NAMESPACE_ID, namespaceId },
                 { CommonParams.SERVICE_NAME, beatInfo.ServiceName },
                 { CommonParams.CLUSTER_NAME, beatInfo.Cluster },
-                { "ip", beatInfo.Ip.ToString() },
-                { "port", beatInfo.Port.ToString() },
+                { CommonParams.IP_PARAM, beatInfo.Ip.ToString() },
+                { CommonParams.PORT_PARAM, beatInfo.Port.ToString() },
             };
 
             var body = new Dictionary<string, string>();
@@ -106,9 +106,9 @@
                 { CommonParams.NAMESPACE_ID, namespaceId },
                 { CommonParams.SERVICE_NAME, service.Name },
                 { CommonParams.GROUP_NAME, service.GroupName },
-                { "protectThreshold", service.ProtectThreshold.ToString() },
-                { "metadata", service.Metadata.ToJsonString() },
-                { "selector", selector.ToJsonString() },
+                { CommonParams.PROTECT_THRESHOLD_PARAM, service.ProtectThreshold.ToString() },
+                { CommonParams.META_PARAM, service.Metadata.ToJsonString() },
+                { CommonParams.SELECTOR_PARAM, selector.ToJsonString() },
             };
 
             await ReqApi(UtilAndComs.NacosUrlService, paramters, HttpMethod.Post).ConfigureAwait(false);
@@ -146,9 +146,9 @@
                 { CommonParams.SERVICE_NAME, groupedServiceName },
                 { CommonParams.GROUP_NAME, groupName },
                 { CommonParams.CLUSTER_NAME, instance.ClusterName },
-                { "ip", instance.Ip },
-                { "port", instance.Port.ToString() },
-                { "ephemeral", instance.Ephemeral.ToString() },
+                { CommonParams.IP_PARAM, instance.Ip },
+                { CommonParams.PORT_PARAM, instance.Port.ToString() },
+                { CommonParams.EPHEMERAL_PARAM, instance.Ephemeral.ToString() },
             };
 
             await ReqApi(UtilAndComs.NacosUrlInstance, paramters, HttpMethod.Delete).ConfigureAwait(false);
@@ -166,7 +166,7 @@
 
             if (selector != null && selector.Type.Equals("label"))
             {
-                paramters["selector"] = selector.ToJsonString();
+                paramters[CommonParams.SELECTOR_PARAM] = selector.ToJsonString();
             }
 
             var result = await ReqApi(UtilAndComs.NacosUrlBase + "/service/list", paramters, HttpMethod.Get).ConfigureAwait(false);
@@ -188,9 +188,9 @@
                 { CommonParams.NAMESPACE_ID, namespaceId },
                 { CommonParams.SERVICE_NAME, groupedServiceName },
                 { CommonParams.CLUSTER_NAME, clusters },
-                { "udpPort", udpPort.ToString() },
-                { "clientIP", NetUtils.LocalIP() },
-                { "healthyOnly", healthyOnly.ToString() },
+                { CommonParams.UDP_PORT_PARAM, udpPort.ToString() },
+                { CommonParams.CLIENT_IP_PARAM, NetUtils.LocalIP() },
+                { CommonParams.HEALTHY_ONLY_PARAM, healthyOnly.ToString() },
             };
 
             var result = await ReqApi(UtilAndComs.NacosUrlBase + "/instance/list", paramters, HttpMethod.Get).ConfigureAwait(false);
@@ -213,7 +213,6 @@
                 { CommonParams.GROUP_NAME, groupName },
             };
 
-
             var result = await ReqApi(UtilAndComs.NacosUrlService, paramters, HttpMethod.Get).ConfigureAwait(false);
             return result.ToObj<Service>();
         }
@@ -235,13 +234,13 @@
                 { CommonParams.SERVICE_NAME, groupedServiceName },
                 { CommonParams.GROUP_NAME, groupName },
                 { CommonParams.CLUSTER_NAME, instance.ClusterName },
-                { "ip", instance.Ip },
-                { "port", instance.Port.ToString() },
-                { "weight", instance.Weight.ToString() },
-                { "enable", instance.Enabled.ToString() },
-                { "healthy", instance.Healthy.ToString() },
-                { "ephemeral", instance.Ephemeral.ToString() },
-                { "metadata", instance.Metadata.ToJsonString() },
+                { CommonParams.IP_PARAM, instance.Ip },
+                { CommonParams.PORT_PARAM, instance.Port.ToString() },
+                { CommonParams.WEIGHT_PARAM, instance.Weight.ToString() },
+                { CommonParams.ENABLE_PARAM, instance.Enabled.ToString() },
+                { CommonParams.HEALTHY_PARAM, instance.Healthy.ToString() },
+                { CommonParams.EPHEMERAL_PARAM, instance.Ephemeral.ToString() },
+                { CommonParams.META_PARAM, instance.Metadata.ToJsonString() },
             };
 
             await ReqApi(UtilAndComs.NacosUrlInstance, paramters, HttpMethod.Post).ConfigureAwait(false);
@@ -368,19 +367,19 @@
                 paramters[Constants.ACCESS_TOKEN] = _securityProxy.GetAccessToken();
             }
 
-            paramters["app"] = AppDomain.CurrentDomain.FriendlyName;
+            paramters[CommonParams.APP_FILED] = AppDomain.CurrentDomain.FriendlyName;
             if (string.IsNullOrWhiteSpace(_options.AccessKey)
                 || string.IsNullOrWhiteSpace(_options.SecretKey))
                 return;
 
-            string signData = !string.IsNullOrWhiteSpace(paramters["serviceName"])
-                ? DateTimeOffset.Now.ToUnixTimeSeconds().ToString() + "@@" + paramters["serviceName"]
+            string signData = !string.IsNullOrWhiteSpace(paramters[CommonParams.SERVICE_NAME_PARAM])
+                ? DateTimeOffset.Now.ToUnixTimeSeconds().ToString() + CommonParams.SEPARATOR + paramters[CommonParams.SERVICE_NAME_PARAM]
                 : DateTimeOffset.Now.ToUnixTimeSeconds().ToString();
 
             string signature = HashUtil.GetHMACSHA1(signData, _options.SecretKey);
-            paramters["signature"] = signature;
-            paramters["data"] = signData;
-            paramters["ak"] = _options.AccessKey;
+            paramters[CommonParams.SIGNATURE_FILED] = signature;
+            paramters[CommonParams.DATA_FILED] = signData;
+            paramters[CommonParams.AK_FILED] = _options.AccessKey;
         }
 
         private void BuildHeader(HttpRequestMessage requestMessage, Dictionary<string, string> headers)
@@ -450,12 +449,12 @@
                 { CommonParams.SERVICE_NAME, serviceName },
                 { CommonParams.GROUP_NAME, groupName },
                 { CommonParams.CLUSTER_NAME, instance.ClusterName },
-                { "ip", instance.Ip },
-                { "port", instance.Port.ToString() },
-                { "weight", instance.Weight.ToString() },
-                { "enable", instance.Enabled.ToString() },
-                { "ephemeral", instance.Ephemeral.ToString() },
-                { "metadata", instance.Metadata.ToJsonString() },
+                { CommonParams.IP_PARAM, instance.Ip },
+                { CommonParams.PORT_PARAM, instance.Port.ToString() },
+                { CommonParams.WEIGHT_PARAM, instance.Weight.ToString() },
+                { CommonParams.ENABLE_PARAM, instance.Enabled.ToString() },
+                { CommonParams.EPHEMERAL_PARAM, instance.Ephemeral.ToString() },
+                { CommonParams.META_PARAM, instance.Metadata.ToJsonString() },
             };
 
             await ReqApi(UtilAndComs.NacosUrlInstance, paramters, HttpMethod.Put).ConfigureAwait(false);
@@ -470,9 +469,9 @@
                 { CommonParams.NAMESPACE_ID, namespaceId },
                 { CommonParams.SERVICE_NAME, service.Name },
                 { CommonParams.GROUP_NAME, service.GroupName },
-                { "protectThreshold", service.ProtectThreshold.ToString() },
-                { "metadata", service.Metadata.ToJsonString() },
-                { "selector", selector.ToJsonString() },
+                { CommonParams.PROTECT_THRESHOLD_PARAM, service.ProtectThreshold.ToString() },
+                { CommonParams.META_PARAM, service.Metadata.ToJsonString() },
+                { CommonParams.SELECTOR_PARAM, selector.ToJsonString() },
             };
 
             await ReqApi(UtilAndComs.NacosUrlService, paramters, HttpMethod.Put).ConfigureAwait(false);

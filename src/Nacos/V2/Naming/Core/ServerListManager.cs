@@ -2,6 +2,7 @@
 {
     using Microsoft.Extensions.Logging;
     using Nacos.V2.Remote;
+    using Nacos.V2.Utils;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -32,9 +33,12 @@
 
         private long _lastServerListRefreshTime = 0L;
 
-        public ServerListManager(ILogger logger, NacosSdkOptions options)
+        private readonly string _namespace;
+
+        public ServerListManager(ILogger logger, NacosSdkOptions options, string @namespace)
         {
             this._logger = logger;
+            this._namespace = @namespace;
             InitServerAddr(options);
         }
 
@@ -68,7 +72,9 @@
             var list = new List<string>();
             try
             {
-                var url = $"http://{_endpoint}/nacos/serverlist";
+                var q = _namespace.IsNotNullOrWhiteSpace() ? $"namespace={_namespace}" : string.Empty;
+
+                var url = $"http://{_endpoint}/nacos/serverlist?{q}";
 
                 var header = Utils.NamingHttpUtil.BuildHeader();
 
@@ -101,7 +107,7 @@
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, "GetServerListFromEndpoint error.");
+                _logger?.LogError(ex, "[SERVER-LIST] failed to update server list.");
                 return null;
             }
         }
