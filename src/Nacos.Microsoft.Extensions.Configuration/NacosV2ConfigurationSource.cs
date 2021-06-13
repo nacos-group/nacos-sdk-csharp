@@ -1,7 +1,6 @@
 ﻿namespace Nacos.Microsoft.Extensions.Configuration
 {
     using global::Microsoft.Extensions.Configuration;
-    using global::Microsoft.Extensions.DependencyInjection;
     using global::Microsoft.Extensions.Logging;
     using Nacos.Config;
     using System;
@@ -17,19 +16,19 @@
         /// <summary>
         /// Determines if the Nacos Server is optional
         /// </summary>
-        [System.Obsolete("please use Listeners to configure")]
+        [Obsolete("please use Listeners to configure")]
         public bool Optional { get; set; }
 
         /// <summary>
         /// Configuration ID
         /// </summary>
-        [System.Obsolete("please use Listeners to configure")]
+        [Obsolete("please use Listeners to configure")]
         public string DataId { get; set; }
 
         /// <summary>
         /// Configuration group
         /// </summary>
-        [System.Obsolete("please use Listeners to configure")]
+        [Obsolete("please use Listeners to configure")]
         public string Group { get; set; }
 
         /// <summary>

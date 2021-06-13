@@ -46,6 +46,8 @@
                 UserName = configurationSource.UserName,
                 ListenInterval = 20000,
                 ConfigUseRpc = configurationSource.ConfigUseRpc,
+                ConfigFilterAssemblies = configurationSource.ConfigFilterAssemblies,
+                ConfigFilterExtInfo = configurationSource.ConfigFilterExtInfo,
             });
 
             var nacosLoggerFactory = Nacos.Microsoft.Extensions.Configuration.NacosLog.NacosLoggerFactory.GetInstance(configurationSource.LoggingBuilder);
