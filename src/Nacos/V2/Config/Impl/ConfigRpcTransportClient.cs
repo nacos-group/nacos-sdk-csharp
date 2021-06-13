@@ -247,7 +247,7 @@
 
         private void InitHandlerRpcClient(RpcClient rpcClientInner)
         {
-            rpcClientInner.RegisterServerPushResponseHandler(new ConfigRpcServerRequestHandler(_cacheMap, NotifyListenConfig));
+            rpcClientInner.RegisterServerPushResponseHandler(new ConfigRpcServerRequestHandler(_logger, _cacheMap, NotifyListenConfig));
             rpcClientInner.RegisterConnectionListener(new ConfigRpcConnectionEventListener(_logger, rpcClientInner, _cacheMap, _listenExecutebell));
 
             rpcClientInner.Init(new ConfigRpcServerListFactory(_serverListManager));

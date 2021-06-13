@@ -1,5 +1,6 @@
 ﻿namespace Nacos.V2.Config.Impl
 {
+    using Microsoft.Extensions.Logging;
     using Nacos.V2.Remote;
     using Nacos.V2.Remote.Requests;
     using Nacos.V2.Remote.Responses;
@@ -10,11 +11,13 @@
 
     public class ConfigRpcServerRequestHandler : IServerRequestHandler
     {
+        private readonly ILogger _logger;
         private ConcurrentDictionary<string, CacheData> _cacheMap;
         private Func<Task> _func;
 
-        public ConfigRpcServerRequestHandler(ConcurrentDictionary<string, CacheData> map, Func<Task> func)
+        public ConfigRpcServerRequestHandler(ILogger logger, ConcurrentDictionary<string, CacheData> map, Func<Task> func)
         {
+            this._logger = logger;
             this._cacheMap = map;
             this._func = func;
         }
@@ -41,7 +44,7 @@
                     _func.Invoke().Wait();
                 }
 
-                Console.WriteLine("Config RequestReply => {0}", request.ToJsonString());
+                _logger?.LogDebug("Config RequestReply => {0}", request.ToJsonString());
 
                 return new ConfigChangeNotifyResponse();
             }
