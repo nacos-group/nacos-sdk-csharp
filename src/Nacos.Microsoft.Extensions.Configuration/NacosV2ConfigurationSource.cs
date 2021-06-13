@@ -3,6 +3,7 @@
     using global::Microsoft.Extensions.Configuration;
     using global::Microsoft.Extensions.Logging;
     using Nacos.Config;
+    using Nacos.V2.Utils;
     using System;
     using System.Collections.Generic;
 
@@ -34,6 +35,7 @@
         /// <summary>
         /// Tenant information. It corresponds to the Namespace field in Nacos.
         /// </summary>
+        [Obsolete("please use Namespace to configure")]
         public string Tenant { get; set; }
 
         /// <summary>
@@ -54,6 +56,24 @@
         public IConfigurationProvider Build(IConfigurationBuilder builder)
         {
             return new NacosV2ConfigurationProvider(this);
+        }
+
+        public string GetNamespace()
+        {
+            if (Namespace.IsNotNullOrWhiteSpace())
+            {
+                return Namespace;
+            }
+#pragma warning disable CS0618
+            else if (Tenant.IsNotNullOrWhiteSpace())
+            {
+                return Tenant;
+            }
+#pragma warning restore CS0618
+            else
+            {
+                return string.Empty;
+            }
         }
     }
 }
