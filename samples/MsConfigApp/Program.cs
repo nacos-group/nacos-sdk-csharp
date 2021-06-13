@@ -1,4 +1,4 @@
-namespace MsConfigApp
+﻿namespace MsConfigApp
 {
     using System.Collections.Generic;
     using Microsoft.AspNetCore.Hosting;
@@ -53,7 +53,7 @@ namespace MsConfigApp
 
                      var dataId = c.GetValue<string>("NacosConfig:DataId");
                      var group = c.GetValue<string>("NacosConfig:Group");
-                     var tenant = c.GetValue<string>("NacosConfig:Tenant");
+                     var @namespace = c.GetValue<string>("NacosConfig:Namespace");
                      var optional = c.GetValue<bool>("NacosConfig:Optional");
                      var serverAddresses = c.GetSection("NacosConfig:ServerAddresses").Get<List<string>>();
 
@@ -71,7 +71,7 @@ namespace MsConfigApp
                      {
                          x.DataId = dataId;
                          x.Group = group;
-                         x.Tenant = tenant;
+                         x.Namespace = @namespace;
                          x.Optional = optional;
                          x.ServerAddresses = serverAddresses;
                      });*/

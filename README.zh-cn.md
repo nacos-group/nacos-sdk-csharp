@@ -1,4 +1,4 @@
-# nacos-sdk-csharp 　　　　   　　　　   　　[English](./README.md)
+﻿# nacos-sdk-csharp 　　　　   　　　　   　　[English](./README.md)
 
 基于C#(dotnet core)实现 [nacos](https://nacos.io/) OpenAPI 的官方版本
 
@@ -72,7 +72,7 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
         "Group": "DEFAULT_GROUP"
       }
     ],    
-    "Tenant": "csharp-demo",
+    "Namespace": "csharp-demo",
     "ServerAddresses": [ "http://localhost:8848/" ],
     "UserName": "test2",
     "Password": "123456",
