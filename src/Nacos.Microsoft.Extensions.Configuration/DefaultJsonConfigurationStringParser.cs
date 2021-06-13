@@ -6,11 +6,11 @@ namespace Nacos.Microsoft.Extensions.Configuration
     using Nacos.Config;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
-    using System.Linq;
+    using global::System;
+    using global::System.Collections.Generic;
+    using global::System.Globalization;
+    using global::System.IO;
+    using global::System.Linq;
 
     internal class DefaultJsonConfigurationStringParser : INacosConfigurationParser
     {

@@ -13,7 +13,7 @@
         private ILogger _logger;
         private NamingGrpcClientProxy _clientProxy;
 
-        private ConcurrentDictionary<string, HashSet<Instance>> _registeredInstanceCached = new ConcurrentDictionary<string, HashSet<Instance>>();
+        private ConcurrentDictionary<string, Instance> _registeredInstanceCached = new ConcurrentDictionary<string, Instance>();
 
         private HashSet<string> _subscribes = new HashSet<string>();
 
@@ -41,19 +41,16 @@
             }
         }
 
-        private void RedoRegisterEachInstance(string serviceName, string groupName, HashSet<Instance> instances)
+        private void RedoRegisterEachInstance(string serviceName, string groupName, Instance instance)
         {
-            foreach (var item in instances)
+            try
             {
-                try
-                {
-                    _clientProxy.RegisterServiceAsync(serviceName, groupName, item)
-                        .ConfigureAwait(false).GetAwaiter().GetResult();
-                }
-                catch (Exception e)
-                {
-                    _logger?.LogWarning(e, "redo register for service {0}@@{1} failed", groupName, serviceName);
-                }
+                _clientProxy.RegisterServiceAsync(serviceName, groupName, instance)
+                    .ConfigureAwait(false).GetAwaiter().GetResult();
+            }
+            catch (Exception e)
+            {
+                _logger?.LogWarning(e, "redo register for service {0}@@{1} failed", groupName, serviceName);
             }
         }
 
@@ -95,24 +92,14 @@
         {
             string key = NamingUtils.GetGroupedName(serviceName, groupName);
 
-            if (_registeredInstanceCached.TryGetValue(key, out var instances))
-            {
-                instances.Add(instance);
-            }
-            else
-            {
-                _registeredInstanceCached[key] = new HashSet<Instance> { instance };
-            }
+            _registeredInstanceCached[key] = instance;
         }
 
         internal void RemoveInstanceForRedo(string serviceName, string groupName, Instance instance)
         {
             string key = NamingUtils.GetGroupedName(serviceName, groupName);
 
-            if (_registeredInstanceCached.TryGetValue(key, out var instances))
-            {
-                instances.Remove(instance);
-            }
+            _registeredInstanceCached.TryRemove(key, out _);
         }
     }
 }

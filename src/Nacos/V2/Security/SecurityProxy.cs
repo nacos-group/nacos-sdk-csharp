@@ -98,11 +98,11 @@
             {
                 var dict = new Dictionary<string, string>
                 {
-                    { "username", _username },
-                    { "password", _password }
+                    { Common.PropertyKeyConst.USERNAME, _username },
+                    { Common.PropertyKeyConst.PASSWORD, _password }
                 };
 
-                var url = $"http://{server}{contextPath}{LOGIN_URL}";
+                var url = $"{Naming.Utils.UtilAndComs.HTTP}{server}{contextPath}{LOGIN_URL}";
                 if (server.Contains(ConstValue.HTTP_PREFIX))
                 {
                     url = $"{server}{contextPath}{LOGIN_URL}";

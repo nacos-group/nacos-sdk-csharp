@@ -65,14 +65,14 @@
 
             // STS 临时凭证鉴权的优先级高于 AK/SK 鉴权
             // StsConfig.getInstance().isStsOn()
-            if (true)
+            /*if (true)
             {
                 // StsCredential stsCredential = getStsCredential();
                 // _accessKey = stsCredential.accessKeyId;
                 // _secretKey = stsCredential.accessKeySecret;
                 // stsCredential.securityToken
                 // spasHeaders["Spas-SecurityToken"] = string.Empty;
-            }
+            }*/
 
             if (_accessKey.IsNotNullOrWhiteSpace() && _secretKey.IsNotNullOrWhiteSpace())
             {

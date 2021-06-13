@@ -78,7 +78,9 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
     "Password": "123456",
     "AccessKey": "",
     "SecretKey": "",
-    "EndPoint": "acm.aliyun.com"
+    "EndPoint": "acm.aliyun.com",
+    "ConfigFilterAssemblies": ["YouPrefix.AssemblyName"],
+    "ConfigFilterExtInfo": "some ext infomation"
   }
 }
 ```
@@ -140,7 +142,7 @@ public class Startup
     {
         // ...
 
-        services.AddNacosAspNet(Configuration);
+        services.AddNacosAspNet(Configuration, "nacos");
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

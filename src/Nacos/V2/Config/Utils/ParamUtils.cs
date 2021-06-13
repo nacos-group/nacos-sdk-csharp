@@ -11,8 +11,20 @@
     {
         private static readonly char[] VALID_CHARS = new char[] { '_', '-', '.', ':' };
 
+        private static readonly string CONTENT_INVALID_MSG = "content invalid";
+
+        private static readonly string DATAID_INVALID_MSG = "dataId invalid";
+
+        private static readonly string TENANT_INVALID_MSG = "tenant invalid";
+
+        private static readonly string BETAIPS_INVALID_MSG = "betaIps invalid";
+
+        private static readonly string GROUP_INVALID_MSG = "group invalid";
+
+        private static readonly string DATUMID_INVALID_MSG = "datumId invalid";
+
         /// <summary>
-        /// 白名单的方式检查, 合法的参数只能包含字母、数字、以及validChars中的字符, 并且不能为空.
+        /// Check the whitelist method, the legal parameters can only contain letters, numbers, and characters in validChars, and cannot be empty.
         /// </summary>
         /// <param name="param">parameter</param>
         /// <returns>true if valid</returns>
@@ -52,12 +64,12 @@
 
             if (dataId.IsNullOrWhiteSpace() || !IsValid(dataId))
             {
-                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "dataId invalid");
+                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, DATAID_INVALID_MSG);
             }
 
             if (group.IsNullOrWhiteSpace() || !IsValid(group))
             {
-                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "group invalid");
+                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, GROUP_INVALID_MSG);
             }
         }
 
@@ -70,12 +82,12 @@
         {
             if (dataId.IsNullOrWhiteSpace() || !IsValid(dataId))
             {
-                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "dataId invalid");
+                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, DATAID_INVALID_MSG);
             }
 
             if (group.IsNullOrWhiteSpace() || !IsValid(group))
             {
-                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "group invalid");
+                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, GROUP_INVALID_MSG);
             }
         }
 
@@ -89,17 +101,17 @@
         {
             if (dataId.IsNullOrWhiteSpace() || !IsValid(dataId))
             {
-                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "dataId invalid");
+                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, DATAID_INVALID_MSG);
             }
 
             if (group.IsNullOrWhiteSpace() || !IsValid(group))
             {
-                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "group invalid");
+                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, GROUP_INVALID_MSG);
             }
 
             if (datumId.IsNullOrWhiteSpace() || !IsValid(datumId))
             {
-                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "datumId invalid");
+                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, DATUMID_INVALID_MSG);
             }
         }
 
@@ -112,20 +124,20 @@
         {
             if (dataIds == null || !dataIds.Any())
             {
-                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "dataIds invalid");
+                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, DATAID_INVALID_MSG);
             }
 
             foreach (var dataId in dataIds)
             {
                 if (dataId.IsNullOrWhiteSpace() || !IsValid(dataId))
                 {
-                    throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "dataId invalid");
+                    throw new NacosException(NacosException.CLIENT_INVALID_PARAM, DATAID_INVALID_MSG);
                 }
             }
 
             if (group.IsNullOrWhiteSpace() || !IsValid(group))
             {
-                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "group invalid");
+                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, GROUP_INVALID_MSG);
             }
         }
 
@@ -140,7 +152,7 @@
             CheckKeyParam(dataId, group);
             if (content.IsNullOrWhiteSpace())
             {
-                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "content invalid");
+                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, CONTENT_INVALID_MSG);
             }
         }
 
@@ -156,7 +168,7 @@
             CheckKeyParam(dataId, group, datumId);
             if (content.IsNullOrWhiteSpace())
             {
-                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "content invalid");
+                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, CONTENT_INVALID_MSG);
             }
         }
 
@@ -168,7 +180,7 @@
         {
             if (tenant.IsNullOrWhiteSpace() || !IsValid(tenant))
             {
-                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "tenant invalid");
+                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, TENANT_INVALID_MSG);
             }
         }
 
@@ -180,7 +192,7 @@
         {
             if (betaIps.IsNullOrWhiteSpace())
             {
-                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "betaIps invalid");
+                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, BETAIPS_INVALID_MSG);
             }
 
             string[] ipsArr = betaIps.Split(',');
@@ -188,7 +200,7 @@
             {
                 if (!IPUtil.IsIP(ip))
                 {
-                    throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "betaIps invalid");
+                    throw new NacosException(NacosException.CLIENT_INVALID_PARAM, BETAIPS_INVALID_MSG);
                 }
             }
         }
@@ -201,7 +213,7 @@
         {
             if (content.IsNullOrWhiteSpace())
             {
-                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "content invalid");
+                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, CONTENT_INVALID_MSG);
             }
         }
 

@@ -9,28 +9,30 @@
 
         private IConfigContext configContext = new ConfigContext();
 
-        public string GetTenant() => param.SafeGetValue("tenant", null);
+        public string GetTenant() => param.SafeGetValue(ConfigConstants.TENANT, null);
 
-        public void SetTenant(string tenant) => param["tenant"] = tenant;
+        public void SetTenant(string tenant) => param[ConfigConstants.TENANT] = tenant;
 
-        public string GetDataId() => param.SafeGetValue("dataId", null);
+        public string GetDataId() => param.SafeGetValue(ConfigConstants.DATA_ID, null);
 
-        public void SetDataId(string dataId) => param["dataId"] = dataId;
+        public void SetDataId(string dataId) => param[ConfigConstants.DATA_ID] = dataId;
 
-        public string GetGroup() => param.SafeGetValue("group", null);
+        public string GetGroup() => param.SafeGetValue(ConfigConstants.GROUP, null);
 
-        public void SetGroup(string group) => param["group"] = group;
+        public void SetGroup(string group) => param[ConfigConstants.GROUP] = group;
 
-        public string GetContent() => param.SafeGetValue("content", null);
+        public string GetContent() => param.SafeGetValue(ConfigConstants.CONTENT, null);
 
-        public void SetContent(string content) => param["content"] = content;
+        public void SetContent(string content) => param[ConfigConstants.CONTENT] = content;
 
-        public string GetConfigRequestType() => param.SafeGetValue("type", null);
+        public string GetConfigRequestType() => param.SafeGetValue(ConfigConstants.TYPE, null);
 
-        public void SetType(string type) => param["type"] = type;
+        public void SetType(string type) => param[ConfigConstants.TYPE] = type;
 
         public object GetParameter(string key) => param.TryGetValue(key, out var obj) ? obj : null;
 
         public IConfigContext GetConfigContext() => configContext;
+
+        public void PutParameter(string key, object value) => param[key] = value;
     }
 }

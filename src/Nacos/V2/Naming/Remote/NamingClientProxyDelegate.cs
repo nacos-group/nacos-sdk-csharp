@@ -38,7 +38,7 @@
         public NamingClientProxyDelegate(ILogger logger, string @namespace, ServiceInfoHolder serviceInfoHolder, NacosSdkOptions options, InstancesChangeNotifier changeNotifier)
         {
             this._options = options;
-            this.serverListManager = new ServerListManager(logger, options);
+            this.serverListManager = new ServerListManager(logger, options, @namespace);
             this.serviceInfoHolder = serviceInfoHolder;
             this.securityProxy = new SecurityProxy(options, logger);
             InitSecurityProxy();

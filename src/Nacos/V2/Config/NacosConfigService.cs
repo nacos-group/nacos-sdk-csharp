@@ -15,12 +15,13 @@
         private readonly ClientWorker _worker;
         private string _namespace;
 
-        private readonly ConfigFilterChainManager _configFilterChainManager = new ConfigFilterChainManager();
+        private readonly ConfigFilterChainManager _configFilterChainManager;
 
         public NacosConfigService(ILoggerFactory loggerFactory, IOptions<NacosSdkOptions> optionsAccs)
         {
             this._logger = loggerFactory.CreateLogger<NacosConfigService>();
             this._namespace = optionsAccs.Value.Namespace;
+            this._configFilterChainManager = new ConfigFilterChainManager(optionsAccs.Value);
             this._worker = new ClientWorker(_logger, _configFilterChainManager, optionsAccs.Value);
         }
 
@@ -82,8 +83,7 @@
 
                 cr.SetContent(content);
 
-                await FileLocalConfigInfoProcessor.GetEncryptDataKeyFailover(_worker.GetAgentName(), dataId, group, tenant).ConfigureAwait(false);
-                encryptedDataKey = string.Empty;
+                encryptedDataKey = await FileLocalConfigInfoProcessor.GetEncryptDataKeyFailover(_worker.GetAgentName(), dataId, group, tenant).ConfigureAwait(false);
                 cr.SetEncryptedDataKey(encryptedDataKey);
 
                 _configFilterChainManager.DoFilter(null, cr);
@@ -139,7 +139,7 @@
             cr.SetType(type);
             _configFilterChainManager.DoFilter(cr, null);
             content = cr.GetContent();
-            string encryptedDataKey = (string)(cr.GetParameter("encryptedDataKey") ?? string.Empty);
+            string encryptedDataKey = (string)(cr.GetParameter(ConfigConstants.ENCRYPTED_DATA_KEY) ?? string.Empty);
 
             return await _worker.PublishConfig(dataId, group, tenant, appName, tag, betaIps, content, encryptedDataKey, casMd5, type).ConfigureAwait(false);
         }

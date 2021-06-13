@@ -28,8 +28,8 @@ jobs:
       run: java -version  
     - name: Setup Unstable Nacos Server
       run: |
-        wget https://github.com/alibaba/nacos/releases/download/2.0.1/nacos-server-2.0.1.tar.gz
-        tar -xvf nacos-server-2.0.1.tar.gz
+        wget https://github.com/alibaba/nacos/releases/download/2.0.2/nacos-server-2.0.2.tar.gz
+        tar -xvf nacos-server-2.0.2.tar.gz
         cd nacos/bin
         # sed -i 's/nacos.core.auth.enabled=false/nacos.core.auth.enabled=true/g' ../conf/application.properties
         sed -i 's/Xms512m/Xms1024m/g' startup.sh
@@ -40,9 +40,19 @@ jobs:
         sleep 30
         curl "127.0.0.1:8848/nacos/v1/ns/operator/metrics"   
     - name: Build with dotnet
-      run: dotnet build
+      run: |
+        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json src/Nacos/Nacos.csproj
+        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json src/Nacos.AspNetCore/Nacos.AspNetCore.csproj
+        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json src/Nacos.Microsoft.Extensions.Configuration/Nacos.Microsoft.Extensions.Configuration.csproj
+        dotnet msbuild -p:Configuration=Release -p:RestoreSources=https://api.nuget.org/v3/index.json -r -t:Build src/Nacos.System.Configuration/Nacos.System.Configuration.csproj
+        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json tests/Nacos.AspNetCore.Tests/Nacos.AspNetCore.Tests.csproj
+        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json tests/Nacos.Microsoft.Extensions.Configuration.Tests/Nacos.Microsoft.Extensions.Configuration.Tests.csproj
+        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json tests/Nacos.Tests/Nacos.Tests.csproj
     - name: Test with dotnet
-      run: dotnet test --filter "Category=all|Category=1x|Category=2x"
+      run: |
+        dotnet test tests/Nacos.AspNetCore.Tests/Nacos.AspNetCore.Tests.csproj --filter "Category=all|Category=1x|Category=2x" --no-restore
+        dotnet test tests/Nacos.Microsoft.Extensions.Configuration.Tests/Nacos.Microsoft.Extensions.Configuration.Tests.csproj --filter "Category=all|Category=1x|Category=2x" --no-restore
+        dotnet test tests/Nacos.Tests/Nacos.Tests.csproj --filter "Category=all|Category=1x|Category=2x" --no-restore
     - name: Upload Nacos logs
       if: always()
       uses: actions/upload-artifact@v2

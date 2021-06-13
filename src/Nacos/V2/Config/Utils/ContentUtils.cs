@@ -14,7 +14,7 @@
         {
             if (string.IsNullOrWhiteSpace(content))
             {
-                throw new ArgumentException("发布/删除内容不能为空");
+                throw new ArgumentException("publish/delete content can not be null");
             }
 
             for (int i = 0; i < content.Length; i++)
@@ -22,12 +22,12 @@
                 char c = content[i];
                 if (c == '\r' || c == '\n')
                 {
-                    throw new ArgumentException("发布/删除内容不能包含回车和换行");
+                    throw new ArgumentException("publish/delete content can not contain return and linefeed");
                 }
 
                 if (c == Constants.WORD_SEPARATOR[0])
                 {
-                    throw new ArgumentException("发布/删除内容不能包含(char)2");
+                    throw new ArgumentException("publish/delete content can not contain(char)2");
                 }
             }
         }
@@ -37,7 +37,7 @@
             int index = content.IndexOf(Constants.WORD_SEPARATOR);
             if (index == -1)
             {
-                throw new ArgumentException("内容没有包含分隔符");
+                throw new ArgumentException("content does not contain separator");
             }
 
             return content.Substring(0, index);
@@ -48,7 +48,7 @@
             int index = content.IndexOf(Constants.WORD_SEPARATOR);
             if (index == -1)
             {
-                throw new ArgumentException("内容没有包含分隔符");
+                throw new ArgumentException("content does not contain separator");
             }
 
             return content.Substring(index + 1);

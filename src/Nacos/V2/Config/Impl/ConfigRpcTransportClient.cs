@@ -4,6 +4,7 @@
     using Nacos.V2.Common;
     using Nacos.V2.Config.Abst;
     using Nacos.V2.Config.FilterImpl;
+    using Nacos.V2.Config.Utils;
     using Nacos.V2.Exceptions;
     using Nacos.V2.Remote;
     using Nacos.V2.Remote.Requests;
@@ -19,6 +20,8 @@
     public class ConfigRpcTransportClient : AbstConfigTransportClient
     {
         private static readonly string RPC_AGENT_NAME = "config_rpc_client";
+
+        private static object _obj = new object();
 
         private readonly BlockingCollection<object> _listenExecutebell = new BlockingCollection<object>(boundedCapacity: 1);
 
@@ -61,14 +64,24 @@
             try
             {
                 var request = new ConfigPublishRequest(dataId, group, tenant, content);
-                request.PutAdditonalParam("tag", tag);
-                request.PutAdditonalParam("appName", appName);
-                request.PutAdditonalParam("betaIps", betaIps);
-                request.PutAdditonalParam("type", type);
+                request.PutAdditonalParam(ConfigConstants.TAG, tag);
+                request.PutAdditonalParam(ConfigConstants.APP_NAME, appName);
+                request.PutAdditonalParam(ConfigConstants.BETAIPS, betaIps);
+                request.PutAdditonalParam(ConfigConstants.TYPE, type);
+                request.PutAdditonalParam(ConfigConstants.ENCRYPTED_DATA_KEY, encryptedDataKey);
 
                 var response = await RequestProxy(GetOneRunningClient(), request).ConfigureAwait(false);
 
-                return response.IsSuccess();
+                if (!response.IsSuccess())
+                {
+                    _logger?.LogWarning("[{0}] [publish-single] fail, dataId={1}, group={2}, tenant={3}, code={4}, msg={5}", this.GetName(), dataId, group, tenant, response.ErrorCode, response.Message);
+                    return false;
+                }
+                else
+                {
+                    _logger?.LogInformation("[{0}] [publish-single] ok, dataId={1}, group={2}, tenant={3}, config={4}", this.GetName(), dataId, group, tenant, ContentUtils.TruncateContent(content));
+                    return true;
+                }
             }
             catch (Exception ex)
             {
@@ -82,9 +95,20 @@
             try
             {
                 var request = new ConfigQueryRequest(dataId, group, tenant);
-                request.PutHeader("notify", notify.ToString());
+                request.PutHeader(ConfigConstants.NOTIFY_HEADER, notify.ToString());
 
-                var response = (ConfigQueryResponse)await RequestProxy(GetOneRunningClient(), request).ConfigureAwait(false);
+                var rpcClient = GetOneRunningClient();
+
+                if (notify)
+                {
+                    var key = GroupKey.GetKeyTenant(dataId, group, tenant);
+                    if (_cacheMap.TryGetValue(key, out var cacheData))
+                    {
+                        rpcClient = EnsureRpcClient(cacheData.TaskId.ToString());
+                    }
+                }
+
+                var response = (ConfigQueryResponse)await RequestProxy(rpcClient, request).ConfigureAwait(false);
 
                 ConfigResponse configResponse = new ConfigResponse();
 
@@ -95,6 +119,8 @@
                     configResponse.SetContent(response.Content);
                     configResponse.SetConfigType(response.ContentType.IsNotNullOrWhiteSpace() ? response.ContentType : "text");
 
+                    // in nacos 2.0.2 still do not return the EncryptedDataKey
+                    // so this always be null at this time!!!
                     string encryptedDataKey = response.EncryptedDataKey;
 
                     await FileLocalConfigInfoProcessor.SaveEncryptDataKeySnapshot(this.GetName(), dataId, group, tenant, encryptedDataKey).ConfigureAwait(false);
@@ -190,22 +216,25 @@
 
         private RpcClient EnsureRpcClient(string taskId)
         {
-            Dictionary<string, string> labels = GetLabels();
-            Dictionary<string, string> newlabels = new Dictionary<string, string>(labels);
-            newlabels["taskId"] = taskId;
-
-            RpcClient rpcClient = RpcClientFactory
-                    .CreateClient("config-" + taskId + "-" + uuid, RemoteConnectionType.GRPC, newlabels);
-
-            if (rpcClient.IsWaitInited())
+            lock (_obj)
             {
-                InitHandlerRpcClient(rpcClient);
-                rpcClient.SetTenant(GetTenant());
-                rpcClient.SetClientAbilities(InitAbilities());
-                rpcClient.Start();
-            }
+                Dictionary<string, string> labels = GetLabels();
+                Dictionary<string, string> newlabels = new Dictionary<string, string>(labels);
+                newlabels["taskId"] = taskId;
 
-            return rpcClient;
+                RpcClient rpcClient = RpcClientFactory
+                        .CreateClient($"{uuid}_config-{taskId}", RemoteConnectionType.GRPC, newlabels);
+
+                if (rpcClient.IsWaitInited())
+                {
+                    InitHandlerRpcClient(rpcClient);
+                    rpcClient.SetTenant(GetTenant());
+                    rpcClient.SetClientAbilities(InitAbilities());
+                    rpcClient.Start();
+                }
+
+                return rpcClient;
+            }
         }
 
         private ClientAbilities InitAbilities()

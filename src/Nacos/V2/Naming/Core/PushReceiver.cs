@@ -13,6 +13,10 @@
 
     public class PushReceiver : IDisposable
     {
+        private static readonly string PUSH_PACKAGE_TYPE_DOM = "dom";
+        private static readonly string PUSH_PACKAGE_TYPE_SERVICE = "service";
+        private static readonly string PUSH_PACKAGE_TYPE_DUMP = "dump";
+
         private readonly ILogger _logger;
         private ServiceInfoHolder _serviceInfoHolder;
         private UdpClient _udpClient;
@@ -83,13 +87,13 @@
 
                     var ack = string.Empty;
 
-                    if (pushPacket.Type.Equals("dom", StringComparison.OrdinalIgnoreCase) || pushPacket.Type.Equals("service", StringComparison.OrdinalIgnoreCase))
+                    if (pushPacket.Type.Equals(PUSH_PACKAGE_TYPE_DOM, StringComparison.OrdinalIgnoreCase) || pushPacket.Type.Equals(PUSH_PACKAGE_TYPE_SERVICE, StringComparison.OrdinalIgnoreCase))
                     {
                         _serviceInfoHolder.ProcessServiceInfo(pushPacket.Data);
 
                         ack = new { type = "push-ack", lastRefTime = pushPacket.LastRefTime, data = string.Empty }.ToJsonString();
                     }
-                    else if (pushPacket.Type.Equals("dump", StringComparison.OrdinalIgnoreCase))
+                    else if (pushPacket.Type.Equals(PUSH_PACKAGE_TYPE_DUMP, StringComparison.OrdinalIgnoreCase))
                     {
                         var map = System.Net.WebUtility.UrlEncode(_serviceInfoHolder.GetServiceInfoMap().ToJsonString());
                         ack = new { type = "dump-ack", lastRefTime = pushPacket.LastRefTime, data = map }.ToJsonString();

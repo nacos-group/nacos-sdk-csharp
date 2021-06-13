@@ -1,4 +1,4 @@
-namespace App3
+﻿namespace App3
 {
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
@@ -41,6 +41,8 @@ namespace App3
                 x.UserName = "nacos";
                 x.Password = "nacos";
 
+                // this sample will add the filter to encrypt the config with AES.
+                x.ConfigFilterAssemblies = new System.Collections.Generic.List<string> { "App3" };
 
                 // swich to use http or rpc
                 x.ConfigUseRpc = true;

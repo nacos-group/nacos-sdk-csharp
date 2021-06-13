@@ -21,6 +21,27 @@
 }
          */
 
+        /*
+         {
+  "ConnectionStrings": {
+    "Default": "U2VydmVyPTEyNy4wLjAuMTtQb3J0PTMzMDY7RGF0YWJhc2U9ZGVtbztVc2VyIElkPXJvb3Q7UGFzc3dvcmQ9MTIzNDU2Ow=="
+  },
+  "version": "测试version",
+  "AppSettings": {
+    "Str": "val",
+    "num": 1,
+    "arr": [
+      1,
+      2,
+      3
+    ],
+    "subobj": {
+      "a": "b"
+    }
+  }
+}
+         */
+
         public string Str { get; set; }
 
 #pragma warning disable SA1300 // Element should begin with upper-case letter

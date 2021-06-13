@@ -13,10 +13,11 @@
         /// </summary>
         /// <param name="services">services.</param>
         /// <param name="configuration">configuration</param>
+        /// <param name="section">section, default is nacos</param>
         /// <returns>IServiceCollection</returns>
-        public static IServiceCollection AddNacosAspNet(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddNacosAspNet(this IServiceCollection services, IConfiguration configuration, string section = "nacos")
         {
-            services.Configure<NacosAspNetOptions>(configuration.GetSection("nacos"));
+            services.Configure<NacosAspNetOptions>(configuration.GetSection(section));
 
             services.AddNacosV2Naming(configuration);
 

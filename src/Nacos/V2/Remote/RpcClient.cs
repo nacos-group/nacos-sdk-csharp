@@ -31,7 +31,7 @@
 
         protected int rpcClientStatus = RpcClientStatus.WAIT_INIT;
 
-        protected RemoteConnection currentConnetion;
+        protected RemoteConnection currentConnection;
 
         protected ClientAbilities clientAbilities;
 
@@ -103,6 +103,35 @@
                 foreach (var connectionEventListener in connectionEventListeners)
                 {
                     connectionEventListener.OnConnected();
+                }
+            }
+        }
+
+        /// <summary>
+        /// check if current connected server is in serverlist ,if not switch server.
+        /// </summary>
+        protected void OnServerListChange()
+        {
+            if (currentConnection != null && currentConnection.ServerInfo != null)
+            {
+                var serverInfo = currentConnection.ServerInfo;
+                bool found = false;
+                foreach (var serverAddress in _serverListFactory.GetServerList())
+                {
+                    if (ResolveServerInfo(serverAddress).GetAddress().Equals(serverInfo.GetAddress(), StringComparison.OrdinalIgnoreCase))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    logger?.LogInformation(
+                        "Current connected server {0}  is not in latest server list,switch switchServerAsync",
+                        serverInfo.GetAddress());
+
+                    SwitchServerAsync();
                 }
             }
         }
@@ -182,7 +211,7 @@
             if (connectToServer != null)
             {
                 logger?.LogInformation("[{0}] success to connect to server [{1}] on start up, connectionId={2}", this._name, connectToServer.ServerInfo?.GetAddress(), connectToServer.GetConnectionId());
-                this.currentConnetion = connectToServer;
+                this.currentConnection = connectToServer;
                 Interlocked.Exchange(ref rpcClientStatus, RpcClientStatus.RUNNING);
                 _eventLinkedBlockingQueue.TryAdd(new ConnectionEvent(ConnectionEvent.CONNECTED));
             }
@@ -234,9 +263,9 @@
 
                             if (!isHealthy)
                             {
-                                if (currentConnetion == null) continue;
+                                if (currentConnection == null) continue;
 
-                                logger?.LogInformation("[{0}]Server healthy check fail,currentConnection={1}", _name, currentConnetion.GetConnectionId());
+                                logger?.LogInformation("[{0}]Server healthy check fail,currentConnection={1}", _name, currentConnection.GetConnectionId());
 
                                 if (Interlocked.CompareExchange(ref rpcClientStatus, RpcClientStatus.UNHEALTHY, RpcClientStatus.RUNNING) == RpcClientStatus.RUNNING)
                                 {
@@ -289,11 +318,11 @@
         private async Task<bool> DoHealthCheckAsync()
         {
             var healthCheckRequest = new HealthCheckRequest();
-            if (this.currentConnetion == null) return false;
+            if (this.currentConnection == null) return false;
 
             try
             {
-                var response = await this.currentConnetion.RequestAsync(healthCheckRequest, BuildMeta(healthCheckRequest.GetRemoteType()), 3000L).ConfigureAwait(false);
+                var response = await this.currentConnection.RequestAsync(healthCheckRequest, BuildMeta(healthCheckRequest.GetRemoteType()), 3000L).ConfigureAwait(false);
 
                 // not only check server is ok ,also check connection is register.
                 return response != null && response.IsSuccess();
@@ -339,14 +368,14 @@
                             logger?.LogInformation("[{0}] success to connect server : {1}", _name, recommendServer);
 
                             // successfully create a new connect.
-                            if (currentConnetion != null)
+                            if (currentConnection != null)
                             {
                                 // set current connection to enable connection event.
-                                currentConnetion.SetAbandon(true);
-                                CloseConnection(currentConnetion);
+                                currentConnection.SetAbandon(true);
+                                CloseConnection(currentConnection);
                             }
 
-                            currentConnetion = connectionNew;
+                            currentConnection = connectionNew;
                             Interlocked.Exchange(ref rpcClientStatus, RpcClientStatus.RUNNING);
                             switchSuccess = true;
 
@@ -357,7 +386,7 @@
                         // close connection if client is already shutdown.
                         if (IsShutdwon())
                         {
-                            CloseConnection(currentConnetion);
+                            CloseConnection(currentConnection);
                         }
 
                         lastException = null;
@@ -419,7 +448,7 @@
 
         public abstract int RpcPortOffset();
 
-        public RemoteServerInfo GetCurrentServer() => this.currentConnetion != null ? this.currentConnetion.ServerInfo : null;
+        public RemoteServerInfo GetCurrentServer() => this.currentConnection != null ? this.currentConnection.ServerInfo : null;
 
         public Task<CommonResponse> Request(CommonRequest request) => Request(request, 3000L);
 
@@ -435,13 +464,13 @@
 
                 try
                 {
-                    if (this.currentConnetion == null)
+                    if (this.currentConnection == null)
                     {
                         waitReconnect = true;
                         throw new NacosException(NacosException.CLIENT_DISCONNECT, $"Client not connected,current status: {rpcClientStatus}");
                     }
 
-                    response = await currentConnetion.RequestAsync(request, BuildMeta(request.GetRemoteType()), timeoutMills).ConfigureAwait(false);
+                    response = await currentConnection.RequestAsync(request, BuildMeta(request.GetRemoteType()), timeoutMills).ConfigureAwait(false);
 
                     if (response == null) throw new NacosException(NacosException.SERVER_ERROR, "Unknown Exception.");
 
@@ -566,7 +595,7 @@
         {
             // executorService.shutdown();
             Interlocked.Exchange(ref rpcClientStatus, RpcClientStatus.SHUTDOWN);
-            CloseConnection(currentConnetion);
+            CloseConnection(currentConnection);
         }
 
         private void CloseConnection(RemoteConnection connection)
