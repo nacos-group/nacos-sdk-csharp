@@ -51,7 +51,11 @@
             string currentServerAddr = _serverListMgr.GetCurrentServerAddr();
             int maxRetry = Constants.MAX_RETRY;
 
-            var requestUrl = $"{GetUrl(currentServerAddr, path)}?{InitParams(paramValues)}";
+            var requestUrl = GetUrl(currentServerAddr, path);
+            if (method == HttpMethod.Get)
+            {
+                requestUrl = $"{requestUrl}?{InitParams(paramValues)}";
+            }
 
             do
             {
@@ -61,6 +65,13 @@
                     cts.CancelAfter(TimeSpan.FromMilliseconds(readTimeoutMs));
 
                     HttpRequestMessage reqMsg = new HttpRequestMessage(method, requestUrl);
+
+                    if (method != HttpMethod.Get
+                        && paramValues.Count > 0)
+                    {
+                        reqMsg.Content = new FormUrlEncodedContent(paramValues);
+                    }
+
                     foreach (var item in headers)
                     {
                         reqMsg.Headers.TryAddWithoutValidation(item.Key, item.Value);
