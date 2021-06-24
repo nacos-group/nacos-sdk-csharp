@@ -25,6 +25,22 @@
         }
 
         [Fact]
+        protected virtual async Task Iss116_Should_Succeed()
+        {
+            var dataId = $"pub-{Guid.NewGuid().ToString()}";
+            var group = Nacos.V2.Common.Constants.DEFAULT_GROUP;
+            var val = @"{
+    ""NacosConfig"": {
+        ""ConfigFilterExtInfo"": ""{\""JsonPaths\"":[\""ConnectionStrings.Default\""],\""Other\"":\""xxxxxx\""}""
+    }
+}";
+
+            var pubFlag = await _configSvc.PublishConfig(dataId, group, val).ConfigureAwait(false);
+            _output.WriteLine($"Iss116_Should_Succeed, PublishConfig {dataId} return {pubFlag}");
+            Assert.True(pubFlag);
+        }
+
+        [Fact]
         protected virtual async Task GetConfig_Should_Succeed()
         {
             var dataId = $"get-{Guid.NewGuid().ToString()}";
