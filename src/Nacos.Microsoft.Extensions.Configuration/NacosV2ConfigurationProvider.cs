@@ -198,7 +198,7 @@
 
                         foreach (var item in data)
                         {
-                            nData.Add(item.Key, item.Value);
+                            nData[item.Key] = item.Value;
                         }
                     }
 
