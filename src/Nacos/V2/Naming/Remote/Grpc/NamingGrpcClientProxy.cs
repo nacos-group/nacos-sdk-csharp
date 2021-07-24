@@ -154,7 +154,7 @@
 
         public async Task DoUnsubscribe(string serviceName, string groupName, string clusters)
         {
-            var request = new SubscribeServiceRequest(namespaceId, serviceName, groupName, clusters, true);
+            var request = new SubscribeServiceRequest(namespaceId, serviceName, groupName, clusters, false);
             await RequestToServer<SubscribeServiceResponse>(request).ConfigureAwait(false);
             _redoService.RemoveSubscriberForRedo(serviceName, groupName, clusters);
         }
