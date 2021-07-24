@@ -1,9 +1,10 @@
 ﻿namespace Nacos.V2.Utils
 {
-    using Nacos.V2.Common;
     using Newtonsoft.Json;
     using System;
-    using System.Threading;
+    using System.IO;
+    using System.Text;
+    using System.Threading.Tasks;
 
     public static class ObjectUtil
     {
@@ -21,5 +22,15 @@
 
         public static string SafeGetValue(this System.Collections.Generic.Dictionary<string, object> dict, string key, string defaultVal = "")
             => dict.TryGetValue(key, out var val) ? (string)val : defaultVal;
+
+        public static async Task<string> ReadFileAsync(this FileInfo file)
+        {
+            using FileStream fs = new FileStream(file.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            byte[] readByte = new byte[fs.Length];
+            await fs.ReadAsync(readByte, 0, readByte.Length).ConfigureAwait(false);
+            string readStr = Encoding.UTF8.GetString(readByte);
+            fs.Close();
+            return readStr;
+        }
     }
 }

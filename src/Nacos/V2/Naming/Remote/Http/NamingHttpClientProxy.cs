@@ -429,7 +429,7 @@
             {
                 string key = beatReactor.BuildKey(instance.ServiceName, instance.Ip, instance.Port);
 
-                if (beatReactor.Dom2Beat.ContainsKey(key) && instance.Ephemeral)
+                if (beatReactor._dom2Beat.ContainsKey(key) && instance.Ephemeral)
                 {
                     BeatInfo beatInfo = beatReactor.BuildBeatInfo(instance);
                     beatReactor.AddBeatInfo(instance.ServiceName, beatInfo);
