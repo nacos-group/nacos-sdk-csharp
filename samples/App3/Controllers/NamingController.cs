@@ -115,7 +115,7 @@
         public async Task<string> Unsubscribe()
         {
             await _client.Unsubscribe("mysvc2", listener).ConfigureAwait(false);
-            return "Subscribe";
+            return "UnSubscribe";
         }
 
         // NOTE: MUST keep Subscribe and Unsubscribe to use one instance of the listener!!!
