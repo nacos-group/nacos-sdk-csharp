@@ -16,9 +16,8 @@
 
         public CommonResponse RequestReply(CommonRequest request)
         {
-            if (request is NotifySubscriberRequest)
+            if (request is NotifySubscriberRequest req)
             {
-                var req = (NotifySubscriberRequest)request;
                 _serviceInfoHolder.ProcessServiceInfo(req.ServiceInfo);
                 return new NotifySubscriberResponse() { RequestId = req.RequestId };
             }
