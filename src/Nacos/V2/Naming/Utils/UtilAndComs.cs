@@ -29,5 +29,11 @@
         public static string HTTP = "http://";
 
         public static string HTTPS = "https://";
+
+        public static string ENV_CONFIGS = "00-00---000-ENV_CONFIGS-000---00-00";
+
+        public static string VIP_CLIENT_FILE = "vipclient.properties";
+
+        public static string ALL_HOSTS = "00-00---000-ALL_HOSTS-000---00-00";
     }
 }

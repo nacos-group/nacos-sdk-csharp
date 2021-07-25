@@ -8,19 +8,19 @@
     using System.Linq;
     using Nacos.V2.Naming.Event;
     using Nacos.V2.Utils;
+    using System.IO;
 
-    public class ServiceInfoHolder
+    public class ServiceInfoHolder : IDisposable
     {
-        private ConcurrentDictionary<string, Dtos.ServiceInfo> serviceInfoMap;
+        private static readonly string FILE_PATH_NACOS = "nacos";
+        private static readonly string FILE_PATH_NAMING = "naming";
 
-        private FailoverReactor failoverReactor;
+        private readonly ILogger _logger;
+        private readonly FailoverReactor _failoverReactor;
+        private readonly ConcurrentDictionary<string, Dtos.ServiceInfo> _serviceInfoMap;
 
         private InstancesChangeNotifier _notifier;
-
-        private string cacheDir = "";
-
-        private ILogger _logger;
-
+        private string cacheDir = string.Empty;
         private bool _pushEmptyProtection;
 
         public ServiceInfoHolder(ILogger logger, string @namespace, NacosSdkOptions nacosOptions, InstancesChangeNotifier notifier = null)
@@ -28,19 +28,19 @@
             this._logger = logger;
             this._notifier = notifier;
 
-            InitCacheDir(@namespace);
+            InitCacheDir(@namespace, nacosOptions);
 
             if (IsLoadCacheAtStart(nacosOptions))
             {
                 var data = DiskCache.ReadAsync(this.cacheDir).ConfigureAwait(false).GetAwaiter().GetResult();
-                this.serviceInfoMap = new ConcurrentDictionary<string, Dtos.ServiceInfo>(data);
+                this._serviceInfoMap = new ConcurrentDictionary<string, Dtos.ServiceInfo>(data);
             }
             else
             {
-                this.serviceInfoMap = new ConcurrentDictionary<string, Dtos.ServiceInfo>();
+                this._serviceInfoMap = new ConcurrentDictionary<string, Dtos.ServiceInfo>();
             }
 
-            this.failoverReactor = new FailoverReactor(this, cacheDir);
+            this._failoverReactor = new FailoverReactor(_logger, this, cacheDir);
             this._pushEmptyProtection = nacosOptions.NamingPushEmptyProtection;
         }
 
@@ -66,11 +66,11 @@
         {
             if (serviceInfo.GetKey().IsNullOrWhiteSpace()) return null;
 
-            serviceInfoMap.TryGetValue(serviceInfo.GetKey(), out var oldService);
+            _serviceInfoMap.TryGetValue(serviceInfo.GetKey(), out var oldService);
 
             if (IsEmptyOrErrorPush(serviceInfo)) return oldService;
 
-            serviceInfoMap.AddOrUpdate(serviceInfo.GetKey(), serviceInfo, (x, y) => serviceInfo);
+            _serviceInfoMap.AddOrUpdate(serviceInfo.GetKey(), serviceInfo, (x, y) => serviceInfo);
 
             bool changed = IsChangedServiceInfo(oldService, serviceInfo);
 
@@ -156,32 +156,47 @@
             return changed;
         }
 
-        internal ConcurrentDictionary<string, Dtos.ServiceInfo> GetServiceInfoMap() => serviceInfoMap;
+        internal ConcurrentDictionary<string, Dtos.ServiceInfo> GetServiceInfoMap() => _serviceInfoMap;
 
-        private void InitCacheDir(string @namespace)
+        private void InitCacheDir(string @namespace, NacosSdkOptions options)
         {
             var jmSnapshotPath = EnvUtil.GetEnvValue("JM.SNAPSHOT.PATH");
+
+            string namingCacheRegistryDir = string.Empty;
+            if (options.NamingCacheRegistryDir.IsNotNullOrWhiteSpace())
+            {
+                namingCacheRegistryDir = options.NamingCacheRegistryDir;
+            }
+
             if (!string.IsNullOrWhiteSpace(jmSnapshotPath))
             {
-                cacheDir = System.IO.Path.Combine(jmSnapshotPath, "nacos", "naming", @namespace);
+                cacheDir = Path.Combine(jmSnapshotPath, FILE_PATH_NACOS, FILE_PATH_NAMING, @namespace);
             }
             else
             {
-                cacheDir = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "nacos", "naming", @namespace);
+                cacheDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), FILE_PATH_NACOS, FILE_PATH_NAMING, @namespace);
             }
         }
 
         internal Dtos.ServiceInfo GetServiceInfo(string serviceName, string groupName, string clusters)
         {
+            _logger?.LogDebug("failover-mode:{0}", _failoverReactor.IsFailoverSwitch());
             string groupedServiceName = NamingUtils.GetGroupedName(serviceName, groupName);
             string key = ServiceInfo.GetKey(groupedServiceName, clusters);
 
-            /*if (failoverReactor.isFailoverSwitch())
+            if (_failoverReactor.IsFailoverSwitch())
             {
-                return failoverReactor.getService(key);
-            }*/
+                return _failoverReactor.GetService(key);
+            }
 
-            return serviceInfoMap.TryGetValue(key, out var serviceInfo) ? serviceInfo : null;
+            return _serviceInfoMap.TryGetValue(key, out var serviceInfo) ? serviceInfo : null;
+        }
+
+        public void Dispose()
+        {
+            _logger?.LogInformation("{0} do shutdown begin", nameof(ServiceInfoHolder));
+            _failoverReactor?.Dispose();
+            _logger?.LogInformation("{0} do shutdown stop", nameof(ServiceInfoHolder));
         }
     }
 }

@@ -13,19 +13,22 @@
 
     public class BeatReactor
     {
-        private readonly ILogger _logger;
+        private static readonly string CLIENT_BEAT_INTERVAL_FIELD = "clientBeatInterval";
+        private static readonly int RESOURCE_NOT_FOUND = 20404;
+        private static readonly int OK = 10200;
 
-        private NamingHttpClientProxy _serverProxy;
+        private readonly ILogger _logger;
+        private readonly NamingHttpClientProxy _serverProxy;
+        public readonly ConcurrentDictionary<string, BeatInfo> _dom2Beat;
+        private readonly ConcurrentDictionary<string, Timer> _beatTimer;
 
         public BeatReactor(ILogger logger, NamingHttpClientProxy serverProxy, NacosSdkOptions options)
         {
             this._logger = logger;
             this._serverProxy = serverProxy;
+            this._dom2Beat = new ConcurrentDictionary<string, BeatInfo>();
+            this._beatTimer = new ConcurrentDictionary<string, Timer>();
         }
-
-        public ConcurrentDictionary<string, BeatInfo> Dom2Beat = new ConcurrentDictionary<string, BeatInfo>();
-
-        private readonly ConcurrentDictionary<string, Timer> _beatTimer = new ConcurrentDictionary<string, Timer>();
 
         internal string BuildKey(string serviceName, string ip, int port)
         {
@@ -40,9 +43,9 @@
 
             string key = BuildKey(serviceName, beatInfo.Ip, beatInfo.Port);
 
-            if (Dom2Beat.TryRemove(key, out var exitBeat)) exitBeat.Stopped = true;
+            if (_dom2Beat.TryRemove(key, out var exitBeat)) exitBeat.Stopped = true;
 
-            Dom2Beat.AddOrUpdate(key, beatInfo, (x, y) => beatInfo);
+            _dom2Beat.AddOrUpdate(key, beatInfo, (x, y) => beatInfo);
 
             var timer = new Timer(
                 async x =>
@@ -64,7 +67,7 @@
             {
                 Newtonsoft.Json.Linq.JObject result = await _serverProxy.SendBeat(beatInfo, false).ConfigureAwait(false);
 
-                long interval = result.GetValue("clientBeatInterval").ToObject<long>();
+                long interval = result.GetValue(CLIENT_BEAT_INTERVAL_FIELD).ToObject<long>();
 
                 bool lightBeatEnabled = false;
 
@@ -75,11 +78,11 @@
 
                 if (interval > 0) nextTime = interval;
 
-                int code = 10200;
+                int code = OK;
 
                 if (result.ContainsKey(CommonParams.CODE)) code = result.GetValue(CommonParams.CODE).ToObject<int>();
 
-                if (code == 20404)
+                if (code == RESOURCE_NOT_FOUND)
                 {
                     Instance instance = new Instance
                     {
@@ -138,7 +141,7 @@
             _logger?.LogInformation("[BEAT] removing beat: {0}:{1}:{2} from beat map.", serviceName, ip, port);
             string key = BuildKey(serviceName, ip, port);
 
-            if (Dom2Beat.TryRemove(key, out var beatInfo)) beatInfo.Stopped = true;
+            if (_dom2Beat.TryRemove(key, out var beatInfo)) beatInfo.Stopped = true;
 
             if (_beatTimer.TryRemove(key, out var t)) t.Dispose();
         }

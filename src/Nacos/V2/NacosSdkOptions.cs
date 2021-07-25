@@ -56,6 +56,8 @@
 
         public string NamingLoadCacheAtStart { get; set; }
 
+        public string NamingCacheRegistryDir { get; set; }
+
         /// <summary>
         /// Whether enable protecting naming push empty data, default is false.
         /// </summary>

@@ -13,26 +13,22 @@
     public class ServiceInfoUpdateService
     {
         private static readonly int DEFAULT_DELAY = 1000;
-
         private static readonly int DEFAULT_UPDATE_CACHE_TIME_MULTIPLE = 6;
 
-        private ConcurrentDictionary<string, Timer> _timerMap = new ConcurrentDictionary<string, Timer>();
-
         private readonly ILogger _logger;
-
-        private ServiceInfoHolder serviceInfoHolder;
-
-        private INamingClientProxy namingClientProxy;
-
-        private InstancesChangeNotifier changeNotifier;
+        private readonly ConcurrentDictionary<string, Timer> _timerMap;
+        private readonly ServiceInfoHolder _serviceInfoHolder;
+        private readonly INamingClientProxy _namingClientProxy;
+        private readonly InstancesChangeNotifier _changeNotifier;
 
         public ServiceInfoUpdateService(ILogger logger, NacosSdkOptions properties, ServiceInfoHolder serviceInfoHolder,
             INamingClientProxy namingClientProxy, InstancesChangeNotifier changeNotifier)
         {
             this._logger = logger;
-            this.serviceInfoHolder = serviceInfoHolder;
-            this.namingClientProxy = namingClientProxy;
-            this.changeNotifier = changeNotifier;
+            this._timerMap = new ConcurrentDictionary<string, Timer>();
+            this._serviceInfoHolder = serviceInfoHolder;
+            this._namingClientProxy = namingClientProxy;
+            this._changeNotifier = changeNotifier;
         }
 
         public void ScheduleUpdateIfAbsent(string serviceName, string groupName, string clusters)
@@ -57,17 +53,17 @@
 
                 try
                 {
-                    if (!changeNotifier.IsSubscribed(state.GroupName, state.ServiceName, state.Clusters) && !_timerMap.ContainsKey(state.ServiceKey))
+                    if (!_changeNotifier.IsSubscribed(state.GroupName, state.ServiceName, state.Clusters) && !_timerMap.ContainsKey(state.ServiceKey))
                     {
                         _logger?.LogInformation("update task is stopped, service:{0}, clusters:{1}", state.GroupedServiceName, state.Clusters);
                         return;
                     }
 
-                    if (!serviceInfoHolder.GetServiceInfoMap().TryGetValue(state.ServiceKey, out var serviceObj))
+                    if (!_serviceInfoHolder.GetServiceInfoMap().TryGetValue(state.ServiceKey, out var serviceObj))
                     {
-                        serviceObj = await namingClientProxy.QueryInstancesOfService(state.ServiceName, state.GroupName, state.Clusters, 0, false).ConfigureAwait(false);
+                        serviceObj = await _namingClientProxy.QueryInstancesOfService(state.ServiceName, state.GroupName, state.Clusters, 0, false).ConfigureAwait(false);
 
-                        serviceInfoHolder.ProcessServiceInfo(serviceObj);
+                        _serviceInfoHolder.ProcessServiceInfo(serviceObj);
                         delayTime = DEFAULT_DELAY;
                         state.LastRefTime = serviceObj.LastRefTime;
                         return;
@@ -75,8 +71,8 @@
 
                     if (serviceObj.LastRefTime <= state.LastRefTime)
                     {
-                        serviceObj = await namingClientProxy.QueryInstancesOfService(serviceName, groupName, clusters, 0, false).ConfigureAwait(false);
-                        serviceInfoHolder.ProcessServiceInfo(serviceObj);
+                        serviceObj = await _namingClientProxy.QueryInstancesOfService(serviceName, groupName, clusters, 0, false).ConfigureAwait(false);
+                        _serviceInfoHolder.ProcessServiceInfo(serviceObj);
                     }
 
                     state.LastRefTime = serviceObj.LastRefTime;
@@ -99,7 +95,6 @@
                     _timerMap.TryGetValue(state.ServiceKey, out var self);
                     var due = Math.Min(delayTime << state.FailCount, DEFAULT_DELAY * 60);
 
-                    // _logger?.LogInformation("update service info due = {0}, {1}, {2}, {3}", due, delayTime << state.FailCount, delayTime, state.FailCount);
                     self?.Change(due, Timeout.Infinite);
                 }
             }, new UpdateModel(serviceName, groupName, clusters), DEFAULT_DELAY, Timeout.Infinite);

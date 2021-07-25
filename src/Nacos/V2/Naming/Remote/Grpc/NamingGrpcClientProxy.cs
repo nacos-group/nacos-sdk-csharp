@@ -177,8 +177,8 @@
 
                 CommonResponse response =
                         requestTimeout < 0
-                        ? await rpcClient.Request(request)
-.ConfigureAwait(false) : await rpcClient.Request(request, requestTimeout).ConfigureAwait(false);
+                        ? await rpcClient.Request(request).ConfigureAwait(false)
+                        : await rpcClient.Request(request, requestTimeout).ConfigureAwait(false);
 
                 if (response == null)
                 {
