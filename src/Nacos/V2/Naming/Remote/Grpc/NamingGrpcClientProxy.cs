@@ -31,7 +31,7 @@
 
         private NacosSdkOptions _options;
 
-        private NamingGrpcConnectionEventListener namingGrpcConnectionEventListener;
+        private NamingGrpcRedoService _redoService;
 
         public NamingGrpcClientProxy(
             ILogger logger,
@@ -56,8 +56,7 @@
             };
 
             this.rpcClient = RpcClientFactory.CreateClient(uuid, RemoteConnectionType.GRPC, labels);
-
-            this.namingGrpcConnectionEventListener = new NamingGrpcConnectionEventListener(_logger, this);
+            this._redoService = new NamingGrpcRedoService(_logger, this);
 
             Start(serverListFactory, serviceInfoHolder);
         }
@@ -65,9 +64,9 @@
         private void Start(IServerListFactory serverListFactory, ServiceInfoHolder serviceInfoHolder)
         {
             rpcClient.Init(serverListFactory);
-            rpcClient.Start();
+            rpcClient.RegisterConnectionListener(_redoService);
             rpcClient.RegisterServerPushResponseHandler(new NamingPushRequestHandler(serviceInfoHolder));
-            rpcClient.RegisterConnectionListener(namingGrpcConnectionEventListener);
+            rpcClient.Start();
         }
 
         public Task CreateService(Service service, AbstractSelector selector) => Task.CompletedTask;
@@ -78,10 +77,15 @@
         {
             _logger?.LogInformation("[DEREGISTER-SERVICE] {0} deregistering service {1} with instance {2}", namespaceId, serviceName, instance);
 
-            namingGrpcConnectionEventListener.RemoveInstanceForRedo(serviceName, groupName, instance);
+            _redoService.InstanceDeregister(serviceName, groupName);
+            await DoDeregisterService(serviceName, groupName, instance).ConfigureAwait(false);
+        }
 
+        public async Task DoDeregisterService(string serviceName, string groupName, Instance instance)
+        {
             var request = new InstanceRequest(namespaceId, serviceName, groupName, NamingRemoteConstants.DE_REGISTER_INSTANCE, instance);
             await RequestToServer<CommonResponse>(request).ConfigureAwait(false);
+            _redoService.RemoveInstanceForRedo(serviceName, groupName);
         }
 
         public async Task<ListView<string>> GetServiceList(int pageNo, int pageSize, string groupName, AbstractSelector selector)
@@ -115,29 +119,44 @@
         {
             _logger?.LogInformation("[REGISTER-SERVICE] {0} registering service {1} with instance {2}", namespaceId, serviceName, instance);
 
-            namingGrpcConnectionEventListener.CacheInstanceForRedo(serviceName, groupName, instance);
+            _redoService.CacheInstanceForRedo(serviceName, groupName, instance);
+            await DoRegisterService(serviceName, groupName, instance).ConfigureAwait(false);
+        }
 
+        public async Task DoRegisterService(string serviceName, string groupName, Instance instance)
+        {
             var request = new InstanceRequest(namespaceId, serviceName, groupName, NamingRemoteConstants.REGISTER_INSTANCE, instance);
             await RequestToServer<CommonResponse>(request).ConfigureAwait(false);
+            _redoService.InstanceRegistered(serviceName, groupName);
         }
 
         public bool ServerHealthy() => rpcClient.IsRunning();
 
         public async Task<ServiceInfo> Subscribe(string serviceName, string groupName, string clusters)
         {
+            _redoService.CacheSubscriberForRedo(serviceName, groupName, clusters);
+            return await DoSubscribe(serviceName, groupName, clusters).ConfigureAwait(false);
+        }
+
+        public async Task<ServiceInfo> DoSubscribe(string serviceName, string groupName, string clusters)
+        {
             var request = new SubscribeServiceRequest(namespaceId, serviceName, groupName, clusters, true);
             var response = await RequestToServer<SubscribeServiceResponse>(request).ConfigureAwait(false);
-
-            namingGrpcConnectionEventListener.CacheSubscriberForRedo(NamingUtils.GetGroupedName(serviceName, groupName), clusters);
+            _redoService.SubscriberRegistered(serviceName, groupName, clusters);
             return response.ServiceInfo;
         }
 
         public async Task Unsubscribe(string serviceName, string groupName, string clusters)
         {
-            var request = new SubscribeServiceRequest(namespaceId, serviceName, groupName, clusters, true);
-            await RequestToServer<SubscribeServiceResponse>(request).ConfigureAwait(false);
+            _redoService.SubscriberDeregister(serviceName, groupName, clusters);
+            await DoUnsubscribe(serviceName, groupName, clusters).ConfigureAwait(false);
+        }
 
-            namingGrpcConnectionEventListener.RemoveSubscriberForRedo(NamingUtils.GetGroupedName(serviceName, groupName), clusters);
+        public async Task DoUnsubscribe(string serviceName, string groupName, string clusters)
+        {
+            var request = new SubscribeServiceRequest(namespaceId, serviceName, groupName, clusters, false);
+            await RequestToServer<SubscribeServiceResponse>(request).ConfigureAwait(false);
+            _redoService.RemoveSubscriberForRedo(serviceName, groupName, clusters);
         }
 
         public Task UpdateBeatInfo(List<Instance> modifiedInstances) => Task.CompletedTask;
@@ -145,6 +164,8 @@
         public Task UpdateInstance(string serviceName, string groupName, Instance instance) => Task.CompletedTask;
 
         public Task UpdateService(Service service, AbstractSelector selector) => Task.CompletedTask;
+
+        public bool IsEnable() => rpcClient.IsRunning();
 
         private async Task<T> RequestToServer<T>(AbstractNamingRequest request)
             where T : CommonResponse
@@ -156,8 +177,8 @@
 
                 CommonResponse response =
                         requestTimeout < 0
-                        ? await rpcClient.Request(request)
-.ConfigureAwait(false) : await rpcClient.Request(request, requestTimeout).ConfigureAwait(false);
+                        ? await rpcClient.Request(request).ConfigureAwait(false)
+                        : await rpcClient.Request(request, requestTimeout).ConfigureAwait(false);
 
                 if (response == null)
                 {

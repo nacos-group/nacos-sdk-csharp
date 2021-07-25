@@ -1,6 +1,7 @@
 ﻿namespace Nacos.AspNetCore
 {
     using Nacos;
+    using System;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -29,16 +30,19 @@
             }).ToList();
 
             // <instanceid, weight>
-            var dic = tmp.ToDictionary(k => k.InstanceId, v => (int)v.Weight);
+            var dic = tmp.OrderByDescending(o => o.Weight).ToDictionary(k => k.InstanceId, v => v.Weight);
 
             var srcInstanceIdList = dic.Keys.ToList();
             var tagInstanceIdList = new List<string>();
+
+            var minWeight = dic.Values.Min();
 
             foreach (var item in srcInstanceIdList)
             {
                 dic.TryGetValue(item, out var weight);
 
-                for (int i = 0; i < weight; i++)
+                var count = Math.Round(weight / minWeight);
+                for (int i = 0; i < count; i++)
                     tagInstanceIdList.Add(item);
             }
 

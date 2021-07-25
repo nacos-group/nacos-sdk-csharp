@@ -118,5 +118,7 @@
 
             return Directory.GetFiles(dir);
         }
+
+        public static string GetLineSeparator() => Environment.NewLine;
     }
 }
