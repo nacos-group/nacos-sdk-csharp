@@ -66,7 +66,7 @@
             try
             {
                 Newtonsoft.Json.Linq.JObject result = await _serverProxy.SendBeat(beatInfo, false).ConfigureAwait(false);
-
+                _logger?.LogDebug("[CLIENT-BEAT] sendbeat result = {0}", result.ToString());
                 long interval = result.GetValue(CLIENT_BEAT_INTERVAL_FIELD).ToObject<long>();
 
                 bool lightBeatEnabled = false;
