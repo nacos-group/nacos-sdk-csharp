@@ -62,7 +62,13 @@
             this.SetServerPort(DEFAULT_SERVER_PORT);
             this.namespaceId = namespaceId;
             this.beatReactor = new BeatReactor(_logger, this, _options);
-            this.pushReceiver = new PushReceiver(_logger, serviceInfoHolder, _options);
+
+            // Don't create PushReceiver when using rpc, it will create a udp server
+            if (!options.NamingUseRpc)
+            {
+                this.pushReceiver = new PushReceiver(_logger, serviceInfoHolder, _options);
+            }
+
             this.serviceInfoHolder = serviceInfoHolder;
         }
 
