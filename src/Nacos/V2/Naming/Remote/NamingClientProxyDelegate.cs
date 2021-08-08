@@ -43,7 +43,12 @@
             this.securityProxy = new SecurityProxy(options, logger);
             InitSecurityProxy();
             this._serviceInfoUpdateService = new ServiceInfoUpdateService(logger, options, serviceInfoHolder, this, changeNotifier);
-            this.grpcClientProxy = new NamingGrpcClientProxy(logger, @namespace, securityProxy, serverListManager, options, serviceInfoHolder);
+
+            if (_options.NamingUseRpc)
+            {
+                this.grpcClientProxy = new NamingGrpcClientProxy(logger, @namespace, securityProxy, serverListManager, options, serviceInfoHolder);
+            }
+
             this.httpClientProxy = new NamingHttpClientProxy(logger, @namespace, securityProxy, serverListManager, options, serviceInfoHolder);
         }
 
@@ -66,7 +71,7 @@
         public async Task DeregisterService(string serviceName, string groupName, Instance instance)
             => await GetExecuteClientProxy().DeregisterService(serviceName, groupName, instance).ConfigureAwait(false);
 
-        public void Dispose() => grpcClientProxy.Dispose();
+        public void Dispose() => grpcClientProxy?.Dispose();
 
         public async Task<ListView<string>> GetServiceList(int pageNo, int pageSize, string groupName, AbstractSelector selector)
             => await GetExecuteClientProxy().GetServiceList(pageNo, pageSize, groupName, selector).ConfigureAwait(false);
@@ -79,7 +84,7 @@
         public async Task RegisterServiceAsync(string serviceName, string groupName, Instance instance)
             => await GetExecuteClientProxy().RegisterServiceAsync(serviceName, groupName, instance).ConfigureAwait(false);
 
-        public bool ServerHealthy() => grpcClientProxy.ServerHealthy();
+        public bool ServerHealthy() => grpcClientProxy?.ServerHealthy() ?? httpClientProxy?.ServerHealthy() ?? false;
 
         public async Task<ServiceInfo> Subscribe(string serviceName, string groupName, string clusters)
         {
