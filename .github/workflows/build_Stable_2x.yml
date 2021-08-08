@@ -46,8 +46,8 @@ jobs:
       run: java -version  
     - name: Setup Stable 2.x Nacos Server
       run: |      
-        wget https://github.com/alibaba/nacos/releases/download/2.0.1/nacos-server-2.0.1.tar.gz
-        tar -xvf nacos-server-2.0.1.tar.gz
+        wget https://github.com/alibaba/nacos/releases/download/2.0.2/nacos-server-2.0.2.tar.gz
+        tar -xvf nacos-server-2.0.2.tar.gz
         cd nacos/bin
         # sed -i 's/nacos.core.auth.enabled=false/nacos.core.auth.enabled=true/g' ../conf/application.properties
         chmod 755 startup.sh
