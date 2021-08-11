@@ -19,7 +19,7 @@
         {
             services.Configure<NacosAspNetOptions>(configuration.GetSection(section));
 
-            services.AddNacosV2Naming(configuration);
+            services.AddNacosV2Naming(configuration, sectionName: section);
 
             services.AddHostedService<RegSvcBgTask>();
 
