@@ -10,6 +10,7 @@
     public class SecurityProxy : ISecurityProxy
     {
         private static readonly string LOGIN_URL = "/v1/auth/users/login";
+        private static readonly int Unit = 1000;
 
         private static HttpClient _httpClient = new HttpClient();
 
@@ -65,7 +66,7 @@
         {
             try
             {
-                if ((DateTimeOffset.Now.ToUnixTimeMilliseconds() - _lastRefreshTime) < _tokenTtl - _tokenRefreshWindow)
+                if ((DateTimeOffset.Now.ToUnixTimeMilliseconds() - _lastRefreshTime) < (_tokenTtl - _tokenRefreshWindow) * Unit)
                 {
                     return true;
                 }
