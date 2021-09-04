@@ -1,0 +1,19 @@
+v1.0.3 (Apr 18th, 2021) 发布记录
+=============================================
+
+
+1. Fix http with ACM
+#. Update proto file
+#. Support logging for Nacos.Microsoft.Extensions.Configuration
+#. Try to adapt SAE
+#. Publish config support type
+#. Fix some known issues.
+
+------------
+
+1. 修复 HTTP 协议访问 ACM 问题
+#. 更新 proto 文件
+#. Nacos.Microsoft.Extensions.Configuration 支持日志
+#. 尝试适配 SAE
+#. 发布配置支持类型
+#. 修复部分已知问题
