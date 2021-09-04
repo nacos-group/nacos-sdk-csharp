@@ -1,0 +1,29 @@
+v1.1.0 (Jun 14th, 2021) 发布记录
+=============================================
+
+
+1. [NAMING] Fixed naming update task error
+#. [NAMING] Support naming push empty protection
+#. [NAMING] Support read UDP port from the environment variable
+#. [NAMING] Fixed services.AddNacosAspNet with action mode error
+#. [NAMING] Add/Remove cache before call server
+#. [NAMING] Support fetching server list from an endpoint with namespace
+#. [CONFIG] Fixed publish will trigger call back twice
+#. [CONFIG] Support CAS md5
+#. [CONFIG] Support config filter
+#. [CONFIG] Support .NET Framework 4.7.1
+#. Fixed and enhanced some known issues
+
+------------
+
+1. [NAMING] 修复服务更新任务异常
+#. [NAMING] 支持服务为空的推送保护
+#. [NAMING] 支持从环境变量读取UDP的端口
+#. [NAMING] 修复services.AddNacosAspNet用action方式的异常
+#. [NAMING] 在调用服务端之前先添加/移除缓存
+#. [NAMING] 支持根据namespace从endpoint获取服务列表
+#. [CONFIG] 修复发布配置触发两次回调问题
+#. [CONFIG] 支持 CAS md5
+#. [CONFIG] 支持 config filter
+#. [CONFIG] 支持 .NET Framework 4.7.1
+#. 修复和加强部分已知问题
