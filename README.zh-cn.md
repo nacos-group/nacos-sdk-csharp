@@ -29,6 +29,10 @@ dotnet add package nacos-sdk-csharp.IniParser
 - 和阿里云应用配置管理(Application Configuration Management，简称 ACM)集成使用
 - ...
 
+更多信息请查阅文档:
+
+https://nacos-sdk-csharp.readthedocs.io/en/latest/
+
 ## 简易用法
 
 ### 配置
