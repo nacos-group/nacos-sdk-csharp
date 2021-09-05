@@ -1,0 +1,15 @@
+v1.2.0 (Sept 5th, 2021) 发布记录
+=============================================
+
+
+1. [NAMING] Fixed not pass section for AddNacosV2Naming (#131)
+#. [AUTH] Fixed request login interface too frequently (#137)
+#. [CORE] improve: make rpcstatus error message readable
+#. [DOCS] improve: host documentation website on `readthedocs <https://nacos-sdk-csharp.readthedocs.io/en/latest/>`_
+
+------------
+
+1. [NAMING] 修复 AddNacosV2Naming 没有传递 section 的 bug (#131)
+#. [AUTH] 修复请求登录接口过于频繁的 bug (#137)
+#. [CORE] 优化 rpc 状态错误的提示语
+#. [DOCS] 托管文档网站到 `readthedocs <https://nacos-sdk-csharp.readthedocs.io/en/latest/>`_

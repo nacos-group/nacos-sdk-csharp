@@ -467,7 +467,7 @@
                     if (this.currentConnection == null)
                     {
                         waitReconnect = true;
-                        throw new NacosException(NacosException.CLIENT_DISCONNECT, $"Client not connected,current status: {rpcClientStatus}");
+                        throw new NacosException(NacosException.CLIENT_DISCONNECT, $"Client not connected,current status: {RpcClientStatus.GetStatusName(rpcClientStatus)}");
                     }
 
                     response = await currentConnection.RequestAsync(request, BuildMeta(request.GetRemoteType()), timeoutMills).ConfigureAwait(false);

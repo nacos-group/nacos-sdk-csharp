@@ -331,3 +331,8 @@ ASALocalRun/
 
 # Mac OS
 .DS_Store
+
+# Read the docstates
+_build/
+_static/
+_templates/

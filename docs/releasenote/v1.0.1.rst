@@ -1,0 +1,13 @@
+v1.0.1 (Mar 20th, 2021) 发布记录
+=============================================
+
+1. Adapt to nacos 2.0.
+#. FIxed some known bugs.
+#. Add log for SecurityProxy.
+
+
+------------
+
+1. 适配 nacos 2.0
+#. 修复部分已知bug
+#. SecurityProxy 添加日志

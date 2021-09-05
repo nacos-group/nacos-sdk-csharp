@@ -1,0 +1,19 @@
+v1.1.1 (Aug 9th, 2021) 发布记录
+=============================================
+
+
+1. [NAMING] Fixed v2 ServerHttpAgent (#117 )
+#. [NAMING] Add redo feature for naming client (#122 )
+#. [NAMING] Add failover of naming (#123 )
+#. [NAMING] Improve weight round robin of v1 naming aspnetcore (#121 #124 )
+#. [NAMING] Improve create NamingGrpcClientProxy and PushReveiver (#127 )
+#. [CONFIG] Fixed key has already been added of msconfig (#119 #120 )
+
+------------
+
+1. [NAMING] 修复 v2 版本 ServerHttpAgent 请求问题 (#117 )
+#. [NAMING] naming client 支持 redo (#122 )
+#. [NAMING] naming client 支持 failover (#123 )
+#. [NAMING] 优化 v1 版本的加权轮询算法 (#121 #124 )
+#. [NAMING] 优化 创建 NamingGrpcClientProxy 和 PushReveiver (#127 )
+#. [CONFIG] 修复集成ASP.NET Core时出现重复配置key时的异常 (#119 #120 )
