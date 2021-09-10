@@ -7,5 +7,4 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Nacos.AspNetCore\Nacos.AspNetCore.csproj" />
   </ItemGroup>
-
 </Project>
