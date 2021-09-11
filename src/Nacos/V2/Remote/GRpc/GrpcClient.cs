@@ -18,9 +18,11 @@
         {
             try
             {
+                var port = serverInfo.ServerPort + RpcPortOffset();
+
                 var channel = new Grpc.Core.Channel(
                     serverInfo.ServerIp,
-                    serverInfo.ServerPort,
+                    port,
                     Grpc.Core.ChannelCredentials.Insecure,
                     /* keep config and naming using diff channel */
                     new List<Grpc.Core.ChannelOption> { new Grpc.Core.ChannelOption(GetName(), 1) });

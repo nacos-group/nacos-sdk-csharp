@@ -1,4 +1,6 @@
-﻿namespace Nacos.V2.Remote
+﻿[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Nacos.Tests")]
+
+namespace Nacos.V2.Remote
 {
     using Microsoft.Extensions.Logging;
     using Nacos.V2.Exceptions;
@@ -14,6 +16,9 @@
 
     public abstract class RpcClient : IDisposable
     {
+        private const string DEFAULT_NACOS_PORT_ENV_NAME = "nacos.server.port";
+        private const string DEFAULT_NACOS_PORT_ENV_VALUE = "8848";
+
         private string _name;
         private string _tenant;
         private long _lastActiveTimeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
@@ -572,18 +577,22 @@
         internal RemoteServerInfo ResolveServerInfo(string serverAddress)
         {
             RemoteServerInfo serverInfo = new RemoteServerInfo();
-            serverInfo.ServerPort = RpcPortOffset();
             if (serverAddress.Contains(ConstValue.HTTP_PREFIX))
             {
                 var arr = serverAddress.TrimEnd('/').Split(':');
                 serverInfo.ServerIp = arr[1].Replace("//", "");
-                serverInfo.ServerPort += Convert.ToInt32(arr[2].Replace("//", ""));
+
+                serverInfo.ServerPort = arr.Length >= 3
+                    ? Convert.ToInt32(arr[2])
+                    : Convert.ToInt32(EnvUtil.GetEnvValue(DEFAULT_NACOS_PORT_ENV_NAME, DEFAULT_NACOS_PORT_ENV_VALUE));
             }
             else
             {
                 var arr = serverAddress.TrimEnd('/').Split(':');
                 serverInfo.ServerIp = arr[0];
-                serverInfo.ServerPort += Convert.ToInt32(arr[1]);
+                serverInfo.ServerPort = arr.Length >= 2
+                    ? Convert.ToInt32(arr[1])
+                    : Convert.ToInt32(EnvUtil.GetEnvValue(DEFAULT_NACOS_PORT_ENV_NAME, DEFAULT_NACOS_PORT_ENV_VALUE));
             }
 
             return serverInfo;
@@ -593,7 +602,6 @@
 
         public void Dispose()
         {
-            // executorService.shutdown();
             Interlocked.Exchange(ref rpcClientStatus, RpcClientStatus.SHUTDOWN);
             CloseConnection(currentConnection);
         }
