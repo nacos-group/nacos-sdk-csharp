@@ -13,9 +13,6 @@
         [Newtonsoft.Json.JsonProperty("tenant")]
         public string Tenant { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("clientIp")]
-        public string ClientIp { get; set; }
-
         [Newtonsoft.Json.JsonProperty("labels")]
         public Dictionary<string, string> Labels = new Dictionary<string, string>();
 

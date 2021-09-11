@@ -53,6 +53,8 @@
     <Rule Id="SA1503" Action="None" />
     <!-- Code should not contain multiple blank lines in a row -->
     <Rule Id="SA1507" Action="None" />
+    <!-- File is required to end with a single newline character-->
+    <Rule Id="SA1518" Action="None" />    
     <!-- Element must be documented -->
     <Rule Id="SA1600" Action="None" />
     <!-- Parameter documentation mus be in the right order -->

@@ -170,7 +170,7 @@
                     {
                         var dataString = await file.ReadFileAsync().ConfigureAwait(false);
 
-                        using (StringReader reader = new (dataString))
+                        using (StringReader reader = new StringReader(dataString))
                         {
                             var json = reader.ReadLine();
 
