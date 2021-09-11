@@ -69,6 +69,7 @@
             }
             else
             {
+                // after remove old v1 code, Listeners must be not empty
                 throw new Nacos.V2.Exceptions.NacosException("Listeners is empty!!");
             }
         }
@@ -129,6 +130,7 @@
                 }
                 else
                 {
+                    // after remove old v1 code, Listeners must be not empty
                     throw new Nacos.V2.Exceptions.NacosException("Listeners is empty!!");
                 }
             }
