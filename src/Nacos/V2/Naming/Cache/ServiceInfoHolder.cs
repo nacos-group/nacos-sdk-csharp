@@ -9,6 +9,7 @@
     using Nacos.V2.Naming.Event;
     using Nacos.V2.Utils;
     using System.IO;
+    using Nacos.V2.Naming.Dtos;
 
     public class ServiceInfoHolder : IDisposable
     {

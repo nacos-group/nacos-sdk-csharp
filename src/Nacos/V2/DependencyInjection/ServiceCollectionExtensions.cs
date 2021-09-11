@@ -15,7 +15,7 @@
             services.AddOptions();
             services.Configure(configure);
 
-            var clientBuilder = services.AddHttpClient(ConstValue.ClientName)
+            var clientBuilder = services.AddHttpClient(Nacos.V2.Common.Constants.ClientName)
                 .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseProxy = false });
 
             if (httpClientAction != null)
@@ -34,7 +34,7 @@
 
             services.Configure<NacosSdkOptions>(configuration.GetSection(sectionName));
 
-            var clientBuilder = services.AddHttpClient(ConstValue.ClientName)
+            var clientBuilder = services.AddHttpClient(Nacos.V2.Common.Constants.ClientName)
                 .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseProxy = false });
 
             if (httpClientAction != null)
@@ -54,7 +54,7 @@
             services.AddOptions();
             services.Configure(configure);
 
-            var clientBuilder = services.AddHttpClient(ConstValue.ClientName)
+            var clientBuilder = services.AddHttpClient(Nacos.V2.Common.Constants.ClientName)
                 .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseProxy = false });
 
             if (httpClientAction != null) clientBuilder.ConfigureHttpClient(httpClientAction);
@@ -70,7 +70,7 @@
 
             services.Configure<NacosSdkOptions>(configuration.GetSection(sectionName));
 
-            var clientBuilder = services.AddHttpClient(ConstValue.ClientName)
+            var clientBuilder = services.AddHttpClient(Nacos.V2.Common.Constants.ClientName)
                 .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseProxy = false });
 
             if (httpClientAction != null) clientBuilder.ConfigureHttpClient(httpClientAction);

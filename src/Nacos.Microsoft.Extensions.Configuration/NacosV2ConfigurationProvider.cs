@@ -3,7 +3,6 @@
     using global::Microsoft.Extensions.Configuration;
     using global::Microsoft.Extensions.Logging;
     using global::Microsoft.Extensions.Options;
-    using Nacos.Config;
     using Nacos.V2;
     using Nacos.V2.Config;
     using System;
@@ -70,11 +69,7 @@
             }
             else
             {
-#pragma warning disable CS0618
-                var listener = new MsConfigListener(_configurationSource.DataId, _configurationSource.Group, _configurationSource.Optional, this, _logger);
-                _client.AddListener(_configurationSource.DataId, _configurationSource.Group, listener);
-                _listenerDict.Add($"{_configurationSource.DataId}#{_configurationSource.Group}", listener);
-#pragma warning restore CS0618
+                throw new Nacos.V2.Exceptions.NacosException("Listeners is empty!!");
             }
         }
 
@@ -134,27 +129,7 @@
                 }
                 else
                 {
-#pragma warning disable CS0618
-                    try
-                    {
-                        var config = _client.GetConfig(_configurationSource.DataId, _configurationSource.Group, 3000)
-                            .ConfigureAwait(false).GetAwaiter().GetResult();
-
-                        _configDict.AddOrUpdate($"{_configurationSource.GetNamespace()}#{_configurationSource.Group}#{_configurationSource.DataId}", config, (x, y) => config);
-
-                        var data = _parser.Parse(config);
-
-                        Data = data;
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger?.LogWarning(ex, "MS Config Query config error, dataid={0}, group={1}, tenant={2}", _configurationSource.DataId, _configurationSource.Group, _configurationSource.Tenant);
-                        if (!_configurationSource.Optional)
-                        {
-                            throw;
-                        }
-                    }
-#pragma warning restore CS0618
+                    throw new Nacos.V2.Exceptions.NacosException("Listeners is empty!!");
                 }
             }
             catch (Exception ex)

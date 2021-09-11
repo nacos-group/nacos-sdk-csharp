@@ -104,7 +104,7 @@
                 };
 
                 var url = $"{Naming.Utils.UtilAndComs.HTTP}{server}{contextPath}{LOGIN_URL}";
-                if (server.Contains(ConstValue.HTTP_PREFIX))
+                if (server.Contains(Nacos.V2.Common.Constants.HTTP_PREFIX))
                 {
                     url = $"{server}{contextPath}{LOGIN_URL}";
                 }
@@ -131,10 +131,10 @@
 
                     var obj = Newtonsoft.Json.Linq.JObject.Parse(content);
 
-                    if (obj.ContainsKey(ConstValue.ACCESS_TOKEN))
+                    if (obj.ContainsKey(Nacos.V2.Common.Constants.ACCESS_TOKEN))
                     {
-                        _accessToken = obj.Value<string>(ConstValue.ACCESS_TOKEN);
-                        _tokenTtl = obj.Value<long>(ConstValue.TOKEN_TTL);
+                        _accessToken = obj.Value<string>(Nacos.V2.Common.Constants.ACCESS_TOKEN);
+                        _tokenTtl = obj.Value<long>(Nacos.V2.Common.Constants.TOKEN_TTL);
                         _tokenRefreshWindow = _tokenTtl / 10;
                     }
                 }

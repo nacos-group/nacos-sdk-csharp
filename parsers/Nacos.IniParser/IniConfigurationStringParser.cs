@@ -1,11 +1,11 @@
-namespace Nacos.IniParser
+﻿namespace Nacos.IniParser
 {
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Text;
     using Microsoft.Extensions.Configuration;
-    using Nacos.Config;
+    using Nacos.V2;
 
     public class IniConfigurationStringParser : INacosConfigurationParser
     {

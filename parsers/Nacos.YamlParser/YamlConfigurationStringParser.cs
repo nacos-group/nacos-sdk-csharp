@@ -1,7 +1,7 @@
 ﻿namespace Nacos.YamlParser
 {
     using Microsoft.Extensions.Configuration;
-    using Nacos.Config;
+    using Nacos.V2;
     using System;
     using System.Collections.Generic;
     using System.IO;

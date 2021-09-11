@@ -13,7 +13,6 @@
     using global::System.Linq;
     using global::System.Reflection;
     using global::System.Threading.Tasks;
-    using Nacos.Microsoft.Extensions.Configuration;
     using Nacos.V2;
     using Nacos.V2.Config;
 
@@ -62,43 +61,22 @@
                             return;
                         }
 
-                        if (nacosConfig.UseGrpc)
+                        var client = new NacosConfigService(LoggerFactory ?? NullLoggerFactory.Instance, Options.Create(new NacosSdkOptions
                         {
-                            var client = new NacosConfigService(LoggerFactory ?? NullLoggerFactory.Instance, Options.Create(new NacosSdkOptions
-                            {
-                                ServerAddresses = nacosConfig.ServerAddresses.Split(';', ',').ToList(),
-                                Namespace = nacosConfig.Tenant,
-                                AccessKey = nacosConfig.AccessKey,
-                                ContextPath = nacosConfig.ContextPath,
-                                EndPoint = nacosConfig.EndPoint,
-                                DefaultTimeOut = nacosConfig.DefaultTimeOut,
-                                SecretKey = nacosConfig.SecretKey,
-                                Password = nacosConfig.Password,
-                                UserName = nacosConfig.UserName,
-                                ListenInterval = 20000
-                            }));
+                            ServerAddresses = nacosConfig.ServerAddresses.Split(';', ',').ToList(),
+                            Namespace = nacosConfig.Tenant,
+                            AccessKey = nacosConfig.AccessKey,
+                            ContextPath = nacosConfig.ContextPath,
+                            EndPoint = nacosConfig.EndPoint,
+                            DefaultTimeOut = nacosConfig.DefaultTimeOut,
+                            SecretKey = nacosConfig.SecretKey,
+                            Password = nacosConfig.Password,
+                            UserName = nacosConfig.UserName,
+                            ListenInterval = 20000,
+                            ConfigUseRpc = nacosConfig.UseGrpc,
+                        }));
 
-                            ClientCache[sectionName] = cache = Tuple.Create(nacosConfig, (object)client);
-                        }
-                        else
-                        {
-                            var client = new NacosMsConfigClient(LoggerFactory ?? NullLoggerFactory.Instance, new NacosOptions
-                            {
-                                ServerAddresses = nacosConfig.ServerAddresses.Split(';', ',').ToList(),
-                                Namespace = nacosConfig.Tenant,
-                                AccessKey = nacosConfig.AccessKey,
-                                ClusterName = nacosConfig.ClusterName,
-                                ContextPath = nacosConfig.ContextPath,
-                                EndPoint = nacosConfig.EndPoint,
-                                DefaultTimeOut = nacosConfig.DefaultTimeOut,
-                                SecretKey = nacosConfig.SecretKey,
-                                Password = nacosConfig.Password,
-                                UserName = nacosConfig.UserName,
-                                ListenInterval = 20000
-                            });
-
-                            ClientCache[sectionName] = cache = Tuple.Create(nacosConfig, (object)client);
-                        }
+                        ClientCache[sectionName] = cache = Tuple.Create(nacosConfig, (object)client);
 
                         if (nacosConfig.Listeners != null && nacosConfig.Listeners.Count > 0)
                         {
@@ -106,15 +84,7 @@
                             {
                                 _ = Task.WhenAll(nacosConfig.Listeners
                                     .OfType<ConfigListener>()
-                                    .Select(item => cache.Item2 is INacosConfigClient ncc
-                                        ? ncc.AddListenerAsync(new AddListenerRequest
-                                        {
-                                            DataId = item.DataId,
-                                            Group = item.Group,
-                                            Tenant = nacosConfig.Tenant,
-                                            Callbacks = new List<Action<string>> { x => CallBackReload($"{nacosConfig.Tenant}#{item.Group}#{item.DataId}", x) }
-                                        })
-                                        : ((INacosConfigService)cache.Item2).AddListener(item.DataId, item.Group ?? ConstValue.DefaultGroup, new MsConfigListener($"{nacosConfig.Tenant}#{item.Group}#{item.DataId}"))));
+                                    .Select(item => ((INacosConfigService)cache.Item2).AddListener(item.DataId, item.Group ?? Nacos.V2.Common.Constants.DEFAULT_GROUP, new MsConfigListener($"{nacosConfig.Tenant}#{item.Group}#{item.DataId}"))));
                             }
                             catch (Exception ex)
                             {
@@ -138,14 +108,7 @@
                     {
                         try
                         {
-                            data = await (client is INacosConfigClient ncc
-                                    ? ncc.GetConfigAsync(new GetConfigRequest
-                                    {
-                                        DataId = item.DataId,
-                                        Group = item.Group,
-                                        Tenant = config.Tenant
-                                    })
-                                    : ((INacosConfigService)client).GetConfig(item.DataId, item.Group ?? ConstValue.DefaultGroup, 3000))
+                            data = await ((INacosConfigService)client).GetConfig(item.DataId, item.Group ?? Nacos.V2.Common.Constants.DEFAULT_GROUP, 3000)
                                 .ConfigureAwait(false);
 
                             if (data == null)

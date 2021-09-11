@@ -6,7 +6,7 @@
     [Trait("Category", "all")]
     public class WeightRandomLBStrategyTest
     {
-        [Fact]
+        /*[Fact]
         public void GetHostTest_When_InstanceId_IsNotEmpty()
         {
             WeightRandomLBStrategy strategy = new WeightRandomLBStrategy();
@@ -69,6 +69,6 @@
             }
 
             Assert.Equal(3, set.Count);
-        }
+        }*/
     }
 }

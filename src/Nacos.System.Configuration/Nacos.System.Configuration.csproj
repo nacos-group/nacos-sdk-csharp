@@ -22,7 +22,6 @@
 
   <ItemGroup>
     <Compile Include="../Nacos.Microsoft.Extensions.Configuration/DefaultJsonConfigurationStringParser.cs" />
-    <Compile Include="../Nacos.Microsoft.Extensions.Configuration/Impl/*.cs" />
 
     <None Include="../../LICENSE" Pack="true" Visible="false" PackagePath="" />
 

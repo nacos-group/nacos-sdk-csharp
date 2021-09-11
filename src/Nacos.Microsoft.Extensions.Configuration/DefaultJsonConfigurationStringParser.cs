@@ -3,7 +3,6 @@
 namespace Nacos.Microsoft.Extensions.Configuration
 {
     using global::Microsoft.Extensions.Configuration;
-    using Nacos.Config;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using global::System;
@@ -11,6 +10,7 @@ namespace Nacos.Microsoft.Extensions.Configuration
     using global::System.Globalization;
     using global::System.IO;
     using global::System.Linq;
+    using Nacos.V2;
 
     internal class DefaultJsonConfigurationStringParser : INacosConfigurationParser
     {

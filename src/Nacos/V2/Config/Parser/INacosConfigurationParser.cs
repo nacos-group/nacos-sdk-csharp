@@ -1,4 +1,4 @@
-﻿namespace Nacos.Config
+﻿namespace Nacos.V2
 {
     using System.Collections.Generic;
 

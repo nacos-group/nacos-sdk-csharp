@@ -335,7 +335,7 @@
 
             try
             {
-                var client = _clientFactory?.CreateClient(ConstValue.ClientName) ?? new HttpClient();
+                var client = _clientFactory?.CreateClient(Nacos.V2.Common.Constants.ClientName) ?? new HttpClient();
                 client.Timeout = TimeSpan.FromSeconds(8);
                 var requestUrl = $"{url}?{InitParams(paramters, body)}";
                 var requestMessage = new HttpRequestMessage(method, requestUrl);

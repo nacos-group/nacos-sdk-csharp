@@ -577,7 +577,7 @@ namespace Nacos.V2.Remote
         internal RemoteServerInfo ResolveServerInfo(string serverAddress)
         {
             RemoteServerInfo serverInfo = new RemoteServerInfo();
-            if (serverAddress.Contains(ConstValue.HTTP_PREFIX))
+            if (serverAddress.Contains(Nacos.V2.Common.Constants.HTTP_PREFIX))
             {
                 var arr = serverAddress.TrimEnd('/').Split(':');
                 serverInfo.ServerIp = arr[1].Replace("//", "");

@@ -7,7 +7,7 @@
     [Trait("Category", "all")]
     public class WeightRoundRobinLBStrategyTest
     {
-        [Fact]
+        /*[Fact]
         public void GetHostTest_When_InstanceId_IsNotEmpty()
         {
             WeightRoundRobinLBStrategy strategy = new WeightRoundRobinLBStrategy();
@@ -77,6 +77,6 @@
             }
 
             Assert.Equal(3, set.Count);
-        }
+        }*/
     }
 }
