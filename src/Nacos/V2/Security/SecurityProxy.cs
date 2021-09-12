@@ -62,6 +62,20 @@
             _logger = logger;
         }
 
+        // for test
+        internal SecurityProxy(NacosSdkOptions options, ILogger logger, HttpMessageHandler httpMessageHandler)
+        {
+            _options = options;
+
+            _username = _options.UserName ?? "";
+            _password = _options.Password ?? "";
+            contextPath = _options.ContextPath;
+            contextPath = contextPath.StartsWith("/") ? contextPath : "/" + contextPath;
+
+            _logger = logger;
+            _httpClient = new HttpClient(httpMessageHandler);
+        }
+
         public async Task<bool> LoginAsync(List<string> servers)
         {
             try
@@ -93,7 +107,9 @@
             return _accessToken;
         }
 
-        private async Task<bool> LoginAsync(string server)
+        public bool IsEnabled() => this._username.IsNotNullOrWhiteSpace();
+
+        internal async Task<bool> LoginAsync(string server)
         {
             if (_username.IsNotNullOrWhiteSpace())
             {
