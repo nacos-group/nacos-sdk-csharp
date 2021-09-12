@@ -469,7 +469,7 @@ namespace Nacos.V2.Remote
 
                 try
                 {
-                    if (this.currentConnection == null)
+                    if (this.currentConnection == null || !IsRunning())
                     {
                         waitReconnect = true;
                         throw new NacosException(NacosException.CLIENT_DISCONNECT, $"Client not connected,current status: {RpcClientStatus.GetStatusName(rpcClientStatus)}");
@@ -485,6 +485,7 @@ namespace Nacos.V2.Remote
                         // here should have a try to reconnect or switch server.
                         if (response.ErrorCode == NacosException.UN_REGISTER)
                         {
+                            waitReconnect = true;
                             if (Interlocked.CompareExchange(ref rpcClientStatus, RpcClientStatus.UNHEALTHY, RpcClientStatus.RUNNING) == RpcClientStatus.UNHEALTHY)
                             {
                                 SwitchServerAsync();
@@ -501,7 +502,7 @@ namespace Nacos.V2.Remote
                 {
                     if (waitReconnect) await Task.Delay((int)Math.Min(100, timeoutMills / 3)).ConfigureAwait(false);
 
-                    logger?.LogError("Fail to send request,request={0},errorMesssage={1}", request, ex.Message);
+                    logger?.LogError("Fail to send request,request={0},retryTimes={1},errorMesssage={2}", request, retryTimes, ex.Message);
 
                     exceptionToThrow = ex;
                 }

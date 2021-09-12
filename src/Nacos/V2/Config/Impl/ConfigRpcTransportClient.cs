@@ -108,7 +108,7 @@
                     }
                 }
 
-                var response = (ConfigQueryResponse)await RequestProxy(rpcClient, request).ConfigureAwait(false);
+                var response = (ConfigQueryResponse)await RequestProxy(rpcClient, request, readTimeous).ConfigureAwait(false);
 
                 ConfigResponse configResponse = new ConfigResponse();
 
@@ -197,7 +197,7 @@
                     try
                     {
                         // block 5000ms
-                        if (_listenExecutebell.TryTake(out _, 5000))
+                        if (_listenExecutebell.TryTake(out _, 50000))
                         {
                             await ExecuteConfigListen().ConfigureAwait(false);
                         }
@@ -267,14 +267,12 @@
             return labels;
         }
 
-        private async Task<CommonResponse> RequestProxy(RpcClient rpcClientInner, CommonRequest request)
+        private async Task<CommonResponse> RequestProxy(RpcClient rpcClientInner, CommonRequest request, long timeout = 3000L)
         {
             BuildRequestHeader(request);
 
-            var timeOut = _options.DefaultTimeOut > 0 ? _options.DefaultTimeOut : 3000;
-
             // TODO: 1. limiter
-            return await rpcClientInner.Request(request, timeOut).ConfigureAwait(false);
+            return await rpcClientInner.Request(request, timeout).ConfigureAwait(false);
         }
 
         private void BuildRequestHeader(CommonRequest request)

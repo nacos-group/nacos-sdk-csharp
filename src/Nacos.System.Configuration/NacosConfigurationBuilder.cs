@@ -21,7 +21,7 @@
         public static ILoggerFactory LoggerFactory { get; set; }
 
         private static readonly FieldInfo ConfigurationManagerReset = typeof(ConfigurationManager).GetField("s_initState", BindingFlags.NonPublic | BindingFlags.Static)!;
-        private static readonly Dictionary<string, Tuple<NacosConfigurationSection, object>> ClientCache = new Dictionary<string, Tuple<NacosConfigurationSection, object>>(StringComparer.OrdinalIgnoreCase);
+        private static readonly Dictionary<string, Tuple<NacosConfigurationSection, INacosConfigService>> ClientCache = new Dictionary<string, Tuple<NacosConfigurationSection, INacosConfigService>>(StringComparer.OrdinalIgnoreCase);
         private static readonly ConcurrentDictionary<string, string> ConfigCache = new ConcurrentDictionary<string, string>();
 
         private Task<IDictionary<string, string>[]> _data;
@@ -61,7 +61,7 @@
                             return;
                         }
 
-                        var client = new NacosConfigService(LoggerFactory ?? NullLoggerFactory.Instance, Options.Create(new NacosSdkOptions
+                        INacosConfigService client = new NacosConfigService(LoggerFactory ?? NullLoggerFactory.Instance, Options.Create(new NacosSdkOptions
                         {
                             ServerAddresses = nacosConfig.ServerAddresses.Split(';', ',').ToList(),
                             Namespace = nacosConfig.Tenant,
@@ -76,7 +76,7 @@
                             ConfigUseRpc = nacosConfig.UseGrpc,
                         }));
 
-                        ClientCache[sectionName] = cache = Tuple.Create(nacosConfig, (object)client);
+                        ClientCache[sectionName] = cache = Tuple.Create(nacosConfig, client);
 
                         if (nacosConfig.Listeners != null && nacosConfig.Listeners.Count > 0)
                         {
@@ -84,7 +84,7 @@
                             {
                                 _ = Task.WhenAll(nacosConfig.Listeners
                                     .OfType<ConfigListener>()
-                                    .Select(item => ((INacosConfigService)cache.Item2).AddListener(item.DataId, item.Group ?? Nacos.V2.Common.Constants.DEFAULT_GROUP, new MsConfigListener($"{nacosConfig.Tenant}#{item.Group}#{item.DataId}"))));
+                                    .Select(item => cache.Item2.AddListener(item.DataId, item.Group ?? Nacos.V2.Common.Constants.DEFAULT_GROUP, new MsConfigListener($"{nacosConfig.Tenant}#{item.Group}#{item.DataId}"))));
                             }
                             catch (Exception ex)
                             {
@@ -100,7 +100,7 @@
             _data = cache == null ? Task.FromResult(Array.Empty<IDictionary<string, string>>()) : GetConfig(cache.Item1, cache.Item2);
         }
 
-        private static Task<IDictionary<string, string>[]> GetConfig(NacosConfigurationSection config, object client) =>
+        private static Task<IDictionary<string, string>[]> GetConfig(NacosConfigurationSection config, INacosConfigService client) =>
             Task.WhenAll(config.Listeners.OfType<ConfigListener>()
                 .Select(async item =>
                 {
@@ -108,9 +108,8 @@
                     {
                         try
                         {
-                            data = await ((INacosConfigService)client).GetConfig(item.DataId, item.Group ?? Nacos.V2.Common.Constants.DEFAULT_GROUP, 3000)
+                            data = await client.GetConfig(item.DataId, item.Group ?? Nacos.V2.Common.Constants.DEFAULT_GROUP, 3000)
                                 .ConfigureAwait(false);
-
                             if (data == null)
                             {
                                 LoggerFactory?.CreateLogger<NacosConfigurationBuilder>().LogWarning($"Can't get config {item.Group}#{item.DataId}");
