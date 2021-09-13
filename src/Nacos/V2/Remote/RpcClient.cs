@@ -469,7 +469,7 @@ namespace Nacos.V2.Remote
 
                 try
                 {
-                    if (this.currentConnection == null || !IsRunning())
+                    if (this.currentConnection == null)
                     {
                         waitReconnect = true;
                         throw new NacosException(NacosException.CLIENT_DISCONNECT, $"Client not connected,current status: {RpcClientStatus.GetStatusName(rpcClientStatus)}");
