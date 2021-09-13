@@ -114,6 +114,12 @@
                             {
                                 LoggerFactory?.CreateLogger<NacosConfigurationBuilder>().LogWarning($"Can't get config {item.Group}#{item.DataId}");
                             }
+                            else
+                            {
+                                // cached when we get it the first time
+                                // if reload, will update the cached value
+                                ConfigCache[$"{config.Tenant}#{item.Group}#{item.DataId}"] = data;
+                            }
                         }
                         catch (Exception ex)
                         {
