@@ -70,7 +70,8 @@
                 request.PutAdditonalParam(ConfigConstants.TYPE, type);
                 request.PutAdditonalParam(ConfigConstants.ENCRYPTED_DATA_KEY, encryptedDataKey);
 
-                var response = await RequestProxy(GetOneRunningClient(), request).ConfigureAwait(false);
+                var timeOut = _options.DefaultTimeOut > 0 ? _options.DefaultTimeOut : 3000;
+                var response = await RequestProxy(GetOneRunningClient(), request, timeOut).ConfigureAwait(false);
 
                 if (!response.IsSuccess())
                 {
@@ -163,7 +164,8 @@
             {
                 var request = new ConfigRemoveRequest(dataId, group, tenant, tag);
 
-                var response = await RequestProxy(GetOneRunningClient(), request).ConfigureAwait(false);
+                var timeOut = _options.DefaultTimeOut > 0 ? _options.DefaultTimeOut : 3000;
+                var response = await RequestProxy(GetOneRunningClient(), request, timeOut).ConfigureAwait(false);
 
                 return response.IsSuccess();
             }
@@ -197,7 +199,7 @@
                     try
                     {
                         // block 5000ms
-                        if (_listenExecutebell.TryTake(out _, 50000))
+                        if (_listenExecutebell.TryTake(out _, 5000))
                         {
                             await ExecuteConfigListen().ConfigureAwait(false);
                         }
