@@ -6,14 +6,8 @@
     {
         private System.Collections.Generic.Dictionary<string, object> param = new System.Collections.Generic.Dictionary<string, object>();
 
-        public object GetParameter(string key)
-        {
-            return param[key];
-        }
+        public object GetParameter(string key) => param.TryGetValue(key, out var val) ? val : null;
 
-        public void SetParameter(string key, object value)
-        {
-            param[key] = value;
-        }
+        public void SetParameter(string key, object value) => param[key] = value;
     }
 }

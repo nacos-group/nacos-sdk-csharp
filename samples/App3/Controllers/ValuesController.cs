@@ -10,7 +10,7 @@
     [System.Obsolete]
     public class ValuesController : ControllerBase
     {
-        private readonly INacosServerManager _serverManager;
+        /*private readonly INacosServerManager _serverManager;
 
         public ValuesController(INacosServerManager serverManager)
         {
@@ -42,6 +42,6 @@
                 var result = client.GetAsync(url).GetAwaiter().GetResult();
                 return result.Content.ReadAsStringAsync().GetAwaiter().GetResult();
             }
-        }
+        }*/
     }
 }

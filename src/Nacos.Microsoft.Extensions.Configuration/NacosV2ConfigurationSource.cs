@@ -2,7 +2,7 @@
 {
     using global::Microsoft.Extensions.Configuration;
     using global::Microsoft.Extensions.Logging;
-    using Nacos.Config;
+    using Nacos.V2;
     using Nacos.V2.Utils;
     using System;
     using System.Collections.Generic;
@@ -13,24 +13,6 @@
         /// The configuration listeners
         /// </summary>
         public List<ConfigListener> Listeners { get; set; }
-
-        /// <summary>
-        /// Determines if the Nacos Server is optional
-        /// </summary>
-        [Obsolete("please use Listeners to configure")]
-        public bool Optional { get; set; }
-
-        /// <summary>
-        /// Configuration ID
-        /// </summary>
-        [Obsolete("please use Listeners to configure")]
-        public string DataId { get; set; }
-
-        /// <summary>
-        /// Configuration group
-        /// </summary>
-        [Obsolete("please use Listeners to configure")]
-        public string Group { get; set; }
 
         /// <summary>
         /// Tenant information. It corresponds to the Namespace field in Nacos.

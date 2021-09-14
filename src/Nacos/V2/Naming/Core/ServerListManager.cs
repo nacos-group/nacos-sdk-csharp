@@ -131,14 +131,14 @@
 
                 foreach (var server in list)
                 {
-                    if (server.StartsWith(ConstValue.HTTPS, StringComparison.OrdinalIgnoreCase)
-                        || server.StartsWith(ConstValue.HTTP, StringComparison.OrdinalIgnoreCase))
+                    if (server.StartsWith(Nacos.V2.Common.Constants.HTTPS, StringComparison.OrdinalIgnoreCase)
+                        || server.StartsWith(Nacos.V2.Common.Constants.HTTP, StringComparison.OrdinalIgnoreCase))
                     {
                         newServerAddrList.Add(server);
                     }
                     else
                     {
-                        newServerAddrList.Add($"{ConstValue.HTTP}{server}");
+                        newServerAddrList.Add($"{Nacos.V2.Common.Constants.HTTP}{server}");
                     }
                 }
 

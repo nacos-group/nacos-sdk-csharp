@@ -17,7 +17,7 @@
 
         public Task<CommonResponse> RequestAsync(CommonRequest req, CommonRequestMeta meta) => Request(req, meta);
 
-        public Task<CommonResponse> RequestAsync(CommonRequest req, CommonRequestMeta meta, long timeoutMills) => Request(req, meta);
+        public Task<CommonResponse> RequestAsync(CommonRequest req, CommonRequestMeta meta, long timeoutMills) => Request(req, meta, timeoutMills);
 
         protected abstract Task<CommonResponse> Request(CommonRequest req, CommonRequestMeta meta);
 

@@ -67,11 +67,6 @@
         /// </summary>
         public bool Secure { get; set; } = false;
 
-        /// <summary>
-        /// Load Balance Strategy
-        /// </summary>
-        public string LBStrategy { get; set; } = LBStrategyName.WeightRandom.ToString();
-
         public System.Action<NacosSdkOptions> BuildSdkOptions()
         {
             return x =>

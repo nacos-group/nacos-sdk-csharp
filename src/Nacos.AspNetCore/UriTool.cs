@@ -1,4 +1,6 @@
-﻿namespace Nacos.AspNetCore
+﻿[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Nacos.AspNetCore.Tests")]
+
+namespace Nacos.AspNetCore
 {
     using Microsoft.AspNetCore.Hosting.Server.Features;
     using Microsoft.AspNetCore.Http.Features;

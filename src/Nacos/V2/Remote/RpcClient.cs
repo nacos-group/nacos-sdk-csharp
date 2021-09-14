@@ -485,6 +485,7 @@ namespace Nacos.V2.Remote
                         // here should have a try to reconnect or switch server.
                         if (response.ErrorCode == NacosException.UN_REGISTER)
                         {
+                            waitReconnect = true;
                             if (Interlocked.CompareExchange(ref rpcClientStatus, RpcClientStatus.UNHEALTHY, RpcClientStatus.RUNNING) == RpcClientStatus.UNHEALTHY)
                             {
                                 SwitchServerAsync();
@@ -501,7 +502,7 @@ namespace Nacos.V2.Remote
                 {
                     if (waitReconnect) await Task.Delay((int)Math.Min(100, timeoutMills / 3)).ConfigureAwait(false);
 
-                    logger?.LogError("Fail to send request,request={0},errorMesssage={1}", request, ex.Message);
+                    logger?.LogError("Fail to send request,request={0},retryTimes={1},errorMesssage={2}", request, retryTimes, ex.Message);
 
                     exceptionToThrow = ex;
                 }
@@ -577,7 +578,7 @@ namespace Nacos.V2.Remote
         internal RemoteServerInfo ResolveServerInfo(string serverAddress)
         {
             RemoteServerInfo serverInfo = new RemoteServerInfo();
-            if (serverAddress.Contains(ConstValue.HTTP_PREFIX))
+            if (serverAddress.Contains(Nacos.V2.Common.Constants.HTTP_PREFIX))
             {
                 var arr = serverAddress.TrimEnd('/').Split(':');
                 serverInfo.ServerIp = arr[1].Replace("//", "");

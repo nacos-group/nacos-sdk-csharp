@@ -4,6 +4,8 @@
     {
         public static string CLIENT_VERSION = "Nacos-CSharp-Client:v1.2.1";
 
+        public const string ClientName = "NacosClient";
+
         public static int DATA_IN_BODY_VERSION = 204;
 
         public static string DEFAULT_GROUP = "DEFAULT_GROUP";
@@ -162,6 +164,10 @@
         public static string DEFAULT_INSTANCE_ID_GENERATOR = "simple";
 
         public static string SNOWFLAKE_INSTANCE_ID_GENERATOR = "snowflake";
+
+        public static string HTTP = "http://";
+
+        public static string HTTPS = "https://";
 
         public static string HTTP_PREFIX = "http";
 
