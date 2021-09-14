@@ -1,14 +1,14 @@
 ﻿namespace Nacos.Tests.Security
 {
-    using System.Collections.Generic;
-    using System.Net.Http;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Microsoft.Extensions.Logging.Abstractions;
     using Moq;
     using Moq.Protected;
     using Nacos.V2;
     using Nacos.V2.Security;
+    using System.Collections.Generic;
+    using System.Net.Http;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Xunit;
 
     [Trait("Category", "all")]
@@ -91,9 +91,12 @@
         [Fact]
         public async Task Login_Twice_In_Window_Should_Call_Once()
         {
+            var req = ItExpr.Is<HttpRequestMessage>(x => x.RequestUri.AbsoluteUri.Equals("http://localhost/nacos/v1/auth/users/login"));
+            var ct = ItExpr.IsAny<CancellationToken>();
+
             var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
             mockHttpMessageHandler.Protected()
-                .Setup<Task<HttpResponseMessage>>(METHOD, ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+                .Setup<Task<HttpResponseMessage>>(METHOD, req, ct)
                 .ReturnsAsync(new HttpResponseMessage
                 {
                     StatusCode = System.Net.HttpStatusCode.OK,
@@ -106,15 +109,18 @@
             await securityProxy.LoginAsync(new List<string> { "localhost" }).ConfigureAwait(false);
             await securityProxy.LoginAsync(new List<string> { "localhost" }).ConfigureAwait(false);
 
-            mockHttpMessageHandler.Protected().Verify(METHOD, Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
+            mockHttpMessageHandler.Protected().Verify(METHOD, Times.Once(), req, ct);
         }
 
         [Fact]
         public async Task Login_Twice_NotIn_Window_Should_Call_Twice()
         {
-            var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+            var req = ItExpr.Is<HttpRequestMessage>(x => x.RequestUri.AbsoluteUri.Equals("http://localhost/nacos/v1/auth/users/login"));
+            var ct = ItExpr.IsAny<CancellationToken>();
+
+            var mockHttpMessageHandler = new Mock<HttpMessageHandler>() { Name = nameof(Login_Twice_NotIn_Window_Should_Call_Twice) };
             mockHttpMessageHandler.Protected()
-                .Setup<Task<HttpResponseMessage>>(METHOD, ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+                .Setup<Task<HttpResponseMessage>>(METHOD, req, ct)
                 .ReturnsAsync(new HttpResponseMessage
                 {
                     StatusCode = System.Net.HttpStatusCode.OK,
@@ -130,7 +136,7 @@
 
             await securityProxy.LoginAsync(new List<string> { "localhost" }).ConfigureAwait(false);
 
-            mockHttpMessageHandler.Protected().Verify(METHOD, Times.Exactly(2), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
+            mockHttpMessageHandler.Protected().Verify(METHOD, Times.Exactly(2), req, ct);
         }
     }
 }
