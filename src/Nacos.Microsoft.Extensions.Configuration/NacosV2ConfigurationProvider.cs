@@ -169,9 +169,15 @@
 
                     var nData = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-                    foreach (var dict in _provider._configDict)
+                    foreach (var listener in _provider._configurationSource.Listeners)
                     {
-                        var data = _provider._parser.Parse(dict.Value);
+                        var key = $"{_provider._configurationSource.GetNamespace()}#{listener.Group}#{listener.DataId}";
+                        if (_provider._configDict[key] == null)
+                        {
+                            continue;
+                        }
+
+                        var data = _provider._parser.Parse(_provider._configDict[key]);
 
                         foreach (var item in data)
                         {
