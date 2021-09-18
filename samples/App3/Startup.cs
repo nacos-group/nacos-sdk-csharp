@@ -18,8 +18,6 @@
 
         public void ConfigureServices(IServiceCollection services)
         {
-            // services.AddNacosAspNetCore(Configuration);
-
             /*
                  "Optional": false,
     "DataId": "demo",

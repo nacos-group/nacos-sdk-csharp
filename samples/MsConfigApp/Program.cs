@@ -4,6 +4,7 @@
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Hosting;
+    using Nacos.Microsoft.Extensions.Configuration;
     using Serilog;
     using Serilog.Events;
 
@@ -51,35 +52,30 @@
                  {
                      var c = builder.Build();
 
-                     var dataId = c.GetValue<string>("NacosConfig:DataId");
-                     var group = c.GetValue<string>("NacosConfig:Group");
-                     var @namespace = c.GetValue<string>("NacosConfig:Namespace");
-                     var optional = c.GetValue<bool>("NacosConfig:Optional");
-                     var serverAddresses = c.GetSection("NacosConfig:ServerAddresses").Get<List<string>>();
-
                      // read configuration from config files
                      // default is json
-                     // builder.AddNacosConfiguration(c.GetSection("NacosConfig"));
+                     // builder.AddNacosV2Configuration(c.GetSection("NacosConfig"));
                      builder.AddNacosV2Configuration(c.GetSection("NacosConfig"), logAction: x => x.AddSerilog(logger));
 
                      // specify ini or yaml
-                     // builder.AddNacosConfiguration(c.GetSection("NacosConfig"), Nacos.IniParser.IniConfigurationStringParser.Instance);
-                     // builder.AddNacosConfiguration(c.GetSection("NacosConfig"), Nacos.YamlParser.YamlConfigurationStringParser.Instance);
+                     // builder.AddNacosV2Configuration(c.GetSection("NacosConfig"), Nacos.IniParser.IniConfigurationStringParser.Instance);
+                     // builder.AddNacosV2Configuration(c.GetSection("NacosConfig"), Nacos.YamlParser.YamlConfigurationStringParser.Instance);
 
                      // hard code here
-                     /*builder.AddNacosConfiguration(x =>
+                     /*builder.AddNacosV2Configuration(x =>
                      {
-                         x.DataId = dataId;
-                         x.Group = group;
-                         x.Namespace = @namespace;
-                         x.Optional = optional;
-                         x.ServerAddresses = serverAddresses;
+                         x.Namespace = "cs";
+                         x.ServerAddresses = new List<string> { "http://localhost:8848" };
+                         x.Listeners = new List<ConfigListener>
+                         {
+                             new ConfigListener { DataId = "d1", Group = "g", Optional = false },
+                         };
                      });*/
                  })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>().UseUrls("http://*:8787");
                 })
-            .UseSerilog();
+                .UseSerilog();
     }
 }
