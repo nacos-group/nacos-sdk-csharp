@@ -74,6 +74,37 @@
             }
         }
 
+        // for test
+        internal NacosV2ConfigurationProvider(NacosV2ConfigurationSource configurationSource, ILogger logger, INacosConfigService client, INacosConfigurationParser parser)
+        {
+            _configurationSource = configurationSource;
+            _parser = parser;
+            _configDict = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            _listenerDict = new Dictionary<string, MsConfigListener>();
+            _logger = logger;
+            _client = client;
+            if (configurationSource.Listeners != null && configurationSource.Listeners.Any())
+            {
+                var tasks = new List<Task>();
+
+                foreach (var item in configurationSource.Listeners)
+                {
+                    var listener = new MsConfigListener(item.DataId, item.Group, item.Optional, this, _logger);
+
+                    tasks.Add(_client.AddListener(item.DataId, item.Group, listener));
+
+                    _listenerDict.Add($"{item.DataId}#{item.Group}", listener);
+                }
+
+                Task.WaitAll(tasks.ToArray());
+            }
+            else
+            {
+                // after remove old v1 code, Listeners must be not empty
+                throw new Nacos.V2.Exceptions.NacosException("Listeners is empty!!");
+            }
+        }
+
         public void Dispose()
         {
             var tasks = new List<Task>();
@@ -138,6 +169,12 @@
             {
                 _logger?.LogError(ex, "Load config error");
             }
+        }
+
+        // for test
+        internal void SetListener(string key, MsConfigListener listener)
+        {
+            _listenerDict[key] = listener;
         }
 
         internal class MsConfigListener : IListener
