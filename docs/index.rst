@@ -44,6 +44,7 @@
    releasenote/v1.1.0
    releasenote/v1.1.1
    releasenote/v1.2.0
+   releasenote/v1.2.1
 
 .. toctree::
    :maxdepth: 2
