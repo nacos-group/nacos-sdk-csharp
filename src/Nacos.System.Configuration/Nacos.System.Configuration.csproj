@@ -27,7 +27,9 @@
 
     <ProjectReference Include="..\Nacos\Nacos.csproj" />
 
-    <PackageReference Include="Grpc.Core" Version="2.34.1" />
+    <!-- <PackageReference Include="Grpc.Core" Version="2.34.1" >
+      <PrivateAssets>None</PrivateAssets>
+    </PackageReference> -->
 
     <PackageReference Include="Microsoft.Configuration.ConfigurationBuilders.Base" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.0" />
