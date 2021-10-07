@@ -62,13 +62,13 @@
         /// <summary>
         /// username
         /// </summary>
-        [ConfigurationProperty("userName", IsRequired = true)]
+        [ConfigurationProperty("userName", IsRequired = false)]
         public string UserName => this["userName"]?.ToString();
 
         /// <summary>
         /// password
         /// </summary>
-        [ConfigurationProperty("password", IsRequired = true)]
+        [ConfigurationProperty("password", IsRequired = false)]
         public string Password => this["password"]?.ToString();
 
         public static NacosConfigurationSection GetConfig(string sectionName) => ConfigurationManager.GetSection(string.IsNullOrWhiteSpace(sectionName) ? "nacos" : sectionName) as NacosConfigurationSection;

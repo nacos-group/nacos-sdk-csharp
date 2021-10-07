@@ -19,7 +19,6 @@
 
         public void ConfigureServices(IServiceCollection services)
         {
-            // services.AddNacosAspNetCore(Configuration);
             // services.AddNacosAspNet(Configuration);
             services.AddNacosAspNet(x =>
             {

@@ -2,8 +2,8 @@
 {
     using global::System;
     using global::System.Configuration;
-    using Nacos.Config;
     using Nacos.Microsoft.Extensions.Configuration;
+    using Nacos.V2;
 
     public class ConfigListener : ConfigurationSection
     {

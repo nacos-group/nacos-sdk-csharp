@@ -49,8 +49,8 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
             // it will use default json parser to parse the configuration store in nacos server.
             builder.AddNacosV2Configuration(c.GetSection("NacosConfig"));
             // you also can specify ini or yaml parser as well.
-            // builder.AddNacosConfiguration(c.GetSection("NacosConfig"), Nacos.IniParser.IniConfigurationStringParser.Instance);
-            // builder.AddNacosConfiguration(c.GetSection("NacosConfig"), Nacos.YamlParser.YamlConfigurationStringParser.Instance);
+            // builder.AddNacosV2Configuration(c.GetSection("NacosConfig"), Nacos.IniParser.IniConfigurationStringParser.Instance);
+            // builder.AddNacosV2Configuration(c.GetSection("NacosConfig"), Nacos.YamlParser.YamlConfigurationStringParser.Instance);
         })
         .ConfigureWebHostDefaults(webBuilder =>
         {

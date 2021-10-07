@@ -2,6 +2,7 @@
 {
     using Microsoft.Extensions.Logging;
     using Nacos.V2.Naming.Cache;
+    using Nacos.V2.Naming.Dtos;
     using Nacos.V2.Naming.Event;
     using Nacos.V2.Naming.Remote;
     using Nacos.V2.Naming.Utils;

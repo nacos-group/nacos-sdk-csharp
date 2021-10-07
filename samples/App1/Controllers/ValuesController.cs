@@ -9,15 +9,11 @@
     [ApiController]
     public class ValuesController : ControllerBase
     {
-        // nacos server 1.x
-        // private readonly INacosServerManager _serverManager;
         // nacos server 1.x and 2.x
         private readonly Nacos.V2.INacosNamingService _svc;
 
-        public ValuesController(
-            /*INacosServerManager serverManager,*/ Nacos.V2.INacosNamingService svc)
+        public ValuesController(Nacos.V2.INacosNamingService svc)
         {
-            // _serverManager = serverManager;
             _svc = svc;
         }
 
@@ -32,8 +28,6 @@
         [HttpGet("test")]
         public ActionResult<string> Test()
         {
-            /*var baseUrl = _serverManager.GetServerAsync("App2", "DEFAULT_GROUP", "DEFAULT", "cs").GetAwaiter().GetResult();*/
-
             var instance = _svc.SelectOneHealthyInstance("App2", "DEFAULT_GROUP").GetAwaiter().GetResult();
             var host = $"{instance.Ip}:{instance.Port}";
 

@@ -3,7 +3,6 @@
     using global::Microsoft.Extensions.Configuration;
     using global::Microsoft.Extensions.Logging;
     using global::Microsoft.Extensions.Options;
-    using Nacos.Config;
     using Nacos.V2;
     using Nacos.V2.Config;
     using System;
@@ -70,11 +69,39 @@
             }
             else
             {
-#pragma warning disable CS0618
-                var listener = new MsConfigListener(_configurationSource.DataId, _configurationSource.Group, _configurationSource.Optional, this, _logger);
-                _client.AddListener(_configurationSource.DataId, _configurationSource.Group, listener);
-                _listenerDict.Add($"{_configurationSource.DataId}#{_configurationSource.Group}", listener);
-#pragma warning restore CS0618
+                // after remove old v1 code, Listeners must be not empty
+                throw new Nacos.V2.Exceptions.NacosException("Listeners is empty!!");
+            }
+        }
+
+        // for test
+        internal NacosV2ConfigurationProvider(NacosV2ConfigurationSource configurationSource, ILogger logger, INacosConfigService client, INacosConfigurationParser parser)
+        {
+            _configurationSource = configurationSource;
+            _parser = parser;
+            _configDict = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            _listenerDict = new Dictionary<string, MsConfigListener>();
+            _logger = logger;
+            _client = client;
+            if (configurationSource.Listeners != null && configurationSource.Listeners.Any())
+            {
+                var tasks = new List<Task>();
+
+                foreach (var item in configurationSource.Listeners)
+                {
+                    var listener = new MsConfigListener(item.DataId, item.Group, item.Optional, this, _logger);
+
+                    tasks.Add(_client.AddListener(item.DataId, item.Group, listener));
+
+                    _listenerDict.Add($"{item.DataId}#{item.Group}", listener);
+                }
+
+                Task.WaitAll(tasks.ToArray());
+            }
+            else
+            {
+                // after remove old v1 code, Listeners must be not empty
+                throw new Nacos.V2.Exceptions.NacosException("Listeners is empty!!");
             }
         }
 
@@ -134,33 +161,20 @@
                 }
                 else
                 {
-#pragma warning disable CS0618
-                    try
-                    {
-                        var config = _client.GetConfig(_configurationSource.DataId, _configurationSource.Group, 3000)
-                            .ConfigureAwait(false).GetAwaiter().GetResult();
-
-                        _configDict.AddOrUpdate($"{_configurationSource.GetNamespace()}#{_configurationSource.Group}#{_configurationSource.DataId}", config, (x, y) => config);
-
-                        var data = _parser.Parse(config);
-
-                        Data = data;
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger?.LogWarning(ex, "MS Config Query config error, dataid={0}, group={1}, tenant={2}", _configurationSource.DataId, _configurationSource.Group, _configurationSource.Tenant);
-                        if (!_configurationSource.Optional)
-                        {
-                            throw;
-                        }
-                    }
-#pragma warning restore CS0618
+                    // after remove old v1 code, Listeners must be not empty
+                    throw new Nacos.V2.Exceptions.NacosException("Listeners is empty!!");
                 }
             }
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "Load config error");
             }
+        }
+
+        // for test
+        internal void SetListener(string key, MsConfigListener listener)
+        {
+            _listenerDict[key] = listener;
         }
 
         internal class MsConfigListener : IListener
@@ -192,9 +206,15 @@
 
                     var nData = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-                    foreach (var dict in _provider._configDict)
+                    foreach (var listener in _provider._configurationSource.Listeners)
                     {
-                        var data = _provider._parser.Parse(dict.Value);
+                        var key = $"{_provider._configurationSource.GetNamespace()}#{listener.Group}#{listener.DataId}";
+                        if (_provider._configDict[key] == null)
+                        {
+                            continue;
+                        }
+
+                        var data = _provider._parser.Parse(_provider._configDict[key]);
 
                         foreach (var item in data)
                         {

@@ -6,6 +6,7 @@
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Nacos.V2;
+    using Nacos.V2.Naming.Core;
     using System;
     using System.Collections.Generic;
     using System.Threading;

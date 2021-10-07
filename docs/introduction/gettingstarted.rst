@@ -51,8 +51,8 @@
                 // 默认会使用JSON解析器来解析存在Nacos Server的配置
                 builder.AddNacosV2Configuration(c.GetSection("NacosConfig"));
                 // 也可以按需使用ini或yaml的解析器
-                // builder.AddNacosConfiguration(c.GetSection("NacosConfig"), Nacos.IniParser.IniConfigurationStringParser.Instance);
-                // builder.AddNacosConfiguration(c.GetSection("NacosConfig"), Nacos.YamlParser.YamlConfigurationStringParser.Instance);
+                // builder.AddNacosV2Configuration(c.GetSection("NacosConfig"), Nacos.IniParser.IniConfigurationStringParser.Instance);
+                // builder.AddNacosV2Configuration(c.GetSection("NacosConfig"), Nacos.YamlParser.YamlConfigurationStringParser.Instance);
             })
             .ConfigureWebHostDefaults(webBuilder =>
             {

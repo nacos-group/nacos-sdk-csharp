@@ -18,8 +18,6 @@
 
         public void ConfigureServices(IServiceCollection services)
         {
-            // nacos server v1.x
-            // services.AddNacosAspNetCore(Configuration);
             // nacos server v1.x or v2.x
             services.AddNacosAspNet(Configuration);
             services.AddControllers();

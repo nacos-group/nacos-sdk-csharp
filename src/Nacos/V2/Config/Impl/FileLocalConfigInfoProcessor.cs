@@ -188,7 +188,7 @@
                 {
                     try
                     {
-                        file.Delete();
+                        if (file.Exists) file.Delete();
                     }
                     catch
                     {

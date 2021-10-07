@@ -70,7 +70,8 @@
                 request.PutAdditonalParam(ConfigConstants.TYPE, type);
                 request.PutAdditonalParam(ConfigConstants.ENCRYPTED_DATA_KEY, encryptedDataKey);
 
-                var response = await RequestProxy(GetOneRunningClient(), request).ConfigureAwait(false);
+                var timeOut = _options.DefaultTimeOut > 0 ? _options.DefaultTimeOut : 3000;
+                var response = await RequestProxy(GetOneRunningClient(), request, timeOut).ConfigureAwait(false);
 
                 if (!response.IsSuccess())
                 {
@@ -108,7 +109,7 @@
                     }
                 }
 
-                var response = (ConfigQueryResponse)await RequestProxy(rpcClient, request).ConfigureAwait(false);
+                var response = (ConfigQueryResponse)await RequestProxy(rpcClient, request, readTimeous).ConfigureAwait(false);
 
                 ConfigResponse configResponse = new ConfigResponse();
 
@@ -163,7 +164,8 @@
             {
                 var request = new ConfigRemoveRequest(dataId, group, tenant, tag);
 
-                var response = await RequestProxy(GetOneRunningClient(), request).ConfigureAwait(false);
+                var timeOut = _options.DefaultTimeOut > 0 ? _options.DefaultTimeOut : 3000;
+                var response = await RequestProxy(GetOneRunningClient(), request, timeOut).ConfigureAwait(false);
 
                 return response.IsSuccess();
             }
@@ -267,14 +269,12 @@
             return labels;
         }
 
-        private async Task<CommonResponse> RequestProxy(RpcClient rpcClientInner, CommonRequest request)
+        private async Task<CommonResponse> RequestProxy(RpcClient rpcClientInner, CommonRequest request, long timeout = 3000L)
         {
             BuildRequestHeader(request);
 
-            var timeOut = _options.DefaultTimeOut > 0 ? _options.DefaultTimeOut : 3000;
-
             // TODO: 1. limiter
-            return await rpcClientInner.Request(request, timeOut).ConfigureAwait(false);
+            return await rpcClientInner.Request(request, timeout).ConfigureAwait(false);
         }
 
         private void BuildRequestHeader(CommonRequest request)
