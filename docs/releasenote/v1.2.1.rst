@@ -1,0 +1,14 @@
+v1.2.1 (Oct 7th, 2021) 发布记录
+=============================================
+
+1. [CORE] Update ResolveServerInfo (#143 $145)
+#. [ALL] Remove old v1 version code (#146 #148)
+#. [CONFIG] Fixed overwrite configuration problem when listening multi dataid with same key (#149 #151)
+#. [NAMING] Fixed v1 naming subscribe do not trigger OnEvent (#154 #157)
+
+------------
+
+1. [CORE] 更新 ResolveServerInfo 方法 (#143 $145)
+#. [ALL] 移除老版本 v1 相关代码 (#146 #148)
+#. [CONFIG] 修复同时监听多个 DataId 并且包含相同配置项出现覆盖的问题 (#149 #151)
+#. [NAMING] 修复 udp 方式订阅时不触发 OnEvent 的问题 (#154 #157)
