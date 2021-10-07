@@ -19,6 +19,7 @@
         private readonly ILogger _logger;
         private readonly FailoverReactor _failoverReactor;
         private readonly ConcurrentDictionary<string, Dtos.ServiceInfo> _serviceInfoMap;
+        private readonly NacosSdkOptions _options;
 
         private InstancesChangeNotifier _notifier;
         private string cacheDir = string.Empty;
@@ -28,6 +29,7 @@
         {
             this._logger = logger;
             this._notifier = notifier;
+            this._options = nacosOptions;
 
             InitCacheDir(@namespace, nacosOptions);
 
@@ -86,7 +88,17 @@
 
                 if (_notifier != null)
                 {
-                    _notifier.OnEvent(new InstancesChangeEvent(serviceInfo.Name, serviceInfo.GroupName, serviceInfo.Clusters, serviceInfo.Hosts));
+                    var @event = new InstancesChangeEvent(serviceInfo.Name, serviceInfo.GroupName, serviceInfo.Clusters, serviceInfo.Hosts);
+
+                    // grpc 和 udp 返回的数据格式不一样，需要对 udp 的方式进行兼容
+                    // {"name":"DEFAULT_GROUP@@mysvc2","clusters":"","cacheMillis":10000,"hosts":[{"serviceName":"DEFAULT_GROUP@@mysvc2"}],.....}
+                    if (!_options.NamingUseRpc)
+                    {
+                        @event.ServiceName = NamingUtils.GetServiceName(serviceInfo.Name);
+                        @event.GroupName = NamingUtils.GetGroupName(serviceInfo.Name);
+                    }
+
+                    _notifier.OnEvent(@event);
                 }
 
                 DiskCache.WriteAsync(serviceInfo, cacheDir)
