@@ -20,7 +20,9 @@ jobs:
       run: |
         dotnet build --configuration Release --source https://api.nuget.org/v3/index.json src/Nacos/Nacos.csproj
         dotnet build --configuration Release --source https://api.nuget.org/v3/index.json src/Nacos.AspNetCore/Nacos.AspNetCore.csproj
-        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json src/Nacos.Microsoft.Extensions.Configuration/Nacos.Microsoft.Extensions.Configuration.csproj        
+        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json src/Nacos.Microsoft.Extensions.Configuration/Nacos.Microsoft.Extensions.Configuration.csproj
+        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json parsers/Nacos.IniParser/Nacos.IniParser.csproj        
+        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json parsers/Nacos.YamlParser/Nacos.IniParser.csproj                
         dotnet msbuild -p:Configuration=Release -p:RestoreSources=https://api.nuget.org/v3/index.json -r -t:Build src/Nacos.System.Configuration/Nacos.System.Configuration.csproj
     - name: Pack with dotnet
       run: |
@@ -28,6 +30,8 @@ jobs:
         dotnet pack src/Nacos/Nacos.csproj --version-suffix $ver -o /home/runner/work/nugetpkgs -c Release --no-build
         dotnet pack src/Nacos.AspNetCore/Nacos.AspNetCore.csproj --version-suffix $ver -o /home/runner/work/nugetpkgs -c Release --no-build
         dotnet pack src/Nacos.Microsoft.Extensions.Configuration/Nacos.Microsoft.Extensions.Configuration.csproj --version-suffix $ver -o /home/runner/work/nugetpkgs -c Release --no-build
+        dotnet pack parsers/Nacos.IniParser/Nacos.IniParser.csproj --version-suffix $ver -o /home/runner/work/nugetpkgs -c Release --no-build
+        dotnet pack parsers/Nacos.YamlParser/Nacos.YamlParser.csproj --version-suffix $ver -o /home/runner/work/nugetpkgs -c Release --no-build
         dotnet msbuild -p:Configuration=Release -t:pack -p:PackageOutputPath=/home/runner/work/nugetpkgs -p:VersionSuffix=$ver src/Nacos.System.Configuration/Nacos.System.Configuration.csproj
     - name: Upload artifact
       uses: actions/upload-artifact@v1
