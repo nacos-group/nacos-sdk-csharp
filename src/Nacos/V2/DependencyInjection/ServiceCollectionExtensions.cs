@@ -16,7 +16,7 @@
             services.Configure(configure);
 
             var clientBuilder = services.AddHttpClient(Nacos.V2.Common.Constants.ClientName)
-                .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseProxy = false });
+                .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseProxy = false, AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate });
 
             if (httpClientAction != null)
             {
@@ -35,7 +35,7 @@
             services.Configure<NacosSdkOptions>(configuration.GetSection(sectionName));
 
             var clientBuilder = services.AddHttpClient(Nacos.V2.Common.Constants.ClientName)
-                .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseProxy = false });
+                .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseProxy = false, AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate });
 
             if (httpClientAction != null)
             {
@@ -55,7 +55,7 @@
             services.Configure(configure);
 
             var clientBuilder = services.AddHttpClient(Nacos.V2.Common.Constants.ClientName)
-                .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseProxy = false });
+                .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseProxy = false, AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate });
 
             if (httpClientAction != null) clientBuilder.ConfigureHttpClient(httpClientAction);
 
@@ -71,7 +71,7 @@
             services.Configure<NacosSdkOptions>(configuration.GetSection(sectionName));
 
             var clientBuilder = services.AddHttpClient(Nacos.V2.Common.Constants.ClientName)
-                .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseProxy = false });
+                .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseProxy = false, AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate });
 
             if (httpClientAction != null) clientBuilder.ConfigureHttpClient(httpClientAction);
 
