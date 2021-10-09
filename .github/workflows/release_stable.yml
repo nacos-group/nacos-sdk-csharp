@@ -22,7 +22,7 @@ jobs:
         dotnet build --configuration Release --source https://api.nuget.org/v3/index.json src/Nacos.AspNetCore/Nacos.AspNetCore.csproj
         dotnet build --configuration Release --source https://api.nuget.org/v3/index.json src/Nacos.Microsoft.Extensions.Configuration/Nacos.Microsoft.Extensions.Configuration.csproj        
         dotnet build --configuration Release --source https://api.nuget.org/v3/index.json parsers/Nacos.IniParser/Nacos.IniParser.csproj        
-        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json parsers/Nacos.YamlParser/Nacos.IniParser.csproj           
+        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json parsers/Nacos.YamlParser/Nacos.YamlParser.csproj           
         dotnet msbuild -p:Configuration=Release -p:RestoreSources=https://api.nuget.org/v3/index.json -r -t:Build src/Nacos.System.Configuration/Nacos.System.Configuration.csproj
     - name: Pack with dotnet
       run: |
