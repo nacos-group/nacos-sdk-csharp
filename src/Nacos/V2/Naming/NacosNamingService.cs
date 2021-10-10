@@ -11,6 +11,7 @@
     using Nacos.V2.Remote;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net.Http;
     using System.Threading.Tasks;
 
     public class NacosNamingService : INacosNamingService
@@ -31,14 +32,15 @@
 
         public NacosNamingService(
             ILoggerFactory loggerFactory,
-            IOptions<NacosSdkOptions> optionAccs)
+            IOptions<NacosSdkOptions> optionAccs,
+            IHttpClientFactory clientFactory)
         {
             _logger = loggerFactory.CreateLogger<NacosNamingService>();
             _options = optionAccs.Value;
             _namespace = _options.Namespace;
             this._changeNotifier = new InstancesChangeNotifier();
             this._serviceInfoHolder = new ServiceInfoHolder(_logger, _namespace, _options, _changeNotifier);
-            this._clientProxy = new NamingClientProxyDelegate(_logger, _namespace, _serviceInfoHolder, _options, _changeNotifier);
+            this._clientProxy = new NamingClientProxyDelegate(_logger, _namespace, _serviceInfoHolder, _options, _changeNotifier, clientFactory);
         }
 
         public async Task DeregisterInstance(string serviceName, string ip, int port)

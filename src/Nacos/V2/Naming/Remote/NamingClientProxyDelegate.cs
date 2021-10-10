@@ -12,6 +12,7 @@
     using Nacos.V2.Security;
     using System;
     using System.Collections.Generic;
+    using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -35,7 +36,7 @@
 
         private long _securityInfoRefreshIntervalMills = 5000;
 
-        public NamingClientProxyDelegate(ILogger logger, string @namespace, ServiceInfoHolder serviceInfoHolder, NacosSdkOptions options, InstancesChangeNotifier changeNotifier)
+        public NamingClientProxyDelegate(ILogger logger, string @namespace, ServiceInfoHolder serviceInfoHolder, NacosSdkOptions options, InstancesChangeNotifier changeNotifier, IHttpClientFactory clientFactory)
         {
             this._options = options;
             this.serverListManager = new ServerListManager(logger, options, @namespace);
@@ -49,7 +50,7 @@
                 this.grpcClientProxy = new NamingGrpcClientProxy(logger, @namespace, securityProxy, serverListManager, options, serviceInfoHolder);
             }
 
-            this.httpClientProxy = new NamingHttpClientProxy(logger, @namespace, securityProxy, serverListManager, options, serviceInfoHolder);
+            this.httpClientProxy = new NamingHttpClientProxy(logger, @namespace, securityProxy, serverListManager, options, serviceInfoHolder, clientFactory);
         }
 
         private void InitSecurityProxy()
