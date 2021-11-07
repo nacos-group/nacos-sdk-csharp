@@ -4,6 +4,7 @@
     using Nacos.V2.Utils;
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     public class ServiceInfo
     {
@@ -92,7 +93,8 @@
                 for (int i = 0; i < host.Weight; i++) validHosts.Add(host);
             }
 
-            return true;
+            // No valid hosts, return false.
+            return validHosts.Any();
         }
 
         private string GetGroupedServiceName()

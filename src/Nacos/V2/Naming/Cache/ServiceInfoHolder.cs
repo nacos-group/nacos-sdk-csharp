@@ -109,7 +109,7 @@
         }
 
         private bool IsEmptyOrErrorPush(Dtos.ServiceInfo serviceInfo)
-            => serviceInfo.Hosts == null || !serviceInfo.Hosts.Any() || (_pushEmptyProtection && !serviceInfo.Validate());
+            => serviceInfo.Hosts == null || (_pushEmptyProtection && !serviceInfo.Validate());
 
         private bool IsChangedServiceInfo(Dtos.ServiceInfo oldService, Dtos.ServiceInfo newService)
         {

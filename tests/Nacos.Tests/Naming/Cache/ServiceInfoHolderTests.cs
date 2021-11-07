@@ -58,6 +58,59 @@
             holder.ProcessServiceInfo(info);
         }
 
+        [Fact]
+        public void ProcessServiceInfo_When_EmptyProtection_Is_True_Should_Not_Return_Empty()
+        {
+            NacosSdkOptions options = new NacosSdkOptions() { NamingPushEmptyProtection = true };
+            ServiceInfoHolder holder = new ServiceInfoHolder(NullLogger.Instance, "", options, null);
+
+            ServiceInfo oldInfo = new ServiceInfo("a@@b@@c");
+
+            oldInfo.Hosts = new System.Collections.Generic.List<Instance>()
+            {
+                CreateInstance("1.1.1.1", 1),
+                CreateInstance("1.1.1.2", 2),
+            };
+
+            holder.ProcessServiceInfo(oldInfo);
+
+            ServiceInfo newInfo = new ServiceInfo("a@@b@@c");
+            var i2 = holder.ProcessServiceInfo(newInfo);
+
+            Assert.Equal(oldInfo.GetKey(), i2.GetKey());
+            Assert.Equal(2, i2.Hosts.Count);
+        }
+
+        [Fact]
+        public void ProcessServiceInfo_When_EmptyProtection_Is_False_Should_Return_Empty()
+        {
+            NacosSdkOptions options = new NacosSdkOptions() { };
+            ServiceInfoHolder holder = new ServiceInfoHolder(NullLogger.Instance, "", options, null);
+
+            ServiceInfo oldInfo = new ServiceInfo("a@@b@@c");
+
+            oldInfo.Hosts = new System.Collections.Generic.List<Instance>()
+            {
+                CreateInstance("1.1.1.1", 1),
+                CreateInstance("1.1.1.2", 2),
+            };
+
+            holder.ProcessServiceInfo(oldInfo);
+
+            ServiceInfo newInfo = new ServiceInfo("a@@b@@c");
+            var i2 = holder.ProcessServiceInfo(newInfo);
+
+            Assert.Empty(i2.Hosts);
+        }
+
+        private Instance CreateInstance(string ip, int port)
+        {
+            Instance instance = new Instance();
+            instance.Ip = ip;
+            instance.Port = port;
+            return instance;
+        }
+
         public class CusListener : Nacos.V2.IEventListener
         {
             public Task OnEvent(Nacos.V2.IEvent @event)
