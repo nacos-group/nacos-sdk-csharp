@@ -1,0 +1,10 @@
+v1.2.2 (Nov 7th, 2021) 发布记录
+=============================================
+
+1. [NAMING] Improve server push empty pretection (#155)
+#. [NAMING] Fixed gzip compression (#161 #162)
+
+------------
+
+1. [NAMING] 优化服务端推空保护 (#155)
+#. [NAMING] 修复gzip压缩问题 (#161 #162)
