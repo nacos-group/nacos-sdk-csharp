@@ -42,14 +42,14 @@
 }
          */
 
-        public string Str { get; set; }
+        public string? Str { get; set; }
 
 #pragma warning disable SA1300 // Element should begin with upper-case letter
         public int num { get; set; }
 
-        public List<int> arr { get; set; }
+        public List<int>? arr { get; set; }
 
-        public SubObj subobj { get; set; }
+        public SubObj? subobj { get; set; }
 #pragma warning restore SA1300 // Element should begin with upper-case letter
     }
 }

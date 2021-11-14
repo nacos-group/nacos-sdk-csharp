@@ -1,20 +1,46 @@
-namespace App3
+﻿using Nacos.V2.DependencyInjection;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddNacosV2Config(x =>
 {
-    using Microsoft.AspNetCore.Hosting;
-    using Microsoft.Extensions.Hosting;
+    x.ServerAddresses = new System.Collections.Generic.List<string> { "http://localhost:8848/" };
+    x.EndPoint = "";
+    x.Namespace = "cs";
+    x.UserName = "nacos";
+    x.Password = "nacos";
 
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            CreateHostBuilder(args).Build().Run();
-        }
+    // this sample will add the filter to encrypt the config with AES.
+    x.ConfigFilterAssemblies = new System.Collections.Generic.List<string> { "App3" };
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>().UseUrls("http://localhost:9632");
-                });
-    }
+    // swich to use http or rpc
+    x.ConfigUseRpc = true;
+});
+
+builder.Services.AddNacosV2Naming(x =>
+{
+    x.ServerAddresses = new System.Collections.Generic.List<string> { "http://localhost:8848/" };
+    x.EndPoint = "";
+    x.Namespace = "cs";
+
+    // swich to use http or rpc
+    x.NamingUseRpc = true;
+});
+
+builder.Services.AddControllers();
+
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
 }
+
+app.UseRouting();
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+});
+
+app.Run("http://*:9632");

@@ -1,81 +1,64 @@
-﻿namespace MsConfigApp
+﻿using Serilog;
+using Serilog.Events;
+
+var outputTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level}] {Message}{NewLine}{Exception}";
+
+Log.Logger = new LoggerConfiguration()
+    .Enrich.FromLogContext()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .MinimumLevel.Override("System", LogEventLevel.Warning)
+    .MinimumLevel.Debug()
+    .WriteTo.Console(
+        outputTemplate: outputTemplate)
+    .CreateLogger();
+
+System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<MsConfigApp.AppSettings>(builder.Configuration.GetSection("AppSettings"));
+
+builder.Services.AddControllers();
+
+builder.Host.ConfigureAppConfiguration((c, b) =>
 {
-    using System.Collections.Generic;
-    using Microsoft.AspNetCore.Hosting;
-    using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.Hosting;
-    using Nacos.Microsoft.Extensions.Configuration;
-    using Serilog;
-    using Serilog.Events;
+    var config = b.Build();
 
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            var outputTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level}] {Message}{NewLine}{Exception}";
+    // read configuration from config files
+    // default is json
+    // b.AddNacosV2Configuration(config.GetSection("NacosConfig"));
+    b.AddNacosV2Configuration(config.GetSection("NacosConfig"), logAction: x => x.AddSerilog(Log.Logger));
 
-            Log.Logger = new LoggerConfiguration()
-                .Enrich.FromLogContext()
-                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-                .MinimumLevel.Override("System", LogEventLevel.Warning)
-                .MinimumLevel.Debug()
-                .WriteTo.Console(
-                    outputTemplate: outputTemplate)
-                /*.WriteTo.File(
-                    path: "logs/ApiTpl.log",
-                    outputTemplate: outputTemplate,
-                    rollingInterval: RollingInterval.Day,
-                    retainedFileCountLimit: 5,
-                    encoding: System.Text.Encoding.UTF8)*/
-                .CreateLogger();
+    // specify ini or yaml
+    // b.AddNacosV2Configuration(config.GetSection("NacosConfig"), Nacos.IniParser.IniConfigurationStringParser.Instance);
+    // b.AddNacosV2Configuration(config.GetSection("NacosConfig"), Nacos.YamlParser.YamlConfigurationStringParser.Instance);
+})
+.UseSerilog();
 
-            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+var app = builder.Build();
 
-            try
-            {
-                Log.ForContext<Program>().Information("Application starting...");
-                CreateHostBuilder(args, Log.Logger).Build().Run();
-            }
-            catch (System.Exception ex)
-            {
-                Log.ForContext<Program>().Fatal(ex, "Application start-up failed!!");
-            }
-            finally
-            {
-                Log.CloseAndFlush();
-            }
-        }
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
 
-        public static IHostBuilder CreateHostBuilder(string[] args, Serilog.ILogger logger) =>
-            Host.CreateDefaultBuilder(args)
-                 .ConfigureAppConfiguration((context, builder) =>
-                 {
-                     var c = builder.Build();
+app.UseRouting();
 
-                     // read configuration from config files
-                     // default is json
-                     // builder.AddNacosV2Configuration(c.GetSection("NacosConfig"));
-                     builder.AddNacosV2Configuration(c.GetSection("NacosConfig"), logAction: x => x.AddSerilog(logger));
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+});
 
-                     // specify ini or yaml
-                     // builder.AddNacosV2Configuration(c.GetSection("NacosConfig"), Nacos.IniParser.IniConfigurationStringParser.Instance);
-                     // builder.AddNacosV2Configuration(c.GetSection("NacosConfig"), Nacos.YamlParser.YamlConfigurationStringParser.Instance);
-
-                     // hard code here
-                     /*builder.AddNacosV2Configuration(x =>
-                     {
-                         x.Namespace = "cs";
-                         x.ServerAddresses = new List<string> { "http://localhost:8848" };
-                         x.Listeners = new List<ConfigListener>
-                         {
-                             new ConfigListener { DataId = "d1", Group = "g", Optional = false },
-                         };
-                     });*/
-                 })
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>().UseUrls("http://*:8787");
-                })
-                .UseSerilog();
-    }
+try
+{
+    Log.ForContext<Program>().Information("Application starting...");
+    app.Run("http://*:8787");
+}
+catch (Exception ex)
+{
+    Log.ForContext<Program>().Fatal(ex, "Application start-up failed!!");
+}
+finally
+{
+    Log.CloseAndFlush();
 }

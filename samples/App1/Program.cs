@@ -1,18 +1,24 @@
-﻿namespace App1
+﻿using Nacos.AspNetCore.V2;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// nacos server v1.x or v2.x
+builder.Services.AddNacosAspNet(builder.Configuration);
+
+builder.Services.AddControllers();
+
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
 {
-    using Microsoft.AspNetCore;
-    using Microsoft.AspNetCore.Hosting;
-
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            CreateWebHostBuilder(args).Build().Run();
-        }
-
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseUrls("http://*:9876")
-                .UseStartup<Startup>();
-    }
+    app.UseDeveloperExceptionPage();
 }
+
+app.UseRouting();
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+});
+
+app.Run("http://*:9876");

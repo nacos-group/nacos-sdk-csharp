@@ -42,20 +42,23 @@
         {
             var jObj = JObject.Parse(src);
 
-            foreach (var item in _jsonPaths)
+            if (_jsonPaths != null)
             {
-                var t = jObj.SelectToken(item);
-
-                if (t != null)
+                foreach (var item in _jsonPaths)
                 {
-                    var r = t.ToString();
+                    var t = jObj.SelectToken(item);
 
-                    // 加解密，示例用 base64
-                    var newToken = isEnc
-                        ? Convert.ToBase64String(Encoding.UTF8.GetBytes(r))
-                        : Encoding.UTF8.GetString(Convert.FromBase64String(r));
+                    if (t != null)
+                    {
+                        var r = t.ToString();
 
-                    t.Replace(newToken);
+                        // 加解密，示例用 base64
+                        var newToken = isEnc
+                            ? Convert.ToBase64String(Encoding.UTF8.GetBytes(r))
+                            : Encoding.UTF8.GetString(Convert.FromBase64String(r));
+
+                        t.Replace(newToken);
+                    }
                 }
             }
 
@@ -68,7 +71,7 @@
 
         public int GetOrder() => 1;
 
-        private List<string> _jsonPaths;
+        private List<string>? _jsonPaths;
 
         public void Init(NacosSdkOptions options)
         {
@@ -78,7 +81,7 @@
 
             if (extInfo.ContainsKey("JsonPaths"))
             {
-                _jsonPaths = extInfo.GetValue("JsonPaths").ToObject<List<string>>();
+                _jsonPaths = extInfo?.GetValue("JsonPaths")?.ToObject<List<string>>();
             }
 
             Console.WriteLine("Assemblies = " + string.Join(",", options.ConfigFilterAssemblies));
