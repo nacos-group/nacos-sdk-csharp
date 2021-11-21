@@ -9,6 +9,9 @@
 
     public class GrpcClient : RpcClient
     {
+        private static readonly string NACOS_SERVER_GRPC_PORT_OFFSET_KEY = "nacos.server.grpc.port.offset";
+        private static readonly string NACOS_SERVER_GRPC_PORT_DEFAULT_OFFSET = "1000";
+
         public GrpcClient(string name)
             : base(name)
         {
@@ -69,7 +72,7 @@
 
         public override RemoteConnectionType GetConnectionType() => RemoteConnectionType.GRPC;
 
-        public override int RpcPortOffset() => 1000;
+        public override int RpcPortOffset() => Convert.ToInt32(Utils.EnvUtil.GetEnvValue(NACOS_SERVER_GRPC_PORT_OFFSET_KEY, NACOS_SERVER_GRPC_PORT_DEFAULT_OFFSET));
 
         private void ShuntDownChannel(Grpc.Core.ChannelBase managedChannel)
         {
