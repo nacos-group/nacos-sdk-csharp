@@ -76,7 +76,7 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
         "Group": "DEFAULT_GROUP"
       }
     ],    
-    "Namespace": "csharp-demo",
+    "Namespace": "csharp-demo",  // 这里请设置 Namespace ID 的值!!!!!!!!
     "ServerAddresses": [ "http://localhost:8848/" ],
     "UserName": "test2",
     "Password": "123456",
@@ -163,7 +163,7 @@ public class Startup
     "EndPoint": "sub-domain.aliyun.com:8080",
     "ServerAddresses": [ "http://localhost:8848" ],
     "DefaultTimeOut": 15000,
-    "Namespace": "cs",
+    "Namespace": "cs",  // 这里请设置 Namespace ID 的值!!!!!!!!
     "ListenInterval": 1000,
     "ServiceName": "App1",
     "GroupName": "DEFAULT_GROUP",

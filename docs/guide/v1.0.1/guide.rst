@@ -58,6 +58,8 @@ The basic configuration is as follows:
 
 Only when 'ConfigUseRpc' and 'NamingUseRpc' are set to true, gPRC will be used to interact with Nacos server, otherwise HTTP will be used.
 
+And `Namespace` should be set to the Namespace Id in the nacos console, not the Namespace name!!!!!!
+
 Configuration changes
 --------------------------
 

@@ -54,6 +54,8 @@
 
 只有当 `ConfigUseRpc` 和 `NamingUseRpc` 设置为true的时候，才会用 gRPC 去和 nacos server 交互， 反之还是 HTTP。
 
+另外，Namespace 字段填写的值是控制台中的 命名空间Id，不是命名空间名称！！！！
+
 配置变化
 ---------------
 
