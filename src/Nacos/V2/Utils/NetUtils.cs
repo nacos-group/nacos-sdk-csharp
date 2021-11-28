@@ -8,14 +8,19 @@
     public class NetUtils
     {
         private static readonly string ResolveFailed = "resolve_failed";
-        private static readonly string LocalIpKey = "com.alibaba.nacos.client.naming.local.ip";
+        private static readonly string CLIENT_NAMING_LOCAL_IP_PROPERTY = "com.alibaba.nacos.client.naming.local.ip";
+        private static readonly string CLIENT_LOCAL_IP_PROPERTY = "com.alibaba.nacos.client.local.ip";
         private static string localIp;
 
         public static string LocalIP()
         {
             if (localIp.IsNotNullOrWhiteSpace()) return localIp;
 
-            var val = EnvUtil.GetEnvValue(LocalIpKey);
+            var val = EnvUtil.GetEnvValue(CLIENT_LOCAL_IP_PROPERTY);
+
+            if (val.IsNotNullOrWhiteSpace()) return val;
+
+            val = EnvUtil.GetEnvValue(CLIENT_NAMING_LOCAL_IP_PROPERTY);
 
             var ip = val.IsNullOrWhiteSpace() ? FindFirstNonLoopbackAddress() : val;
 

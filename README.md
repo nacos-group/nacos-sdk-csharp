@@ -25,7 +25,7 @@ dotnet add package nacos-sdk-csharp.IniParser
 - Basic OpenApi Usages
 - Integrate ASP.NET Core Configuration System
 - Service Registration and Discovery With ASP.NET Core
-- Integrate With Aliyun ACM
+- Integrate With Aliyun MSE/ACM
 - ...
 
 Find more information on the documents pages:

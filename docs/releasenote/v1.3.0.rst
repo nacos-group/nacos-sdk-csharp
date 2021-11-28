@@ -1,0 +1,12 @@
+v1.3.0 (Dec xth, 2021) 发布记录
+=============================================
+
+1. [ALL] Support net6 for TargetFrameworks (#164)
+#. [NAMING] Support reading nacos server port offset from environment variable (#167)
+#. [ALL] remove RequestStream in proto file (#169)
+
+------------
+
+1. [ALL] TargetFrameworks添加net6支持 (#164)
+#. [NAMING] 支持从环境变量读取nacos server的端口偏移 (#167)
+#. [ALL] 从 proto 文件移除 RequestStream 方法 (#169)
