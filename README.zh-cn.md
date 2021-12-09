@@ -27,6 +27,7 @@ dotnet add package nacos-sdk-csharp.IniParser
 - 集成ASP.NET Core的配置系统
 - 简易ASP.NET Core的服务注册和发现
 - 和阿里云应用配置管理(Application Configuration Management，简称 ACM)集成使用
+- 和阿里云微服务引擎(Microservices Engine，简称 MSE)集成使用
 - ...
 
 更多信息请查阅文档:
@@ -76,7 +77,7 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
         "Group": "DEFAULT_GROUP"
       }
     ],    
-    "Namespace": "csharp-demo",
+    "Namespace": "csharp-demo",  // 这里请设置 Namespace ID 的值!!!!!!!!
     "ServerAddresses": [ "http://localhost:8848/" ],
     "UserName": "test2",
     "Password": "123456",
@@ -163,7 +164,7 @@ public class Startup
     "EndPoint": "sub-domain.aliyun.com:8080",
     "ServerAddresses": [ "http://localhost:8848" ],
     "DefaultTimeOut": 15000,
-    "Namespace": "cs",
+    "Namespace": "cs",  // 这里请设置 Namespace ID 的值!!!!!!!!
     "ListenInterval": 1000,
     "ServiceName": "App1",
     "GroupName": "DEFAULT_GROUP",

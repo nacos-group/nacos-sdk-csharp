@@ -49,7 +49,7 @@
             Console.WriteLine("Init");
         }
 
-        public static string AESEncrypt(string data, string key)
+        public static string? AESEncrypt(string data, string key)
         {
             using (MemoryStream memory = new MemoryStream())
             {
@@ -81,7 +81,7 @@
             }
         }
 
-        public static string AESDecrypt(string data, string key)
+        public static string? AESDecrypt(string data, string key)
         {
             byte[] encryptedBytes = Convert.FromBase64String(data);
             byte[] bKey = new byte[32];

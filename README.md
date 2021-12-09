@@ -25,7 +25,7 @@ dotnet add package nacos-sdk-csharp.IniParser
 - Basic OpenApi Usages
 - Integrate ASP.NET Core Configuration System
 - Service Registration and Discovery With ASP.NET Core
-- Integrate With Aliyun ACM
+- Integrate With Aliyun MSE/ACM
 - ...
 
 Find more information on the documents pages:
@@ -75,7 +75,7 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
         "Group": "DEFAULT_GROUP"
       }
     ],    
-    "Namespace": "csharp-demo",
+    "Namespace": "csharp-demo",  // Please set the value of Namespace ID !!!!!!!!
     "ServerAddresses": [ "http://localhost:8848/" ],
     "UserName": "test2",
     "Password": "123456",
@@ -162,7 +162,7 @@ Modify `appsettings.json`
     "EndPoint": "sub-domain.aliyun.com:8080",
     "ServerAddresses": [ "http://localhost:8848" ],
     "DefaultTimeOut": 15000,
-    "Namespace": "cs",
+    "Namespace": "cs", // Please set the value of Namespace ID !!!!!!!!
     "ListenInterval": 1000,
     "ServiceName": "App1",
     "GroupName": "DEFAULT_GROUP",

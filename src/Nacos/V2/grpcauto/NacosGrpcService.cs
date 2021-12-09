@@ -30,12 +30,11 @@ namespace Nacos {
             "GAggASgJEicKB2hlYWRlcnMYByADKAsyFi5NZXRhZGF0YS5IZWFkZXJzRW50",
             "cnkaLgoMSGVhZGVyc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEo",
             "CToCOAEiSgoHUGF5bG9hZBIbCghtZXRhZGF0YRgCIAEoCzIJLk1ldGFkYXRh",
-            "EiIKBGJvZHkYAyABKAsyFC5nb29nbGUucHJvdG9idWYuQW55MjgKDVJlcXVl",
-            "c3RTdHJlYW0SJwoNcmVxdWVzdFN0cmVhbRIILlBheWxvYWQaCC5QYXlsb2Fk",
-            "IgAwATIqCgdSZXF1ZXN0Eh8KB3JlcXVlc3QSCC5QYXlsb2FkGgguUGF5bG9h",
-            "ZCIAMj4KD0JpUmVxdWVzdFN0cmVhbRIrCg9yZXF1ZXN0QmlTdHJlYW0SCC5Q",
-            "YXlsb2FkGgguUGF5bG9hZCIAKAEwAUIrCh9jb20uYWxpYmFiYS5uYWNvcy5h",
-            "cGkuZ3JwYy5hdXRvUAGqAgVOYWNvc2IGcHJvdG8z"));
+            "EiIKBGJvZHkYAyABKAsyFC5nb29nbGUucHJvdG9idWYuQW55MioKB1JlcXVl",
+            "c3QSHwoHcmVxdWVzdBIILlBheWxvYWQaCC5QYXlsb2FkIgAyPgoPQmlSZXF1",
+            "ZXN0U3RyZWFtEisKD3JlcXVlc3RCaVN0cmVhbRIILlBheWxvYWQaCC5QYXls",
+            "b2FkIgAoATABQisKH2NvbS5hbGliYWJhLm5hY29zLmFwaS5ncnBjLmF1dG9Q",
+            "AaoCBU5hY29zYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Google.Protobuf.WellKnownTypes.AnyReflection.Descriptor, global::Google.Protobuf.WellKnownTypes.TimestampReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {

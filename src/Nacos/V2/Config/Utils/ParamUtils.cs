@@ -217,26 +217,6 @@
             }
         }
 
-        /// <summary>
-        /// check whether still using http .
-        /// </summary>
-        /// <returns>use http or not</returns>
-        public static bool UseHttpSwitch()
-        {
-            var useHttpSwitch = EnvUtil.GetEnvValue("clientworker.use.http.switch");
-            return "Y".Equals(useHttpSwitch, StringComparison.OrdinalIgnoreCase);
-        }
-
-        /// <summary>
-        /// get connection type for remote.
-        /// </summary>
-        /// <returns>connection type</returns>
-        public static string ConfigRemoteConnectionType()
-        {
-            string remoteConnectionType = EnvUtil.GetEnvValue("nacos.remote.config.connectiontype");
-            return remoteConnectionType;
-        }
-
         public static string Null2DefaultGroup(string group) => (group == null) ? Constants.DEFAULT_GROUP : group.Trim();
     }
 }

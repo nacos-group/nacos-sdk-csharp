@@ -15,6 +15,7 @@
    :caption: Introduction
 
    introduction/gettingstarted
+   introduction/sdkenvvar
 
 .. toctree::
    :maxdepth: 2
@@ -24,6 +25,7 @@
    features/configuration
    features/cfg-encrypt
    features/servicediscovery
+   features/mse
 
 .. toctree::
    :maxdepth: 2
@@ -37,15 +39,12 @@
    :maxdepth: 2
    :hidden:
    :caption: Release Note
-
-   releasenote/v1.0.1
-   releasenote/v1.0.2
-   releasenote/v1.0.3
-   releasenote/v1.1.0
+   
    releasenote/v1.1.1
    releasenote/v1.2.0
    releasenote/v1.2.1
    releasenote/v1.2.2
+   releasenote/v1.3.0
 
 .. toctree::
    :maxdepth: 2
