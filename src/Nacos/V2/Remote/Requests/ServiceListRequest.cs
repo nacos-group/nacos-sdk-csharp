@@ -11,7 +11,7 @@
             : base(@namespace, string.Empty, groupName)
         {
             this.PageNo = pageNo;
-            this.PageSize = PageSize;
+            this.PageSize = pageSize;
         }
 
         [Newtonsoft.Json.JsonProperty("pageNo")]
