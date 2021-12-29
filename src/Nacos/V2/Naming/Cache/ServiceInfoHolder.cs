@@ -122,6 +122,7 @@
             if (oldService.LastRefTime > newService.LastRefTime)
             {
                 _logger?.LogWarning("out of date data received, old-t: {0}, new-t: {1}", oldService.LastRefTime, newService.LastRefTime);
+                return false;
             }
 
             bool changed = false;
