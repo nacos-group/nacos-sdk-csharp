@@ -504,5 +504,7 @@
 
             return builder.ToString().TrimEnd('&');
         }
+
+        public Task<bool> IsSubscribed(string serviceName, string groupName, string clusters) => Task.FromResult(true);
     }
 }
