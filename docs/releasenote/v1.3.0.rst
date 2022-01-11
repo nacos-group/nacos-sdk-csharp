@@ -1,4 +1,4 @@
-v1.3.0 (Dec xth, 2021) 发布记录
+v1.3.0 (Dec 9th, 2021) 发布记录
 =============================================
 
 1. [ALL] Support net6 for TargetFrameworks (#164)

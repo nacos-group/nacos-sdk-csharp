@@ -1,0 +1,12 @@
+v1.3.1 (Jan xth, 2022) 发布记录
+=============================================
+
+1. [NAMING] Fix ServiceListRequest pageSize error
+#. [NAMING] Fix service push when new data lastRefTime lessthan old data lastRefTime
+#. [NAMING] Fix judgement for is subscribe services.
+
+------------
+
+1. [NAMING] 修复分页请求 pageSize 参数传递问题
+#. [NAMING] 修复服务推送时，lastRefTime 新数据比老数据的小的情况
+#. [NAMING] 修复是否订阅服务的判断
