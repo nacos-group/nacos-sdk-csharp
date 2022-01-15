@@ -336,13 +336,16 @@
             try
             {
                 var client = _clientFactory?.CreateClient(Nacos.V2.Common.Constants.ClientName) ?? new HttpClient();
-                client.Timeout = TimeSpan.FromSeconds(8);
+
+                using var cts = new CancellationTokenSource();
+                cts.CancelAfter(TimeSpan.FromMilliseconds(8000));
+
                 var requestUrl = $"{url}?{InitParams(paramters, body)}";
                 var requestMessage = new HttpRequestMessage(method, requestUrl);
 
                 BuildHeader(requestMessage, headers);
 
-                var responseMessage = await client.SendAsync(requestMessage).ConfigureAwait(false);
+                var responseMessage = await client.SendAsync(requestMessage, cts.Token).ConfigureAwait(false);
 
                 if (responseMessage.IsSuccessStatusCode)
                 {

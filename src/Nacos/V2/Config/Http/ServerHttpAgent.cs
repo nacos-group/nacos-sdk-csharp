@@ -61,7 +61,7 @@
             {
                 try
                 {
-                    var cts = new System.Threading.CancellationTokenSource();
+                    using var cts = new System.Threading.CancellationTokenSource();
                     cts.CancelAfter(TimeSpan.FromMilliseconds(readTimeoutMs));
 
                     HttpRequestMessage reqMsg = new HttpRequestMessage(method, requestUrl);

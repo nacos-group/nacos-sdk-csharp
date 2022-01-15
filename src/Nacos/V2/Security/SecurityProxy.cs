@@ -11,6 +11,7 @@
     {
         private static readonly string LOGIN_URL = "/v1/auth/users/login";
         private static readonly int Unit = 1000;
+        private static readonly int LoginTimeOut = 5000;
 
         private static HttpClient _httpClient = new HttpClient();
 
@@ -127,8 +128,8 @@
 
                 try
                 {
-                    var cts = new System.Threading.CancellationTokenSource();
-                    cts.CancelAfter(5000);
+                    using var cts = new System.Threading.CancellationTokenSource();
+                    cts.CancelAfter(TimeSpan.FromMilliseconds(LoginTimeOut));
 
                     var req = new HttpRequestMessage(HttpMethod.Post, url)
                     {
