@@ -21,6 +21,7 @@
         private const string HTTP = "http";
         private const string HTTPS = "https";
         private const string DefaultNodesPath = "serverlist";
+        private const int DEFAULT_TIMEOUT = 5000;
 
         private string _name = "";
         private string _namespace = "";
@@ -152,8 +153,8 @@
             var result = new List<string>();
             try
             {
-                var cts = new CancellationTokenSource();
-                cts.CancelAfter(TimeSpan.FromMilliseconds(3000));
+                using var cts = new CancellationTokenSource();
+                cts.CancelAfter(TimeSpan.FromMilliseconds(DEFAULT_TIMEOUT));
 
                 var req = new HttpRequestMessage(HttpMethod.Get, _addressServerUrl);
 

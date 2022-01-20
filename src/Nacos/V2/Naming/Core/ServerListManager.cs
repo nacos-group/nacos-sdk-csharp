@@ -15,6 +15,8 @@
     {
         private static HttpClient _httpClient = new HttpClient();
 
+        private const int DEFAULT_TIMEOUT = 5000;
+
         private readonly ILogger _logger;
 
         private long _refreshServerListInternal = 30000;
@@ -78,13 +80,13 @@
 
                 var header = Utils.NamingHttpUtil.BuildHeader();
 
-                var cts = new CancellationTokenSource();
-                cts.CancelAfter(TimeSpan.FromMilliseconds(5000));
+                using var cts = new CancellationTokenSource();
+                cts.CancelAfter(TimeSpan.FromMilliseconds(DEFAULT_TIMEOUT));
 
                 HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Get, url);
                 foreach (var item in header) req.Headers.TryAddWithoutValidation(item.Key, item.Value);
 
-                var resp = await _httpClient.SendAsync(req).ConfigureAwait(false);
+                var resp = await _httpClient.SendAsync(req, cts.Token).ConfigureAwait(false);
 
                 if (!resp.IsSuccessStatusCode)
                 {

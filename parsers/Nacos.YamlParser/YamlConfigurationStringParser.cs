@@ -10,6 +10,10 @@
 
     public class YamlConfigurationStringParser : INacosConfigurationParser
     {
+        public YamlConfigurationStringParser()
+        {
+        }
+
         private readonly IDictionary<string, string> _data = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         private readonly Stack<string> _context = new Stack<string>();
         private string _currentPath;
@@ -17,6 +21,9 @@
         public static YamlConfigurationStringParser Instance = new YamlConfigurationStringParser();
 
         public IDictionary<string, string> Parse(string input)
+           => new YamlConfigurationStringParser().ParseString(input);
+
+        private IDictionary<string, string> ParseString(string input)
         {
             _data.Clear();
             _context.Clear();

@@ -98,7 +98,7 @@
             if (subscribe)
             {
                 serviceInfo = _serviceInfoHolder.GetServiceInfo(serviceName, groupName, clusterString);
-                if (serviceInfo == null)
+                if (serviceInfo == null || !await _clientProxy.IsSubscribed(serviceName, groupName, clusterString).ConfigureAwait(false))
                 {
                     serviceInfo = await _clientProxy.Subscribe(serviceName, groupName, clusterString).ConfigureAwait(false);
                 }

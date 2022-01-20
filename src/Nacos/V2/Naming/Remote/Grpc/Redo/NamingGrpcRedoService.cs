@@ -96,6 +96,19 @@
         }
 
         /// <summary>
+        /// Judge subscriber has registered to server.
+        /// </summary>
+        /// <param name="serviceName">service name</param>
+        /// <param name="groupName">group name</param>
+        /// <param name="cluster">cluster</param>
+        /// <returns>true if subscribed, otherwise false</returns>
+        public bool IsSubscriberRegistered(string serviceName, string groupName, string cluster)
+        {
+            string key = ServiceInfo.GetKey(NamingUtils.GetGroupedName(serviceName, groupName), cluster);
+            return _subscribes.TryGetValue(key, out var data) && data != null && data.Registered;
+        }
+
+        /// <summary>
         /// Remove registered instance for redo.
         /// </summary>
         /// <param name="serviceName">service name</param>

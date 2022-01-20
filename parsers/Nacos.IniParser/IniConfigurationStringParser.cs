@@ -9,11 +9,18 @@
 
     public class IniConfigurationStringParser : INacosConfigurationParser
     {
+        public IniConfigurationStringParser()
+        {
+        }
+
         private readonly IDictionary<string, string> _data = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         public static IniConfigurationStringParser Instance = new IniConfigurationStringParser();
 
         public IDictionary<string, string> Parse(string input)
+          => new IniConfigurationStringParser().ParseString(input);
+
+        public IDictionary<string, string> ParseString(string input)
         {
             _data.Clear();
 

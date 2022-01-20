@@ -92,7 +92,8 @@
             string serviceNameWithGroup = NamingUtils.GetGroupedName(serviceName, groupName);
             string serviceKey = ServiceInfo.GetKey(serviceNameWithGroup, clusters);
 
-            if (!serviceInfoHolder.GetServiceInfoMap().TryGetValue(serviceKey, out var result))
+            if (!serviceInfoHolder.GetServiceInfoMap().TryGetValue(serviceKey, out var result)
+                || !await IsSubscribed(serviceName, groupName, clusters).ConfigureAwait(false))
             {
                 result = await GetExecuteClientProxy().Subscribe(serviceName, groupName, clusters).ConfigureAwait(false);
             }
@@ -116,5 +117,8 @@
         public Task UpdateService(Service service, AbstractSelector selector) => Task.CompletedTask;
 
         private INamingClientProxy GetExecuteClientProxy() => _options.NamingUseRpc ? grpcClientProxy : httpClientProxy;
+
+        public Task<bool> IsSubscribed(string serviceName, string groupName, string clusters)
+            => grpcClientProxy.IsSubscribed(serviceName, groupName, clusters);
     }
 }

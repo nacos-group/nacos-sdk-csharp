@@ -43,5 +43,7 @@
         Task UpdateBeatInfo(List<Instance> modifiedInstances);
 
         bool ServerHealthy();
+
+        Task<bool> IsSubscribed(string serviceName, string groupName, string clusters);
     }
 }

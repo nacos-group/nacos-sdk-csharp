@@ -134,6 +134,7 @@
 
         public async Task<ServiceInfo> Subscribe(string serviceName, string groupName, string clusters)
         {
+            _logger?.LogDebug("[GRPC-SUBSCRIBE] service:{0}, group:{1}, cluster:{2} ", serviceName, groupName, clusters);
             _redoService.CacheSubscriberForRedo(serviceName, groupName, clusters);
             return await DoSubscribe(serviceName, groupName, clusters).ConfigureAwait(false);
         }
@@ -148,6 +149,7 @@
 
         public async Task Unsubscribe(string serviceName, string groupName, string clusters)
         {
+            _logger?.LogDebug("[GRPC-UNSUBSCRIBE] service:{0}, group:{1}, cluster:{2} ", serviceName, groupName, clusters);
             _redoService.SubscriberDeregister(serviceName, groupName, clusters);
             await DoUnsubscribe(serviceName, groupName, clusters).ConfigureAwait(false);
         }
@@ -243,5 +245,8 @@
 
             return result;
         }
+
+        public Task<bool> IsSubscribed(string serviceName, string groupName, string clusters)
+            => Task.FromResult(_redoService.IsSubscriberRegistered(serviceName, groupName, clusters));
     }
 }

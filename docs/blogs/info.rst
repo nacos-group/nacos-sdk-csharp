@@ -1,10 +1,20 @@
 一些博客
 ===============
 
+2022
+^^^^^^^^^^^^^
+
+- `待挖掘 <https://github.com/nacos-group/nacos-sdk-csharp>`_  【2022-xx-xx】
+
 
 2021
 ^^^^^^^^^^^^^
 
+- `聊一聊Yarp结合Nacos完成服务发现 <https://mp.weixin.qq.com/s/VkGSyqW0jZq4XzrEQTLbOQ>`_  【2021-12-27】
+- `Nacos配置中心+ASP.NET Core  <https://www.cnblogs.com/igeekfan/p/nacos-aspnetcore.html>`_  【2021-12-26】
+- `聊一聊基于Nacos的metadata完成服务间的AB测试 <https://mp.weixin.qq.com/s/gm2Pt5WKMYncIWW1tb6N7g>`_  【2021-12-13】
+- `Asp.Net5 WebAPI 使用NacOS作为配置中心的方法 <https://www.cnblogs.com/puzi0315/p/15577888.html>`_  【2021-11-19】
+- `聊一聊声明式接口调用与Nacos的结合使用 <https://mp.weixin.qq.com/s/ySWaEVs-EETe_mvjpqdxQA>`_  【2021-11-12】
 - `聊一聊.NET Core结合Nacos实现配置加解密 <https://mp.weixin.qq.com/s/XAWBGyHkmluC8pkJrsVW8g>`_  【2021-06-15】
 - `聊一聊如何在.NET Core中使用Nacos 2.0 <https://mp.weixin.qq.com/s/iC6lFJJsHUFUveSJhoZxgA>`_  【2021-03-22】
 - `聊一聊和Nacos 2.0.0对接那些事 <https://mp.weixin.qq.com/s/YOasHrZiJlT44RvD67Ayeg>`_ 【2021-03-08】
