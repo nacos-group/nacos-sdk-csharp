@@ -193,7 +193,7 @@
             {
                 { CommonParams.NAMESPACE_ID, namespaceId },
                 { CommonParams.SERVICE_NAME, groupedServiceName },
-                { CommonParams.CLUSTER_NAME, clusters },
+                { CommonParams.CLUSTERS_PARAM, clusters },
                 { CommonParams.UDP_PORT_PARAM, udpPort.ToString() },
                 { CommonParams.CLIENT_IP_PARAM, NetUtils.LocalIP() },
                 { CommonParams.HEALTHY_ONLY_PARAM, healthyOnly.ToString() },
