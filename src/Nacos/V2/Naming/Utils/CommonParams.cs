@@ -20,6 +20,8 @@
 
         public static readonly string PORT_PARAM = "port";
 
+        public static readonly string CLUSTERS_PARAM = "clusters";
+
         public static readonly string WEIGHT_PARAM = "weight";
 
         public static readonly string ENABLE_PARAM = "enabled";
