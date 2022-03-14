@@ -1,4 +1,4 @@
-v1.3.1 (Jan xth, 2022) 发布记录
+v1.3.1 (Jan 20th, 2022) 发布记录
 =============================================
 
 1. [NAMING] Fix ServiceListRequest pageSize error
