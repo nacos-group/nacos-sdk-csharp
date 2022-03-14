@@ -1,0 +1,10 @@
+v1.3.2 (Mar 15th, 2022) 发布记录
+=============================================
+
+1. [NAMING] Fix QueryInstancesOfService error cluster param (#180 #181)
+#. [NAMING] Fix Empty namespace issue (#187 #189)
+
+------------
+
+1. [NAMING] 修复 QueryInstancesOfService 请求参数错误 (#180 #181)
+#. [NAMING] 修复空命名空间默认值问题 (#187 #189)

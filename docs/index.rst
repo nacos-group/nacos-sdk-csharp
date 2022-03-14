@@ -40,11 +40,11 @@
    :hidden:
    :caption: Release Note
    
-   releasenote/v1.2.0
    releasenote/v1.2.1
    releasenote/v1.2.2
    releasenote/v1.3.0
    releasenote/v1.3.1
+   releasenote/v1.3.2
 
 .. toctree::
    :maxdepth: 2
