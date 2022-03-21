@@ -83,6 +83,9 @@
 
         public static string? AESDecrypt(string data, string key)
         {
+            if (string.IsNullOrEmpty(data))
+                return null;
+
             byte[] encryptedBytes = Convert.FromBase64String(data);
             byte[] bKey = new byte[32];
             Array.Copy(Encoding.UTF8.GetBytes(key.PadRight(bKey.Length)), bKey, bKey.Length);
