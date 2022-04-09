@@ -119,6 +119,6 @@
         private INamingClientProxy GetExecuteClientProxy() => _options.NamingUseRpc ? grpcClientProxy : httpClientProxy;
 
         public Task<bool> IsSubscribed(string serviceName, string groupName, string clusters)
-            => grpcClientProxy.IsSubscribed(serviceName, groupName, clusters);
+            => GetExecuteClientProxy().IsSubscribed(serviceName, groupName, clusters);
     }
 }
