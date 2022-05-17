@@ -30,6 +30,18 @@ AppSettings:
         }
 
         [Fact]
+        public void YamlTest_Should_ThrowException_When_Contains_DuplicateKey()
+        {
+            var yaml = @"
+ a: 
+  - 1
+ a:0: 123
+                         ";
+
+            Assert.Throws<FormatException>(() => Nacos.YamlParser.YamlConfigurationStringParser.Instance.Parse(yaml));
+        }
+
+        [Fact]
         public void YamlTest_ThreadSafe_Iss176()
         {
             var yaml = @"---

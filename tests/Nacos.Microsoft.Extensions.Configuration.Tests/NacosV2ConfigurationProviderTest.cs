@@ -3,6 +3,7 @@
     using Moq;
     using Nacos.V2;
     using Nacos.V2.Utils;
+    using System.Threading.Tasks;
     using Xunit;
     using static Nacos.Microsoft.Extensions.Configuration.NacosV2ConfigurationProvider;
 
@@ -19,10 +20,27 @@
         [Fact]
         public void Init_Should_ThrowException_When_Listeners_Is_Empty()
         {
+            var cs = new NacosV2ConfigurationSource(null, null)
+            {
+                Namespace = "cs",
+                Listeners = new System.Collections.Generic.List<ConfigListener>
+                {
+                }
+            };
+
             Assert.Throws<Nacos.V2.Exceptions.NacosException>(() =>
             {
-                new NacosV2ConfigurationProvider(new NacosV2ConfigurationSource(null, null), null, null);
+                new NacosV2ConfigurationProvider(cs, null, null, null);
             });
+        }
+
+        [Fact]
+        public void Dispose_Should_Call_RemoveListener()
+        {
+            var provider = GetProviderForMultiListeners();
+            _mockSvc.Setup(x => x.RemoveListener("d1", "g", It.IsAny<IListener>())).Returns(Task.CompletedTask);
+            provider.Dispose();
+            _mockSvc.Verify(x => x.RemoveListener("d1", "g", It.IsAny<IListener>()), Times.Once);
         }
 
         [Fact]
@@ -34,6 +52,15 @@
             provider.TryGet("all", out var all);
 
             Assert.Equal("d2", all);
+        }
+
+        [Fact]
+        public void Load_Should_Fail_When_IsNotOptional()
+        {
+            var provider = GetProviderForSingleListeners(true, false);
+            provider.Load();
+
+            Assert.Empty(provider.GetData());
         }
 
         [Fact]
@@ -104,16 +131,25 @@
             return provider;
         }
 
-        private NacosV2ConfigurationProvider GetProviderForSingleListeners()
+        private NacosV2ConfigurationProvider GetProviderForSingleListeners(bool isThrow = false, bool isOptional = true)
         {
-            _mockSvc.Setup(x => x.GetConfig("d1", "g", 3000)).ReturnsAsync(new { all = "d1" }.ToJsonString());
+            var setup = _mockSvc.Setup(x => x.GetConfig("d1", "g", 3000));
+
+            if (!isThrow)
+            {
+                setup.ReturnsAsync(new { all = "d1" }.ToJsonString());
+            }
+            else
+            {
+                setup.ThrowsAsync(new System.Exception("ts"));
+            }
 
             var cs = new NacosV2ConfigurationSource(null, null)
             {
                 Namespace = "cs",
                 Listeners = new System.Collections.Generic.List<ConfigListener>
                 {
-                     new ConfigListener { DataId = "d1", Group = "g" }
+                     new ConfigListener { DataId = "d1", Group = "g", Optional = isOptional }
                 }
             };
 

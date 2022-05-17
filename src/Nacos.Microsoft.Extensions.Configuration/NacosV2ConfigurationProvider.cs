@@ -86,6 +86,8 @@
             }
         }
 
+        internal IDictionary<string, string> GetData() => Data;
+
         public void Dispose()
         {
             var tasks = new List<Task>();
