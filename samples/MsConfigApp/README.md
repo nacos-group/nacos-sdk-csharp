@@ -1,4 +1,4 @@
-# MsConfigApp
+﻿# MsConfigApp
 
 This sample shows how to integrate ASP.NET Core Configuration System.
 
@@ -37,7 +37,9 @@ https://nacos.io/en-us/docs/quick-start-docker.html
     "Password": "123456",
     "AccessKey": "",
     "SecretKey": "",
-    "EndPoint": "acm.aliyun.com"
+    "EndPoint": "acm.aliyun.com",
+    "ConfigFilterAssemblies": [ "MsConfigApp" ],
+    "ConfigFilterExtInfo": "{\"JsonPaths\":[\"ConnectionStrings.Default\"],\"Other\":\"xxxxxx\"}"
   }
 }
 ```
@@ -56,6 +58,26 @@ The first one, its dataid is demo, group is DFAULT_GROUP and the value is as fol
 {
     "ConnectionStrings": {
         "Default": "Server=127.0.0.1;Port=3306;Database=demo;User Id=root;Password=123456;"
+    },
+    "version": "测试version",
+    "AppSettings": {
+        "Str": "val",
+        "num": 1,
+        "arr": [1, 2, 3],
+        "subobj": {
+            "a": "b"
+        }
+    }
+}
+```
+
+> NOTE: If **ConfigFilterAssemblies** is not empty, using the following config value.
+
+
+```JSON
+{
+    "ConnectionStrings": {
+        "Default": "U2VydmVyPTEyNy4wLjAuMTtQb3J0PTMzMDY7RGF0YWJhc2U9ZGVtbztVc2VyIElkPXJvb3Q7UGFzc3dvcmQ9MTIzNDU2Ow=="
     },
     "version": "测试version",
     "AppSettings": {

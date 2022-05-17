@@ -21,7 +21,7 @@
         {
             Assert.Throws<Nacos.V2.Exceptions.NacosException>(() =>
             {
-                new NacosV2ConfigurationProvider(new NacosV2ConfigurationSource());
+                new NacosV2ConfigurationProvider(new NacosV2ConfigurationSource(null, null), null, null);
             });
         }
 
@@ -90,7 +90,7 @@
             _mockSvc.Setup(x => x.GetConfig("d1", "g", 3000)).ReturnsAsync(new { all = "d1" }.ToJsonString());
             _mockSvc.Setup(x => x.GetConfig("d2", "g", 3000)).ReturnsAsync(new { all = "d2" }.ToJsonString());
 
-            var cs = new NacosV2ConfigurationSource()
+            var cs = new NacosV2ConfigurationSource(null, null)
             {
                 Namespace = "cs",
                 Listeners = new System.Collections.Generic.List<ConfigListener>
@@ -108,7 +108,7 @@
         {
             _mockSvc.Setup(x => x.GetConfig("d1", "g", 3000)).ReturnsAsync(new { all = "d1" }.ToJsonString());
 
-            var cs = new NacosV2ConfigurationSource()
+            var cs = new NacosV2ConfigurationSource(null, null)
             {
                 Namespace = "cs",
                 Listeners = new System.Collections.Generic.List<ConfigListener>

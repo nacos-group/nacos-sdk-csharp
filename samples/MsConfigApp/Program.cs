@@ -27,7 +27,7 @@ builder.Host.ConfigureAppConfiguration((c, b) =>
     // read configuration from config files
     // default is json
     // b.AddNacosV2Configuration(config.GetSection("NacosConfig"));
-    b.AddNacosV2Configuration(config.GetSection("NacosConfig"), logAction: x => x.AddSerilog(Log.Logger));
+    b.AddNacosV2Configuration(config.GetSection("NacosConfig"), builder.Services);
 
     // specify ini or yaml
     // b.AddNacosV2Configuration(config.GetSection("NacosConfig"), Nacos.IniParser.IniConfigurationStringParser.Instance);

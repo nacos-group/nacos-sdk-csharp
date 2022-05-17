@@ -2,9 +2,7 @@
 {
     using global::Microsoft.Extensions.Configuration;
     using global::Microsoft.Extensions.Logging;
-    using global::Microsoft.Extensions.Options;
     using Nacos.V2;
-    using Nacos.V2.Config;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
@@ -25,33 +23,16 @@
 
         private readonly ILogger _logger;
 
-        public NacosV2ConfigurationProvider(NacosV2ConfigurationSource configurationSource)
+        public NacosV2ConfigurationProvider(NacosV2ConfigurationSource configurationSource, INacosConfigService client, ILoggerFactory loggerFactory)
         {
             _configurationSource = configurationSource;
             _parser = configurationSource.NacosConfigurationParser;
             _configDict = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             _listenerDict = new Dictionary<string, MsConfigListener>();
 
-            var options = Options.Create(new NacosSdkOptions()
-            {
-                ServerAddresses = configurationSource.ServerAddresses,
-                Namespace = configurationSource.GetNamespace(),
-                AccessKey = configurationSource.AccessKey,
-                ContextPath = configurationSource.ContextPath,
-                EndPoint = configurationSource.EndPoint,
-                DefaultTimeOut = configurationSource.DefaultTimeOut,
-                SecretKey = configurationSource.SecretKey,
-                Password = configurationSource.Password,
-                UserName = configurationSource.UserName,
-                ListenInterval = 20000,
-                ConfigUseRpc = configurationSource.ConfigUseRpc,
-                ConfigFilterAssemblies = configurationSource.ConfigFilterAssemblies,
-                ConfigFilterExtInfo = configurationSource.ConfigFilterExtInfo,
-            });
+            _client = client;
+            _logger = loggerFactory?.CreateLogger<NacosV2ConfigurationProvider>();
 
-            var nacosLoggerFactory = Nacos.Microsoft.Extensions.Configuration.NacosLog.NacosLoggerFactory.GetInstance(configurationSource.LoggingBuilder);
-            _logger = nacosLoggerFactory.CreateLogger<NacosV2ConfigurationProvider>();
-            _client = new NacosConfigService(nacosLoggerFactory, options);
             if (configurationSource.Listeners != null && configurationSource.Listeners.Any())
             {
                 var tasks = new List<Task>();

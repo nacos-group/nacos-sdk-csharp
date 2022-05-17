@@ -9,26 +9,24 @@
 
     public class NacosV2ConfigurationSource : Nacos.V2.NacosSdkOptions, IConfigurationSource
     {
+        internal INacosConfigService Client;
+        internal ILoggerFactory LoggerFactory;
+
         /// <summary>
         /// The configuration listeners
         /// </summary>
         public List<ConfigListener> Listeners { get; set; }
 
         /// <summary>
-        /// Tenant information. It corresponds to the Namespace field in Nacos.
-        /// </summary>
-        [Obsolete("please use Namespace to configure")]
-        public string Tenant { get; set; }
-
-        /// <summary>
         /// The configuration parser, default is json
         /// </summary>
         public INacosConfigurationParser NacosConfigurationParser { get; set; }
 
-        /// <summary>
-        /// The logging builder, default will use AddConsole
-        /// </summary>
-        public Action<ILoggingBuilder> LoggingBuilder { get; set; }
+        public NacosV2ConfigurationSource(INacosConfigService client, ILoggerFactory loggerFactory)
+        {
+            Client = client;
+            LoggerFactory = loggerFactory;
+        }
 
         /// <summary>
         /// Build the provider
@@ -37,7 +35,7 @@
         /// <returns>IConfigurationProvider</returns>
         public IConfigurationProvider Build(IConfigurationBuilder builder)
         {
-            return new NacosV2ConfigurationProvider(this);
+            return new NacosV2ConfigurationProvider(this, Client, LoggerFactory);
         }
 
         public string GetNamespace()
@@ -46,16 +44,32 @@
             {
                 return Namespace;
             }
-#pragma warning disable CS0618
-            else if (Tenant.IsNotNullOrWhiteSpace())
-            {
-                return Tenant;
-            }
-#pragma warning restore CS0618
             else
             {
                 return string.Empty;
             }
+        }
+
+        internal Action<NacosSdkOptions> GetNacosSdkOptions()
+        {
+            Action<NacosSdkOptions> action = (x) =>
+            {
+                x.ServerAddresses = this.ServerAddresses;
+                x.Namespace = this.Namespace;
+                x.AccessKey = this.AccessKey;
+                x.ContextPath = this.ContextPath;
+                x.EndPoint = this.EndPoint;
+                x.DefaultTimeOut = this.DefaultTimeOut;
+                x.SecretKey = this.SecretKey;
+                x.Password = this.Password;
+                x.UserName = this.UserName;
+                x.ListenInterval = this.ListenInterval;
+                x.ConfigUseRpc = this.ConfigUseRpc;
+                x.ConfigFilterAssemblies = this.ConfigFilterAssemblies;
+                x.ConfigFilterExtInfo = this.ConfigFilterExtInfo;
+            };
+
+            return action;
         }
     }
 }
