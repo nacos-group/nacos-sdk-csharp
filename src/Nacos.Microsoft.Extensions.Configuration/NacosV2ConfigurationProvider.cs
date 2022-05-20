@@ -132,7 +132,7 @@
                         }
                         catch (Exception ex)
                         {
-                            _logger?.LogWarning(ex, "MS Config Query config error, dataid={0}, group={1}, tenant={2}", listener.DataId, listener.Group, listener.Tenant);
+                            _logger?.LogWarning(ex, "MS Config Query config error, dataid={0}, group={1}, tenant={2}", listener.DataId, listener.Group, _configurationSource.GetNamespace());
                             if (!listener.Optional)
                             {
                                 throw;

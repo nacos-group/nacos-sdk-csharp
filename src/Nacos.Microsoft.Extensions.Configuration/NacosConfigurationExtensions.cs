@@ -14,10 +14,18 @@
         /// </summary>
         /// <param name="builder">IConfigurationBuilder</param>
         /// <param name="action">setup NacosConfigurationSource</param>
-        /// <param name="serviceCollection">setup NacosConfigurationSource</param>
+        /// <param name="client">The nacos config client</param>
+        /// <param name="loggerFactory">The loggerFactory</param>
+        /// <param name="parser">The parser.</param>
+        /// <param name="logAction">The logAction.</param>
         /// <returns>IConfigurationBuilder</returns>
         public static IConfigurationBuilder AddNacosV2Configuration(
-           this IConfigurationBuilder builder, Action<NacosV2ConfigurationSource> action, IServiceCollection serviceCollection)
+           this IConfigurationBuilder builder,
+           Action<NacosV2ConfigurationSource> action,
+           INacosConfigService client = null,
+           ILoggerFactory loggerFactory = null,
+           INacosConfigurationParser parser = null,
+           Action<ILoggingBuilder> logAction = null)
         {
             if (builder == null)
             {
@@ -31,9 +39,9 @@
 
             var source = new NacosV2ConfigurationSource(null, null);
             action.Invoke(source);
-            source.NacosConfigurationParser ??= DefaultJsonConfigurationStringParser.Instance;
+            source.NacosConfigurationParser ??= parser ?? DefaultJsonConfigurationStringParser.Instance;
 
-            BuildDISource(source, serviceCollection);
+            BuildDISource(source, client, loggerFactory, logAction);
 
             return builder.Add(source);
         }
@@ -43,14 +51,18 @@
         /// </summary>
         /// <param name="builder">IConfigurationBuilder</param>
         /// <param name="configuration">Configuration binding nacos configuration source</param>
-        /// <param name="serviceCollection">setup NacosConfigurationSource</param>
+        /// <param name="client">The nacos config client</param>
+        /// <param name="loggerFactory">The loggerFactory</param>
         /// <param name="parser">The parser.</param>
+        /// <param name="logAction">The logAction.</param>
         /// <returns>IConfigurationBuilder</returns>
         public static IConfigurationBuilder AddNacosV2Configuration(
            this IConfigurationBuilder builder,
            IConfiguration configuration,
-           IServiceCollection serviceCollection,
-           INacosConfigurationParser parser = null)
+           INacosConfigService client = null,
+           ILoggerFactory loggerFactory = null,
+           INacosConfigurationParser parser = null,
+           Action<ILoggingBuilder> logAction = null)
         {
             if (builder == null)
             {
@@ -66,24 +78,33 @@
             configuration.Bind(source);
             source.NacosConfigurationParser = parser ?? DefaultJsonConfigurationStringParser.Instance;
 
-            BuildDISource(source, serviceCollection);
+            BuildDISource(source, client, loggerFactory, logAction);
 
             return builder.Add(source);
         }
 
-        private static void BuildDISource(NacosV2ConfigurationSource source, IServiceCollection serviceCollection)
+        private static void BuildDISource(
+            NacosV2ConfigurationSource source,
+            INacosConfigService client,
+            ILoggerFactory logFactory,
+            Action<ILoggingBuilder> logAction)
         {
-            var sdkAction = source.GetNacosSdkOptions();
-            serviceCollection.AddNacosV2Config(sdkAction);
+            if (client == null)
+            {
+                IServiceCollection serviceCollection = new ServiceCollection();
 
-            var serviceProvider = serviceCollection.BuildServiceProvider();
+                var sdkAction = source.GetNacosSdkOptions();
+                serviceCollection.AddNacosV2Config(sdkAction);
+                serviceCollection.AddLogging(logAction ?? (x => x.AddConsole()));
 
-            var client = serviceProvider.GetService<INacosConfigService>();
-            var logFactory = serviceProvider.GetService<ILoggerFactory>();
+                var serviceProvider = serviceCollection.BuildServiceProvider();
+
+                client = serviceProvider.GetService<INacosConfigService>();
+                logFactory = serviceProvider.GetService<ILoggerFactory>();
+            }
 
             source.Client = client ?? throw new Nacos.V2.Exceptions.NacosException("Can't get INacosConfigService instance from DI Container");
             source.LoggerFactory = logFactory;
-            source.NacosConfigurationParser ??= DefaultJsonConfigurationStringParser.Instance;
         }
     }
 }
