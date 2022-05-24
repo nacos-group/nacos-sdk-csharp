@@ -202,19 +202,20 @@
                 _logger?.LogDebug("MsConfigListener Receive ConfigInfo 【{0}】", configInfo);
                 try
                 {
-                    _provider._configDict[_key] = configInfo;
+                    _provider._configDict.AddOrUpdate(_key, configInfo, (x, y) => configInfo);
 
                     var nData = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
                     foreach (var listener in _provider._configurationSource.Listeners)
                     {
                         var key = $"{_provider._configurationSource.GetNamespace()}#{listener.Group}#{listener.DataId}";
-                        if (_provider._configDict[key] == null)
+
+                        if (!_provider._configDict.TryGetValue(key, out var config))
                         {
                             continue;
                         }
 
-                        var data = _provider._parser.Parse(_provider._configDict[key]);
+                        var data = _provider._parser.Parse(config);
 
                         foreach (var item in data)
                         {
