@@ -2,9 +2,7 @@
 {
     using global::Microsoft.Extensions.Configuration;
     using global::Microsoft.Extensions.Logging;
-    using global::Microsoft.Extensions.Options;
     using Nacos.V2;
-    using Nacos.V2.Config;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;

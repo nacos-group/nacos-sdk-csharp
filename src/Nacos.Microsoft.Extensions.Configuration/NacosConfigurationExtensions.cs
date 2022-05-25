@@ -1,6 +1,7 @@
 ﻿namespace Microsoft.Extensions.Configuration
 {
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
     using Nacos.Microsoft.Extensions.Configuration;
     using Nacos.V2;
@@ -82,6 +83,40 @@
 
             return builder.Add(source);
         }
+
+        /// <summary>
+        /// Use nacos config combine IHostBuilder and ConfigureAppConfiguration
+        /// </summary>
+        /// <param name="builder">host builder.</param>
+        /// <param name="section">basic nacos configuration section.</param>
+        /// <param name="parser">The parser.</param>
+        /// <param name="logAction">The logAction.</param>
+        /// <returns>IHostBuilder</returns>
+        public static IHostBuilder UseNacosConfig(this IHostBuilder builder, string section, INacosConfigurationParser parser = null, Action<ILoggingBuilder> logAction = null)
+        {
+            builder.ConfigureAppConfiguration((_, cfb) =>
+            {
+                var config = cfb.Build();
+
+                cfb.AddNacosV2Configuration(config.GetSection(section), parser: parser, logAction: logAction);
+            });
+
+            return builder;
+        }
+
+#if NET5_0_OR_GREATER
+        public static AspNetCore.Hosting.IWebHostBuilder UseNacosConfig(this AspNetCore.Hosting.IWebHostBuilder builder, string section, INacosConfigurationParser parser = null, Action<ILoggingBuilder> logAction = null)
+        {
+            builder.ConfigureAppConfiguration((_, cfb) =>
+            {
+                var config = cfb.Build();
+
+                cfb.AddNacosV2Configuration(config.GetSection(section), parser: parser, logAction: logAction);
+            });
+
+            return builder;
+        }
+#endif
 
         private static void BuildDISource(
             NacosV2ConfigurationSource source,
