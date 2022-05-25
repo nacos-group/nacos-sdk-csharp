@@ -1,6 +1,4 @@
-﻿[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Nacos.Microsoft.Extensions.Configuration.Tests")]
-
-namespace Nacos.Microsoft.Extensions.Configuration
+﻿namespace Nacos.Microsoft.Extensions.Configuration
 {
     using global::Microsoft.Extensions.Configuration;
     using Newtonsoft.Json;

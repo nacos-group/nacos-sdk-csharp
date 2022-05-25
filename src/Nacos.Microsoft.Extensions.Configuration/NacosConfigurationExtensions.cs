@@ -105,6 +105,14 @@
         }
 
 #if NET5_0_OR_GREATER
+        /// <summary>
+        /// Use nacos config combine IWebHostBuilder and ConfigureAppConfiguration
+        /// </summary>
+        /// <param name="builder">host builder.</param>
+        /// <param name="section">basic nacos configuration section.</param>
+        /// <param name="parser">The parser.</param>
+        /// <param name="logAction">The logAction.</param>
+        /// <returns>IHostBuilder</returns>
         public static AspNetCore.Hosting.IWebHostBuilder UseNacosConfig(this AspNetCore.Hosting.IWebHostBuilder builder, string section, INacosConfigurationParser parser = null, Action<ILoggingBuilder> logAction = null)
         {
             builder.ConfigureAppConfiguration((_, cfb) =>

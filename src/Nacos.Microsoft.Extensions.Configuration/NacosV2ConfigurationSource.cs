@@ -9,7 +9,14 @@
 
     public class NacosV2ConfigurationSource : Nacos.V2.NacosSdkOptions, IConfigurationSource
     {
+        /// <summary>
+        /// The INacosConfigService.
+        /// </summary>
         internal INacosConfigService Client;
+
+        /// <summary>
+        /// The ILoggerFactory.
+        /// </summary>
         internal ILoggerFactory LoggerFactory;
 
         /// <summary>
@@ -40,6 +47,8 @@
 
         public string GetNamespace()
         {
+            // breaking change here after 1.3.3 release
+            // do not use tenant any more!!!!
             if (Namespace.IsNotNullOrWhiteSpace())
             {
                 return Namespace;

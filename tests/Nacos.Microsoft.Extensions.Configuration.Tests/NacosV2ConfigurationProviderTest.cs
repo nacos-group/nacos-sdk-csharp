@@ -30,7 +30,7 @@
 
             Assert.Throws<Nacos.V2.Exceptions.NacosException>(() =>
             {
-                new NacosV2ConfigurationProvider(cs, null, null, null);
+                new NacosV2ConfigurationProvider(cs, null, null);
             });
         }
 
@@ -124,10 +124,11 @@
                 {
                      new ConfigListener { DataId = "d1", Group = "g" },
                      new ConfigListener { DataId = "d2", Group = "g" }
-                }
+                },
+                NacosConfigurationParser = DefaultJsonConfigurationStringParser.Instance
             };
 
-            var provider = new NacosV2ConfigurationProvider(cs, null, _mockSvc.Object, DefaultJsonConfigurationStringParser.Instance);
+            var provider = new NacosV2ConfigurationProvider(cs, _mockSvc.Object, null);
             return provider;
         }
 
@@ -150,10 +151,11 @@
                 Listeners = new System.Collections.Generic.List<ConfigListener>
                 {
                      new ConfigListener { DataId = "d1", Group = "g", Optional = isOptional }
-                }
+                },
+                NacosConfigurationParser = DefaultJsonConfigurationStringParser.Instance
             };
 
-            var provider = new NacosV2ConfigurationProvider(cs, null, _mockSvc.Object, DefaultJsonConfigurationStringParser.Instance);
+            var provider = new NacosV2ConfigurationProvider(cs, _mockSvc.Object, null);
             return provider;
         }
     }

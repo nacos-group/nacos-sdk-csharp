@@ -56,5 +56,9 @@
   <ItemGroup>
     <ProjectReference Include="..\Nacos\Nacos.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <InternalsVisibleTo Include="Nacos.Microsoft.Extensions.Configuration.Tests" />
+  </ItemGroup>
 
 </Project>
