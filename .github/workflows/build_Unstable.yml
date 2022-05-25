@@ -28,8 +28,8 @@ jobs:
       run: java -version  
     - name: Setup Unstable Nacos Server
       run: |
-        wget https://github.com/alibaba/nacos/releases/download/2.0.3/nacos-server-2.0.3.tar.gz
-        tar -xvf nacos-server-2.0.3.tar.gz
+        wget https://github.com/alibaba/nacos/releases/download/2.1.0/nacos-server-2.1.0.tar.gz
+        tar -xvf nacos-server-2.1.0.tar.gz
         cd nacos/bin
         # sed -i 's/nacos.core.auth.enabled=false/nacos.core.auth.enabled=true/g' ../conf/application.properties
         sed -i 's/Xms512m/Xms1024m/g' startup.sh
