@@ -16,10 +16,5 @@
         /// Configuration group
         /// </summary>
         public string Group { get; set; }
-
-        /// <summary>
-        /// Tenant information. It corresponds to the Namespace field in Nacos.
-        /// </summary>
-        public string Tenant { get; set; }
     }
 }

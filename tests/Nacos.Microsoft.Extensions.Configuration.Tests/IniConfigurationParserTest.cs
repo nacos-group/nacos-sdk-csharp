@@ -22,6 +22,10 @@ arr:0=1
 arr:1=2
 arr:2=3
 
+;sdf
+#abc
+/123
+
 [AppSettings:subobj]
 a = b
 ";
@@ -30,6 +34,27 @@ a = b
 
             Assert.NotNull(data);
             Assert.Equal(8, data.Count);
+        }
+
+        [Fact]
+        public void IniTest_Should_ThrowException_When_Miss_Equal()
+        {
+            var ini = @"
+version
+";
+
+            Assert.Throws<FormatException>(() => Nacos.IniParser.IniConfigurationStringParser.Instance.Parse(ini));
+        }
+
+        [Fact]
+        public void IniTest_Should_ThrowException_When_Contains_DuplicateKey()
+        {
+            var ini = @"
+version=1
+version=2
+";
+
+            Assert.Throws<FormatException>(() => Nacos.IniParser.IniConfigurationStringParser.Instance.Parse(ini));
         }
 
         [Fact]
