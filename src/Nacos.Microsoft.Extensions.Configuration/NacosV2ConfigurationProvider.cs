@@ -2,9 +2,7 @@
 {
     using global::Microsoft.Extensions.Configuration;
     using global::Microsoft.Extensions.Logging;
-    using global::Microsoft.Extensions.Options;
     using Nacos.V2;
-    using Nacos.V2.Config;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
@@ -25,64 +23,16 @@
 
         private readonly ILogger _logger;
 
-        public NacosV2ConfigurationProvider(NacosV2ConfigurationSource configurationSource)
+        public NacosV2ConfigurationProvider(NacosV2ConfigurationSource configurationSource, INacosConfigService client, ILoggerFactory loggerFactory)
         {
             _configurationSource = configurationSource;
             _parser = configurationSource.NacosConfigurationParser;
             _configDict = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             _listenerDict = new Dictionary<string, MsConfigListener>();
 
-            var options = Options.Create(new NacosSdkOptions()
-            {
-                ServerAddresses = configurationSource.ServerAddresses,
-                Namespace = configurationSource.GetNamespace(),
-                AccessKey = configurationSource.AccessKey,
-                ContextPath = configurationSource.ContextPath,
-                EndPoint = configurationSource.EndPoint,
-                DefaultTimeOut = configurationSource.DefaultTimeOut,
-                SecretKey = configurationSource.SecretKey,
-                Password = configurationSource.Password,
-                UserName = configurationSource.UserName,
-                ListenInterval = 20000,
-                ConfigUseRpc = configurationSource.ConfigUseRpc,
-                ConfigFilterAssemblies = configurationSource.ConfigFilterAssemblies,
-                ConfigFilterExtInfo = configurationSource.ConfigFilterExtInfo,
-            });
-
-            var nacosLoggerFactory = Nacos.Microsoft.Extensions.Configuration.NacosLog.NacosLoggerFactory.GetInstance(configurationSource.LoggingBuilder);
-            _logger = nacosLoggerFactory.CreateLogger<NacosV2ConfigurationProvider>();
-            _client = new NacosConfigService(nacosLoggerFactory, options);
-            if (configurationSource.Listeners != null && configurationSource.Listeners.Any())
-            {
-                var tasks = new List<Task>();
-
-                foreach (var item in configurationSource.Listeners)
-                {
-                    var listener = new MsConfigListener(item.DataId, item.Group, item.Optional, this, _logger);
-
-                    tasks.Add(_client.AddListener(item.DataId, item.Group, listener));
-
-                    _listenerDict.Add($"{item.DataId}#{item.Group}", listener);
-                }
-
-                Task.WaitAll(tasks.ToArray());
-            }
-            else
-            {
-                // after remove old v1 code, Listeners must be not empty
-                throw new Nacos.V2.Exceptions.NacosException("Listeners is empty!!");
-            }
-        }
-
-        // for test
-        internal NacosV2ConfigurationProvider(NacosV2ConfigurationSource configurationSource, ILogger logger, INacosConfigService client, INacosConfigurationParser parser)
-        {
-            _configurationSource = configurationSource;
-            _parser = parser;
-            _configDict = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            _listenerDict = new Dictionary<string, MsConfigListener>();
-            _logger = logger;
             _client = client;
+            _logger = loggerFactory?.CreateLogger<NacosV2ConfigurationProvider>();
+
             if (configurationSource.Listeners != null && configurationSource.Listeners.Any())
             {
                 var tasks = new List<Task>();
@@ -104,6 +54,8 @@
                 throw new Nacos.V2.Exceptions.NacosException("Listeners is empty!!");
             }
         }
+
+        internal IDictionary<string, string> GetData() => Data;
 
         public void Dispose()
         {
@@ -149,7 +101,7 @@
                         }
                         catch (Exception ex)
                         {
-                            _logger?.LogWarning(ex, "MS Config Query config error, dataid={0}, group={1}, tenant={2}", listener.DataId, listener.Group, listener.Tenant);
+                            _logger?.LogWarning(ex, "MS Config Query config error, dataid={0}, group={1}, tenant={2}", listener.DataId, listener.Group, _configurationSource.GetNamespace());
                             if (!listener.Optional)
                             {
                                 throw;

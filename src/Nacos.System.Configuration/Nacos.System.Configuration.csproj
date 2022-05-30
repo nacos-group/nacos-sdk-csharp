@@ -13,6 +13,7 @@
     <RepositoryUrl>https://github.com/nacos-group/nacos-sdk-csharp</RepositoryUrl>
     <ProjectUrl>https://github.com/nacos-group/nacos-sdk-csharp</ProjectUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReleaseNotes>
     </PackageReleaseNotes>
 
@@ -24,6 +25,7 @@
     <Compile Include="../Nacos.Microsoft.Extensions.Configuration/DefaultJsonConfigurationStringParser.cs" />
 
     <None Include="../../LICENSE" Pack="true" Visible="false" PackagePath="" />
+    <None Include="README.md" Pack="true" Visible="false" PackagePath="" />
 
     <ProjectReference Include="..\Nacos\Nacos.csproj" />
 

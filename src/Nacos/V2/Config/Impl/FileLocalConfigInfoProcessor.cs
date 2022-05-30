@@ -7,7 +7,13 @@
 
     public static class FileLocalConfigInfoProcessor
     {
-        private static readonly string LOCAL_SNAPSHOT_PATH = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "nacos", "config");
+        private static readonly string LOCAL_SNAPSHOT_PATH = string.Empty;
+
+        static FileLocalConfigInfoProcessor()
+        {
+            var basePath = Nacos.V2.Utils.EnvUtil.GetEnvValue("JM.SNAPSHOT.PATH", Environment.GetFolderPath(Environment.SpecialFolder.Personal));
+            LOCAL_SNAPSHOT_PATH = Path.Combine(basePath, "nacos", "config");
+        }
 
         public static async Task<string> GetFailoverAsync(string serverName, string dataId, string group, string tenant)
         {

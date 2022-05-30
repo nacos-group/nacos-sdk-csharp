@@ -20,6 +20,17 @@ builder.Services.Configure<MsConfigApp.AppSettings>(builder.Configuration.GetSec
 
 builder.Services.AddControllers();
 
+// NOTE: after v1.3.3
+// read configuration from config files
+// default parser is json
+builder.Host.UseNacosConfig(section: "NacosConfig");
+
+// specify ini or yaml parser
+// builder.Host.UseNacosConfig(section: "NacosConfig", parser: Nacos.IniParser.IniConfigurationStringParser.Instance);
+// builder.Host.UseNacosConfig(section: "NacosConfig", parser: Nacos.YamlParser.YamlConfigurationStringParser.Instance);
+
+/*
+NOTE: before v1.3.3
 builder.Host.ConfigureAppConfiguration((c, b) =>
 {
     var config = b.Build();
@@ -27,13 +38,15 @@ builder.Host.ConfigureAppConfiguration((c, b) =>
     // read configuration from config files
     // default is json
     // b.AddNacosV2Configuration(config.GetSection("NacosConfig"));
-    b.AddNacosV2Configuration(config.GetSection("NacosConfig"), logAction: x => x.AddSerilog(Log.Logger));
+    b.AddNacosV2Configuration(config.GetSection("NacosConfig"));
 
     // specify ini or yaml
-    // b.AddNacosV2Configuration(config.GetSection("NacosConfig"), Nacos.IniParser.IniConfigurationStringParser.Instance);
-    // b.AddNacosV2Configuration(config.GetSection("NacosConfig"), Nacos.YamlParser.YamlConfigurationStringParser.Instance);
-})
-.UseSerilog();
+    b.AddNacosV2Configuration(config.GetSection("NacosConfig"), parser: Nacos.IniParser.IniConfigurationStringParser.Instance);
+    b.AddNacosV2Configuration(config.GetSection("NacosConfig"), parser: Nacos.YamlParser.YamlConfigurationStringParser.Instance);
+});
+ */
+
+builder.Host.UseSerilog();
 
 var app = builder.Build();
 

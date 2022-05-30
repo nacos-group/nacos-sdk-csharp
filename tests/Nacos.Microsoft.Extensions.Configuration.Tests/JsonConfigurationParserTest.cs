@@ -18,6 +18,14 @@
         }
 
         [Fact]
+        public void JsonTest_Should_ThrowException_When_Contains_DuplicateKey()
+        {
+            var json = @"{""a"":[1], ""a:0"":2}";
+
+            Assert.Throws<FormatException>(() => DefaultJsonConfigurationStringParser.Instance.Parse(json));
+        }
+
+        [Fact]
         public void JsonTest_ThreadSafe()
         {
             var json = @"{""ConnectionStrings"":{""Default"":""Server=127.0.0.1;Port=3306;Database=demo;User Id=root;Password=123456; ""},""version"":""测试version"",""AppSettings"":{""Str"":""val"",""num"":1,""arr"":[1,2,3],""subobj"":{""a"":""b""}}}";
