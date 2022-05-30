@@ -4,6 +4,7 @@
 2022
 ^^^^^^^^^^^^^
 
+- `微服务 配置中心 Nacos .Net 5 <https://blog.csdn.net/i2blue/article/details/124827269>`_  【2022-05-17】
 - `待挖掘 <https://github.com/nacos-group/nacos-sdk-csharp>`_  【2022-xx-xx】
 
 

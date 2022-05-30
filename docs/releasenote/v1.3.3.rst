@@ -1,0 +1,18 @@
+v1.3.3 (May 30th, 2022) 发布记录
+=============================================
+
+1. [NAMING] Fix IsSubscribed exception when NamingUseRpc is false (#194 #196)
+#. [CONFIG] Fix ReceiveConfigInfo dict get item error in startup (#200 #201)
+#. [CONFIG] Improve Microsoft.Extensions.Configuration Integration (#203 #204)
+#. [CONFIG] Config cache path from JM.SNAPSHOT.PATH env at first  (#205 #206)
+#. [CORE] Add package readme file  (#207)
+#. [CI] Update version of Nacos Server 
+
+------------
+
+1. [NAMING] 修复 NamingUseRpc 设置成 false 是 IsSubscribed 抛异常的问题 (#194 #196)
+#. [CONFIG] 修复启动时 ReceiveConfigInfo 字典操作异常问题 (#200 #201)
+#. [CONFIG] 优化 Microsoft.Extensions.Configuration 的集成 (#203 #204)
+#. [CONFIG] 优化配置缓存的路径读取方式  (#205 #206)
+#. [CORE] 添加nuget包说明文件  (#207)
+#. [CI] 更新 Nacos Server 版本
