@@ -40,7 +40,8 @@
             {
                 var callOptions = default(Grpc.Core.CallOptions).WithDeadline(DateTime.UtcNow.AddMilliseconds(timeoutMills));
 
-                grpcResponse = await reqClient.requestAsync(grpcRequest, callOptions);
+                grpcResponse = await reqClient.requestAsync(grpcRequest, callOptions).ResponseAsync
+                    .ConfigureAwait(false);
             }
             catch (Exception ex)
             {
