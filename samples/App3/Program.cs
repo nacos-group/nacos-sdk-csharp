@@ -1,4 +1,5 @@
 ﻿using Nacos.V2.DependencyInjection;
+using Nacos.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,13 @@ builder.Services.AddNacosV2Naming(x =>
 
     // swich to use http or rpc
     x.NamingUseRpc = true;
+});
+
+builder.Services.AddNacosOpenApi(x =>
+{
+    x.ServerAddresses = new System.Collections.Generic.List<string> { "http://localhost:8848/" };
+    x.EndPoint = "";
+    x.Namespace = "cs";
 });
 
 builder.Services.AddControllers();
