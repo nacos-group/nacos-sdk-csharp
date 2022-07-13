@@ -12,6 +12,7 @@
     using Nacos.V2.Security;
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
@@ -120,5 +121,12 @@
 
         public Task<bool> IsSubscribed(string serviceName, string groupName, string clusters)
             => GetExecuteClientProxy().IsSubscribed(serviceName, groupName, clusters);
+
+        public async Task BatchRegisterServiceAsync(string serviceName, string groupName, List<Instance> instances)
+        {
+            if (instances == null || !instances.Any()) await Task.Yield();
+
+            await GetExecuteClientProxy().BatchRegisterServiceAsync(serviceName, groupName, instances).ConfigureAwait(false);
+        }
     }
 }

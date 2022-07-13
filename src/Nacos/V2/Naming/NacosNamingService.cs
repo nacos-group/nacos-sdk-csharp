@@ -297,5 +297,12 @@
                 await _clientProxy.Unsubscribe(serviceName, groupName, clustersString).ConfigureAwait(false);
             }
         }
+
+        public async Task BatchRegisterInstance(string serviceName, string groupName, List<Instance> instances)
+        {
+            Naming.Utils.NamingUtils.BatchCheckInstanceIsLegal(instances);
+
+            await _clientProxy.BatchRegisterServiceAsync(serviceName, groupName, instances).ConfigureAwait(false);
+        }
     }
 }

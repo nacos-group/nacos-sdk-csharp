@@ -509,5 +509,10 @@
         }
 
         public Task<bool> IsSubscribed(string serviceName, string groupName, string clusters) => Task.FromResult(true);
+
+        public Task BatchRegisterServiceAsync(string serviceName, string groupName, List<Instance> instances)
+        {
+            throw new NotImplementedException("Do not support persistent instances to perform batch registration methods.");
+        }
     }
 }

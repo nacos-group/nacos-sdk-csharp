@@ -4,6 +4,8 @@
     {
         public static string REGISTER_INSTANCE = "registerInstance";
 
+        public static string BATCH_REGISTER_INSTANCE = "batchRegisterInstance";
+
         public static string DE_REGISTER_INSTANCE = "deregisterInstance";
 
         public static string QUERY_SERVICE = "queryService";

@@ -123,6 +123,19 @@
             await DoRegisterService(serviceName, groupName, instance).ConfigureAwait(false);
         }
 
+        public async Task BatchRegisterServiceAsync(string serviceName, string groupName, List<Instance> instances)
+        {
+            _redoService.CacheInstanceForRedo(serviceName, groupName, instances);
+            await DoBatchRegisterService(serviceName, groupName, instances).ConfigureAwait(false);
+        }
+
+        private async Task DoBatchRegisterService(string serviceName, string groupName, List<Instance> instances)
+        {
+            var request = new BatchInstanceRequest(namespaceId, serviceName, groupName, NamingRemoteConstants.BATCH_REGISTER_INSTANCE, instances);
+            await RequestToServer<CommonResponse>(request).ConfigureAwait(false);
+            _redoService.InstanceRegistered(serviceName, groupName);
+        }
+
         public async Task DoRegisterService(string serviceName, string groupName, Instance instance)
         {
             var request = new InstanceRequest(namespaceId, serviceName, groupName, NamingRemoteConstants.REGISTER_INSTANCE, instance);
