@@ -59,6 +59,15 @@
         Task RegisterInstance(string serviceName, string groupName, Instance instance);
 
         /// <summary>
+        /// batch register instance to service with specified instance properties.
+        /// since nacos server 2.1.1
+        /// </summary>
+        /// <param name="serviceName">name of service</param>
+        /// <param name="groupName">group of service</param>
+        /// <param name="instances">instances to register</param>
+        Task BatchRegisterInstance(string serviceName, string groupName, List<Instance> instances);
+
+        /// <summary>
         /// deregister instance from a service.
         /// </summary>
         /// <param name="serviceName">name of service</param>

@@ -182,5 +182,7 @@
         public static string AMORY_TAG = "Amory-Tag";
 
         public static string LOCATION_TAG = "Location-Tag";
+
+        public static string CLUSTER_NAME_PATTERN_STRING = "^[0-9a-zA-Z-]+$";
     }
 }
