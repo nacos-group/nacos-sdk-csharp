@@ -10,6 +10,7 @@
     public class DefaultNacosOpenApi : INacosOpenApi
     {
         private const string _namespacePath = "nacos/v1/console/namespaces";
+        private const string _metricsPath = "nacos/v1/ns/operator/metrics";
 
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly Nacos.V2.NacosSdkOptions _options;
@@ -63,6 +64,25 @@
             else
             {
                 throw new Nacos.V2.Exceptions.NacosException((int)resp.StatusCode, "DeleteNamespaceAsync exception");
+            }
+        }
+
+        public async Task<NacosMetrics> GetMetricsAsync(bool onlyStatus)
+        {
+            var client = _httpClientFactory.CreateClient(Constants.HttpClientName);
+
+            var req = new HttpRequestMessage(HttpMethod.Get, $"{_options.ServerAddresses.First().TrimEnd('/')}/{_metricsPath}?onlyStatus={onlyStatus.ToString().ToLower()}");
+
+            var resp = await client.SendAsync(req).ConfigureAwait(false);
+
+            if (resp.IsSuccessStatusCode)
+            {
+                var res = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
+                return res.ToObj<NacosMetrics>();
+            }
+            else
+            {
+                throw new Nacos.V2.Exceptions.NacosException((int)resp.StatusCode, "GetMetricsAsync exception");
             }
         }
 

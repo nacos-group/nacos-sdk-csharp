@@ -52,5 +52,14 @@
 
             return flag.ToString();
         }
+
+        // GET o/metrics
+        [HttpGet("metrics")]
+        public async Task<string> GetMetrics()
+        {
+            var flag = await _api.GetMetricsAsync(false).ConfigureAwait(false);
+
+            return flag.ToJsonString();
+        }
     }
 }

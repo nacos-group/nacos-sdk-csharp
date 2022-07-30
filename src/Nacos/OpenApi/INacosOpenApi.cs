@@ -35,5 +35,12 @@
         /// <param name="namespaceId">ID of namespace</param>
         /// <returns>Deleted or not</returns>
         Task<bool> DeleteNamespaceAsync(string namespaceId);
+
+        /// <summary>
+        /// Query system metrics
+        /// </summary>
+        /// <param name="onlyStatus">only status info or not</param>
+        /// <returns>system metrics</returns>
+        Task<NacosMetrics> GetMetricsAsync(bool onlyStatus);
     }
 }
