@@ -34,5 +34,28 @@
 
             Assert.Equal(2, uris.Count());
         }
+
+        [Theory]
+        [InlineData("http://+80")]
+        [InlineData("http://*80")]
+        public void GetUrl_With_ASPNETCORE_URLS_Should_ThrowExceptions(string url)
+        {
+            System.Environment.SetEnvironmentVariable("ASPNETCORE_URLS", url);
+            var ex = Assert.Throws<Nacos.V2.Exceptions.NacosException>(() => UriTool.GetUri(null, "", 0, ""));
+            Assert.Equal("Invalid ip address from ASPNETCORE_URLS", ex.ErrorMsg);
+        }
+
+        [Theory]
+        [InlineData("http://+:80")]
+        [InlineData("http://*:80")]
+        public void GetUrl_With_ASPNETCORE_URLS_Should_Succeed(string url)
+        {
+            System.Environment.SetEnvironmentVariable("ASPNETCORE_URLS", url);
+            var uris = UriTool.GetUri(null, "", 0, "");
+            Assert.Single(uris);
+            var uri = uris.First();
+            Assert.True(System.Net.IPAddress.TryParse(uri.Host, out _));
+            Assert.Equal(80, uri.Port);
+        }
     }
 }
