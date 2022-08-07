@@ -59,7 +59,17 @@ namespace Nacos.AspNetCore
             {
                 var url = ReplaceAddress(address, preferredNetworks);
 
-                return url.Split(splitChars).Select(x => new Uri(x));
+                var uris = url.Split(splitChars).Select(x => new Uri(x));
+
+                foreach (var item in uris)
+                {
+                    if (!IPAddress.TryParse(item.Host, out _))
+                    {
+                        throw new Nacos.V2.Exceptions.NacosException("Invalid ip address from ASPNETCORE_URLS");
+                    }
+                }
+
+                return uris;
             }
 
             // 4. --urls
@@ -74,7 +84,17 @@ namespace Nacos.AspNetCore
 
                     var url = ReplaceAddress(address, preferredNetworks);
 
-                    return url.Split(splitChars).Select(x => new Uri(x));
+                    var uris = url.Split(splitChars).Select(x => new Uri(x));
+
+                    foreach (var item in uris)
+                    {
+                        if (!IPAddress.TryParse(item.Host, out _))
+                        {
+                            throw new Nacos.V2.Exceptions.NacosException("Invalid ip address from --urls");
+                        }
+                    }
+
+                    return uris;
                 }
             }
 
