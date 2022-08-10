@@ -65,6 +65,14 @@
             _registeredInstances.AddOrUpdate(key, redoData, (x, y) => redoData);
         }
 
+        public void CacheInstanceForRedo(string serviceName, string groupName, List<Instance> instances)
+        {
+            string key = NamingUtils.GetGroupedName(serviceName, groupName);
+            var redoData = BatchInstanceRedoData.Build(serviceName, groupName, instances);
+
+            _registeredInstances.AddOrUpdate(key, redoData, (x, y) => redoData);
+        }
+
         /// <summary>
         /// Instance register successfully, mark registered status as true
         /// </summary>

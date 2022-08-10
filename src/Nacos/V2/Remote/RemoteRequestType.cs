@@ -84,6 +84,10 @@
 
         public static readonly string Resp_Naming_NotifySubscriber = "NotifySubscriberResponse";
 
+        public static readonly string Req_Naming_BatchInstance = "BatchInstanceRequest";
+
+        public static readonly string Resp_Naming_BatchInstance = "BatchInstanceResponse";
+
         public static Dictionary<string, Type> RemoteResponseTypeMapping = new Dictionary<string, Type>
         {
             { Resp_Config_Pubish_Alpha1, typeof(ConfigPubishResponse) },
@@ -107,6 +111,8 @@
             { Req_ConnectReset, typeof(ConnectResetRequest) },
             { Resp_HealthCheck, typeof(HealthCheckResponse) },
             { Resp_Naming_NotifySubscriber, typeof(NotifySubscriberResponse) },
+            { Req_Naming_BatchInstance, typeof(BatchInstanceRequest) },
+            { Resp_Naming_BatchInstance, typeof(BatchInstanceResponse) },
         };
     }
 }

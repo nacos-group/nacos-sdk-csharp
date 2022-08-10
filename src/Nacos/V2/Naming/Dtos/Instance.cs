@@ -110,5 +110,16 @@
         {
             return $"Instance{{instanceId='{InstanceId}', ip='{Ip}', port={Port}, weight={Weight}, healthy={Healthy}, enabled={Enabled}, ephemeral={Ephemeral}, clusterName='{ClusterName}', serviceName='{ServiceName}', metadata={Metadata.ToJsonString()}}}";
         }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is not Instance) return false;
+
+            var host = (Instance)obj;
+
+            return ToString().Equals(host.ToString());
+        }
+
+        public override int GetHashCode() => ToString().GetHashCode();
     }
 }

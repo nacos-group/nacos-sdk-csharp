@@ -1,7 +1,11 @@
 ﻿namespace Nacos.V2.Naming.Utils
 {
     using System;
+    using System.Collections.Generic;
+    using System.Text.RegularExpressions;
     using Nacos.V2.Common;
+    using Nacos.V2.Exceptions;
+    using Nacos.V2.Naming.Dtos;
     using Nacos.V2.Utils;
 
     public class NamingUtils
@@ -93,6 +97,62 @@
         public static string GetGroupedNameOptional(string serviceName, string groupName)
         {
             return groupName + Constants.SERVICE_INFO_SPLITER + serviceName;
+        }
+
+        /// <summary>
+        /// Batch verify the validity of instances.
+        /// </summary>
+        /// <param name="instances">List of instances to be registered</param>
+        public static void BatchCheckInstanceIsLegal(List<Instance> instances)
+        {
+            HashSet<Instance> newInstanceSet = new HashSet<Instance>(instances);
+
+            foreach (var instance in newInstanceSet)
+            {
+                CheckInstanceIsEphemeral(instance);
+                CheckInstanceIsLegal(instance);
+            }
+        }
+
+        /// <summary>
+        /// check batch register is Ephemeral.
+        /// </summary>
+        /// <param name="instance">instance</param>
+        /// <exception cref="NacosException"></exception>
+        public static void CheckInstanceIsEphemeral(Instance instance)
+        {
+            if (!instance.Ephemeral)
+            {
+                throw new NacosException(
+                    NacosException.INVALID_PARAM,
+                    $"Batch registration does not allow persistent instance registration , Instance：{instance}");
+            }
+        }
+
+        /// <summary>
+        /// Check instance param about keep alive.
+        /// heart beat timeout must > heart beat interval
+        /// ip delete timeout must  > heart beat interval
+        /// </summary>
+        /// <param name="instance">need checked instance</param>
+        /// <exception cref="NacosException"></exception>
+        public static void CheckInstanceIsLegal(Instance instance)
+        {
+            if (instance.GetInstanceHeartBeatTimeOut() < instance.GetInstanceHeartBeatInterval()
+                    || instance.GetIpDeleteTimeout() < instance.GetInstanceHeartBeatInterval())
+            {
+                throw new NacosException(
+                    NacosException.INVALID_PARAM,
+                    "Instance 'heart beat interval' must less than 'heart beat timeout' and 'ip delete timeout'.");
+            }
+
+            if (instance.ClusterName.IsNotNullOrWhiteSpace()
+                && !Regex.IsMatch(instance.ClusterName, Common.Constants.CLUSTER_NAME_PATTERN_STRING))
+            {
+                throw new NacosException(
+                    NacosException.INVALID_PARAM,
+                    $"Instance 'clusterName' should be characters with only 0-9a-zA-Z-. (current: {instance.ClusterName})");
+            }
         }
     }
 }
