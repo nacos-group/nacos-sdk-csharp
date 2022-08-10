@@ -39,6 +39,18 @@ https://nacos-sdk-csharp.readthedocs.io/en/latest/
 1. Configure in `Program.cs`
 
 ```cs
+// after v1.3.3, we can use UseNacosConfig to simplify
+public static IHostBuilder CreateHostBuilder(string[] args) =>
+    Host.CreateDefaultBuilder(args)
+        .UseNacosConfig(section: "NacosConfig", parser: null logAction: null)
+        // .UseNacosConfig(section: "NacosConfig", parser: Nacos.YamlParser.YamlConfigurationStringParser.Instance logAction: null)
+        // .UseNacosConfig(section: "NacosConfig", parser: Nacos.IniParser.IniConfigurationStringParser.Instance logAction: null)       
+        .ConfigureWebHostDefaults(webBuilder =>
+        {
+            webBuilder.UseStartup<Startup>();
+        });
+
+// before v1.3.3
 public static IHostBuilder CreateHostBuilder(string[] args) =>
     Host.CreateDefaultBuilder(args)
         .ConfigureAppConfiguration((context, builder) =>
@@ -55,7 +67,7 @@ public static IHostBuilder CreateHostBuilder(string[] args) =>
         .ConfigureWebHostDefaults(webBuilder =>
         {
             webBuilder.UseStartup<Startup>();
-        })
+        });
 ```
 
 2. Modify `appsettings.json`
