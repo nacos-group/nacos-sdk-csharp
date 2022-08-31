@@ -79,10 +79,11 @@
 
                 _isFixed = false;
 
+                var endpoint = _options.EndPoint.IndexOf(':') == -1 ? $"{_options.EndPoint}:{_endpointPort}" : _options.EndPoint;
                 if (@namespace.IsNullOrWhiteSpace())
                 {
                     _name = _options.EndPoint;
-                    _addressServerUrl = $"http://{_options.EndPoint}:{_endpointPort}/{_contentPath}/{_defaultNodesPath}";
+                    _addressServerUrl = $"http://{endpoint}/{_contentPath}/{_defaultNodesPath}";
                 }
                 else
                 {
@@ -90,7 +91,7 @@
                     _tenant = $"{_options.EndPoint}-{@namespace}";
                     _name = $"{FIXED_NAME}-{GetFixedNameSuffix(_serverUrls)}-{@namespace}";
 
-                    _addressServerUrl = $"http://{_options.EndPoint}:{_endpointPort}/{_contentPath}/{_defaultNodesPath}?namespace={@namespace}";
+                    _addressServerUrl = $"http://{endpoint}/{_contentPath}/{_defaultNodesPath}?namespace={@namespace}";
                 }
 
                 _refreshSvcListTimer = new Timer(
