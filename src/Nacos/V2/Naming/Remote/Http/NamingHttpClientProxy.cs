@@ -381,9 +381,9 @@
                 || string.IsNullOrWhiteSpace(_options.SecretKey))
                 return;
 
-            string signData = !string.IsNullOrWhiteSpace(paramters[CommonParams.SERVICE_NAME_PARAM])
-                ? DateTimeOffset.Now.ToUnixTimeSeconds().ToString() + CommonParams.SEPARATOR + paramters[CommonParams.SERVICE_NAME_PARAM]
-                : DateTimeOffset.Now.ToUnixTimeSeconds().ToString();
+            string signData = paramters.ContainsKey(CommonParams.SERVICE_NAME_PARAM) && !string.IsNullOrWhiteSpace(paramters[CommonParams.SERVICE_NAME_PARAM])
+                ? DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString() + CommonParams.SEPARATOR + paramters[CommonParams.SERVICE_NAME_PARAM]
+                : DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
 
             string signature = HashUtil.GetHMACSHA1(signData, _options.SecretKey);
             paramters[CommonParams.SIGNATURE_FILED] = signature;

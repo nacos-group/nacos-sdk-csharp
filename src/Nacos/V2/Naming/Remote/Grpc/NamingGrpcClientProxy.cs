@@ -248,8 +248,8 @@
                 return result;
 
             string signData = !string.IsNullOrWhiteSpace(serviceName)
-                ? DateTimeOffset.Now.ToUnixTimeSeconds().ToString() + CommonParams.SEPARATOR + serviceName
-                : DateTimeOffset.Now.ToUnixTimeSeconds().ToString();
+                ? DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString() + CommonParams.SEPARATOR + serviceName
+                : DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
 
             string signature = HashUtil.GetHMACSHA1(signData, _options.SecretKey);
             result[CommonParams.SIGNATURE_FILED] = signature;
