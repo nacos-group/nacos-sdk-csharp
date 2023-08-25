@@ -5,7 +5,7 @@
     using System.IO;
     using System.Text;
     using Microsoft.Extensions.Configuration;
-    using Nacos.V2;
+    using Nacos.Config.Parser;
 
     public class IniConfigurationStringParser : INacosConfigurationParser
     {

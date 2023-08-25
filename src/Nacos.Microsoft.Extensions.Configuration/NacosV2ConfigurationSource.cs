@@ -2,12 +2,13 @@
 {
     using global::Microsoft.Extensions.Configuration;
     using global::Microsoft.Extensions.Logging;
-    using Nacos.V2;
-    using Nacos.V2.Utils;
+    using Nacos;
+    using Nacos.Config.Parser;
+    using Nacos.Utils;
     using System;
     using System.Collections.Generic;
 
-    public class NacosV2ConfigurationSource : Nacos.V2.NacosSdkOptions, IConfigurationSource
+    public class NacosV2ConfigurationSource : NacosSdkOptions, IConfigurationSource
     {
         /// <summary>
         /// The INacosConfigService.

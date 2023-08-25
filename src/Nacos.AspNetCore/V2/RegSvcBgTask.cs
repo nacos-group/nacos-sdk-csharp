@@ -5,8 +5,8 @@
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
-    using Nacos.V2;
-    using Nacos.V2.Naming.Core;
+    using Nacos;
+    using Nacos.Naming.Core;
     using System;
     using System.Collections.Generic;
     using System.Threading;
@@ -75,7 +75,7 @@
                 {
                     try
                     {
-                        var instance = new Nacos.V2.Naming.Dtos.Instance
+                        var instance = new Nacos.Naming.Dtos.Instance
                         {
                             Ephemeral = _options.Ephemeral,
                             ServiceName = _options.ServiceName,

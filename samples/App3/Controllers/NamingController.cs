@@ -1,16 +1,17 @@
 ﻿namespace App3.Controllers
 {
     using Microsoft.AspNetCore.Mvc;
-    using Nacos.V2.Utils;
+    using Nacos.Naming;
+    using Nacos.Utils;
     using System.Threading.Tasks;
 
     [ApiController]
     [Route("n")]
     public class NamingController : ControllerBase
     {
-        private readonly Nacos.V2.INacosNamingService _client;
+        private readonly Nacos.INacosNamingService _client;
 
-        public NamingController(Nacos.V2.INacosNamingService client)
+        public NamingController(Nacos.INacosNamingService client)
         {
             _client = client;
         }
@@ -31,7 +32,7 @@
         public async Task<string> RegisterInstance()
         {
             // await _client.RegisterInstance("mysvc", "127.0.0.1", 9635);
-            var instance = new Nacos.V2.Naming.Dtos.Instance
+            var instance = new Nacos.Naming.Dtos.Instance
             {
                 Ip = "127.0.0.1",
                 Ephemeral = true,
@@ -49,7 +50,7 @@
         public async Task<string> RegisterInstance2()
         {
             // await _client.RegisterInstance("mysvc", "127.0.0.1", 9635);
-            var instance = new Nacos.V2.Naming.Dtos.Instance
+            var instance = new Nacos.Naming.Dtos.Instance
             {
                 Ip = "127.0.0.1",
                 Ephemeral = true,
@@ -67,7 +68,7 @@
         public async Task<string> DeregisterInstance()
         {
             // await _client.RegisterInstance("mysvc", "127.0.0.1", 9635);
-            var instance = new Nacos.V2.Naming.Dtos.Instance
+            var instance = new Nacos.Naming.Dtos.Instance
             {
                 Ip = "127.0.0.1",
                 Ephemeral = true,
@@ -122,11 +123,11 @@
         // DO NOT create new instance for each opreation!!!
         private static CusListener listener = new CusListener();
 
-        public class CusListener : Nacos.V2.IEventListener
+        public class CusListener : IEventListener
         {
-            public Task OnEvent(Nacos.V2.IEvent @event)
+            public Task OnEvent(IEvent @event)
             {
-                if (@event is Nacos.V2.Naming.Event.InstancesChangeEvent e)
+                if (@event is Nacos.Naming.Event.InstancesChangeEvent e)
                 {
                     System.Console.WriteLine("CusListener");
                     System.Console.WriteLine("ServiceName" + e.ServiceName);

@@ -1,6 +1,6 @@
 ﻿namespace Nacos.Tests.Remote
 {
-    using Nacos.V2.Remote;
+    using Nacos.Remote;
     using System;
     using System.Collections.Generic;
     using Xunit;

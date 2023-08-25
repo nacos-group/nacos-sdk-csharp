@@ -8,7 +8,7 @@
     using global::System.Globalization;
     using global::System.IO;
     using global::System.Linq;
-    using Nacos.V2;
+    using Nacos.Config.Parser;
 
     internal class DefaultJsonConfigurationStringParser : INacosConfigurationParser
     {

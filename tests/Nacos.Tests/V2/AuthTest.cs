@@ -2,9 +2,9 @@
 {
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
-    using Nacos.V2;
-    using Nacos.V2.DependencyInjection;
-    using Nacos.V2.Utils;
+    using Nacos;
+    using Nacos.DependencyInjection;
+    using Nacos.Utils;
     using System;
     using System.Threading.Tasks;
     using Xunit;
@@ -62,7 +62,7 @@
         protected virtual async Task Config_Should_Succeed()
         {
             var dataId = $"get-{Guid.NewGuid().ToString()}";
-            var group = Nacos.V2.Common.Constants.DEFAULT_GROUP;
+            var group = Common.Constants.DEFAULT_GROUP;
 
             var config = await _configSvc.GetConfig(dataId, group, 10000L).ConfigureAwait(false);
             _output.WriteLine($"Config_Should_Succeed, GetConfig {dataId} return {config}");

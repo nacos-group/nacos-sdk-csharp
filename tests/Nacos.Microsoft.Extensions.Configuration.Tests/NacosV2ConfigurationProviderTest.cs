@@ -1,8 +1,9 @@
 ﻿namespace Nacos.Microsoft.Extensions.Configuration.Tests
 {
     using Moq;
-    using Nacos.V2;
-    using Nacos.V2.Utils;
+    using Nacos;
+    using Nacos.Config;
+    using Nacos.Utils;
     using System.Threading.Tasks;
     using Xunit;
     using static Nacos.Microsoft.Extensions.Configuration.NacosV2ConfigurationProvider;
@@ -28,7 +29,7 @@
                 }
             };
 
-            Assert.Throws<Nacos.V2.Exceptions.NacosException>(() =>
+            Assert.Throws<Exceptions.NacosException>(() =>
             {
                 new NacosV2ConfigurationProvider(cs, null, null);
             });

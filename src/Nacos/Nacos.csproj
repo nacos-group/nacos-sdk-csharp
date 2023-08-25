@@ -2,7 +2,7 @@
   <Import Project="../../build/version.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net5.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
     <PackageId>nacos-sdk-csharp</PackageId>
     <VersionPrefix>$(NugetVersion)</VersionPrefix>
     <VersionSuffix></VersionSuffix>
@@ -34,12 +34,6 @@
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="6.0.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="5.0.0" />
-  </ItemGroup>
-
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.1.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="3.1.0" />
@@ -47,9 +41,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="Google.Protobuf" Version="3.21.2" />
-    <PackageReference Include="Grpc.Core" Version="2.46.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Google.Protobuf" Version="3.23.2" />
+    <PackageReference Include="Grpc.Core" Version="2.46.6" />
     <!--<PackageReference Include="Grpc.Net.Client" Version="2.33.1" />-->
     <!--<Protobuf Include="V2\protos\nacos_grpc_service.proto" GrpcServices="Client" />-->
     <!--<PackageReference Include="Grpc.Tools" Version="2.36.1" PrivateAssets="All" />-->

@@ -1,7 +1,7 @@
 ﻿namespace Nacos.Tests.Config.FilterImpl
 {
-    using Nacos.V2;
-    using Nacos.V2.Config.Abst;
+    using Nacos;
+    using Nacos.Config.Abst;
     using System.Collections.Generic;
 
     public class MyIConfigFilter : IConfigFilter

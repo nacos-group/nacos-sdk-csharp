@@ -1,7 +1,8 @@
 ﻿namespace Nacos.Tests.V2
 {
-    using Nacos.V2;
-    using Nacos.V2.Utils;
+    using Nacos;
+    using Nacos.Naming;
+    using Nacos.Utils;
     using System;
     using System.Threading.Tasks;
     using Xunit;
@@ -71,7 +72,7 @@
             Assert.Equal(port, first.Port);
         }
 
-        public class NamingListerner : Nacos.V2.IEventListener
+        public class NamingListerner : IEventListener
         {
             private ITestOutputHelper _output;
 
@@ -81,7 +82,7 @@
             {
                 _output.WriteLine($"NamingListerner, {@event.ToJsonString()}");
 
-                Assert.IsType<Nacos.V2.Naming.Event.InstancesChangeEvent>(@event);
+                Assert.IsType<Nacos.Naming.Event.InstancesChangeEvent>(@event);
 
                 return Task.CompletedTask;
             }

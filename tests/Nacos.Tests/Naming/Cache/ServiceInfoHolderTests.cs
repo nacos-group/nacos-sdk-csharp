@@ -1,10 +1,11 @@
 ﻿namespace Nacos.Tests.Naming.Cache
 {
     using Microsoft.Extensions.Logging.Abstractions;
-    using Nacos.V2;
-    using Nacos.V2.Naming.Cache;
-    using Nacos.V2.Naming.Dtos;
-    using Nacos.V2.Naming.Event;
+    using Nacos;
+    using Nacos.Naming;
+    using Nacos.Naming.Cache;
+    using Nacos.Naming.Dtos;
+    using Nacos.Naming.Event;
     using System.Threading.Tasks;
     using Xunit;
 
@@ -111,11 +112,11 @@
             return instance;
         }
 
-        public class CusListener : Nacos.V2.IEventListener
+        public class CusListener : IEventListener
         {
-            public Task OnEvent(Nacos.V2.IEvent @event)
+            public Task OnEvent(IEvent @event)
             {
-                if (@event is Nacos.V2.Naming.Event.InstancesChangeEvent e)
+                if (@event is InstancesChangeEvent e)
                 {
                     Assert.Equal("mysvc2", e.ServiceName);
                     Assert.Equal("My_GROUP", e.GroupName);

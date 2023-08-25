@@ -13,8 +13,9 @@
     using global::System.Linq;
     using global::System.Reflection;
     using global::System.Threading.Tasks;
-    using Nacos.V2;
-    using Nacos.V2.Config;
+    using Nacos;
+    using Nacos.Common;
+    using Nacos.Config;
 
     public class NacosConfigurationBuilder : KeyValueConfigBuilder
     {
@@ -61,7 +62,8 @@
                             return;
                         }
 
-                        INacosConfigService client = new NacosConfigService(LoggerFactory ?? NullLoggerFactory.Instance, Options.Create(new NacosSdkOptions
+                        INacosConfigService client = null
+                            /*= new NacosConfigService(LoggerFactory ?? NullLoggerFactory.Instance, Options.Create(new NacosSdkOptions
                         {
                             ServerAddresses = nacosConfig.ServerAddresses.Split(';', ',').ToList(),
                             Namespace = nacosConfig.Tenant,
@@ -74,7 +76,8 @@
                             UserName = nacosConfig.UserName,
                             ListenInterval = 20000,
                             ConfigUseRpc = nacosConfig.UseGrpc,
-                        }));
+                        }))*/
+                            ;
 
                         ClientCache[sectionName] = cache = Tuple.Create(nacosConfig, client);
 
@@ -84,7 +87,7 @@
                             {
                                 _ = Task.WhenAll(nacosConfig.Listeners
                                     .OfType<ConfigListener>()
-                                    .Select(item => cache.Item2.AddListener(item.DataId, item.Group ?? Nacos.V2.Common.Constants.DEFAULT_GROUP, new MsConfigListener($"{nacosConfig.Tenant}#{item.Group}#{item.DataId}"))));
+                                    .Select(item => cache.Item2.AddListener(item.DataId, item.Group ?? Constants.DEFAULT_GROUP, new MsConfigListener($"{nacosConfig.Tenant}#{item.Group}#{item.DataId}"))));
                             }
                             catch (Exception ex)
                             {
@@ -108,7 +111,7 @@
                     {
                         try
                         {
-                            data = await client.GetConfig(item.DataId, item.Group ?? Nacos.V2.Common.Constants.DEFAULT_GROUP, 3000)
+                            data = await client.GetConfig(item.DataId, item.Group ?? Constants.DEFAULT_GROUP, 3000)
                                 .ConfigureAwait(false);
                             if (data == null)
                             {

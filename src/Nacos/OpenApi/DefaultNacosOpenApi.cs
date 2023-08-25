@@ -1,7 +1,7 @@
 ﻿namespace Nacos.OpenApi
 {
     using Microsoft.Extensions.Options;
-    using Nacos.V2.Utils;
+    using Nacos.Utils;
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Http;
@@ -13,9 +13,23 @@
         private const string _metricsPath = "nacos/v1/ns/operator/metrics";
 
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly Nacos.V2.NacosSdkOptions _options;
 
-        public DefaultNacosOpenApi(IHttpClientFactory httpClientFactory, IOptions<Nacos.V2.NacosSdkOptions> optionsAccs)
+/* 项目“Nacos (netstandard2.0)”的未合并的更改
+在此之前:
+        private readonly Nacos.NacosSdkOptions _options;
+在此之后:
+        private readonly NacosSdkOptions _options;
+*/
+        private readonly Nacos.NacosSdkOptions _options;
+
+
+/* 项目“Nacos (netstandard2.0)”的未合并的更改
+在此之前:
+        public DefaultNacosOpenApi(IHttpClientFactory httpClientFactory, IOptions<Nacos.NacosSdkOptions> optionsAccs)
+在此之后:
+        public DefaultNacosOpenApi(IHttpClientFactory httpClientFactory, IOptions<NacosSdkOptions> optionsAccs)
+*/
+        public DefaultNacosOpenApi(IHttpClientFactory httpClientFactory, IOptions<Nacos.NacosSdkOptions> optionsAccs)
         {
             this._httpClientFactory = httpClientFactory;
             this._options = optionsAccs.Value;
@@ -40,7 +54,7 @@
             }
             else
             {
-                throw new Nacos.V2.Exceptions.NacosException((int)resp.StatusCode, "CreateNamespaceAsync exception");
+                throw new Nacos.Exceptions.NacosException((int)resp.StatusCode, "CreateNamespaceAsync exception");
             }
         }
 
@@ -63,7 +77,7 @@
             }
             else
             {
-                throw new Nacos.V2.Exceptions.NacosException((int)resp.StatusCode, "DeleteNamespaceAsync exception");
+                throw new Nacos.Exceptions.NacosException((int)resp.StatusCode, "DeleteNamespaceAsync exception");
             }
         }
 
@@ -82,7 +96,7 @@
             }
             else
             {
-                throw new Nacos.V2.Exceptions.NacosException((int)resp.StatusCode, "GetMetricsAsync exception");
+                throw new Nacos.Exceptions.NacosException((int)resp.StatusCode, "GetMetricsAsync exception");
             }
         }
 
@@ -110,7 +124,7 @@
             }
             else
             {
-                throw new Nacos.V2.Exceptions.NacosException((int)resp.StatusCode, "GetNamespacesAsync exception");
+                throw new Nacos.Exceptions.NacosException((int)resp.StatusCode, "GetNamespacesAsync exception");
             }
         }
 
@@ -133,7 +147,7 @@
             }
             else
             {
-                throw new Nacos.V2.Exceptions.NacosException((int)resp.StatusCode, "UpdateNamespaceAsync exception");
+                throw new Nacos.Exceptions.NacosException((int)resp.StatusCode, "UpdateNamespaceAsync exception");
             }
         }
     }

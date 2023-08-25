@@ -41,7 +41,7 @@
         public void GetUrl_With_ASPNETCORE_URLS_Should_ThrowExceptions(string url)
         {
             System.Environment.SetEnvironmentVariable("ASPNETCORE_URLS", url);
-            var ex = Assert.Throws<Nacos.V2.Exceptions.NacosException>(() => UriTool.GetUri(null, "", 0, ""));
+            var ex = Assert.Throws<Nacos.Exceptions.NacosException>(() => UriTool.GetUri(null, "", 0, ""));
             Assert.Equal("Invalid ip address from ASPNETCORE_URLS", ex.ErrorMsg);
         }
 

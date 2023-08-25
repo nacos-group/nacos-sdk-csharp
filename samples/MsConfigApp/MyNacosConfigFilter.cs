@@ -1,7 +1,7 @@
 ﻿namespace MsConfigApp
 {
-    using Nacos.V2;
-    using Nacos.V2.Config.Abst;
+    using Nacos;
+    using Nacos.Config.Abst;
     using Newtonsoft.Json.Linq;
     using System;
     using System.Collections.Generic;
@@ -13,20 +13,20 @@
         {
             if (request != null)
             {
-                var raw_content = request.GetParameter(Nacos.V2.Config.ConfigConstants.CONTENT);
+                var raw_content = request.GetParameter(Nacos.Config.Common.ConfigConstants.CONTENT);
 
                 // 部分配置加密后的 content
                 var content = ReplaceJsonNode((string)raw_content, true);
 
                 // after encrypt the content, don't forget to update the request!!!
-                request.PutParameter(Nacos.V2.Config.ConfigConstants.ENCRYPTED_DATA_KEY, "");
-                request.PutParameter(Nacos.V2.Config.ConfigConstants.CONTENT, content);
+                request.PutParameter(Nacos.Config.Common.ConfigConstants.ENCRYPTED_DATA_KEY, "");
+                request.PutParameter(Nacos.Config.Common.ConfigConstants.CONTENT, content);
             }
 
             if (response != null)
             {
-                var resp_content = response.GetParameter(Nacos.V2.Config.ConfigConstants.CONTENT);
-                var resp_encryptedDataKey = response.GetParameter(Nacos.V2.Config.ConfigConstants.ENCRYPTED_DATA_KEY);
+                var resp_content = response.GetParameter(Nacos.Config.Common.ConfigConstants.CONTENT);
+                var resp_encryptedDataKey = response.GetParameter(Nacos.Config.Common.ConfigConstants.ENCRYPTED_DATA_KEY);
 
                 // nacos 2.0.2 still do not return the encryptedDataKey yet
                 // but we can use a const key here.
@@ -34,7 +34,7 @@
                 var encryptedDataKey = (resp_encryptedDataKey == null || string.IsNullOrWhiteSpace((string)resp_encryptedDataKey)) ? string.Empty : (string)resp_encryptedDataKey;
 
                 var content = ReplaceJsonNode((string)resp_content, false);
-                response.PutParameter(Nacos.V2.Config.ConfigConstants.CONTENT, content);
+                response.PutParameter(Nacos.Config.Common.ConfigConstants.CONTENT, content);
             }
         }
 

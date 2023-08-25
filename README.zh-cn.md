@@ -211,9 +211,9 @@ public class Startup
 [ApiController]
 public class ValuesController : ControllerBase
 {
-    private readonly Nacos.V2.INacosNamingService _svc;
+    private readonly Nacos.INacosNamingService _svc;
 
-    public ValuesController(Nacos.V2.INacosNamingService svc)
+    public ValuesController(Nacos.INacosNamingService svc)
     {
         _svc = svc;
     }

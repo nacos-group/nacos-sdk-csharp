@@ -1,7 +1,7 @@
 ﻿namespace App3.Controllers
 {
     using Microsoft.AspNetCore.Mvc;
-    using Nacos.V2.Utils;
+    using Nacos.Utils;
     using System.Threading.Tasks;
 
     [ApiController]

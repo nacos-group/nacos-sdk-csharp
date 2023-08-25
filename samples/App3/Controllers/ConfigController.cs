@@ -1,7 +1,7 @@
 ﻿namespace App3.Controllers
 {
     using Microsoft.AspNetCore.Mvc;
-    using Nacos.V2;
+    using Nacos;
     using System.Threading.Tasks;
 
     [ApiController]
@@ -61,7 +61,7 @@
 
         private static CusConfigListen _configListen = new CusConfigListen();
 
-        public class CusConfigListen : Nacos.V2.IListener
+        public class CusConfigListen : Nacos.Config.IListener
         {
             public void ReceiveConfigInfo(string configInfo)
             {

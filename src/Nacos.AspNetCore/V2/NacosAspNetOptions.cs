@@ -1,6 +1,7 @@
 ﻿namespace Nacos.AspNetCore.V2
 {
-    using Nacos.V2;
+    using Nacos;
+    using Nacos.Common;
     using System.Collections.Generic;
 
     public class NacosAspNetOptions : NacosSdkOptions
@@ -13,13 +14,13 @@
         /// <summary>
         /// the name of the group.
         /// </summary>
-        public string GroupName { get; set; } = Nacos.V2.Common.Constants.DEFAULT_GROUP;
+        public string GroupName { get; set; } = Constants.DEFAULT_GROUP;
 
         /// <summary>
         /// the name of the cluster.
         /// </summary>
         /// <value>The name of the cluster.</value>
-        public string ClusterName { get; set; } = Nacos.V2.Common.Constants.DEFAULT_CLUSTER_NAME;
+        public string ClusterName { get; set; } = Constants.DEFAULT_CLUSTER_NAME;
 
         /// <summary>
         /// the ip of this instance

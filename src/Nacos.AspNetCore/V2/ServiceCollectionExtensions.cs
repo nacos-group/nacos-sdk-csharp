@@ -2,7 +2,7 @@
 {
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
-    using Nacos.V2.DependencyInjection;
+    using Nacos.DependencyInjection;
     using System;
 
     public static class ServiceCollectionExtensions

@@ -6,9 +6,9 @@
     using Microsoft.Extensions.Logging.Abstractions;
     using Microsoft.Extensions.Options;
     using Moq;
+    using Nacos;
     using Nacos.AspNetCore.V2;
-    using Nacos.V2;
-    using Nacos.V2.Naming.Dtos;
+    using Nacos.Naming.Dtos;
     using System;
     using System.Threading.Tasks;
     using Xunit;

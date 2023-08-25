@@ -1,7 +1,7 @@
 ﻿namespace App3.ConfigFilters
 {
-    using Nacos.V2;
-    using Nacos.V2.Config.Abst;
+    using Nacos;
+    using Nacos.Config.Abst;
     using System;
     using System.IO;
     using System.Security.Cryptography;
@@ -16,25 +16,25 @@
             if (request != null)
             {
                 var encryptedDataKey = DefaultKey;
-                var raw_content = request.GetParameter(Nacos.V2.Config.ConfigConstants.CONTENT);
+                var raw_content = request.GetParameter(Nacos.Config.Common.ConfigConstants.CONTENT);
                 var content = AESEncrypt((string)raw_content, encryptedDataKey);
 
                 // after encrypt the content, don't forget to update the request!!!
-                request.PutParameter(Nacos.V2.Config.ConfigConstants.ENCRYPTED_DATA_KEY, encryptedDataKey);
-                request.PutParameter(Nacos.V2.Config.ConfigConstants.CONTENT, content);
+                request.PutParameter(Nacos.Config.Common.ConfigConstants.ENCRYPTED_DATA_KEY, encryptedDataKey);
+                request.PutParameter(Nacos.Config.Common.ConfigConstants.CONTENT, content);
             }
 
             if (response != null)
             {
-                var resp_content = response.GetParameter(Nacos.V2.Config.ConfigConstants.CONTENT);
-                var resp_encryptedDataKey = response.GetParameter(Nacos.V2.Config.ConfigConstants.ENCRYPTED_DATA_KEY);
+                var resp_content = response.GetParameter(Nacos.Config.Common.ConfigConstants.CONTENT);
+                var resp_encryptedDataKey = response.GetParameter(Nacos.Config.Common.ConfigConstants.ENCRYPTED_DATA_KEY);
 
                 // nacos 2.0.2 still do not return the encryptedDataKey yet
                 // but we can use a const key here.
                 // after nacos server return the encryptedDataKey, we can keep one dataid with one encryptedDataKey
                 var encryptedDataKey = (resp_encryptedDataKey == null || string.IsNullOrWhiteSpace((string)resp_encryptedDataKey)) ? DefaultKey : (string)resp_encryptedDataKey;
                 var content = AESDecrypt((string)resp_content, encryptedDataKey);
-                response.PutParameter(Nacos.V2.Config.ConfigConstants.CONTENT, content);
+                response.PutParameter(Nacos.Config.Common.ConfigConstants.CONTENT, content);
             }
         }
 

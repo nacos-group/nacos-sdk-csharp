@@ -3,9 +3,10 @@
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
+    using Nacos;
+    using Nacos.Config.Parser;
+    using Nacos.DependencyInjection;
     using Nacos.Microsoft.Extensions.Configuration;
-    using Nacos.V2;
-    using Nacos.V2.DependencyInjection;
     using System;
 
     public static class NacosConfigurationExtensions
@@ -146,7 +147,7 @@
                 logFactory = serviceProvider.GetService<ILoggerFactory>();
             }
 
-            source.Client = client ?? throw new Nacos.V2.Exceptions.NacosException("Can't get INacosConfigService instance from DI Container");
+            source.Client = client ?? throw new Nacos.Exceptions.NacosException("Can't get INacosConfigService instance from DI Container");
             source.LoggerFactory = logFactory;
         }
     }

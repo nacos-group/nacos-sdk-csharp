@@ -2,8 +2,8 @@
 {
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
-    using Nacos.V2;
-    using Nacos.V2.DependencyInjection;
+    using Nacos;
+    using Nacos.DependencyInjection;
     using System;
     using Xunit;
     using Xunit.Abstractions;

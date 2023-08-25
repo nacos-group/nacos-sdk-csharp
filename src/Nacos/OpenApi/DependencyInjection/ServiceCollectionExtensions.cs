@@ -1,7 +1,7 @@
 ﻿namespace Nacos.OpenApi
 {
     using Microsoft.Extensions.DependencyInjection;
-    using Nacos.V2;
+    using Nacos;
     using System;
     using System.Net.Http;
 

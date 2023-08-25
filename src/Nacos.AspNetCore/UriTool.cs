@@ -65,7 +65,7 @@ namespace Nacos.AspNetCore
                 {
                     if (!IPAddress.TryParse(item.Host, out _))
                     {
-                        throw new Nacos.V2.Exceptions.NacosException("Invalid ip address from ASPNETCORE_URLS");
+                        throw new Nacos.Exceptions.NacosException("Invalid ip address from ASPNETCORE_URLS");
                     }
                 }
 
@@ -90,7 +90,7 @@ namespace Nacos.AspNetCore
                     {
                         if (!IPAddress.TryParse(item.Host, out _))
                         {
-                            throw new Nacos.V2.Exceptions.NacosException("Invalid ip address from --urls");
+                            throw new Nacos.Exceptions.NacosException("Invalid ip address from --urls");
                         }
                     }
 

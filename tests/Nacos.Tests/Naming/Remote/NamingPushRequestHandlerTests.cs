@@ -1,12 +1,12 @@
 ﻿namespace Nacos.Tests.Naming.Remote
 {
     using Microsoft.Extensions.Logging.Abstractions;
-    using Nacos.V2;
-    using Nacos.V2.Naming.Cache;
-    using Nacos.V2.Naming.Dtos;
-    using Nacos.V2.Naming.Remote.Grpc;
-    using Nacos.V2.Remote.Requests;
-    using Nacos.V2.Remote.Responses;
+    using Nacos.Naming.Dtos;
+    using Nacos.Remote.Responses;
+    using Nacos;
+    using Nacos.Naming.Cache;
+    using Nacos.Naming.Remote.Grpc;
+    using Nacos.Remote.Requests;
     using Xunit;
 
     [Trait("Category", "2x")]

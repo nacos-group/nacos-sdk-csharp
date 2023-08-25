@@ -2,7 +2,9 @@
 {
     using global::Microsoft.Extensions.Configuration;
     using global::Microsoft.Extensions.Logging;
-    using Nacos.V2;
+    using Nacos;
+    using Nacos.Config;
+    using Nacos.Config.Parser;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
@@ -51,7 +53,7 @@
             else
             {
                 // after remove old v1 code, Listeners must be not empty
-                throw new Nacos.V2.Exceptions.NacosException("Listeners is empty!!");
+                throw new Nacos.Exceptions.NacosException("Listeners is empty!!");
             }
         }
 
@@ -114,7 +116,7 @@
                 else
                 {
                     // after remove old v1 code, Listeners must be not empty
-                    throw new Nacos.V2.Exceptions.NacosException("Listeners is empty!!");
+                    throw new Nacos.Exceptions.NacosException("Listeners is empty!!");
                 }
             }
             catch (Exception ex)
