@@ -58,7 +58,7 @@
                 { RemoteConstants.LABEL_MODULE, RemoteConstants.LABEL_MODULE_NAMING },
             };
 
-            rpcClient = RpcClientFactory.CreateClient(uuid, RemoteConnectionType.GRPC, labels);
+            rpcClient = RpcClientFactory.CreateClient(uuid, RemoteConnectionType.GRPC, labels, _options.TLSConfig);
             _redoService = new NamingGrpcRedoService(_logger, this);
 
             Start(serverListFactory, serviceInfoHolder);

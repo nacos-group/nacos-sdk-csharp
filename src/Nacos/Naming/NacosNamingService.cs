@@ -39,12 +39,6 @@
             _logger = loggerFactory.CreateLogger<NacosNamingService>();
             _options = optionAccs.Value;
 
-            /* 项目“Nacos (netstandard2.0)”的未合并的更改
-            在此之前:
-                        _namespace = string.IsNullOrWhiteSpace(_options.Namespace) ? Utils.UtilAndComs.DEFAULT_NAMESPACE_ID : _options.Namespace;
-            在此之后:
-                        _namespace = string.IsNullOrWhiteSpace(_options.Namespace) ? UtilAndComs.DEFAULT_NAMESPACE_ID : _options.Namespace;
-            */
             _namespace = string.IsNullOrWhiteSpace(_options.Namespace) ? Utils.UtilAndComs.DEFAULT_NAMESPACE_ID : _options.Namespace;
             _changeNotifier = new InstancesChangeNotifier();
             _serviceInfoHolder = new ServiceInfoHolder(_logger, _namespace, _options, _changeNotifier);

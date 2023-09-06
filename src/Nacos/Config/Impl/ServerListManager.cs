@@ -14,9 +14,12 @@
     using Nacos.Exceptions;
     using Nacos;
     using Nacos.Config.Abst;
+    using Nacos.Common;
 
     public class ServerListManager : IServerListManager
     {
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<ServerListManager>();
+
         private static HttpClient _httpClient = new();
 
         public const string FIXED_NAME = "fixed";
@@ -39,12 +42,10 @@
         private readonly string _contentPath;
         private readonly string _defaultNodesPath;
         private readonly bool _isFixed = false;
-        private readonly ILogger _logger;
         private readonly NacosSdkOptions _options;
 
-        public ServerListManager(ILogger logger, NacosSdkOptions options)
+        public ServerListManager(NacosSdkOptions options)
         {
-            _logger = logger;
             _options = options;
 
             _serverUrls = new List<string>();

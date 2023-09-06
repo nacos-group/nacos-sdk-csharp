@@ -23,6 +23,8 @@
 
     public class ConfigRpcTransportClient : AbstConfigTransportClient
     {
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<ConfigRpcTransportClient>();
+
         private static readonly string RPC_AGENT_NAME = "config_rpc_client";
 
         private static object _obj = new();
@@ -30,8 +32,6 @@
         private readonly BlockingCollection<object> _listenExecutebell = new(boundedCapacity: 1);
 
         private object _bellItem = new();
-
-        private ILogger _logger;
 
         private ConcurrentDictionary<string, CacheData> _cacheMap;
         private string uuid = Guid.NewGuid().ToString();
@@ -41,13 +41,11 @@
         private long _securityInfoRefreshIntervalMills = 5000;
 
         public ConfigRpcTransportClient(
-            ILogger logger,
-            IOptions<NacosSdkOptions> optionAccs,
+            NacosSdkOptions options,
             IServerListManager serverListManager,
             ISecurityProxy securityProxy)
         {
-            _logger = logger;
-            _options = optionAccs.Value;
+            _options = options;
             _serverListManager = serverListManager;
             _accessKey = _options.AccessKey;
             _secretKey = _options.SecretKey;
@@ -230,7 +228,7 @@
                 };
 
                 RpcClient rpcClient = RpcClientFactory
-                        .CreateClient($"{uuid}_config-{taskId}", RemoteConnectionType.GRPC, newlabels);
+                        .CreateClient($"{uuid}_config-{taskId}", RemoteConnectionType.GRPC, newlabels, _options.TLSConfig);
 
                 if (rpcClient.IsWaitInited())
                 {
@@ -254,8 +252,8 @@
 
         private void InitHandlerRpcClient(RpcClient rpcClientInner)
         {
-            rpcClientInner.RegisterServerPushResponseHandler(new ConfigRpcServerRequestHandler(_logger, _cacheMap, NotifyListenConfig));
-            rpcClientInner.RegisterConnectionListener(new ConfigRpcConnectionEventListener(_logger, rpcClientInner, _cacheMap, _listenExecutebell));
+            rpcClientInner.RegisterServerPushResponseHandler(new ConfigRpcServerRequestHandler(_cacheMap, NotifyListenConfig));
+            rpcClientInner.RegisterConnectionListener(new ConfigRpcConnectionEventListener(rpcClientInner, _cacheMap, _listenExecutebell));
 
             rpcClientInner.Init(new ConfigRpcServerListFactory(_serverListManager));
         }

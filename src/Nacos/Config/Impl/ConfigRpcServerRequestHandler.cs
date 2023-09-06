@@ -9,16 +9,17 @@
     using System;
     using System.Collections.Concurrent;
     using System.Threading.Tasks;
+    using Nacos.Common;
 
     public class ConfigRpcServerRequestHandler : IServerRequestHandler
     {
-        private readonly ILogger _logger;
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<ConfigRpcServerRequestHandler>();
+
         private ConcurrentDictionary<string, CacheData> _cacheMap;
         private Func<Task> _func;
 
-        public ConfigRpcServerRequestHandler(ILogger logger, ConcurrentDictionary<string, CacheData> map, Func<Task> func)
+        public ConfigRpcServerRequestHandler(ConcurrentDictionary<string, CacheData> map, Func<Task> func)
         {
-            _logger = logger;
             _cacheMap = map;
             _func = func;
         }

@@ -3,6 +3,8 @@
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Nacos;
+    using Nacos.Auth;
+    using Nacos.Common;
     using Nacos.Config.Abst;
     using Nacos.Config.FilterImpl;
     using Nacos.Config.Impl;
@@ -13,25 +15,23 @@
 
     public class NacosConfigService : INacosConfigService
     {
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<NacosConfigService>();
+
         private static readonly string UP = "UP";
         private static readonly string DOWN = "DOWN";
 
-        private readonly ILogger _logger;
         private readonly NacosSdkOptions _options;
         private readonly IConfigFilterChain _configFilterChainManager;
         private readonly IClientWorker _worker;
         private string _namespace;
 
         public NacosConfigService(
-            ILoggerFactory loggerFactory,
-            IOptions<NacosSdkOptions> optionsAccs,
-            IConfigFilterChain configFilterChainManager,
-            IClientWorker worker)
+            IOptions<NacosSdkOptions> optionsAccs)
         {
-            _logger = loggerFactory.CreateLogger<NacosConfigService>();
             _options = optionsAccs.Value;
-            _configFilterChainManager = configFilterChainManager;
-            _worker = worker;
+            _configFilterChainManager = new ConfigFilterChainManager(_options);
+            IServerListManager serverListManager = new ServerListManager(_options);
+            _worker = new ClientWorker(_configFilterChainManager, serverListManager, _options);
             _namespace = _options.Namespace;
         }
 

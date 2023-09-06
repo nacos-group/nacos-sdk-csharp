@@ -1,20 +1,22 @@
 ﻿namespace Nacos.Remote.GRpc
 {
+    using Grpc.Core;
     using Microsoft.Extensions.Logging;
     using Nacos.Common;
     using Nacos.Remote;
     using Nacos.Remote.Requests;
     using Nacos.Remote.Responses;
     using System;
-    using System.Collections.Generic;
+    using System.Net.Http;
+    using System.Security.Cryptography.X509Certificates;
 
     public class GrpcClient : RpcClient
     {
         private static readonly string NACOS_SERVER_GRPC_PORT_OFFSET_KEY = "nacos.server.grpc.port.offset";
         private static readonly string NACOS_SERVER_GRPC_PORT_DEFAULT_OFFSET = "1000";
 
-        public GrpcClient(string name)
-            : base(name)
+        public GrpcClient(string name, TLSConfig tlsConfig)
+            : base(name, tlsConfig)
         {
         }
 
@@ -22,16 +24,41 @@
         {
             try
             {
+                var options = new Grpc.Net.Client.GrpcChannelOptions();
                 var port = serverInfo.ServerPort + RpcPortOffset();
+                var address = string.Empty;
 
-                var channel = new Grpc.Core.Channel(
-                    serverInfo.ServerIp,
-                    port,
-                    Grpc.Core.ChannelCredentials.Insecure,
-                    /* keep config and naming using diff channel */
-                    new List<Grpc.Core.ChannelOption> { new Grpc.Core.ChannelOption(GetName(), 1) });
+                if (_tlsConfig != null && _tlsConfig.Enabled)
+                {
+                    var clientCertificate = new X509Certificate2(_tlsConfig.PfxFile, _tlsConfig.Password);
 
-                // after nacos alpha2 server check response was changed!!
+#if !NETSTANDARD2_0
+                    var httpClientHandler = new SocketsHttpHandler();
+                    httpClientHandler.UseProxy = false;
+                    httpClientHandler.AllowAutoRedirect = false;
+                    httpClientHandler.SslOptions.ClientCertificates = new X509CertificateCollection { clientCertificate };
+                    httpClientHandler.SslOptions.RemoteCertificateValidationCallback = (sender, cert, chain, errors) => true;
+#else
+                    var httpClientHandler = new HttpClientHandler();
+                    httpClientHandler.UseProxy = false;
+                    httpClientHandler.AllowAutoRedirect = false;
+                    httpClientHandler.ClientCertificates.Add(clientCertificate);
+                    httpClientHandler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true;
+#endif
+
+                    options.HttpHandler = httpClientHandler;
+                    address = $"https://{serverInfo.ServerIp}:{port}";
+                }
+                else
+                {
+                    options.Credentials = ChannelCredentials.Insecure;
+
+                    address = $"http://{serverInfo.ServerIp}:{port}";
+                }
+
+                options.MaxRetryAttempts = 0;
+                var channel = Grpc.Net.Client.GrpcChannel.ForAddress(address, options);
+
                 var response = ServerCheck(channel);
                 if (response == null || response is not ServerCheckResponse scResp)
                 {
@@ -83,7 +110,7 @@
             }
         }
 
-        private CommonResponse ServerCheck(Grpc.Core.ChannelBase channel)
+        private CommonResponse ServerCheck(Grpc.Net.Client.GrpcChannel channel)
         {
             try
             {

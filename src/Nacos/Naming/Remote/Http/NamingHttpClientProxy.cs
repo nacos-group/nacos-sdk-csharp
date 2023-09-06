@@ -41,8 +41,6 @@
 
         private ServiceInfoHolder serviceInfoHolder;
 
-        private PushReceiver pushReceiver;
-
         private int serverPort = DEFAULT_SERVER_PORT;
 
         private NacosSdkOptions _options;
@@ -64,12 +62,6 @@
             SetServerPort(DEFAULT_SERVER_PORT);
             this.namespaceId = namespaceId;
             beatReactor = new BeatReactor(_logger, this, _options);
-
-            // Don't create PushReceiver when using rpc, it will create a udp server
-            if (!options.NamingUseRpc)
-            {
-                pushReceiver = new PushReceiver(_logger, serviceInfoHolder, _options);
-            }
 
             this.serviceInfoHolder = serviceInfoHolder;
         }
@@ -420,9 +412,9 @@
             }
         }
 
-        public async Task<ServiceInfo> Subscribe(string serviceName, string groupName, string clusters)
+        public Task<ServiceInfo> Subscribe(string serviceName, string groupName, string clusters)
         {
-            return await QueryInstancesOfService(serviceName, groupName, clusters, pushReceiver.GetUdpPort(), false).ConfigureAwait(false);
+            throw new NotSupportedException("Do not support subscribe service by UDP, please use gRPC replaced.");
         }
 
         public Task Unsubscribe(string serviceName, string groupName, string clusters)

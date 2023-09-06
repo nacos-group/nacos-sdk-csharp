@@ -3,6 +3,9 @@
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Nacos;
+    using Nacos.Config.Abst;
+    using Nacos.Config.FilterImpl;
+    using Nacos.Config.Impl;
     using System;
     using System.Net.Http;
 
@@ -15,13 +18,6 @@
             services.AddOptions();
             services.Configure(configure);
 
-
-/* 项目“Nacos (netstandard2.0)”的未合并的更改
-在此之前:
-            var clientBuilder = services.AddHttpClient(V2.Common.Constants.ClientName)
-在此之后:
-            var clientBuilder = services.AddHttpClient(Constants.ClientName)
-*/
             var clientBuilder = services.AddHttpClient(Nacos.Common.Constants.ClientName)
                 .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseProxy = false, AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate });
 
@@ -30,13 +26,6 @@
                 clientBuilder.ConfigureHttpClient(httpClientAction);
             }
 
-
-            /* 项目“Nacos (netstandard2.0)”的未合并的更改
-            在此之前:
-                        services.AddSingleton<Nacos.INacosConfigService, Nacos.Config.NacosConfigService>();
-            在此之后:
-                        services.AddSingleton<Nacos.INacosConfigService, NacosConfigService>();
-            */
             services.AddSingleton<INacosConfigService, Config.NacosConfigService>();
 
             return services;
@@ -48,13 +37,6 @@
 
             services.Configure<NacosSdkOptions>(configuration.GetSection(sectionName));
 
-
-/* 项目“Nacos (netstandard2.0)”的未合并的更改
-在此之前:
-            var clientBuilder = services.AddHttpClient(V2.Common.Constants.ClientName)
-在此之后:
-            var clientBuilder = services.AddHttpClient(Constants.ClientName)
-*/
             var clientBuilder = services.AddHttpClient(Nacos.Common.Constants.ClientName)
                 .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseProxy = false, AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate });
 
@@ -63,13 +45,6 @@
                 clientBuilder.ConfigureHttpClient(httpClientAction);
             }
 
-
-            /* 项目“Nacos (netstandard2.0)”的未合并的更改
-            在此之前:
-                        services.AddSingleton<Nacos.INacosConfigService, Nacos.Config.NacosConfigService>();
-            在此之后:
-                        services.AddSingleton<Nacos.INacosConfigService, NacosConfigService>();
-            */
             services.AddSingleton<INacosConfigService, Config.NacosConfigService>();
 
             return services;
@@ -82,25 +57,11 @@
             services.AddOptions();
             services.Configure(configure);
 
-
-/* 项目“Nacos (netstandard2.0)”的未合并的更改
-在此之前:
-            var clientBuilder = services.AddHttpClient(V2.Common.Constants.ClientName)
-在此之后:
-            var clientBuilder = services.AddHttpClient(Constants.ClientName)
-*/
             var clientBuilder = services.AddHttpClient(Nacos.Common.Constants.ClientName)
                 .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseProxy = false, AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate });
 
             if (httpClientAction != null) clientBuilder.ConfigureHttpClient(httpClientAction);
 
-
-            /* 项目“Nacos (netstandard2.0)”的未合并的更改
-            在此之前:
-                        services.AddSingleton<INacosNamingService, Nacos.Naming.NacosNamingService>();
-            在此之后:
-                        services.AddSingleton<INacosNamingService, NacosNamingService>();
-            */
             services.AddSingleton<INacosNamingService, Naming.NacosNamingService>();
 
             return services;
@@ -112,25 +73,11 @@
 
             services.Configure<NacosSdkOptions>(configuration.GetSection(sectionName));
 
-
-/* 项目“Nacos (netstandard2.0)”的未合并的更改
-在此之前:
-            var clientBuilder = services.AddHttpClient(V2.Common.Constants.ClientName)
-在此之后:
-            var clientBuilder = services.AddHttpClient(Constants.ClientName)
-*/
             var clientBuilder = services.AddHttpClient(Nacos.Common.Constants.ClientName)
                 .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseProxy = false, AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate });
 
             if (httpClientAction != null) clientBuilder.ConfigureHttpClient(httpClientAction);
 
-
-            /* 项目“Nacos (netstandard2.0)”的未合并的更改
-            在此之前:
-                        services.AddSingleton<INacosNamingService, Nacos.Naming.NacosNamingService>();
-            在此之后:
-                        services.AddSingleton<INacosNamingService, NacosNamingService>();
-            */
             services.AddSingleton<INacosNamingService, Naming.NacosNamingService>();
 
             return services;

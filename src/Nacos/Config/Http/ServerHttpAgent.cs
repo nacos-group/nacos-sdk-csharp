@@ -13,14 +13,14 @@
 
     public class ServerHttpAgent : IHttpAgent
     {
-        private readonly ILogger _logger;
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<ServerHttpAgent>();
         private ServerListManager _serverListMgr;
         private HttpClient _httpClient = new HttpClient();
 
         public ServerHttpAgent(ILogger logger, NacosSdkOptions options)
         {
             _logger = logger;
-            _serverListMgr = new ServerListManager(logger, options);
+            _serverListMgr = new ServerListManager(options);
         }
 
         public void Dispose()

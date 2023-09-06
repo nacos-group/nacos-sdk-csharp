@@ -32,6 +32,8 @@ namespace Nacos.Remote
 
         protected ILogger logger;
 
+        protected TLSConfig _tlsConfig;
+
         protected Dictionary<string, string> labels = new();
 
         protected int rpcClientStatus = RpcClientStatus.WAIT_INIT;
@@ -50,7 +52,11 @@ namespace Nacos.Remote
         /// </summary>
         protected List<IServerRequestHandler> serverRequestHandlers = new();
 
-        public RpcClient(string name) => _name = name;
+        public RpcClient(string name, TLSConfig tlsConfig)
+        {
+            _name = name;
+            _tlsConfig = tlsConfig;
+        }
 
         public RpcClient(IServerListFactory serverListFactory)
         {
@@ -61,8 +67,8 @@ namespace Nacos.Remote
             logger?.LogInformation("RpcClient init in constructor , ServerListFactory ={0}", _serverListFactory?.GetType()?.Name);
         }
 
-        public RpcClient(string name, IServerListFactory serverListFactory)
-            : this(name)
+        public RpcClient(string name, TLSConfig tlsConfig, IServerListFactory serverListFactory)
+            : this(name, tlsConfig)
         {
             _serverListFactory = serverListFactory;
             Interlocked.CompareExchange(ref rpcClientStatus, RpcClientStatus.INITIALIZED, RpcClientStatus.WAIT_INIT);

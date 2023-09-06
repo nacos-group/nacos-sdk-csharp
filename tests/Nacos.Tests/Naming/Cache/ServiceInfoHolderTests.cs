@@ -15,7 +15,7 @@
         public void Udp_ProcessServiceInfo_Should_Succeed()
         {
             InstancesChangeNotifier notifier = new InstancesChangeNotifier();
-            NacosSdkOptions options = new NacosSdkOptions() { NamingUseRpc = false };
+            NacosSdkOptions options = new NacosSdkOptions() { };
             ServiceInfoHolder holder = new ServiceInfoHolder(NullLogger.Instance, "", options, notifier);
 
             var listener = new CusListener();
@@ -33,7 +33,7 @@
         public void Grpc_ProcessServiceInfo_Should_Succeed()
         {
             InstancesChangeNotifier notifier = new InstancesChangeNotifier();
-            NacosSdkOptions options = new NacosSdkOptions() { NamingUseRpc = true };
+            NacosSdkOptions options = new NacosSdkOptions() { };
             ServiceInfoHolder holder = new ServiceInfoHolder(NullLogger.Instance, "", options, notifier);
 
             var listener = new CusListener();

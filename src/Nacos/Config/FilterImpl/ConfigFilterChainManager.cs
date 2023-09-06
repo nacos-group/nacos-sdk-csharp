@@ -1,9 +1,13 @@
 ﻿namespace Nacos.Config.FilterImpl
 {
+    using Google.Protobuf.WellKnownTypes;
+    using Microsoft.Extensions.DependencyModel;
     using Microsoft.Extensions.Options;
     using Nacos;
     using Nacos.Config.Abst;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Reflection;
 
     public class ConfigFilterChainManager : IConfigFilterChain
     {
@@ -11,14 +15,39 @@
 
         private readonly NacosSdkOptions _options;
 
-        public ConfigFilterChainManager(IOptions<NacosSdkOptions> optionsAccs, IEnumerable<IConfigFilter> configFilters)
+        public ConfigFilterChainManager(NacosSdkOptions options)
         {
-            _options = optionsAccs.Value;
+            _options = options;
+
+            List<IConfigFilter> configFilters =
+                GetAssemblies(options).SelectMany(item => item.GetTypes())
+                                .Where(item => item.GetInterfaces().Contains(typeof(IConfigFilter)))
+                                .Select(type => (IConfigFilter)System.Activator.CreateInstance(type)).ToList();
 
             foreach (var configFilter in configFilters)
             {
+                configFilter.Init(options);
                 AddFilter(configFilter);
             }
+        }
+
+        private List<Assembly> GetAssemblies(NacosSdkOptions options)
+        {
+            var assemblies = new List<Assembly>();
+
+            if (options.ConfigFilterAssemblies == null || !options.ConfigFilterAssemblies.Any()) return assemblies;
+
+            DependencyContext context = DependencyContext.Default;
+
+            var libs = context.CompileLibraries.Where(lib => options.ConfigFilterAssemblies.Contains(lib.Name));
+
+            foreach (var lib in libs)
+            {
+                var assembly = Assembly.Load(new AssemblyName(lib.Name));
+                assemblies.Add(assembly);
+            }
+
+            return assemblies;
         }
 
         public void DoFilter(IConfigRequest request, IConfigResponse response)

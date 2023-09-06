@@ -1,6 +1,7 @@
 ﻿namespace Nacos.Config.Impl
 {
     using Microsoft.Extensions.Logging;
+    using Nacos.Auth;
     using Nacos.Common;
     using Nacos.Config;
     using Nacos.Config.Abst;
@@ -15,22 +16,22 @@
 
     public class ClientWorker : IClientWorker
     {
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<ClientWorker>();
+
         private ConcurrentDictionary<string, CacheData> _cacheMap = new();
 
-        private readonly ILogger _logger;
         private readonly IConfigFilterChain _configFilterChainManager;
 
         private IConfigTransportClient _agent;
 
         public ClientWorker(
-            ILogger logger,
             IConfigFilterChain configFilterChainManager,
-            IConfigTransportClient agent)
+            IServerListManager serverListManager,
+            NacosSdkOptions options)
         {
-            _logger = logger;
             _configFilterChainManager = configFilterChainManager;
 
-            _agent = agent;
+            _agent = null;
         }
 
         public async Task AddTenantListeners(string dataId, string group, List<IListener> listeners)
