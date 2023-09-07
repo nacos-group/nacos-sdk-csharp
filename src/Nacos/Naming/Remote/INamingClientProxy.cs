@@ -2,6 +2,7 @@
 {
     using Nacos.Naming.Dtos;
     using Nacos.Remote;
+    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
@@ -54,5 +55,13 @@
         bool ServerHealthy();
 
         Task<bool> IsSubscribed(string serviceName, string groupName, string clusters);
+    }
+
+    public interface INamingHttpClientProxy : INamingClientProxy, IDisposable
+    {
+    }
+
+    public interface INamingGrpcClientProxy : INamingClientProxy, IDisposable
+    {
     }
 }

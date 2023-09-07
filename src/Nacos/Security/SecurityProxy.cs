@@ -7,7 +7,6 @@
     using Nacos.Common;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Net.Http;
     using System.Threading.Tasks;
 
     public class SecurityProxy : ISecurityProxy
@@ -16,9 +15,15 @@
         private readonly NacosSdkOptions _options;
         private readonly IEnumerable<IClientAuthService> _clientAuthServices;
 
-        public SecurityProxy(NacosSdkOptions options, IEnumerable<IClientAuthService> clientAuthServices)
+        public SecurityProxy(NacosSdkOptions options)
         {
             _options = options;
+            _clientAuthServices = null;
+        }
+
+        public SecurityProxy(IOptions<NacosSdkOptions> optionsAccs, IEnumerable<IClientAuthService> clientAuthServices)
+        {
+            _options = optionsAccs.Value;
             _clientAuthServices = clientAuthServices;
         }
 

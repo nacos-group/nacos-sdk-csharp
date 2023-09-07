@@ -1,6 +1,7 @@
 ﻿namespace Nacos.Naming.Remote.Grpc
 {
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
     using Nacos;
     using Nacos.Common;
     using Nacos.Exceptions;
@@ -18,7 +19,7 @@
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
-    public class NamingGrpcClientProxy : INamingClientProxy, IDisposable
+    public class NamingGrpcClientProxy : INamingGrpcClientProxy
     {
         private readonly ILogger _logger;
 
@@ -30,27 +31,26 @@
 
         private RpcClient rpcClient;
 
-        private SecurityProxy _securityProxy;
+        private ISecurityProxy _securityProxy;
 
         private NacosSdkOptions _options;
 
         private NamingGrpcRedoService _redoService;
 
         public NamingGrpcClientProxy(
-            ILogger logger,
-            string namespaceId,
-            SecurityProxy securityProxy,
+            ILoggerFactory loggerFactory,
+            ISecurityProxy securityProxy,
             IServerListFactory serverListFactory,
-            NacosSdkOptions options,
+            IOptions<NacosSdkOptions> optionsAccs,
             ServiceInfoHolder serviceInfoHolder)
         {
-            _logger = logger;
-            this.namespaceId = namespaceId;
-            uuid = Guid.NewGuid().ToString();
-            _options = options;
-            _securityProxy = securityProxy;
+            _logger = loggerFactory.CreateLogger<NamingGrpcClientProxy>();
 
-            requestTimeout = options.DefaultTimeOut > 0 ? options.DefaultTimeOut : 3000L;
+            uuid = Guid.NewGuid().ToString();
+            _options = optionsAccs.Value;
+            _securityProxy = securityProxy;
+            namespaceId = string.IsNullOrWhiteSpace(_options.Namespace) ? Constants.DEFAULT_NAMESPACE_ID : _options.Namespace;
+            requestTimeout = _options.DefaultTimeOut > 0 ? _options.DefaultTimeOut : 3000L;
 
             Dictionary<string, string> labels = new Dictionary<string, string>()
             {

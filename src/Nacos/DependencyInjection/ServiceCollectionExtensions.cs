@@ -2,10 +2,16 @@
 {
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
     using Nacos;
-    using Nacos.Config.Abst;
-    using Nacos.Config.FilterImpl;
-    using Nacos.Config.Impl;
+    using Nacos.Auth;
+    using Nacos.Naming.Cache;
+    using Nacos.Naming.Event;
+    using Nacos.Naming.Remote;
+    using Nacos.Naming.Remote.Grpc;
+    using Nacos.Naming.Remote.Http;
+    using Nacos.Remote;
+    using Nacos.Security;
     using System;
     using System.Net.Http;
 
@@ -62,6 +68,14 @@
 
             if (httpClientAction != null) clientBuilder.ConfigureHttpClient(httpClientAction);
 
+            services.TryAddSingleton<IClientAuthService, NacosClientAuthServiceImpl>();
+            services.AddSingleton<InstancesChangeNotifier>();
+            services.AddSingleton<ServiceInfoHolder>();
+            services.AddSingleton<ISecurityProxy, SecurityProxy>();
+            services.AddSingleton<IServerListFactory, Nacos.Remote.ServerListManager>();
+            services.AddSingleton<INamingHttpClientProxy, NamingHttpClientProxy>();
+            services.AddSingleton<INamingGrpcClientProxy, NamingGrpcClientProxy>();
+            services.AddSingleton<INamingClientProxy, NamingClientProxyDelegate>();
             services.AddSingleton<INacosNamingService, Naming.NacosNamingService>();
 
             return services;
@@ -78,6 +92,14 @@
 
             if (httpClientAction != null) clientBuilder.ConfigureHttpClient(httpClientAction);
 
+            services.TryAddSingleton<IClientAuthService, NacosClientAuthServiceImpl>();
+            services.AddSingleton<InstancesChangeNotifier>();
+            services.AddSingleton<ServiceInfoHolder>();
+            services.AddSingleton<ISecurityProxy, SecurityProxy>();
+            services.AddSingleton<IServerListFactory, Nacos.Remote.ServerListManager>();
+            services.AddSingleton<INamingHttpClientProxy, NamingHttpClientProxy>();
+            services.AddSingleton<INamingGrpcClientProxy, NamingGrpcClientProxy>();
+            services.AddSingleton<INamingClientProxy, NamingClientProxyDelegate>();
             services.AddSingleton<INacosNamingService, Naming.NacosNamingService>();
 
             return services;

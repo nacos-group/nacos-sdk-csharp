@@ -3,7 +3,7 @@ using Nacos.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddNacosV2Config(x =>
+/*builder.Services.AddNacosV2Config(x =>
 {
     x.ServerAddresses = new System.Collections.Generic.List<string> { "http://localhost:8848/" };
     x.EndPoint = "";
@@ -17,21 +17,18 @@ builder.Services.AddNacosV2Config(x =>
 
     // swich to use http or rpc
     x.ConfigUseRpc = true;
-});
+});*/
 
 builder.Services.AddNacosV2Naming(x =>
 {
     x.ServerAddresses = new System.Collections.Generic.List<string> { "http://localhost:8848/" };
     x.EndPoint = "";
     x.Namespace = "cs";
-    x.TLSConfig = null;
-});
 
-builder.Services.AddNacosOpenApi(x =>
-{
-    x.ServerAddresses = new System.Collections.Generic.List<string> { "http://localhost:8848/" };
-    x.EndPoint = "";
-    x.Namespace = "cs";
+    /*x.UserName = "nacos";
+    x.Password = "nacos";*/
+
+    x.TLSConfig = null;
 });
 
 builder.Services.AddControllers();

@@ -1,6 +1,7 @@
 ﻿namespace Nacos.Naming.Remote
 {
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
     using Nacos;
     using Nacos.Naming.Cache;
     using Nacos.Naming.Core;
@@ -22,33 +23,41 @@
     {
         private NacosSdkOptions _options;
 
-        private ServerListManager serverListManager;
+        private IServerListFactory serverListManager;
 
         private ServiceInfoUpdateService _serviceInfoUpdateService;
 
         private ServiceInfoHolder serviceInfoHolder;
 
-        private NamingHttpClientProxy httpClientProxy;
+        private INamingHttpClientProxy httpClientProxy;
 
-        private NamingGrpcClientProxy grpcClientProxy;
+        private INamingGrpcClientProxy grpcClientProxy;
 
-        private SecurityProxy securityProxy;
+        private ISecurityProxy securityProxy;
 
         private Timer _loginTimer;
 
         private long _securityInfoRefreshIntervalMills = 5000;
 
-        public NamingClientProxyDelegate(ILogger logger, string @namespace, ServiceInfoHolder serviceInfoHolder, NacosSdkOptions options, InstancesChangeNotifier changeNotifier, IHttpClientFactory clientFactory)
+        public NamingClientProxyDelegate(
+            ILoggerFactory loggerFactory,
+            ServiceInfoHolder serviceInfoHolder,
+            IOptions<NacosSdkOptions> options,
+            InstancesChangeNotifier changeNotifier,
+            IServerListFactory serverListFactory,
+            ISecurityProxy securityProxy,
+            INamingHttpClientProxy httpClientProxy,
+            INamingGrpcClientProxy grpcClientProxy)
         {
-            _options = options;
-            serverListManager = new ServerListManager(logger, options, @namespace);
+            _options = options.Value;
             this.serviceInfoHolder = serviceInfoHolder;
-            securityProxy = null; /* new SecurityProxy(options, logger); */
+            serverListManager = serverListFactory;
+            this.securityProxy = securityProxy;
             InitSecurityProxy();
-            _serviceInfoUpdateService = new ServiceInfoUpdateService(logger, options, serviceInfoHolder, this, changeNotifier);
+            _serviceInfoUpdateService = new ServiceInfoUpdateService(loggerFactory.CreateLogger<NamingClientProxyDelegate>(), _options, serviceInfoHolder, this, changeNotifier);
 
-            grpcClientProxy = new NamingGrpcClientProxy(logger, @namespace, securityProxy, serverListManager, options, serviceInfoHolder);
-            httpClientProxy = new NamingHttpClientProxy(logger, @namespace, securityProxy, serverListManager, options, serviceInfoHolder, clientFactory);
+            this.grpcClientProxy = grpcClientProxy;
+            this.httpClientProxy = httpClientProxy;
         }
 
         private void InitSecurityProxy()

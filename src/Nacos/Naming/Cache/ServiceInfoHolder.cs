@@ -11,6 +11,9 @@
     using Nacos.Naming.Utils;
     using Nacos.Utils;
     using Nacos;
+    using Microsoft.Extensions.Options;
+    using System.Xml.Linq;
+    using Nacos.Common;
 
     public class ServiceInfoHolder : IDisposable
     {
@@ -26,15 +29,14 @@
         private string cacheDir = string.Empty;
         private bool _pushEmptyProtection;
 
-        public ServiceInfoHolder(ILogger logger, string @namespace, NacosSdkOptions nacosOptions, InstancesChangeNotifier notifier = null)
+        internal ServiceInfoHolder(ILogger logger, string namespeceId, NacosSdkOptions options, InstancesChangeNotifier notifier = null)
         {
             _logger = logger;
-            _notifier = notifier;
-            _options = nacosOptions;
+            _options = options;
 
-            InitCacheDir(@namespace, nacosOptions);
+            InitCacheDir(namespeceId, _options);
 
-            if (IsLoadCacheAtStart(nacosOptions))
+            if (IsLoadCacheAtStart(_options))
             {
                 var data = DiskCache.ReadAsync(cacheDir).ConfigureAwait(false).GetAwaiter().GetResult();
                 _serviceInfoMap = new ConcurrentDictionary<string, Dtos.ServiceInfo>(data);
@@ -45,7 +47,30 @@
             }
 
             _failoverReactor = new FailoverReactor(_logger, this, cacheDir);
-            _pushEmptyProtection = nacosOptions.NamingPushEmptyProtection;
+            _pushEmptyProtection = _options.NamingPushEmptyProtection;
+        }
+
+        public ServiceInfoHolder(ILoggerFactory loggerFactory, IOptions<NacosSdkOptions> optionsAccs, InstancesChangeNotifier notifier = null)
+        {
+            _logger = loggerFactory.CreateLogger<ServiceInfoHolder>();
+            _notifier = notifier;
+            _options = optionsAccs.Value;
+
+            var @namespace = _options.Namespace.IsNullOrWhiteSpace() ? Constants.DEFAULT_NAMESPACE_ID : _options.Namespace;
+            InitCacheDir(@namespace, _options);
+
+            if (IsLoadCacheAtStart(_options))
+            {
+                var data = DiskCache.ReadAsync(cacheDir).ConfigureAwait(false).GetAwaiter().GetResult();
+                _serviceInfoMap = new ConcurrentDictionary<string, Dtos.ServiceInfo>(data);
+            }
+            else
+            {
+                _serviceInfoMap = new ConcurrentDictionary<string, Dtos.ServiceInfo>();
+            }
+
+            _failoverReactor = new FailoverReactor(_logger, this, cacheDir);
+            _pushEmptyProtection = _options.NamingPushEmptyProtection;
         }
 
         private bool IsLoadCacheAtStart(NacosSdkOptions nacosOptions)

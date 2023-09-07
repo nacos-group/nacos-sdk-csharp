@@ -7,7 +7,9 @@
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
+    using System.Xml.Linq;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
     using Nacos;
     using Nacos.Common;
     using Nacos.Exceptions;
@@ -21,7 +23,7 @@
     using Nacos.Security;
     using Nacos.Utils;
 
-    public class NamingHttpClientProxy : INamingClientProxy
+    public class NamingHttpClientProxy : INamingHttpClientProxy
     {
         private static readonly int DEFAULT_SERVER_PORT = 8848;
 
@@ -33,9 +35,9 @@
 
         private string namespaceId;
 
-        private SecurityProxy _securityProxy;
+        private ISecurityProxy _securityProxy;
 
-        private ServerListManager serverListManager;
+        private IServerListFactory serverListManager;
 
         private BeatReactor beatReactor;
 
@@ -46,21 +48,20 @@
         private NacosSdkOptions _options;
 
         public NamingHttpClientProxy(
-            ILogger logger,
-            string namespaceId,
-            SecurityProxy securityProxy,
-            ServerListManager serverListManager,
-            NacosSdkOptions options,
+            ILoggerFactory loggerFactory,
+            ISecurityProxy securityProxy,
+            IServerListFactory serverListManager,
+            IOptions<NacosSdkOptions> optionsAccs,
             ServiceInfoHolder serviceInfoHolder,
-            IHttpClientFactory clientFactory = null)
+            IHttpClientFactory clientFactory)
         {
-            _logger = logger;
+            _logger = loggerFactory.CreateLogger<NamingHttpClientProxy>();
             _clientFactory = clientFactory;
             this.serverListManager = serverListManager;
             _securityProxy = securityProxy;
-            _options = options;
+            _options = optionsAccs.Value;
             SetServerPort(DEFAULT_SERVER_PORT);
-            this.namespaceId = namespaceId;
+            this.namespaceId = string.IsNullOrWhiteSpace(_options.Namespace) ? Constants.DEFAULT_NAMESPACE_ID : _options.Namespace;
             beatReactor = new BeatReactor(_logger, this, _options);
 
             this.serviceInfoHolder = serviceInfoHolder;
@@ -256,7 +257,7 @@
         {
             paramters[CommonParams.NAMESPACE_ID] = namespaceId;
 
-            if ((servers == null || !servers.Any()) && serverListManager.IsDomain())
+            if (servers == null || !servers.Any())
                 throw new NacosException(NacosException.INVALID_PARAM, "no server available");
 
             NacosException exception = new NacosException(string.Empty);
@@ -280,22 +281,6 @@
                     }
 
                     index = (index + 1) % servers.Count;
-                }
-            }
-
-            if (serverListManager.IsDomain())
-            {
-                for (int i = 0; i < UtilAndComs.REQUEST_DOMAIN_RETRY_COUNT; i++)
-                {
-                    try
-                    {
-                        return await CallServer(url, paramters, body, serverListManager.GetNacosDomain(), method).ConfigureAwait(false);
-                    }
-                    catch (NacosException e)
-                    {
-                        exception = e;
-                        _logger?.LogDebug(e, "request {0} failed.", serverListManager.GetNacosDomain());
-                    }
                 }
             }
 
@@ -503,6 +488,11 @@
         public Task BatchRegisterServiceAsync(string serviceName, string groupName, List<Instance> instances)
         {
             throw new NotImplementedException("Do not support persistent instances to perform batch registration methods.");
+        }
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
         }
     }
 }
