@@ -8,6 +8,7 @@
     using Nacos.Config.Impl;
     using Nacos.Config.Utils;
     using Nacos.Exceptions;
+    using Nacos.Logging;
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
@@ -16,19 +17,17 @@
         private static readonly string UP = "UP";
         private static readonly string DOWN = "DOWN";
 
-        private readonly ILogger _logger;
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<NacosConfigService>();
         private readonly NacosSdkOptions _options;
         private readonly IConfigFilterChain _configFilterChainManager;
         private readonly IClientWorker _worker;
         private string _namespace;
 
         public NacosConfigService(
-            ILoggerFactory loggerFactory,
             IOptions<NacosSdkOptions> optionsAccs,
             IConfigFilterChain configFilterChainManager,
             IClientWorker worker)
         {
-            _logger = loggerFactory.CreateLogger<NacosConfigService>();
             _options = optionsAccs.Value;
             _configFilterChainManager = configFilterChainManager;
             _worker = worker;

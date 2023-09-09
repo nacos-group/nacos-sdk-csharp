@@ -4,6 +4,7 @@
     using Microsoft.Extensions.Options;
     using Nacos;
     using Nacos.Auth;
+    using Nacos.Logging;
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Http;
@@ -11,13 +12,12 @@
 
     public class SecurityProxy : ISecurityProxy
     {
-        private readonly ILogger _logger;
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<SecurityProxy>();
         private readonly NacosSdkOptions _options;
         private readonly IEnumerable<IClientAuthService> _clientAuthServices;
 
-        public SecurityProxy(ILoggerFactory loggerFactory, IOptions<NacosSdkOptions> optionsAccs, IEnumerable<IClientAuthService> clientAuthServices)
+        public SecurityProxy(IOptions<NacosSdkOptions> optionsAccs, IEnumerable<IClientAuthService> clientAuthServices)
         {
-            _logger = loggerFactory.CreateLogger<SecurityProxy>();
             _options = optionsAccs.Value;
             _clientAuthServices = clientAuthServices;
         }

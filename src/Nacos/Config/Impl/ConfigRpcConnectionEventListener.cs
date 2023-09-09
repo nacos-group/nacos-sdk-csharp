@@ -1,21 +1,21 @@
 ﻿namespace Nacos.Config.Impl
 {
     using Microsoft.Extensions.Logging;
+    using Nacos.Logging;
     using Nacos.Remote;
     using System;
     using System.Collections.Concurrent;
 
     public class ConfigRpcConnectionEventListener : IConnectionEventListener
     {
-        private readonly ILogger _logger;
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<ConfigRpcConnectionEventListener>();
         private readonly RpcClient _rpcClient;
         private readonly ConcurrentDictionary<string, CacheData> _cacheMap;
         private readonly BlockingCollection<object> _listenExecutebell;
         private object _bellItem = new object();
 
-        public ConfigRpcConnectionEventListener(ILogger logger, RpcClient rpcClientInner, ConcurrentDictionary<string, CacheData> cacheMap, BlockingCollection<object> listenExecutebell)
+        public ConfigRpcConnectionEventListener(RpcClient rpcClientInner, ConcurrentDictionary<string, CacheData> cacheMap, BlockingCollection<object> listenExecutebell)
         {
-            _logger = logger;
             _rpcClient = rpcClientInner;
             _cacheMap = cacheMap;
             _listenExecutebell = listenExecutebell;

@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using Nacos.Logging;
+using Serilog;
 using Serilog.Events;
 
 var outputTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level}] {Message}{NewLine}{Exception}";
@@ -19,6 +20,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<MsConfigApp.AppSettings>(builder.Configuration.GetSection("AppSettings"));
 
 builder.Services.AddControllers();
+
+// Use LoggerFactory
+var loggerFactory = LoggerFactory.Create(builder =>
+{
+    builder.AddSerilog(Log.Logger);
+});
+
+NacosLogManager.UseLoggerFactory(loggerFactory);
 
 // NOTE: after v1.3.3
 // read configuration from config files
@@ -46,7 +55,6 @@ builder.Host.ConfigureAppConfiguration((c, b) =>
 });
  */
 
-builder.Host.UseSerilog();
 
 var app = builder.Build();
 

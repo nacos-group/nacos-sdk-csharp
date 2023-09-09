@@ -2,6 +2,7 @@
 {
     using Microsoft.Extensions.Logging;
     using Nacos;
+    using Nacos.Logging;
     using Nacos.Remote;
     using Nacos.Utils;
     using System;
@@ -18,7 +19,7 @@
 
         private const int DEFAULT_TIMEOUT = 5000;
 
-        private readonly ILogger _logger;
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<ServerListManager>();
 
         private long _refreshServerListInternal = 30000;
 
@@ -38,9 +39,8 @@
 
         private readonly string _namespace;
 
-        public ServerListManager(ILogger logger, NacosSdkOptions options, string @namespace)
+        public ServerListManager(NacosSdkOptions options, string @namespace)
         {
-            _logger = logger;
             _namespace = @namespace;
             InitServerAddr(options);
         }

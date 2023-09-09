@@ -38,21 +38,21 @@
 
         private long _securityInfoRefreshIntervalMills = 5000;
 
-        public NamingClientProxyDelegate(ILogger logger, string @namespace, ServiceInfoHolder serviceInfoHolder, NacosSdkOptions options, InstancesChangeNotifier changeNotifier, IHttpClientFactory clientFactory)
+        public NamingClientProxyDelegate(string @namespace, ServiceInfoHolder serviceInfoHolder, NacosSdkOptions options, InstancesChangeNotifier changeNotifier, IHttpClientFactory clientFactory)
         {
             _options = options;
-            serverListManager = new ServerListManager(logger, options, @namespace);
+            serverListManager = new ServerListManager(options, @namespace);
             this.serviceInfoHolder = serviceInfoHolder;
             securityProxy = null; /* new SecurityProxy(options, logger); */
             InitSecurityProxy();
-            _serviceInfoUpdateService = new ServiceInfoUpdateService(logger, options, serviceInfoHolder, this, changeNotifier);
+            _serviceInfoUpdateService = new ServiceInfoUpdateService(options, serviceInfoHolder, this, changeNotifier);
 
             if (_options.NamingUseRpc)
             {
-                grpcClientProxy = new NamingGrpcClientProxy(logger, @namespace, securityProxy, serverListManager, options, serviceInfoHolder);
+                grpcClientProxy = new NamingGrpcClientProxy(@namespace, securityProxy, serverListManager, options, serviceInfoHolder);
             }
 
-            httpClientProxy = new NamingHttpClientProxy(logger, @namespace, securityProxy, serverListManager, options, serviceInfoHolder, clientFactory);
+            httpClientProxy = new NamingHttpClientProxy(@namespace, securityProxy, serverListManager, options, serviceInfoHolder, clientFactory);
         }
 
         private void InitSecurityProxy()

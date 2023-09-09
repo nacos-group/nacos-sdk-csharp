@@ -4,6 +4,7 @@
     using Nacos;
     using Nacos.Common;
     using Nacos.Exceptions;
+    using Nacos.Logging;
     using Nacos.Naming.Cache;
     using Nacos.Naming.Dtos;
     using Nacos.Naming.Remote;
@@ -20,7 +21,7 @@
 
     public class NamingGrpcClientProxy : INamingClientProxy, IDisposable
     {
-        private readonly ILogger _logger;
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<NamingGrpcClientProxy>();
 
         private string namespaceId;
 
@@ -37,14 +38,12 @@
         private NamingGrpcRedoService _redoService;
 
         public NamingGrpcClientProxy(
-            ILogger logger,
             string namespaceId,
             SecurityProxy securityProxy,
             IServerListFactory serverListFactory,
             NacosSdkOptions options,
             ServiceInfoHolder serviceInfoHolder)
         {
-            _logger = logger;
             this.namespaceId = namespaceId;
             uuid = Guid.NewGuid().ToString();
             _options = options;
@@ -59,7 +58,7 @@
             };
 
             rpcClient = RpcClientFactory.CreateClient(uuid, RemoteConnectionType.GRPC, labels);
-            _redoService = new NamingGrpcRedoService(_logger, this);
+            _redoService = new NamingGrpcRedoService(this);
 
             Start(serverListFactory, serviceInfoHolder);
         }

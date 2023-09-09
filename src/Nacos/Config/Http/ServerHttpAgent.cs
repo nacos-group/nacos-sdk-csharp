@@ -3,7 +3,9 @@
     using Microsoft.Extensions.Logging;
     using Nacos;
     using Nacos.Common;
+    using Nacos.Config.Abst;
     using Nacos.Config.Impl;
+    using Nacos.Logging;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -13,14 +15,13 @@
 
     public class ServerHttpAgent : IHttpAgent
     {
-        private readonly ILogger _logger;
-        private ServerListManager _serverListMgr;
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<ServerHttpAgent>();
+        private IServerListManager _serverListMgr;
         private HttpClient _httpClient = new HttpClient();
 
-        public ServerHttpAgent(ILogger logger, NacosSdkOptions options)
+        public ServerHttpAgent(IServerListManager serverListManager, NacosSdkOptions options)
         {
-            _logger = logger;
-            _serverListMgr = new ServerListManager(logger, options);
+            _serverListMgr = serverListManager;
         }
 
         public void Dispose()

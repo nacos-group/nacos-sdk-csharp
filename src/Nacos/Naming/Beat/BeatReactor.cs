@@ -4,6 +4,7 @@
     using Nacos;
     using Nacos.Common;
     using Nacos.Exceptions;
+    using Nacos.Logging;
     using Nacos.Naming.Dtos;
     using Nacos.Naming.Remote.Http;
     using Nacos.Naming.Utils;
@@ -18,14 +19,13 @@
         private static readonly int RESOURCE_NOT_FOUND = 20404;
         private static readonly int OK = 10200;
 
-        private readonly ILogger _logger;
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<BeatReactor>();
         private readonly NamingHttpClientProxy _serverProxy;
         public readonly ConcurrentDictionary<string, BeatInfo> _dom2Beat;
         private readonly ConcurrentDictionary<string, Timer> _beatTimer;
 
-        public BeatReactor(ILogger logger, NamingHttpClientProxy serverProxy, NacosSdkOptions options)
+        public BeatReactor(NamingHttpClientProxy serverProxy, NacosSdkOptions options)
         {
-            _logger = logger;
             _serverProxy = serverProxy;
             _dom2Beat = new ConcurrentDictionary<string, BeatInfo>();
             _beatTimer = new ConcurrentDictionary<string, Timer>();

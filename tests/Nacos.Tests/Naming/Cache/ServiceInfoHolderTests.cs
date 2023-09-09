@@ -16,7 +16,7 @@
         {
             InstancesChangeNotifier notifier = new InstancesChangeNotifier();
             NacosSdkOptions options = new NacosSdkOptions() { NamingUseRpc = false };
-            ServiceInfoHolder holder = new ServiceInfoHolder(NullLogger.Instance, "", options, notifier);
+            ServiceInfoHolder holder = new ServiceInfoHolder("", options, notifier);
 
             var listener = new CusListener();
             var svcName = "mysvc2";
@@ -34,7 +34,7 @@
         {
             InstancesChangeNotifier notifier = new InstancesChangeNotifier();
             NacosSdkOptions options = new NacosSdkOptions() { NamingUseRpc = true };
-            ServiceInfoHolder holder = new ServiceInfoHolder(NullLogger.Instance, "", options, notifier);
+            ServiceInfoHolder holder = new ServiceInfoHolder("", options, notifier);
 
             var listener = new CusListener();
             var svcName = "mysvc2";
@@ -63,7 +63,7 @@
         public void ProcessServiceInfo_When_EmptyProtection_Is_True_Should_Not_Return_Empty()
         {
             NacosSdkOptions options = new NacosSdkOptions() { NamingPushEmptyProtection = true };
-            ServiceInfoHolder holder = new ServiceInfoHolder(NullLogger.Instance, "", options, null);
+            ServiceInfoHolder holder = new ServiceInfoHolder("", options, null);
 
             ServiceInfo oldInfo = new ServiceInfo("a@@b@@c");
 
@@ -86,7 +86,7 @@
         public void ProcessServiceInfo_When_EmptyProtection_Is_False_Should_Return_Empty()
         {
             NacosSdkOptions options = new NacosSdkOptions() { };
-            ServiceInfoHolder holder = new ServiceInfoHolder(NullLogger.Instance, "", options, null);
+            ServiceInfoHolder holder = new ServiceInfoHolder("", options, null);
 
             ServiceInfo oldInfo = new ServiceInfo("a@@b@@c");
 

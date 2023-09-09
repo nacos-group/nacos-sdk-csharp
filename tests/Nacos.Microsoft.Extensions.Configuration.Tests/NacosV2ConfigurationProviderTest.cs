@@ -21,7 +21,7 @@
         [Fact]
         public void Init_Should_ThrowException_When_Listeners_Is_Empty()
         {
-            var cs = new NacosV2ConfigurationSource(null, null)
+            var cs = new NacosV2ConfigurationSource(null)
             {
                 Namespace = "cs",
                 Listeners = new System.Collections.Generic.List<ConfigListener>
@@ -31,7 +31,7 @@
 
             Assert.Throws<Exceptions.NacosException>(() =>
             {
-                new NacosV2ConfigurationProvider(cs, null, null);
+                new NacosV2ConfigurationProvider(cs, null);
             });
         }
 
@@ -118,7 +118,7 @@
             _mockSvc.Setup(x => x.GetConfig("d1", "g", 3000)).ReturnsAsync(new { all = "d1" }.ToJsonString());
             _mockSvc.Setup(x => x.GetConfig("d2", "g", 3000)).ReturnsAsync(new { all = "d2" }.ToJsonString());
 
-            var cs = new NacosV2ConfigurationSource(null, null)
+            var cs = new NacosV2ConfigurationSource(null)
             {
                 Namespace = "cs",
                 Listeners = new System.Collections.Generic.List<ConfigListener>
@@ -129,7 +129,7 @@
                 NacosConfigurationParser = DefaultJsonConfigurationStringParser.Instance
             };
 
-            var provider = new NacosV2ConfigurationProvider(cs, _mockSvc.Object, null);
+            var provider = new NacosV2ConfigurationProvider(cs, _mockSvc.Object);
             return provider;
         }
 
@@ -146,7 +146,7 @@
                 setup.ThrowsAsync(new System.Exception("ts"));
             }
 
-            var cs = new NacosV2ConfigurationSource(null, null)
+            var cs = new NacosV2ConfigurationSource(null)
             {
                 Namespace = "cs",
                 Listeners = new System.Collections.Generic.List<ConfigListener>
@@ -156,7 +156,7 @@
                 NacosConfigurationParser = DefaultJsonConfigurationStringParser.Instance
             };
 
-            var provider = new NacosV2ConfigurationProvider(cs, _mockSvc.Object, null);
+            var provider = new NacosV2ConfigurationProvider(cs, _mockSvc.Object);
             return provider;
         }
     }

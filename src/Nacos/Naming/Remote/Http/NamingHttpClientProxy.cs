@@ -11,6 +11,7 @@
     using Nacos;
     using Nacos.Common;
     using Nacos.Exceptions;
+    using Nacos.Logging;
     using Nacos.Naming.Beat;
     using Nacos.Naming.Cache;
     using Nacos.Naming.Core;
@@ -27,7 +28,7 @@
 
         private static readonly string NAMING_SERVER_PORT = "nacos.naming.exposed.port";
 
-        private ILogger _logger;
+        private ILogger _logger = NacosLogManager.CreateLogger<NamingHttpClientProxy>();
 
         private readonly IHttpClientFactory _clientFactory;
 
@@ -48,7 +49,6 @@
         private NacosSdkOptions _options;
 
         public NamingHttpClientProxy(
-            ILogger logger,
             string namespaceId,
             SecurityProxy securityProxy,
             ServerListManager serverListManager,
@@ -56,19 +56,18 @@
             ServiceInfoHolder serviceInfoHolder,
             IHttpClientFactory clientFactory = null)
         {
-            _logger = logger;
             _clientFactory = clientFactory;
             this.serverListManager = serverListManager;
             _securityProxy = securityProxy;
             _options = options;
             SetServerPort(DEFAULT_SERVER_PORT);
             this.namespaceId = namespaceId;
-            beatReactor = new BeatReactor(_logger, this, _options);
+            beatReactor = new BeatReactor(this, _options);
 
             // Don't create PushReceiver when using rpc, it will create a udp server
             if (!options.NamingUseRpc)
             {
-                pushReceiver = new PushReceiver(_logger, serviceInfoHolder, _options);
+                pushReceiver = new PushReceiver(serviceInfoHolder, _options);
             }
 
             this.serviceInfoHolder = serviceInfoHolder;

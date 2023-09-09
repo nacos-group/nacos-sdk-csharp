@@ -2,19 +2,19 @@
 {
     using Microsoft.Extensions.Logging;
     using Nacos.Exceptions;
+    using Nacos.Logging;
     using Nacos.Naming.Remote.Grpc;
     using System;
     using System.Threading.Tasks;
 
     public class RedoScheduledTask
     {
-        private readonly ILogger _logger;
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<RedoScheduledTask>();
         private readonly NamingGrpcClientProxy _clientProxy;
         private readonly NamingGrpcRedoService _redoService;
 
-        public RedoScheduledTask(ILogger logger, NamingGrpcClientProxy clientProxy, NamingGrpcRedoService redoService)
+        public RedoScheduledTask(NamingGrpcClientProxy clientProxy, NamingGrpcRedoService redoService)
         {
-            _logger = logger;
             _clientProxy = clientProxy;
             _redoService = redoService;
         }

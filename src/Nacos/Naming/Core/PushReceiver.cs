@@ -3,6 +3,7 @@
     using Microsoft.Extensions.Logging;
     using Nacos;
     using Nacos.Common;
+    using Nacos.Logging;
     using Nacos.Naming.Cache;
     using Nacos.Utils;
     using System;
@@ -18,15 +19,14 @@
         private static readonly string PUSH_PACKAGE_TYPE_SERVICE = "service";
         private static readonly string PUSH_PACKAGE_TYPE_DUMP = "dump";
 
-        private readonly ILogger _logger;
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<PushReceiver>();
         private ServiceInfoHolder _serviceInfoHolder;
         private UdpClient _udpClient;
         private int _port;
         private bool _closed = false;
 
-        public PushReceiver(ILogger logger, ServiceInfoHolder serviceInfoHolder, NacosSdkOptions options)
+        public PushReceiver(ServiceInfoHolder serviceInfoHolder, NacosSdkOptions options)
         {
-            _logger = logger;
             _serviceInfoHolder = serviceInfoHolder;
 
             // if using grpc, do not setup a udp client here.

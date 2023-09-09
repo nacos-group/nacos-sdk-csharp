@@ -11,13 +11,14 @@
     using Nacos.Naming.Utils;
     using Nacos.Utils;
     using Nacos;
+    using Nacos.Logging;
 
     public class ServiceInfoHolder : IDisposable
     {
         private static readonly string FILE_PATH_NACOS = "nacos";
         private static readonly string FILE_PATH_NAMING = "naming";
 
-        private readonly ILogger _logger;
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<ServiceInfoHolder>();
         private readonly FailoverReactor _failoverReactor;
         private readonly ConcurrentDictionary<string, Dtos.ServiceInfo> _serviceInfoMap;
         private readonly NacosSdkOptions _options;
@@ -26,9 +27,8 @@
         private string cacheDir = string.Empty;
         private bool _pushEmptyProtection;
 
-        public ServiceInfoHolder(ILogger logger, string @namespace, NacosSdkOptions nacosOptions, InstancesChangeNotifier notifier = null)
+        public ServiceInfoHolder(string @namespace, NacosSdkOptions nacosOptions, InstancesChangeNotifier notifier = null)
         {
-            _logger = logger;
             _notifier = notifier;
             _options = nacosOptions;
 
@@ -44,7 +44,7 @@
                 _serviceInfoMap = new ConcurrentDictionary<string, Dtos.ServiceInfo>();
             }
 
-            _failoverReactor = new FailoverReactor(_logger, this, cacheDir);
+            _failoverReactor = new FailoverReactor(this, cacheDir);
             _pushEmptyProtection = nacosOptions.NamingPushEmptyProtection;
         }
 

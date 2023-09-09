@@ -32,7 +32,7 @@
 
             var serverList = new List<string> { "localhost" };
 
-            Nacos.Auth.NacosClientAuthServiceImpl auth = new(NullLoggerFactory.Instance, new HttpClient(mockHttpMessageHandler.Object));
+            Nacos.Auth.NacosClientAuthServiceImpl auth = new(new HttpClient(mockHttpMessageHandler.Object));
             auth.SetServerList(serverList);
 
             var options = new NacosSdkOptions() { UserName = "aaa", Password = "123456" };
@@ -54,7 +54,7 @@
 
             var serverList = new List<string> { "localhost" };
 
-            Nacos.Auth.NacosClientAuthServiceImpl auth = new(NullLoggerFactory.Instance, new HttpClient(mockHttpMessageHandler.Object));
+            Nacos.Auth.NacosClientAuthServiceImpl auth = new(new HttpClient(mockHttpMessageHandler.Object));
             auth.SetServerList(serverList);
 
             var options = new NacosSdkOptions() { UserName = "aaa", Password = "123456" };
@@ -73,7 +73,7 @@
 
             var serverList = new List<string> { "localhost" };
 
-            Nacos.Auth.NacosClientAuthServiceImpl auth = new(NullLoggerFactory.Instance, new HttpClient(mockHttpMessageHandler.Object));
+            Nacos.Auth.NacosClientAuthServiceImpl auth = new(new HttpClient(mockHttpMessageHandler.Object));
             auth.SetServerList(serverList);
 
             var options = new NacosSdkOptions() { UserName = "aaa", Password = "123456" };
@@ -96,7 +96,7 @@
 
             var serverList = new List<string> { "localhost" };
 
-            Nacos.Auth.NacosClientAuthServiceImpl auth = new(NullLoggerFactory.Instance, new HttpClient(mockHttpMessageHandler.Object));
+            Nacos.Auth.NacosClientAuthServiceImpl auth = new(new HttpClient(mockHttpMessageHandler.Object));
             auth.SetServerList(serverList);
 
             var options = new NacosSdkOptions() { UserName = "aaa", Password = "123456" };

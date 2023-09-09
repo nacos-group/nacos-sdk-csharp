@@ -2,6 +2,7 @@
 {
     using Microsoft.Extensions.Logging;
     using Nacos;
+    using Nacos.Logging;
     using Nacos.Naming.Cache;
     using Nacos.Naming.Dtos;
     using Nacos.Naming.Event;
@@ -17,16 +18,15 @@
         private static readonly int DEFAULT_DELAY = 1000;
         private static readonly int DEFAULT_UPDATE_CACHE_TIME_MULTIPLE = 6;
 
-        private readonly ILogger _logger;
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<ServiceInfoUpdateService>();
         private readonly ConcurrentDictionary<string, Timer> _timerMap;
         private readonly ServiceInfoHolder _serviceInfoHolder;
         private readonly INamingClientProxy _namingClientProxy;
         private readonly InstancesChangeNotifier _changeNotifier;
 
-        public ServiceInfoUpdateService(ILogger logger, NacosSdkOptions properties, ServiceInfoHolder serviceInfoHolder,
+        public ServiceInfoUpdateService(NacosSdkOptions properties, ServiceInfoHolder serviceInfoHolder,
             INamingClientProxy namingClientProxy, InstancesChangeNotifier changeNotifier)
         {
-            _logger = logger;
             _timerMap = new ConcurrentDictionary<string, Timer>();
             _serviceInfoHolder = serviceInfoHolder;
             _namingClientProxy = namingClientProxy;

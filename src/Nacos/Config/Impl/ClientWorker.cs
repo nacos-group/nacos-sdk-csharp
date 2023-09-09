@@ -7,6 +7,7 @@
     using Nacos.Config.Common;
     using Nacos.Config.FilterImpl;
     using Nacos.Config.Utils;
+    using Nacos.Logging;
     using Nacos.Utils;
     using System;
     using System.Collections.Concurrent;
@@ -17,17 +18,15 @@
     {
         private ConcurrentDictionary<string, CacheData> _cacheMap = new();
 
-        private readonly ILogger _logger;
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<ClientWorker>();
         private readonly IConfigFilterChain _configFilterChainManager;
 
         private IConfigTransportClient _agent;
 
         public ClientWorker(
-            ILogger logger,
             IConfigFilterChain configFilterChainManager,
             IConfigTransportClient agent)
         {
-            _logger = logger;
             _configFilterChainManager = configFilterChainManager;
 
             _agent = agent;

@@ -4,6 +4,7 @@
     using Microsoft.Extensions.Options;
     using Nacos;
     using Nacos.Common;
+    using Nacos.Logging;
     using Nacos.Naming.Cache;
     using Nacos.Naming.Core;
     using Nacos.Naming.Dtos;
@@ -20,7 +21,7 @@
         private static readonly string UP = "UP";
         private static readonly string DOWN = "DOWN";
 
-        private readonly ILogger _logger;
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<NacosNamingService>();
         private readonly NacosSdkOptions _options;
 
         private string _namespace;
@@ -32,11 +33,9 @@
         private INamingClientProxy _clientProxy;
 
         public NacosNamingService(
-            ILoggerFactory loggerFactory,
             IOptions<NacosSdkOptions> optionAccs,
             IHttpClientFactory clientFactory)
         {
-            _logger = loggerFactory.CreateLogger<NacosNamingService>();
             _options = optionAccs.Value;
 
             /* 项目“Nacos (netstandard2.0)”的未合并的更改
@@ -47,8 +46,8 @@
             */
             _namespace = string.IsNullOrWhiteSpace(_options.Namespace) ? Utils.UtilAndComs.DEFAULT_NAMESPACE_ID : _options.Namespace;
             _changeNotifier = new InstancesChangeNotifier();
-            _serviceInfoHolder = new ServiceInfoHolder(_logger, _namespace, _options, _changeNotifier);
-            _clientProxy = new NamingClientProxyDelegate(_logger, _namespace, _serviceInfoHolder, _options, _changeNotifier, clientFactory);
+            _serviceInfoHolder = new ServiceInfoHolder(_namespace, _options, _changeNotifier);
+            _clientProxy = new NamingClientProxyDelegate(_namespace, _serviceInfoHolder, _options, _changeNotifier, clientFactory);
         }
 
         public async Task DeregisterInstance(string serviceName, string ip, int port)

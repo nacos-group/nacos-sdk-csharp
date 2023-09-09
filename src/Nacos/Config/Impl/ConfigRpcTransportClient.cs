@@ -9,6 +9,7 @@
     using Nacos.Config.FilterImpl;
     using Nacos.Config.Utils;
     using Nacos.Exceptions;
+    using Nacos.Logging;
     using Nacos.Remote;
     using Nacos.Remote.Requests;
     using Nacos.Remote.Responses;
@@ -31,7 +32,7 @@
 
         private object _bellItem = new();
 
-        private ILogger _logger;
+        private ILogger _logger = NacosLogManager.CreateLogger<ConfigRpcTransportClient>();
 
         private ConcurrentDictionary<string, CacheData> _cacheMap;
         private string uuid = Guid.NewGuid().ToString();
@@ -41,12 +42,10 @@
         private long _securityInfoRefreshIntervalMills = 5000;
 
         public ConfigRpcTransportClient(
-            ILogger logger,
             IOptions<NacosSdkOptions> optionAccs,
             IServerListManager serverListManager,
             ISecurityProxy securityProxy)
         {
-            _logger = logger;
             _options = optionAccs.Value;
             _serverListManager = serverListManager;
             _accessKey = _options.AccessKey;
@@ -254,8 +253,8 @@
 
         private void InitHandlerRpcClient(RpcClient rpcClientInner)
         {
-            rpcClientInner.RegisterServerPushResponseHandler(new ConfigRpcServerRequestHandler(_logger, _cacheMap, NotifyListenConfig));
-            rpcClientInner.RegisterConnectionListener(new ConfigRpcConnectionEventListener(_logger, rpcClientInner, _cacheMap, _listenExecutebell));
+            rpcClientInner.RegisterServerPushResponseHandler(new ConfigRpcServerRequestHandler(_cacheMap, NotifyListenConfig));
+            rpcClientInner.RegisterConnectionListener(new ConfigRpcConnectionEventListener(rpcClientInner, _cacheMap, _listenExecutebell));
 
             rpcClientInner.Init(new ConfigRpcServerListFactory(_serverListManager));
         }
