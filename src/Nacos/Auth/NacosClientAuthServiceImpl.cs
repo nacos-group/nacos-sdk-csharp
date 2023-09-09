@@ -1,6 +1,7 @@
 ﻿namespace Nacos.Auth
 {
     using Microsoft.Extensions.Logging;
+    using Nacos.Logging;
     using Nacos.Utils;
     using System;
     using System.Collections.Generic;
@@ -35,17 +36,15 @@
 
         private List<string> _serverList;
 
-        private readonly ILogger _logger;
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<NacosClientAuthServiceImpl>();
 
-        public NacosClientAuthServiceImpl(ILoggerFactory loggerFactory)
+        public NacosClientAuthServiceImpl()
         {
-            _logger = loggerFactory.CreateLogger<NacosClientAuthServiceImpl>();
         }
 
         // For UT only
-        internal NacosClientAuthServiceImpl(ILoggerFactory loggerFactory, HttpClient testClient)
+        internal NacosClientAuthServiceImpl(HttpClient testClient)
         {
-            _logger = loggerFactory.CreateLogger<NacosClientAuthServiceImpl>();
             _httpClient = testClient;
         }
 
@@ -99,7 +98,7 @@
 
                         if (!resp.IsSuccessStatusCode)
                         {
-                            _logger?.LogError("login failed: {0}", await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
+                            _logger.LogError("login failed: {0}", await resp.Content.ReadAsStringAsync().ConfigureAwait(false));
                             return false;
                         }
 
@@ -119,7 +118,7 @@
                     }
                     catch (Exception ex)
                     {
-                        _logger?.LogError(ex, "[NacosClientAuthServiceImpl] login http request failed, url: {0}", url);
+                        _logger.LogError(ex, "[NacosClientAuthServiceImpl] login http request failed, url: {0}", url);
                         return false;
                     }
                 }

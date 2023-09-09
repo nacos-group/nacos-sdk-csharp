@@ -1,6 +1,7 @@
 ﻿namespace Nacos.Naming.Backups
 {
     using Microsoft.Extensions.Logging;
+    using Nacos.Logging;
     using Nacos.Naming.Cache;
     using Nacos.Naming.Utils;
     using Nacos.Utils;
@@ -34,7 +35,7 @@
 
         private static readonly long DAY_PERIOD_MINUTES = 24 * 60;
 
-        private readonly ILogger _logger;
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<FailoverReactor>();
         private readonly string _failoverDir;
         private readonly ServiceInfoHolder _serviceInfoHolder;
 
@@ -44,9 +45,8 @@
 
         private long lastModifiedMillis = 0L;
 
-        public FailoverReactor(ILogger logger, ServiceInfoHolder serviceInfoHolder, string cacheDir)
+        public FailoverReactor(ServiceInfoHolder serviceInfoHolder, string cacheDir)
         {
-            _logger = logger;
             _serviceInfoHolder = serviceInfoHolder;
             _failoverDir = Path.Combine(cacheDir, FAILOVER_DIR);
 

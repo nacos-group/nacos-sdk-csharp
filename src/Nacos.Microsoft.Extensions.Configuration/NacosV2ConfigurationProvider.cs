@@ -5,6 +5,7 @@
     using Nacos;
     using Nacos.Config;
     using Nacos.Config.Parser;
+    using Nacos.Logging;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
@@ -13,6 +14,8 @@
 
     internal class NacosV2ConfigurationProvider : ConfigurationProvider, IDisposable
     {
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<NacosV2ConfigurationProvider>();
+
         private readonly NacosV2ConfigurationSource _configurationSource;
 
         private readonly INacosConfigurationParser _parser;
@@ -23,9 +26,7 @@
 
         private readonly Dictionary<string, MsConfigListener> _listenerDict;
 
-        private readonly ILogger _logger;
-
-        public NacosV2ConfigurationProvider(NacosV2ConfigurationSource configurationSource, INacosConfigService client, ILoggerFactory loggerFactory)
+        public NacosV2ConfigurationProvider(NacosV2ConfigurationSource configurationSource, INacosConfigService client)
         {
             _configurationSource = configurationSource;
             _parser = configurationSource.NacosConfigurationParser;
@@ -33,7 +34,6 @@
             _listenerDict = new Dictionary<string, MsConfigListener>();
 
             _client = client;
-            _logger = loggerFactory?.CreateLogger<NacosV2ConfigurationProvider>();
 
             if (configurationSource.Listeners != null && configurationSource.Listeners.Any())
             {

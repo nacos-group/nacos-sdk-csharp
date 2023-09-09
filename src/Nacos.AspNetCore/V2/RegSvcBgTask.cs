@@ -6,6 +6,7 @@
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Nacos;
+    using Nacos.Logging;
     using Nacos.Naming.Core;
     using System;
     using System.Collections.Generic;
@@ -18,7 +19,7 @@
         private static readonly string MetadataHostOs = "HOST_OS";
         private static readonly string MetadataSecure = "secure";
 
-        private readonly ILogger _logger;
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<RegSvcBgTask>();
         private readonly INacosNamingService _svc;
         private readonly IFeatureCollection _features;
         private NacosAspNetOptions _options;
@@ -26,12 +27,10 @@
         private IEnumerable<Uri> uris = null;
 
         public RegSvcBgTask(
-            ILoggerFactory loggerFactory,
             INacosNamingService svc,
             IServer server,
             IOptionsMonitor<NacosAspNetOptions> optionsAccs)
         {
-            _logger = loggerFactory.CreateLogger<RegSvcBgTask>();
             _svc = svc;
             _options = optionsAccs.CurrentValue;
             _features = server.Features;

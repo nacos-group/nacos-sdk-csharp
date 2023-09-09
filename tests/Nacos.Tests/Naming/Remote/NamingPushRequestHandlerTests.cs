@@ -17,7 +17,7 @@
         {
             ServiceInfo info = new ServiceInfo("name", "cluster1");
 
-            var holder = new ServiceInfoHolder(NullLogger.Instance, string.Empty, new NacosSdkOptions(), null);
+            var holder = new ServiceInfoHolder(string.Empty, new NacosSdkOptions(), null);
             var handler = new NamingPushRequestHandler(holder);
 
             var req = new NotifySubscriberRequest() { ServiceInfo = info };
