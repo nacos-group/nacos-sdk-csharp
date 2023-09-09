@@ -1,6 +1,5 @@
 ﻿namespace Nacos.Config.FilterImpl
 {
-    using Google.Protobuf.WellKnownTypes;
     using Microsoft.Extensions.DependencyModel;
     using Microsoft.Extensions.Options;
     using Nacos;
@@ -15,18 +14,18 @@
 
         private readonly NacosSdkOptions _options;
 
-        public ConfigFilterChainManager(NacosSdkOptions options)
+        public ConfigFilterChainManager(IOptions<NacosSdkOptions> optionAccs)
         {
-            _options = options;
+            _options = optionAccs.Value;
 
             List<IConfigFilter> configFilters =
-                GetAssemblies(options).SelectMany(item => item.GetTypes())
+                GetAssemblies(_options).SelectMany(item => item.GetTypes())
                                 .Where(item => item.GetInterfaces().Contains(typeof(IConfigFilter)))
                                 .Select(type => (IConfigFilter)System.Activator.CreateInstance(type)).ToList();
 
             foreach (var configFilter in configFilters)
             {
-                configFilter.Init(options);
+                configFilter.Init(_options);
                 AddFilter(configFilter);
             }
         }

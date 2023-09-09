@@ -57,7 +57,7 @@
             };
 
             rpcClient = RpcClientFactory.CreateClient(uuid, RemoteConnectionType.GRPC, labels, _options.TLSConfig);
-            _redoService = new NamingGrpcRedoService( this);
+            _redoService = new NamingGrpcRedoService(this);
 
             Start(serverListFactory, serviceInfoHolder);
         }

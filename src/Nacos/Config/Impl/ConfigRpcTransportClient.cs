@@ -25,17 +25,10 @@
     public class ConfigRpcTransportClient : AbstConfigTransportClient
     {
         private readonly ILogger _logger = NacosLogManager.CreateLogger<ConfigRpcTransportClient>();
-
         private static readonly string RPC_AGENT_NAME = "config_rpc_client";
-
         private static object _obj = new();
-
         private readonly BlockingCollection<object> _listenExecutebell = new(boundedCapacity: 1);
-
         private object _bellItem = new();
-
-        private ILogger _logger = NacosLogManager.CreateLogger<ConfigRpcTransportClient>();
-
         private ConcurrentDictionary<string, CacheData> _cacheMap;
         private string uuid = Guid.NewGuid().ToString();
 

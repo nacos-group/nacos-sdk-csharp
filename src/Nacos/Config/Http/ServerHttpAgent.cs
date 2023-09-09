@@ -19,7 +19,7 @@
         private IServerListManager _serverListMgr;
         private HttpClient _httpClient = new HttpClient();
 
-        public ServerHttpAgent(IServerListManager serverListManager, NacosSdkOptions options)
+        public ServerHttpAgent(IServerListManager serverListManager)
         {
             _serverListMgr = serverListManager;
         }

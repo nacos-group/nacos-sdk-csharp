@@ -16,7 +16,6 @@
     using Nacos.Config.Abst;
     using Nacos.Logging;
     using Microsoft.Extensions.Options;
-    using Nacos.Common;
 
     public class ServerListManager : IServerListManager
     {
@@ -44,7 +43,6 @@
         private readonly string _contentPath;
         private readonly string _defaultNodesPath;
         private readonly bool _isFixed = false;
-        private readonly ILogger _logger = NacosLogManager.CreateLogger<ServerListManager>();
         private readonly NacosSdkOptions _options;
 
         public ServerListManager(IOptions<NacosSdkOptions> optionsAccs)

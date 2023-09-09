@@ -32,12 +32,7 @@
                 clientBuilder.ConfigureHttpClient(httpClientAction);
             }
 
-
-            services.AddSingleton<Security.ISecurityProxy, Security.SecurityProxy>();
-            services.AddSingleton<Config.Abst.IServerListManager, Config.Impl.ServerListManager>();
-            services.AddSingleton<Config.Abst.IConfigTransportClient, Config.Impl.ConfigRpcTransportClient>();
-            services.AddSingleton<Config.Abst.IClientWorker, Config.Impl.ClientWorker>();
-            services.AddSingleton<Config.Abst.IConfigFilterChain, Config.FilterImpl.ConfigFilterChainManager>();
+            services.AddSingleton<ISecurityProxy, SecurityProxy>();
             services.AddSingleton<INacosConfigService, Config.NacosConfigService>();
 
             return services;

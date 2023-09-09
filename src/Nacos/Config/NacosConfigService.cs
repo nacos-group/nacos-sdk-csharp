@@ -3,21 +3,18 @@
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Nacos;
-    using Nacos.Auth;
-    using Nacos.Common;
     using Nacos.Config.Abst;
     using Nacos.Config.FilterImpl;
     using Nacos.Config.Impl;
     using Nacos.Config.Utils;
     using Nacos.Exceptions;
     using Nacos.Logging;
+    using Nacos.Security;
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
     public class NacosConfigService : INacosConfigService
     {
-        private readonly ILogger _logger = NacosLogManager.CreateLogger<NacosConfigService>();
-
         private static readonly string UP = "UP";
         private static readonly string DOWN = "DOWN";
 
@@ -29,13 +26,13 @@
 
         public NacosConfigService(
             IOptions<NacosSdkOptions> optionsAccs,
-            IConfigFilterChain configFilterChainManager,
-            IClientWorker worker)
+            ISecurityProxy securityProxy)
         {
             _options = optionsAccs.Value;
-            _configFilterChainManager = new ConfigFilterChainManager(_options);
-            IServerListManager serverListManager = new ServerListManager(_options);
-            _worker = new ClientWorker(_configFilterChainManager, serverListManager, _options);
+            _configFilterChainManager = new ConfigFilterChainManager(optionsAccs);
+            IServerListManager serverListManager = new ServerListManager(optionsAccs);
+            ConfigRpcTransportClient agent = new ConfigRpcTransportClient(optionsAccs, serverListManager, securityProxy);
+            _worker = new ClientWorker(_configFilterChainManager, agent);
             _namespace = _options.Namespace;
         }
 
