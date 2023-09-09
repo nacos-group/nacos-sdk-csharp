@@ -21,12 +21,12 @@ builder.Services.Configure<MsConfigApp.AppSettings>(builder.Configuration.GetSec
 
 builder.Services.AddControllers();
 
-// Use LoggerFactory
 var loggerFactory = LoggerFactory.Create(builder =>
 {
     builder.AddSerilog(Log.Logger);
 });
 
+// Set nacos LoggerFactory
 NacosLogManager.UseLoggerFactory(loggerFactory);
 
 // NOTE: after v1.3.3
