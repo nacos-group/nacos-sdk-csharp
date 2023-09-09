@@ -46,7 +46,7 @@
                 _serviceInfoMap = new ConcurrentDictionary<string, Dtos.ServiceInfo>();
             }
 
-            _failoverReactor = new FailoverReactor(_logger, this, cacheDir);
+            _failoverReactor = new FailoverReactor(this, cacheDir);
             _pushEmptyProtection = _options.NamingPushEmptyProtection;
         }
 
