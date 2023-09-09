@@ -11,6 +11,9 @@
     using Nacos.Naming.Utils;
     using Nacos.Utils;
     using Nacos;
+    using Microsoft.Extensions.Options;
+    using System.Xml.Linq;
+    using Nacos.Common;
     using Nacos.Logging;
 
     public class ServiceInfoHolder : IDisposable
@@ -27,14 +30,35 @@
         private string cacheDir = string.Empty;
         private bool _pushEmptyProtection;
 
-        public ServiceInfoHolder(string @namespace, NacosSdkOptions nacosOptions, InstancesChangeNotifier notifier = null)
+        internal ServiceInfoHolder(string namespeceId, NacosSdkOptions options, InstancesChangeNotifier notifier = null)
+        {
+            _options = options;
+
+            InitCacheDir(namespeceId, _options);
+
+            if (IsLoadCacheAtStart(_options))
+            {
+                var data = DiskCache.ReadAsync(cacheDir).ConfigureAwait(false).GetAwaiter().GetResult();
+                _serviceInfoMap = new ConcurrentDictionary<string, Dtos.ServiceInfo>(data);
+            }
+            else
+            {
+                _serviceInfoMap = new ConcurrentDictionary<string, Dtos.ServiceInfo>();
+            }
+
+            _failoverReactor = new FailoverReactor(_logger, this, cacheDir);
+            _pushEmptyProtection = _options.NamingPushEmptyProtection;
+        }
+
+        public ServiceInfoHolder(IOptions<NacosSdkOptions> optionsAccs, InstancesChangeNotifier notifier = null)
         {
             _notifier = notifier;
-            _options = nacosOptions;
+            _options = optionsAccs.Value;
 
-            InitCacheDir(@namespace, nacosOptions);
+            var @namespace = _options.Namespace.IsNullOrWhiteSpace() ? Constants.DEFAULT_NAMESPACE_ID : _options.Namespace;
+            InitCacheDir(@namespace, _options);
 
-            if (IsLoadCacheAtStart(nacosOptions))
+            if (IsLoadCacheAtStart(_options))
             {
                 var data = DiskCache.ReadAsync(cacheDir).ConfigureAwait(false).GetAwaiter().GetResult();
                 _serviceInfoMap = new ConcurrentDictionary<string, Dtos.ServiceInfo>(data);
@@ -45,7 +69,7 @@
             }
 
             _failoverReactor = new FailoverReactor(this, cacheDir);
-            _pushEmptyProtection = nacosOptions.NamingPushEmptyProtection;
+            _pushEmptyProtection = _options.NamingPushEmptyProtection;
         }
 
         private bool IsLoadCacheAtStart(NacosSdkOptions nacosOptions)
@@ -90,14 +114,6 @@
                 if (_notifier != null)
                 {
                     var @event = new InstancesChangeEvent(serviceInfo.Name, serviceInfo.GroupName, serviceInfo.Clusters, serviceInfo.Hosts);
-
-                    // grpc 和 udp 返回的数据格式不一样，需要对 udp 的方式进行兼容
-                    // {"name":"DEFAULT_GROUP@@mysvc2","clusters":"","cacheMillis":10000,"hosts":[{"serviceName":"DEFAULT_GROUP@@mysvc2"}],.....}
-                    if (!_options.NamingUseRpc)
-                    {
-                        @event.ServiceName = NamingUtils.GetServiceName(serviceInfo.Name);
-                        @event.GroupName = NamingUtils.GetGroupName(serviceInfo.Name);
-                    }
 
                     _notifier.OnEvent(@event);
                 }

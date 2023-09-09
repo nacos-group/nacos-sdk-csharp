@@ -18,8 +18,6 @@
 
         public static string FAILOVER_SWITCH = "00-00---000-VIPSRV_FAILOVER_SWITCH-000---00-00";
 
-        public static string DEFAULT_NAMESPACE_ID = "public";
-
         public static int REQUEST_DOMAIN_RETRY_COUNT = 3;
 
         public static int DEFAULT_CLIENT_BEAT_THREAD_COUNT = 1;

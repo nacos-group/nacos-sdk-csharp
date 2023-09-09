@@ -7,7 +7,9 @@
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
+    using System.Xml.Linq;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
     using Nacos;
     using Nacos.Common;
     using Nacos.Exceptions;
@@ -22,7 +24,7 @@
     using Nacos.Security;
     using Nacos.Utils;
 
-    public class NamingHttpClientProxy : INamingClientProxy
+    public class NamingHttpClientProxy : INamingHttpClientProxy
     {
         private static readonly int DEFAULT_SERVER_PORT = 8848;
 
@@ -34,41 +36,33 @@
 
         private string namespaceId;
 
-        private SecurityProxy _securityProxy;
+        private ISecurityProxy _securityProxy;
 
-        private ServerListManager serverListManager;
+        private IServerListFactory serverListManager;
 
         private BeatReactor beatReactor;
 
         private ServiceInfoHolder serviceInfoHolder;
-
-        private PushReceiver pushReceiver;
 
         private int serverPort = DEFAULT_SERVER_PORT;
 
         private NacosSdkOptions _options;
 
         public NamingHttpClientProxy(
-            string namespaceId,
-            SecurityProxy securityProxy,
-            ServerListManager serverListManager,
-            NacosSdkOptions options,
+            ILoggerFactory loggerFactory,
+            ISecurityProxy securityProxy,
+            IServerListFactory serverListManager,
+            IOptions<NacosSdkOptions> optionsAccs,
             ServiceInfoHolder serviceInfoHolder,
-            IHttpClientFactory clientFactory = null)
+            IHttpClientFactory clientFactory)
         {
             _clientFactory = clientFactory;
             this.serverListManager = serverListManager;
             _securityProxy = securityProxy;
-            _options = options;
+            _options = optionsAccs.Value;
             SetServerPort(DEFAULT_SERVER_PORT);
-            this.namespaceId = namespaceId;
+            this.namespaceId = string.IsNullOrWhiteSpace(_options.Namespace) ? Constants.DEFAULT_NAMESPACE_ID : _options.Namespace;
             beatReactor = new BeatReactor(this, _options);
-
-            // Don't create PushReceiver when using rpc, it will create a udp server
-            if (!options.NamingUseRpc)
-            {
-                pushReceiver = new PushReceiver(serviceInfoHolder, _options);
-            }
 
             this.serviceInfoHolder = serviceInfoHolder;
         }
@@ -263,7 +257,7 @@
         {
             paramters[CommonParams.NAMESPACE_ID] = namespaceId;
 
-            if ((servers == null || !servers.Any()) && serverListManager.IsDomain())
+            if (servers == null || !servers.Any())
                 throw new NacosException(NacosException.INVALID_PARAM, "no server available");
 
             NacosException exception = new NacosException(string.Empty);
@@ -287,22 +281,6 @@
                     }
 
                     index = (index + 1) % servers.Count;
-                }
-            }
-
-            if (serverListManager.IsDomain())
-            {
-                for (int i = 0; i < UtilAndComs.REQUEST_DOMAIN_RETRY_COUNT; i++)
-                {
-                    try
-                    {
-                        return await CallServer(url, paramters, body, serverListManager.GetNacosDomain(), method).ConfigureAwait(false);
-                    }
-                    catch (NacosException e)
-                    {
-                        exception = e;
-                        _logger?.LogDebug(e, "request {0} failed.", serverListManager.GetNacosDomain());
-                    }
                 }
             }
 
@@ -419,9 +397,9 @@
             }
         }
 
-        public async Task<ServiceInfo> Subscribe(string serviceName, string groupName, string clusters)
+        public Task<ServiceInfo> Subscribe(string serviceName, string groupName, string clusters)
         {
-            return await QueryInstancesOfService(serviceName, groupName, clusters, pushReceiver.GetUdpPort(), false).ConfigureAwait(false);
+            throw new NotSupportedException("Do not support subscribe service by UDP, please use gRPC replaced.");
         }
 
         public Task Unsubscribe(string serviceName, string groupName, string clusters)
@@ -510,6 +488,11 @@
         public Task BatchRegisterServiceAsync(string serviceName, string groupName, List<Instance> instances)
         {
             throw new NotImplementedException("Do not support persistent instances to perform batch registration methods.");
+        }
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -80,7 +80,6 @@
                 x.ListenInterval = this.ListenInterval;
                 x.Namespace = this.Namespace;
                 x.NamingLoadCacheAtStart = this.NamingLoadCacheAtStart;
-                x.NamingUseRpc = this.NamingUseRpc;
                 x.Password = this.Password;
                 x.SecretKey = this.SecretKey;
                 x.ServerAddresses = this.ServerAddresses;

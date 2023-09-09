@@ -9,6 +9,7 @@
     using System;
     using System.Collections.Concurrent;
     using System.Threading.Tasks;
+    using Nacos.Common;
     using Nacos.Logging;
 
     public class ConfigRpcServerRequestHandler : IServerRequestHandler

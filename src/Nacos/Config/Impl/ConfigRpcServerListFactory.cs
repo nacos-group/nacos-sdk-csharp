@@ -13,9 +13,19 @@
             _serverListManager = serverListManager;
         }
 
+        public void Dispose()
+        {
+            throw new System.NotImplementedException();
+        }
+
         public string GenNextServer() => _serverListManager.GetNextServerAddr();
 
         public string GetCurrentServer() => _serverListManager.GetCurrentServerAddr();
+
+        public string GetName()
+        {
+            throw new System.NotImplementedException();
+        }
 
         public List<string> GetServerList() => _serverListManager.GetServerUrls();
     }

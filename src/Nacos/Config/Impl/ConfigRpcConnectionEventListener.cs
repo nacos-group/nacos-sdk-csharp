@@ -1,6 +1,7 @@
 ﻿namespace Nacos.Config.Impl
 {
     using Microsoft.Extensions.Logging;
+    using Nacos.Common;
     using Nacos.Logging;
     using Nacos.Remote;
     using System;

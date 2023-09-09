@@ -52,8 +52,6 @@
 
         public bool ConfigUseRpc { get; set; } = true;
 
-        public bool NamingUseRpc { get; set; } = true;
-
         public string NamingLoadCacheAtStart { get; set; }
 
         public string NamingCacheRegistryDir { get; set; }
@@ -72,5 +70,10 @@
         /// Specify some extension info of IConfigFilter.
         /// </summary>
         public string ConfigFilterExtInfo { get; set; }
+
+        /// <summary>
+        /// TLS config
+        /// </summary>
+        public TLSConfig TLSConfig { get; set; }
     }
 }

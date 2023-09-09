@@ -19,9 +19,6 @@ builder.Services.AddNacosAspNet(x =>
     x.InstanceEnabled = true;
     x.Ephemeral = true;
     x.Secure = false;
-
-    // swich to use http or rpc
-    x.NamingUseRpc = true;
 });
 
 builder.Services.AddControllers();

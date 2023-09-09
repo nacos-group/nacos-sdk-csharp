@@ -2,7 +2,16 @@
 {
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
     using Nacos;
+    using Nacos.Auth;
+    using Nacos.Naming.Cache;
+    using Nacos.Naming.Event;
+    using Nacos.Naming.Remote;
+    using Nacos.Naming.Remote.Grpc;
+    using Nacos.Naming.Remote.Http;
+    using Nacos.Remote;
+    using Nacos.Security;
     using System;
     using System.Net.Http;
 
@@ -15,13 +24,6 @@
             services.AddOptions();
             services.Configure(configure);
 
-
-/* 项目“Nacos (netstandard2.0)”的未合并的更改
-在此之前:
-            var clientBuilder = services.AddHttpClient(V2.Common.Constants.ClientName)
-在此之后:
-            var clientBuilder = services.AddHttpClient(Constants.ClientName)
-*/
             var clientBuilder = services.AddHttpClient(Nacos.Common.Constants.ClientName)
                 .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseProxy = false, AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate });
 
@@ -31,12 +33,6 @@
             }
 
 
-            /* 项目“Nacos (netstandard2.0)”的未合并的更改
-            在此之前:
-                        services.AddSingleton<Nacos.INacosConfigService, Nacos.Config.NacosConfigService>();
-            在此之后:
-                        services.AddSingleton<Nacos.INacosConfigService, NacosConfigService>();
-            */
             services.AddSingleton<Security.ISecurityProxy, Security.SecurityProxy>();
             services.AddSingleton<Config.Abst.IServerListManager, Config.Impl.ServerListManager>();
             services.AddSingleton<Config.Abst.IConfigTransportClient, Config.Impl.ConfigRpcTransportClient>();
@@ -53,13 +49,6 @@
 
             services.Configure<NacosSdkOptions>(configuration.GetSection(sectionName));
 
-
-/* 项目“Nacos (netstandard2.0)”的未合并的更改
-在此之前:
-            var clientBuilder = services.AddHttpClient(V2.Common.Constants.ClientName)
-在此之后:
-            var clientBuilder = services.AddHttpClient(Constants.ClientName)
-*/
             var clientBuilder = services.AddHttpClient(Nacos.Common.Constants.ClientName)
                 .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseProxy = false, AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate });
 
@@ -68,13 +57,6 @@
                 clientBuilder.ConfigureHttpClient(httpClientAction);
             }
 
-
-            /* 项目“Nacos (netstandard2.0)”的未合并的更改
-            在此之前:
-                        services.AddSingleton<Nacos.INacosConfigService, Nacos.Config.NacosConfigService>();
-            在此之后:
-                        services.AddSingleton<Nacos.INacosConfigService, NacosConfigService>();
-            */
             services.AddSingleton<Config.Abst.IConfigFilterChain, Config.FilterImpl.ConfigFilterChainManager>();
 
             services.AddSingleton<INacosConfigService, Config.NacosConfigService>();
@@ -89,25 +71,19 @@
             services.AddOptions();
             services.Configure(configure);
 
-
-/* 项目“Nacos (netstandard2.0)”的未合并的更改
-在此之前:
-            var clientBuilder = services.AddHttpClient(V2.Common.Constants.ClientName)
-在此之后:
-            var clientBuilder = services.AddHttpClient(Constants.ClientName)
-*/
             var clientBuilder = services.AddHttpClient(Nacos.Common.Constants.ClientName)
                 .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseProxy = false, AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate });
 
             if (httpClientAction != null) clientBuilder.ConfigureHttpClient(httpClientAction);
 
-
-            /* 项目“Nacos (netstandard2.0)”的未合并的更改
-            在此之前:
-                        services.AddSingleton<INacosNamingService, Nacos.Naming.NacosNamingService>();
-            在此之后:
-                        services.AddSingleton<INacosNamingService, NacosNamingService>();
-            */
+            services.TryAddSingleton<IClientAuthService, NacosClientAuthServiceImpl>();
+            services.AddSingleton<InstancesChangeNotifier>();
+            services.AddSingleton<ServiceInfoHolder>();
+            services.AddSingleton<ISecurityProxy, SecurityProxy>();
+            services.AddSingleton<IServerListFactory, Nacos.Remote.ServerListManager>();
+            services.AddSingleton<INamingHttpClientProxy, NamingHttpClientProxy>();
+            services.AddSingleton<INamingGrpcClientProxy, NamingGrpcClientProxy>();
+            services.AddSingleton<INamingClientProxy, NamingClientProxyDelegate>();
             services.AddSingleton<INacosNamingService, Naming.NacosNamingService>();
 
             return services;
@@ -119,25 +95,19 @@
 
             services.Configure<NacosSdkOptions>(configuration.GetSection(sectionName));
 
-
-/* 项目“Nacos (netstandard2.0)”的未合并的更改
-在此之前:
-            var clientBuilder = services.AddHttpClient(V2.Common.Constants.ClientName)
-在此之后:
-            var clientBuilder = services.AddHttpClient(Constants.ClientName)
-*/
             var clientBuilder = services.AddHttpClient(Nacos.Common.Constants.ClientName)
                 .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler() { UseProxy = false, AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate });
 
             if (httpClientAction != null) clientBuilder.ConfigureHttpClient(httpClientAction);
 
-
-            /* 项目“Nacos (netstandard2.0)”的未合并的更改
-            在此之前:
-                        services.AddSingleton<INacosNamingService, Nacos.Naming.NacosNamingService>();
-            在此之后:
-                        services.AddSingleton<INacosNamingService, NacosNamingService>();
-            */
+            services.TryAddSingleton<IClientAuthService, NacosClientAuthServiceImpl>();
+            services.AddSingleton<InstancesChangeNotifier>();
+            services.AddSingleton<ServiceInfoHolder>();
+            services.AddSingleton<ISecurityProxy, SecurityProxy>();
+            services.AddSingleton<IServerListFactory, Nacos.Remote.ServerListManager>();
+            services.AddSingleton<INamingHttpClientProxy, NamingHttpClientProxy>();
+            services.AddSingleton<INamingGrpcClientProxy, NamingGrpcClientProxy>();
+            services.AddSingleton<INamingClientProxy, NamingClientProxyDelegate>();
             services.AddSingleton<INacosNamingService, Naming.NacosNamingService>();
 
             return services;

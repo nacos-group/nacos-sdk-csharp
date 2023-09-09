@@ -7,13 +7,13 @@
 
     public class GrpcConnection : RemoteConnection
     {
-        protected Grpc.Core.ChannelBase channel;
+        protected Grpc.Net.Client.GrpcChannel channel;
 
         protected Nacos.Request.RequestClient reqClient;
 
         protected Grpc.Core.AsyncDuplexStreamingCall<Nacos.Payload, Nacos.Payload> streamCall;
 
-        public void SetChannel(Grpc.Core.ChannelBase channel) => this.channel = channel;
+        public void SetChannel(Grpc.Net.Client.GrpcChannel channel) => this.channel = channel;
 
         public void SetRequestClient(Nacos.Request.RequestClient client) => reqClient = client;
 

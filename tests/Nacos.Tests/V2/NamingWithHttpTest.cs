@@ -26,9 +26,6 @@
 
                 /*x.UserName = "nacos";
                 x.Password = "nacos";*/
-
-                // swich to use http or rpc
-                x.NamingUseRpc = false;
             });
 
             services.AddLogging(builder => { builder.AddConsole(); });

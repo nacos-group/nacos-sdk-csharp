@@ -16,9 +16,12 @@
     using Nacos.Config.Abst;
     using Nacos.Logging;
     using Microsoft.Extensions.Options;
+    using Nacos.Common;
 
     public class ServerListManager : IServerListManager
     {
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<ServerListManager>();
+
         private static HttpClient _httpClient = new();
 
         public const string FIXED_NAME = "fixed";

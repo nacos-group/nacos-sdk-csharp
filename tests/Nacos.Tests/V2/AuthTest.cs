@@ -35,7 +35,6 @@
 
                 // swich to use http or rpc
                 x.ConfigUseRpc = true;
-                x.NamingUseRpc = true;
             });
 
             services.AddNacosV2Naming(x =>

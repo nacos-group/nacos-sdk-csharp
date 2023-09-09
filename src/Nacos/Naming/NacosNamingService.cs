@@ -34,20 +34,19 @@
 
         public NacosNamingService(
             IOptions<NacosSdkOptions> optionAccs,
-            IHttpClientFactory clientFactory)
+            INamingClientProxy clientProxy,
+            InstancesChangeNotifier changeNotifier,
+            ServiceInfoHolder serviceInfoHolder)
         {
             _options = optionAccs.Value;
+            _clientProxy = clientProxy;
+            _changeNotifier = changeNotifier;
+            _serviceInfoHolder = serviceInfoHolder;
 
-            /* 项目“Nacos (netstandard2.0)”的未合并的更改
-            在此之前:
-                        _namespace = string.IsNullOrWhiteSpace(_options.Namespace) ? Utils.UtilAndComs.DEFAULT_NAMESPACE_ID : _options.Namespace;
-            在此之后:
-                        _namespace = string.IsNullOrWhiteSpace(_options.Namespace) ? UtilAndComs.DEFAULT_NAMESPACE_ID : _options.Namespace;
-            */
-            _namespace = string.IsNullOrWhiteSpace(_options.Namespace) ? Utils.UtilAndComs.DEFAULT_NAMESPACE_ID : _options.Namespace;
-            _changeNotifier = new InstancesChangeNotifier();
-            _serviceInfoHolder = new ServiceInfoHolder(_namespace, _options, _changeNotifier);
-            _clientProxy = new NamingClientProxyDelegate(_namespace, _serviceInfoHolder, _options, _changeNotifier, clientFactory);
+            _namespace = string.IsNullOrWhiteSpace(_options.Namespace) ? Constants.DEFAULT_NAMESPACE_ID : _options.Namespace;
+
+            // _serviceInfoHolder = new ServiceInfoHolder(_namespace, _options, _changeNotifier);
+            // _clientProxy = new NamingClientProxyDelegate(_namespace, _serviceInfoHolder, _options, _changeNotifier, clientFactory);
         }
 
         public async Task DeregisterInstance(string serviceName, string ip, int port)

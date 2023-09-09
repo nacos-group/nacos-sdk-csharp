@@ -24,6 +24,8 @@
 
     public class ConfigRpcTransportClient : AbstConfigTransportClient
     {
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<ConfigRpcTransportClient>();
+
         private static readonly string RPC_AGENT_NAME = "config_rpc_client";
 
         private static object _obj = new();
@@ -229,7 +231,7 @@
                 };
 
                 RpcClient rpcClient = RpcClientFactory
-                        .CreateClient($"{uuid}_config-{taskId}", RemoteConnectionType.GRPC, newlabels);
+                        .CreateClient($"{uuid}_config-{taskId}", RemoteConnectionType.GRPC, newlabels, _options.TLSConfig);
 
                 if (rpcClient.IsWaitInited())
                 {
