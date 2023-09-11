@@ -16,11 +16,6 @@
         internal INacosConfigService Client;
 
         /// <summary>
-        /// The ILoggerFactory.
-        /// </summary>
-        internal ILoggerFactory LoggerFactory;
-
-        /// <summary>
         /// The configuration listeners
         /// </summary>
         public List<ConfigListener> Listeners { get; set; }
@@ -30,10 +25,9 @@
         /// </summary>
         public INacosConfigurationParser NacosConfigurationParser { get; set; }
 
-        public NacosV2ConfigurationSource(INacosConfigService client, ILoggerFactory loggerFactory)
+        public NacosV2ConfigurationSource(INacosConfigService client)
         {
             Client = client;
-            LoggerFactory = loggerFactory;
         }
 
         /// <summary>
@@ -43,7 +37,7 @@
         /// <returns>IConfigurationProvider</returns>
         public IConfigurationProvider Build(IConfigurationBuilder builder)
         {
-            return new NacosV2ConfigurationProvider(this, Client, LoggerFactory);
+            return new NacosV2ConfigurationProvider(this, Client);
         }
 
         public string GetNamespace()

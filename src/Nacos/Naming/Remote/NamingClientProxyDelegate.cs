@@ -40,7 +40,6 @@
         private long _securityInfoRefreshIntervalMills = 5000;
 
         public NamingClientProxyDelegate(
-            ILoggerFactory loggerFactory,
             ServiceInfoHolder serviceInfoHolder,
             IOptions<NacosSdkOptions> options,
             InstancesChangeNotifier changeNotifier,
@@ -54,7 +53,7 @@
             serverListManager = serverListFactory;
             this.securityProxy = securityProxy;
             InitSecurityProxy();
-            _serviceInfoUpdateService = new ServiceInfoUpdateService(loggerFactory.CreateLogger<NamingClientProxyDelegate>(), _options, serviceInfoHolder, this, changeNotifier);
+            _serviceInfoUpdateService = new ServiceInfoUpdateService(_options, serviceInfoHolder, this, changeNotifier);
 
             this.grpcClientProxy = grpcClientProxy;
             this.httpClientProxy = httpClientProxy;

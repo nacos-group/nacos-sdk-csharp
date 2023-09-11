@@ -32,6 +32,7 @@
                 clientBuilder.ConfigureHttpClient(httpClientAction);
             }
 
+            services.AddSingleton<ISecurityProxy, SecurityProxy>();
             services.AddSingleton<INacosConfigService, Config.NacosConfigService>();
 
             return services;
@@ -50,6 +51,8 @@
             {
                 clientBuilder.ConfigureHttpClient(httpClientAction);
             }
+
+            services.AddSingleton<Config.Abst.IConfigFilterChain, Config.FilterImpl.ConfigFilterChainManager>();
 
             services.AddSingleton<INacosConfigService, Config.NacosConfigService>();
 

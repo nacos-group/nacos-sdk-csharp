@@ -13,6 +13,7 @@
     using Nacos;
     using Nacos.Common;
     using Nacos.Exceptions;
+    using Nacos.Logging;
     using Nacos.Naming.Beat;
     using Nacos.Naming.Cache;
     using Nacos.Naming.Core;
@@ -29,7 +30,7 @@
 
         private static readonly string NAMING_SERVER_PORT = "nacos.naming.exposed.port";
 
-        private ILogger _logger;
+        private ILogger _logger = NacosLogManager.CreateLogger<NamingHttpClientProxy>();
 
         private readonly IHttpClientFactory _clientFactory;
 
@@ -55,14 +56,13 @@
             ServiceInfoHolder serviceInfoHolder,
             IHttpClientFactory clientFactory)
         {
-            _logger = loggerFactory.CreateLogger<NamingHttpClientProxy>();
             _clientFactory = clientFactory;
             this.serverListManager = serverListManager;
             _securityProxy = securityProxy;
             _options = optionsAccs.Value;
             SetServerPort(DEFAULT_SERVER_PORT);
             this.namespaceId = string.IsNullOrWhiteSpace(_options.Namespace) ? Constants.DEFAULT_NAMESPACE_ID : _options.Namespace;
-            beatReactor = new BeatReactor(_logger, this, _options);
+            beatReactor = new BeatReactor(this, _options);
 
             this.serviceInfoHolder = serviceInfoHolder;
         }

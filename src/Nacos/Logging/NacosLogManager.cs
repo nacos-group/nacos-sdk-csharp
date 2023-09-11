@@ -1,9 +1,10 @@
-﻿namespace Nacos.Common
+﻿namespace Nacos.Logging
 {
-    using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Logging.Abstractions;
+    using Microsoft.Extensions.Logging;
+    using System;
 
-    public static class NacosLogManager
+    public class NacosLogManager
     {
         private static ILoggerFactory _loggerFactory;
 
@@ -12,14 +13,14 @@
             return _loggerFactory?.CreateLogger<T>() ?? NullLogger<T>.Instance;
         }
 
-        public static ILogger CreateLogger(string category)
+        public static ILogger CreateLogger(string categoryName)
         {
-            return _loggerFactory?.CreateLogger(category) ?? NullLogger.Instance;
+            return _loggerFactory?.CreateLogger(categoryName) ?? NullLogger.Instance;
         }
 
         public static void UseLoggerFactory(ILoggerFactory loggerFactory)
         {
-            _loggerFactory = loggerFactory ?? throw new System.ArgumentNullException(nameof(loggerFactory));
+            _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
         }
     }
 }

@@ -5,6 +5,7 @@
     using global::Microsoft.Extensions.Logging;
     using Nacos;
     using Nacos.DependencyInjection;
+    using Nacos.Logging;
     using System;
     using System.Collections.Generic;
     using Xunit;
@@ -27,10 +28,9 @@
         {
             var serviceProvider = BuildNacosProvider();
             var client = serviceProvider.GetService<INacosConfigService>();
-            var logFactory = serviceProvider.GetService<ILoggerFactory>();
 
             IConfigurationBuilder builder = new ConfigurationBuilder();
-            builder.AddNacosV2Configuration(NCSAction, client, logFactory);
+            builder.AddNacosV2Configuration(NCSAction, client);
 
             Assert.Single(builder.Sources);
 
@@ -38,7 +38,8 @@
             Assert.IsType<NacosV2ConfigurationSource>(source);
 
             Assert.Equal(client, ((NacosV2ConfigurationSource)source).Client);
-            Assert.Equal(logFactory, ((NacosV2ConfigurationSource)source).LoggerFactory);
+
+            // Assert.Equal(logFactory, ((NacosV2ConfigurationSource)source).LoggerFactory);
         }
 
         [Fact]
@@ -57,12 +58,11 @@
         {
             var serviceProvider = BuildNacosProvider();
             var client = serviceProvider.GetService<INacosConfigService>();
-            var logFactory = serviceProvider.GetService<ILoggerFactory>();
 
             IConfiguration configuration = BuildNacosConfigIConfiguration();
 
             IConfigurationBuilder builder = new ConfigurationBuilder();
-            builder.AddNacosV2Configuration(configuration, client, logFactory);
+            builder.AddNacosV2Configuration(configuration, client);
 
             Assert.Single(builder.Sources);
 
@@ -70,7 +70,8 @@
             Assert.IsType<NacosV2ConfigurationSource>(source);
 
             Assert.Equal(client, ((NacosV2ConfigurationSource)source).Client);
-            Assert.Equal(logFactory, ((NacosV2ConfigurationSource)source).LoggerFactory);
+
+            // Assert.Equal(logFactory, ((NacosV2ConfigurationSource)source).LoggerFactory);
         }
 
         [Fact]
@@ -121,7 +122,11 @@
 
             IConfiguration configuration = BuildNacosConfigIConfiguration("nacos:");
             serviceCollection.AddNacosV2Config(configuration);
-            serviceCollection.AddLogging(x => x.AddConsole());
+            var loggerFactory = LoggerFactory.Create(
+               builder => builder
+                  .AddFilter("logger", LogLevel.Information)
+                  .AddConsole());
+            NacosLogManager.UseLoggerFactory(loggerFactory);
 
             return serviceCollection.BuildServiceProvider();
         }

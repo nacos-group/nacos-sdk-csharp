@@ -2,6 +2,7 @@
 {
     using Microsoft.Extensions.Logging;
     using Nacos.Common;
+    using Nacos.Logging;
     using Nacos.Remote;
     using System;
     using System.Collections.Concurrent;
@@ -9,7 +10,6 @@
     public class ConfigRpcConnectionEventListener : IConnectionEventListener
     {
         private readonly ILogger _logger = NacosLogManager.CreateLogger<ConfigRpcConnectionEventListener>();
-
         private readonly RpcClient _rpcClient;
         private readonly ConcurrentDictionary<string, CacheData> _cacheMap;
         private readonly BlockingCollection<object> _listenExecutebell;

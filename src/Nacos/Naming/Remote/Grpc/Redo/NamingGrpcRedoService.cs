@@ -1,6 +1,7 @@
 ﻿namespace Nacos.Naming.Remote.Grpc.Redo
 {
     using Microsoft.Extensions.Logging;
+    using Nacos.Logging;
     using Nacos.Naming.Dtos;
     using Nacos.Naming.Remote.Grpc;
     using Nacos.Naming.Utils;
@@ -13,7 +14,7 @@
 
     public class NamingGrpcRedoService : IConnectionEventListener, IDisposable
     {
-        private readonly ILogger _logger;
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<NamingGrpcRedoService>();
         private readonly ConcurrentDictionary<string, InstanceRedoData> _registeredInstances;
         private readonly ConcurrentDictionary<string, SubscriberRedoData> _subscribes;
 
@@ -21,13 +22,12 @@
         private long _connected = 0;
         private static readonly long DEFAULT_REDO_DELAY = 3000L;
 
-        public NamingGrpcRedoService(ILogger logger, NamingGrpcClientProxy clientProxy)
+        public NamingGrpcRedoService(NamingGrpcClientProxy clientProxy)
         {
-            _logger = logger;
             _registeredInstances = new ConcurrentDictionary<string, InstanceRedoData>();
             _subscribes = new ConcurrentDictionary<string, SubscriberRedoData>();
             _timer = new Timer(
-                async x => await new RedoScheduledTask(_logger, clientProxy, this).Run().ConfigureAwait(false),
+                async x => await new RedoScheduledTask(clientProxy, this).Run().ConfigureAwait(false),
                 null,
                 TimeSpan.FromMilliseconds(DEFAULT_REDO_DELAY),
                 TimeSpan.FromMilliseconds(DEFAULT_REDO_DELAY));

@@ -5,6 +5,7 @@
     using Nacos;
     using Nacos.Auth;
     using Nacos.Common;
+    using Nacos.Logging;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;

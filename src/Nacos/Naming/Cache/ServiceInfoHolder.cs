@@ -14,13 +14,14 @@
     using Microsoft.Extensions.Options;
     using System.Xml.Linq;
     using Nacos.Common;
+    using Nacos.Logging;
 
     public class ServiceInfoHolder : IDisposable
     {
         private static readonly string FILE_PATH_NACOS = "nacos";
         private static readonly string FILE_PATH_NAMING = "naming";
 
-        private readonly ILogger _logger;
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<ServiceInfoHolder>();
         private readonly FailoverReactor _failoverReactor;
         private readonly ConcurrentDictionary<string, Dtos.ServiceInfo> _serviceInfoMap;
         private readonly NacosSdkOptions _options;
@@ -29,9 +30,8 @@
         private string cacheDir = string.Empty;
         private bool _pushEmptyProtection;
 
-        internal ServiceInfoHolder(ILogger logger, string namespeceId, NacosSdkOptions options, InstancesChangeNotifier notifier = null)
+        internal ServiceInfoHolder(string namespeceId, NacosSdkOptions options, InstancesChangeNotifier notifier = null)
         {
-            _logger = logger;
             _options = options;
 
             InitCacheDir(namespeceId, _options);
@@ -46,13 +46,12 @@
                 _serviceInfoMap = new ConcurrentDictionary<string, Dtos.ServiceInfo>();
             }
 
-            _failoverReactor = new FailoverReactor(_logger, this, cacheDir);
+            _failoverReactor = new FailoverReactor(this, cacheDir);
             _pushEmptyProtection = _options.NamingPushEmptyProtection;
         }
 
-        public ServiceInfoHolder(ILoggerFactory loggerFactory, IOptions<NacosSdkOptions> optionsAccs, InstancesChangeNotifier notifier = null)
+        public ServiceInfoHolder(IOptions<NacosSdkOptions> optionsAccs, InstancesChangeNotifier notifier = null)
         {
-            _logger = loggerFactory.CreateLogger<ServiceInfoHolder>();
             _notifier = notifier;
             _options = optionsAccs.Value;
 
@@ -69,7 +68,7 @@
                 _serviceInfoMap = new ConcurrentDictionary<string, Dtos.ServiceInfo>();
             }
 
-            _failoverReactor = new FailoverReactor(_logger, this, cacheDir);
+            _failoverReactor = new FailoverReactor(this, cacheDir);
             _pushEmptyProtection = _options.NamingPushEmptyProtection;
         }
 

@@ -34,7 +34,7 @@
             _mockSvc.Setup(x => x.RegisterInstance(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Instance>())).Returns(Task.CompletedTask);
             _mockOptions.Setup(x => x.CurrentValue).Returns(new NacosAspNetOptions { ServiceName = "abc123", Ip = "127.0.0.1" });
 
-            var task = new RegSvcBgTask(NullLoggerFactory.Instance, _mockSvc.Object, _mockServer.Object, _mockOptions.Object);
+            var task = new RegSvcBgTask(_mockSvc.Object, _mockServer.Object, _mockOptions.Object);
             await task.StartAsync(default).ConfigureAwait(false);
 
             // only one, if succeed
@@ -48,7 +48,7 @@
             _mockSvc.Setup(x => x.RegisterInstance(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Instance>())).Throws<Exception>();
             _mockOptions.Setup(x => x.CurrentValue).Returns(new NacosAspNetOptions { ServiceName = "abc123", Ip = "127.0.0.1" });
 
-            var task = new RegSvcBgTask(NullLoggerFactory.Instance, _mockSvc.Object, _mockServer.Object, _mockOptions.Object);
+            var task = new RegSvcBgTask(_mockSvc.Object, _mockServer.Object, _mockOptions.Object);
             await task.StartAsync(default).ConfigureAwait(false);
 
             // at most three times, if fail
@@ -68,7 +68,7 @@
             _mockSvc.Setup(x => x.RegisterInstance(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Instance>())).Returns(Task.CompletedTask);
             _mockOptions.Setup(x => x.CurrentValue).Returns(new NacosAspNetOptions { ServiceName = "abc123" });
 
-            var task = new RegSvcBgTask(NullLoggerFactory.Instance, _mockSvc.Object, _mockServer.Object, _mockOptions.Object);
+            var task = new RegSvcBgTask(_mockSvc.Object, _mockServer.Object, _mockOptions.Object);
             await task.StartAsync(default).ConfigureAwait(false);
 
             _mockSvc.Verify(x => x.RegisterInstance(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Instance>()), Times.Exactly(2));
@@ -87,7 +87,7 @@
             _mockSvc.Setup(x => x.RegisterInstance(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Instance>())).Throws<Exception>();
             _mockOptions.Setup(x => x.CurrentValue).Returns(new NacosAspNetOptions { ServiceName = "abc123" });
 
-            var task = new RegSvcBgTask(NullLoggerFactory.Instance, _mockSvc.Object, _mockServer.Object, _mockOptions.Object);
+            var task = new RegSvcBgTask(_mockSvc.Object, _mockServer.Object, _mockOptions.Object);
             await task.StartAsync(default).ConfigureAwait(false);
 
             _mockSvc.Verify(x => x.RegisterInstance(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Instance>()), Times.AtMost(6));

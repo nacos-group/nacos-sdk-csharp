@@ -9,6 +9,7 @@
     using Nacos.Config.FilterImpl;
     using Nacos.Config.Utils;
     using Nacos.Exceptions;
+    using Nacos.Logging;
     using Nacos.Remote;
     using Nacos.Remote.Requests;
     using Nacos.Remote.Responses;
@@ -24,15 +25,10 @@
     public class ConfigRpcTransportClient : AbstConfigTransportClient
     {
         private readonly ILogger _logger = NacosLogManager.CreateLogger<ConfigRpcTransportClient>();
-
         private static readonly string RPC_AGENT_NAME = "config_rpc_client";
-
         private static object _obj = new();
-
         private readonly BlockingCollection<object> _listenExecutebell = new(boundedCapacity: 1);
-
         private object _bellItem = new();
-
         private ConcurrentDictionary<string, CacheData> _cacheMap;
         private string uuid = Guid.NewGuid().ToString();
 
@@ -41,11 +37,11 @@
         private long _securityInfoRefreshIntervalMills = 5000;
 
         public ConfigRpcTransportClient(
-            NacosSdkOptions options,
+            IOptions<NacosSdkOptions> optionAccs,
             IServerListManager serverListManager,
             ISecurityProxy securityProxy)
         {
-            _options = options;
+            _options = optionAccs.Value;
             _serverListManager = serverListManager;
             _accessKey = _options.AccessKey;
             _secretKey = _options.SecretKey;

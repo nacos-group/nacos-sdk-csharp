@@ -17,17 +17,13 @@
         /// <param name="builder">IConfigurationBuilder</param>
         /// <param name="action">setup NacosConfigurationSource</param>
         /// <param name="client">The nacos config client</param>
-        /// <param name="loggerFactory">The loggerFactory</param>
         /// <param name="parser">The parser.</param>
-        /// <param name="logAction">The logAction.</param>
         /// <returns>IConfigurationBuilder</returns>
         public static IConfigurationBuilder AddNacosV2Configuration(
            this IConfigurationBuilder builder,
            Action<NacosV2ConfigurationSource> action,
            INacosConfigService client = null,
-           ILoggerFactory loggerFactory = null,
-           INacosConfigurationParser parser = null,
-           Action<ILoggingBuilder> logAction = null)
+           INacosConfigurationParser parser = null)
         {
             if (builder == null)
             {
@@ -39,11 +35,11 @@
                 throw new ArgumentNullException(nameof(action));
             }
 
-            var source = new NacosV2ConfigurationSource(null, null);
+            var source = new NacosV2ConfigurationSource(null);
             action.Invoke(source);
             source.NacosConfigurationParser ??= parser ?? DefaultJsonConfigurationStringParser.Instance;
 
-            BuildDISource(source, client, loggerFactory, logAction);
+            BuildDISource(source, client);
 
             return builder.Add(source);
         }
@@ -54,17 +50,13 @@
         /// <param name="builder">IConfigurationBuilder</param>
         /// <param name="configuration">Configuration binding nacos configuration source</param>
         /// <param name="client">The nacos config client</param>
-        /// <param name="loggerFactory">The loggerFactory</param>
         /// <param name="parser">The parser.</param>
-        /// <param name="logAction">The logAction.</param>
         /// <returns>IConfigurationBuilder</returns>
         public static IConfigurationBuilder AddNacosV2Configuration(
            this IConfigurationBuilder builder,
            IConfiguration configuration,
            INacosConfigService client = null,
-           ILoggerFactory loggerFactory = null,
-           INacosConfigurationParser parser = null,
-           Action<ILoggingBuilder> logAction = null)
+           INacosConfigurationParser parser = null)
         {
             if (builder == null)
             {
@@ -76,11 +68,11 @@
                 throw new ArgumentNullException(nameof(configuration));
             }
 
-            var source = new NacosV2ConfigurationSource(null, null);
+            var source = new NacosV2ConfigurationSource(null);
             configuration.Bind(source);
             source.NacosConfigurationParser = parser ?? DefaultJsonConfigurationStringParser.Instance;
 
-            BuildDISource(source, client, loggerFactory, logAction);
+            BuildDISource(source, client);
 
             return builder.Add(source);
         }
@@ -99,7 +91,7 @@
             {
                 var config = cfb.Build();
 
-                cfb.AddNacosV2Configuration(config.GetSection(section), parser: parser, logAction: logAction);
+                cfb.AddNacosV2Configuration(config.GetSection(section), parser: parser);
             });
 
             return builder;
@@ -112,15 +104,14 @@
         /// <param name="builder">host builder.</param>
         /// <param name="section">basic nacos configuration section.</param>
         /// <param name="parser">The parser.</param>
-        /// <param name="logAction">The logAction.</param>
         /// <returns>IHostBuilder</returns>
-        public static AspNetCore.Hosting.IWebHostBuilder UseNacosConfig(this AspNetCore.Hosting.IWebHostBuilder builder, string section, INacosConfigurationParser parser = null, Action<ILoggingBuilder> logAction = null)
+        public static AspNetCore.Hosting.IWebHostBuilder UseNacosConfig(this AspNetCore.Hosting.IWebHostBuilder builder, string section, INacosConfigurationParser parser = null)
         {
             builder.ConfigureAppConfiguration((_, cfb) =>
             {
                 var config = cfb.Build();
 
-                cfb.AddNacosV2Configuration(config.GetSection(section), parser: parser, logAction: logAction);
+                cfb.AddNacosV2Configuration(config.GetSection(section), parser: parser);
             });
 
             return builder;
@@ -129,9 +120,7 @@
 
         private static void BuildDISource(
             NacosV2ConfigurationSource source,
-            INacosConfigService client,
-            ILoggerFactory logFactory,
-            Action<ILoggingBuilder> logAction)
+            INacosConfigService client)
         {
             if (client == null)
             {
@@ -139,16 +128,13 @@
 
                 var sdkAction = source.GetNacosSdkOptions();
                 serviceCollection.AddNacosV2Config(sdkAction);
-                serviceCollection.AddLogging(logAction ?? (x => x.AddConsole()));
 
                 var serviceProvider = serviceCollection.BuildServiceProvider();
 
                 client = serviceProvider.GetService<INacosConfigService>();
-                logFactory = serviceProvider.GetService<ILoggerFactory>();
             }
 
             source.Client = client ?? throw new Nacos.Exceptions.NacosException("Can't get INacosConfigService instance from DI Container");
-            source.LoggerFactory = logFactory;
         }
     }
 }
