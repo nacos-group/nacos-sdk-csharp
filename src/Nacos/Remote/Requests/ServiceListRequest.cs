@@ -14,13 +14,13 @@
             PageSize = pageSize;
         }
 
-        [Newtonsoft.Json.JsonProperty("pageNo")]
+        [System.Text.Json.Serialization.JsonPropertyName("pageNo")]
         public int PageNo { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("pageSize")]
+        [System.Text.Json.Serialization.JsonPropertyName("pageSize")]
         public int PageSize { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("selector")]
+        [System.Text.Json.Serialization.JsonPropertyName("selector")]
         public string Selector { get; set; }
 
         public override string GetRemoteType() => RemoteRequestType.Req_Naming_ServiceList;

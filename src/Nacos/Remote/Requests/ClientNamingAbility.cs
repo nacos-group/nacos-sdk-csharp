@@ -2,10 +2,10 @@
 {
     public class ClientNamingAbility
     {
-        [Newtonsoft.Json.JsonProperty("supportDeltaPush")]
+        [System.Text.Json.Serialization.JsonPropertyName("supportDeltaPush")]
         public bool SupportDeltaPush { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("supportRemoteMetric")]
+        [System.Text.Json.Serialization.JsonPropertyName("supportRemoteMetric")]
         public bool SupportRemoteMetric { get; set; }
     }
 }

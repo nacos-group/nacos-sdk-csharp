@@ -2,10 +2,10 @@
 {
     public class InstanceRequest : AbstractNamingRequest
     {
-        [Newtonsoft.Json.JsonProperty("type")]
+        [System.Text.Json.Serialization.JsonPropertyName("type")]
         public string Type { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("instance")]
+        [System.Text.Json.Serialization.JsonPropertyName("instance")]
 
         /* 项目“Nacos (netstandard2.0)”的未合并的更改
         在此之前:

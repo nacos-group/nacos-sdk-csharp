@@ -6,25 +6,25 @@
 
         public static readonly int CONFIG_QUERY_CONFLICT = 400;
 
-        [Newtonsoft.Json.JsonProperty("content")]
+        [System.Text.Json.Serialization.JsonPropertyName("content")]
         public string Content { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("contentType")]
+        [System.Text.Json.Serialization.JsonPropertyName("contentType")]
         public string ContentType { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("md5")]
+        [System.Text.Json.Serialization.JsonPropertyName("md5")]
         public string Md5 { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("isBeta")]
+        [System.Text.Json.Serialization.JsonPropertyName("isBeta")]
         public bool IsBeta { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("tag")]
+        [System.Text.Json.Serialization.JsonPropertyName("tag")]
         public string Tag { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("lastModified")]
+        [System.Text.Json.Serialization.JsonPropertyName("lastModified")]
         public long LastModified { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("encryptedDataKey")]
+        [System.Text.Json.Serialization.JsonPropertyName("encryptedDataKey")]
         public string EncryptedDataKey { get; set; }
 
         public override string GetRemoteType() => RemoteRequestType.Resp_Config_Query;

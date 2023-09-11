@@ -2,7 +2,7 @@
 {
     public class SubscribeServiceResponse : CommonResponse
     {
-        [Newtonsoft.Json.JsonProperty("serviceInfo")]
+        [System.Text.Json.Serialization.JsonPropertyName("serviceInfo")]
 
         /* 项目“Nacos (netstandard2.0)”的未合并的更改
         在此之前:

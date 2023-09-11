@@ -2,22 +2,22 @@
 {
     public class CommonRequestMeta
     {
-        [Newtonsoft.Json.JsonProperty("connectionId")]
+        [System.Text.Json.Serialization.JsonPropertyName("connectionId")]
         public string ConnectionId { get; set; } = "";
 
-        [Newtonsoft.Json.JsonProperty("clientIp")]
+        [System.Text.Json.Serialization.JsonPropertyName("clientIp")]
         public string ClientIp { get; set; } = "";
 
-        [Newtonsoft.Json.JsonProperty("clientPort")]
+        [System.Text.Json.Serialization.JsonPropertyName("clientPort")]
         public int ClientPort { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("clientVersion")]
+        [System.Text.Json.Serialization.JsonPropertyName("clientVersion")]
         public string ClientVersion { get; set; } = "";
 
-        [Newtonsoft.Json.JsonProperty("type")]
+        [System.Text.Json.Serialization.JsonPropertyName("type")]
         public string Type { get; set; } = "";
 
-        [Newtonsoft.Json.JsonProperty("labels")]
+        [System.Text.Json.Serialization.JsonPropertyName("labels")]
         public System.Collections.Generic.Dictionary<string, string> Labels { get; set; } = new System.Collections.Generic.Dictionary<string, string>();
     }
 }

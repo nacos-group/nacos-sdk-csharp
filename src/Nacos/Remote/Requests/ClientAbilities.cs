@@ -2,13 +2,13 @@
 {
     public class ClientAbilities
     {
-        [Newtonsoft.Json.JsonProperty("remoteAbility")]
+        [System.Text.Json.Serialization.JsonPropertyName("remoteAbility")]
         public ClientRemoteAbility RemoteAbility = new ClientRemoteAbility();
 
-        [Newtonsoft.Json.JsonProperty("configAbility")]
+        [System.Text.Json.Serialization.JsonPropertyName("configAbility")]
         public ClientConfigAbility ConfigAbility = new ClientConfigAbility();
 
-        [Newtonsoft.Json.JsonProperty("namingAbility")]
+        [System.Text.Json.Serialization.JsonPropertyName("namingAbility")]
         public ClientNamingAbility NamingAbility = new ClientNamingAbility();
     }
 }

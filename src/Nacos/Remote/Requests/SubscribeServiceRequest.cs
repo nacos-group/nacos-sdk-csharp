@@ -15,10 +15,10 @@
         }
 
 
-        [Newtonsoft.Json.JsonProperty("subscribe")]
+        [System.Text.Json.Serialization.JsonPropertyName("subscribe")]
         public bool Subscribe { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("clusters")]
+        [System.Text.Json.Serialization.JsonPropertyName("clusters")]
         public string Clisters { get; set; }
 
         public override string GetRemoteType() => RemoteRequestType.Req_Naming_SubscribeService;

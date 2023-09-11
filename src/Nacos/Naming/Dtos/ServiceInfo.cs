@@ -8,28 +8,28 @@
 
     public class ServiceInfo
     {
-        [Newtonsoft.Json.JsonProperty("name")]
+        [System.Text.Json.Serialization.JsonPropertyName("name")]
         public string Name { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("groupName")]
+        [System.Text.Json.Serialization.JsonPropertyName("groupName")]
         public string GroupName { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("cacheMillis")]
+        [System.Text.Json.Serialization.JsonPropertyName("cacheMillis")]
         public long CacheMillis { get; set; } = 1000L;
 
-        [Newtonsoft.Json.JsonProperty("lastRefTime")]
+        [System.Text.Json.Serialization.JsonPropertyName("lastRefTime")]
         public long LastRefTime { get; set; } = 0L;
 
-        [Newtonsoft.Json.JsonProperty("checksum")]
+        [System.Text.Json.Serialization.JsonPropertyName("checksum")]
         public string Checksum { get; set; } = "";
 
-        [Newtonsoft.Json.JsonProperty("hosts")]
+        [System.Text.Json.Serialization.JsonPropertyName("hosts")]
         public List<Instance> Hosts { get; set; } = new List<Instance>();
 
-        [Newtonsoft.Json.JsonProperty("metallIPsadata")]
+        [System.Text.Json.Serialization.JsonPropertyName("metallIPsadata")]
         public bool AllIPs { get; set; } = false;
 
-        [Newtonsoft.Json.JsonProperty("clusters")]
+        [System.Text.Json.Serialization.JsonPropertyName("clusters")]
         public string Clusters { get; set; }
 
         public ServiceInfo()
@@ -76,7 +76,7 @@
             => !string.IsNullOrEmpty(clusters) ? name + Constants.SERVICE_INFO_SPLITER + clusters : name;
 
 
-        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public string JsonFromServer { get; set; }
 
         public string GetKeyEncoded() => GetKey(System.Net.WebUtility.UrlEncode(GetGroupedServiceName()), Clusters);

@@ -4,10 +4,10 @@
 
     public abstract class CommonRequest
     {
-        [Newtonsoft.Json.JsonProperty("headers")]
+        [System.Text.Json.Serialization.JsonPropertyName("headers")]
         public System.Collections.Generic.Dictionary<string, string> Headers { get; set; } = new System.Collections.Generic.Dictionary<string, string>();
 
-        [Newtonsoft.Json.JsonProperty("requestId")]
+        [System.Text.Json.Serialization.JsonPropertyName("requestId")]
         public string RequestId { get; set; }
 
         public void PutHeader(string key, string value)

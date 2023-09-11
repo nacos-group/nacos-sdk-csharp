@@ -11,61 +11,61 @@
         /// <summary>
         /// unique id of this instance.
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("instanceId")]
+        [System.Text.Json.Serialization.JsonPropertyName("instanceId")]
         public string InstanceId { get; set; }
 
         /// <summary>
         /// instance ip.
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("ip")]
+        [System.Text.Json.Serialization.JsonPropertyName("ip")]
         public string Ip { get; set; }
 
         /// <summary>
         /// instance port.
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("port")]
+        [System.Text.Json.Serialization.JsonPropertyName("port")]
         public int Port { get; set; }
 
         /// <summary>
         /// instance weight.
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("weight")]
+        [System.Text.Json.Serialization.JsonPropertyName("weight")]
         public double Weight { get; set; } = 1.0D;
 
         /// <summary>
         /// instance health status.
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("healthy")]
+        [System.Text.Json.Serialization.JsonPropertyName("healthy")]
         public bool Healthy { get; set; } = true;
 
         /// <summary>
         /// If instance is enabled to accept request.
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("enabled")]
+        [System.Text.Json.Serialization.JsonPropertyName("enabled")]
         public bool Enabled { get; set; } = true;
 
         /// <summary>
         /// If instance is ephemeral.
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("ephemeral")]
+        [System.Text.Json.Serialization.JsonPropertyName("ephemeral")]
         public bool Ephemeral { get; set; } = true;
 
         /// <summary>
         /// cluster information of instance.
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("clusterName")]
+        [System.Text.Json.Serialization.JsonPropertyName("clusterName")]
         public string ClusterName { get; set; }
 
         /// <summary>
         ///  Service information of instance.
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("serviceName")]
+        [System.Text.Json.Serialization.JsonPropertyName("serviceName")]
         public string ServiceName { get; set; }
 
         /// <summary>
         /// user extended attributes.
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("metadata")]
+        [System.Text.Json.Serialization.JsonPropertyName("metadata")]
         public Dictionary<string, string> Metadata { get; set; } = new Dictionary<string, string>();
 
         public void AddMetadata(string key, string value)
