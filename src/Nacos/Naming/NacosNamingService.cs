@@ -306,12 +306,6 @@
 
         public async Task BatchRegisterInstance(string serviceName, string groupName, List<Instance> instances)
         {
-            /* 项目“Nacos (netstandard2.0)”的未合并的更改
-            在此之前:
-                        Naming.Utils.NamingUtils.BatchCheckInstanceIsLegal(instances);
-            在此之后:
-                        NamingUtils.BatchCheckInstanceIsLegal(instances);
-            */
             Utils.NamingUtils.BatchCheckInstanceIsLegal(instances);
 
             await _clientProxy.BatchRegisterServiceAsync(serviceName, groupName, instances).ConfigureAwait(false);

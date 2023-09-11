@@ -22,13 +22,6 @@
 
         private static readonly string FAILOVER_MODE_PARAM = "failover-mode";
 
-
-/* 项目“Nacos (netstandard2.0)”的未合并的更改
-在此之前:
-        private ConcurrentDictionary<string, V2.Naming.Dtos.ServiceInfo> serviceMap = new ConcurrentDictionary<string, V2.Naming.Dtos.ServiceInfo>();
-在此之后:
-        private ConcurrentDictionary<string, ServiceInfo> serviceMap = new ConcurrentDictionary<string, ServiceInfo>();
-*/
         private ConcurrentDictionary<string, Dtos.ServiceInfo> serviceMap = new ConcurrentDictionary<string, Dtos.ServiceInfo>();
 
         private ConcurrentDictionary<string, string> switchParams = new ConcurrentDictionary<string, string>();
@@ -147,12 +140,6 @@
 
         public async Task RunFailoverFileRead()
         {
-/* 项目“Nacos (netstandard2.0)”的未合并的更改
-在此之前:
-            var domMap = new ConcurrentDictionary<string, V2.Naming.Dtos.ServiceInfo>();
-在此之后:
-            var domMap = new ConcurrentDictionary<string, ServiceInfo>();
-*/
             var domMap = new ConcurrentDictionary<string, Dtos.ServiceInfo>();
 
             try
@@ -191,12 +178,6 @@
                             {
                                 try
                                 {
-/* 项目“Nacos (netstandard2.0)”的未合并的更改
-在此之前:
-                                    dom = json.ToObj<V2.Naming.Dtos.ServiceInfo>();
-在此之后:
-                                    dom = json.ToObj<ServiceInfo>();
-*/
                                     dom = json.ToObj<Dtos.ServiceInfo>();
                                 }
                                 catch (Exception e)
@@ -255,13 +236,6 @@
                 : false;
         }
 
-
-/* 项目“Nacos (netstandard2.0)”的未合并的更改
-在此之前:
-        public V2.Naming.Dtos.ServiceInfo GetService(string key)
-在此之后:
-        public ServiceInfo GetService(string key)
-*/
         public Dtos.ServiceInfo GetService(string key)
         {
             if (!serviceMap.TryGetValue(key, out var serviceInfo))
