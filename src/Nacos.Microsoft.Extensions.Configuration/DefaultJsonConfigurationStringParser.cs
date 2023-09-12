@@ -30,8 +30,7 @@
                 AllowTrailingCommas = true,
             };
 
-            using (var reader = new StreamReader(input))
-            using (JsonDocument doc = JsonDocument.Parse(reader.ReadToEnd(), jsonDocumentOptions))
+            using (JsonDocument doc = JsonDocument.Parse(input, jsonDocumentOptions))
             {
                 if (doc.RootElement.ValueKind != JsonValueKind.Object)
                 {
