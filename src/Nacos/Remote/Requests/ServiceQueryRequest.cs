@@ -7,13 +7,13 @@
         {
         }
 
-        [Newtonsoft.Json.JsonProperty("cluster")]
+        [System.Text.Json.Serialization.JsonPropertyName("cluster")]
         public string Cluster { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("healthyOnly")]
+        [System.Text.Json.Serialization.JsonPropertyName("healthyOnly")]
         public bool HealthyOnly { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("udpPort")]
+        [System.Text.Json.Serialization.JsonPropertyName("udpPort")]
         public int UdpPort { get; set; }
 
         public override string GetRemoteType() => RemoteRequestType.Req_Naming_ServiceQuery;

@@ -66,22 +66,22 @@
 
             try
             {
-                Newtonsoft.Json.Linq.JObject result = await _serverProxy.SendBeat(beatInfo, false).ConfigureAwait(false);
+                System.Text.Json.Nodes.JsonObject result = await _serverProxy.SendBeat(beatInfo, false).ConfigureAwait(false);
                 _logger?.LogDebug("[CLIENT-BEAT] sendbeat result = {0}", result.ToString());
-                long interval = result.GetValue(CLIENT_BEAT_INTERVAL_FIELD).ToObject<long>();
+                var interval = result[CLIENT_BEAT_INTERVAL_FIELD].GetValue<long>();
 
                 bool lightBeatEnabled = false;
 
                 if (result.ContainsKey(CommonParams.LIGHT_BEAT_ENABLED))
                 {
-                    lightBeatEnabled = result.GetValue(CommonParams.LIGHT_BEAT_ENABLED).ToObject<bool>();
+                    lightBeatEnabled = result[CommonParams.LIGHT_BEAT_ENABLED].GetValue<bool>();
                 }
 
                 if (interval > 0) nextTime = interval;
 
                 int code = OK;
 
-                if (result.ContainsKey(CommonParams.CODE)) code = result.GetValue(CommonParams.CODE).ToObject<int>();
+                if (result.ContainsKey(CommonParams.CODE)) code = result[CommonParams.CODE].GetValue<int>();
 
                 if (code == RESOURCE_NOT_FOUND)
                 {

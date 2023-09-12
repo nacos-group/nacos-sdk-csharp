@@ -104,12 +104,12 @@
 
                         var content = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-                        var obj = Newtonsoft.Json.Linq.JObject.Parse(content);
+                        var obj = System.Text.Json.Nodes.JsonNode.Parse(content).AsObject();
 
                         if (obj.ContainsKey(Nacos.Common.Constants.ACCESS_TOKEN))
                         {
-                            var accessToken = obj.Value<string>(NacosAuthLoginConstant.ACCESSTOKEN);
-                            _tokenTtl = obj.Value<long>(NacosAuthLoginConstant.TOKENTTL);
+                            var accessToken = obj[NacosAuthLoginConstant.ACCESSTOKEN].GetValue<string>();
+                            _tokenTtl = obj[NacosAuthLoginConstant.TOKENTTL].GetValue<long>();
                             _tokenRefreshWindow = _tokenTtl / 10;
                             _lastRefreshTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 

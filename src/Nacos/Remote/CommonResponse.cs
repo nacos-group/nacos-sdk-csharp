@@ -2,16 +2,16 @@
 {
     public abstract class CommonResponse
     {
-        [Newtonsoft.Json.JsonProperty("resultCode")]
+        [System.Text.Json.Serialization.JsonPropertyName("resultCode")]
         public int ResultCode { get; set; } = 200;
 
-        [Newtonsoft.Json.JsonProperty("errorCode")]
+        [System.Text.Json.Serialization.JsonPropertyName("errorCode")]
         public int ErrorCode { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("message")]
+        [System.Text.Json.Serialization.JsonPropertyName("message")]
         public string Message { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("requestId")]
+        [System.Text.Json.Serialization.JsonPropertyName("requestId")]
         public string RequestId { get; set; }
 
         public bool IsSuccess() => ResultCode == 200;

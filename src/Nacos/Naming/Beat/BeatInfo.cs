@@ -5,31 +5,31 @@
 
     public class BeatInfo
     {
-        [Newtonsoft.Json.JsonProperty("port")]
+        [System.Text.Json.Serialization.JsonPropertyName("port")]
         public int Port { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("ip")]
+        [System.Text.Json.Serialization.JsonPropertyName("ip")]
         public string Ip { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("weight")]
+        [System.Text.Json.Serialization.JsonPropertyName("weight")]
         public double? Weight { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("serviceName")]
+        [System.Text.Json.Serialization.JsonPropertyName("serviceName")]
         public string ServiceName { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("cluster")]
+        [System.Text.Json.Serialization.JsonPropertyName("cluster")]
         public string Cluster { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("metadata")]
+        [System.Text.Json.Serialization.JsonPropertyName("metadata")]
         public Dictionary<string, string> Metadata { get; set; } = new Dictionary<string, string>();
 
-        [Newtonsoft.Json.JsonProperty("scheduled")]
+        [System.Text.Json.Serialization.JsonPropertyName("scheduled")]
         public bool Scheduled { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("period")]
+        [System.Text.Json.Serialization.JsonPropertyName("period")]
         public long Period { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("stopped")]
+        [System.Text.Json.Serialization.JsonPropertyName("stopped")]
         public bool Stopped { get; set; }
 
         public override string ToString()

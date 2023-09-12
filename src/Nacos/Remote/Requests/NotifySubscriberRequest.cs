@@ -2,16 +2,16 @@
 {
     public class NotifySubscriberRequest : CommonRequest
     {
-        [Newtonsoft.Json.JsonProperty("namespace")]
+        [System.Text.Json.Serialization.JsonPropertyName("namespace")]
         public string Namespace { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("serviceName")]
+        [System.Text.Json.Serialization.JsonPropertyName("serviceName")]
         public string ServiceName { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("groupName")]
+        [System.Text.Json.Serialization.JsonPropertyName("groupName")]
         public string GroupName { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("serviceInfo")]
+        [System.Text.Json.Serialization.JsonPropertyName("serviceInfo")]
         public Naming.Dtos.ServiceInfo ServiceInfo { get; set; }
 
         public override string GetRemoteType() => RemoteRequestType.Req_Naming_NotifySubscriber;
