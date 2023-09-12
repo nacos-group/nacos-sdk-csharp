@@ -24,10 +24,10 @@
             => System.Text.Json.JsonSerializer.Serialize(obj, _jsonSerializerOptions);
 
         public static T ToObj<T>(this string json)
-            => json.IsNullOrWhiteSpace() ? default : System.Text.Json.JsonSerializer.Deserialize<T>(json);
+            => json.IsNullOrWhiteSpace() ? default : System.Text.Json.JsonSerializer.Deserialize<T>(json, _jsonSerializerOptions);
 
         public static object ToObj(this string json, Type type)
-            => json.IsNullOrWhiteSpace() || type == null ? null : System.Text.Json.JsonSerializer.Deserialize(json, type);
+            => json.IsNullOrWhiteSpace() || type == null ? null : System.Text.Json.JsonSerializer.Deserialize(json, type, _jsonSerializerOptions);
 
         public static string SafeGetValue(this System.Collections.Generic.Dictionary<string, object> dict, string key, string defaultVal = "")
             => dict.TryGetValue(key, out var val) ? (string)val : defaultVal;
