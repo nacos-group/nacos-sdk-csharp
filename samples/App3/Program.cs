@@ -1,5 +1,4 @@
-﻿using Nacos.OpenApi;
-using Nacos.DependencyInjection;
+﻿using Nacos.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 

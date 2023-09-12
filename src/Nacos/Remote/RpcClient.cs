@@ -485,13 +485,6 @@ namespace Nacos.Remote
 
                     if (response == null) throw new NacosException(NacosException.SERVER_ERROR, "Unknown Exception.");
 
-
-                    /* 项目“Nacos (netstandard2.0)”的未合并的更改
-                    在此之前:
-                                        if (response is Responses.ErrorResponse)
-                    在此之后:
-                                        if (response is ErrorResponse)
-                    */
                     if (response is Responses.ErrorResponse)
                     {
                         // it means that we are new to this nacos server, because we do not setup the connection!!

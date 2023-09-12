@@ -11,12 +11,6 @@
 
         static FileLocalConfigInfoProcessor()
         {
-/* 项目“Nacos (netstandard2.0)”的未合并的更改
-在此之前:
-            var basePath = V2.Utils.EnvUtil.GetEnvValue("JM.SNAPSHOT.PATH", Environment.GetFolderPath(Environment.SpecialFolder.Personal));
-在此之后:
-            var basePath = EnvUtil.GetEnvValue("JM.SNAPSHOT.PATH", Environment.GetFolderPath(Environment.SpecialFolder.Personal));
-*/
             var basePath = Nacos.Utils.EnvUtil.GetEnvValue("JM.SNAPSHOT.PATH", Environment.GetFolderPath(Environment.SpecialFolder.Personal));
             LOCAL_SNAPSHOT_PATH = Path.Combine(basePath, "nacos", "config");
         }
