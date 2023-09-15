@@ -3,6 +3,7 @@
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Nacos;
+    using Nacos.Auth;
     using Nacos.Common;
     using Nacos.Config.Abst;
     using Nacos.Config.Common;
@@ -36,13 +37,26 @@
 
         private long _securityInfoRefreshIntervalMills = 5000;
 
+        public ConfigRpcTransportClient(NacosSdkOptions options)
+        {
+            _options = options;
+            _accessKey = _options.AccessKey;
+            _secretKey = _options.SecretKey;
+
+            _serverListFactory = new ServerListManager(_options);
+            _securityProxy = new SecurityProxy(_options);
+            _cacheMap = new ConcurrentDictionary<string, CacheData>();
+
+            StartInner();
+        }
+
         public ConfigRpcTransportClient(
             IOptions<NacosSdkOptions> optionAccs,
-            IServerListManager serverListManager,
+            IServerListFactory serverListManager,
             ISecurityProxy securityProxy)
         {
             _options = optionAccs.Value;
-            _serverListManager = serverListManager;
+            _serverListFactory = serverListManager;
             _accessKey = _options.AccessKey;
             _secretKey = _options.SecretKey;
             _securityProxy = securityProxy;
@@ -178,11 +192,11 @@
             _loginTimer = new Timer(
                 async x =>
                 {
-                    await _securityProxy.LoginAsync(_serverListManager.GetServerUrls()).ConfigureAwait(false);
+                    await _securityProxy.LoginAsync(_serverListFactory.GetServerList()).ConfigureAwait(false);
                 }, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(_securityInfoRefreshIntervalMills));
 
             // init should wait the result.
-            _securityProxy.LoginAsync(_serverListManager.GetServerUrls()).Wait();
+            _securityProxy.LoginAsync(_serverListFactory.GetServerList()).Wait();
         }
 
         protected override void StartInner()
@@ -251,7 +265,7 @@
             rpcClientInner.RegisterServerPushResponseHandler(new ConfigRpcServerRequestHandler(_cacheMap, NotifyListenConfig));
             rpcClientInner.RegisterConnectionListener(new ConfigRpcConnectionEventListener(rpcClientInner, _cacheMap, _listenExecutebell));
 
-            rpcClientInner.Init(new ConfigRpcServerListFactory(_serverListManager));
+            rpcClientInner.Init(new ConfigRpcServerListFactory(_serverListFactory));
         }
 
         private Dictionary<string, string> GetLabels()

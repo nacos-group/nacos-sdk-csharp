@@ -1,16 +1,15 @@
 ﻿namespace Nacos.Config.Impl
 {
-    using Nacos.Config.Abst;
     using Nacos.Remote;
     using System.Collections.Generic;
 
     public class ConfigRpcServerListFactory : IServerListFactory
     {
-        private readonly IServerListManager _serverListManager;
+        private readonly IServerListFactory _serverListFactory;
 
-        public ConfigRpcServerListFactory(IServerListManager serverListManager)
+        public ConfigRpcServerListFactory(IServerListFactory serverListFactory)
         {
-            _serverListManager = serverListManager;
+            _serverListFactory = serverListFactory;
         }
 
         public void Dispose()
@@ -18,15 +17,15 @@
             throw new System.NotImplementedException();
         }
 
-        public string GenNextServer() => _serverListManager.GetNextServerAddr();
+        public string GenNextServer() => _serverListFactory.GenNextServer();
 
-        public string GetCurrentServer() => _serverListManager.GetCurrentServerAddr();
+        public string GetCurrentServer() => _serverListFactory.GetCurrentServer();
 
         public string GetName()
         {
             throw new System.NotImplementedException();
         }
 
-        public List<string> GetServerList() => _serverListManager.GetServerUrls();
+        public List<string> GetServerList() => _serverListFactory.GetServerList();
     }
 }

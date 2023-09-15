@@ -3,6 +3,7 @@
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Nacos.Exceptions;
+    using Nacos.Logging;
     using Nacos.Utils;
     using System;
     using System.Collections.Generic;
@@ -34,7 +35,7 @@
         private const int DEFAULT_TIMEOUT = 5000;
         private const int DefaultEndpointPort = 8080;
 
-        private readonly ILogger _logger;
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<ServerListManager>();
 
         private long _refreshServerListInternal = 30000;
 
@@ -54,22 +55,26 @@
 
         private long _lastServerListRefreshTime = 0L;
 
-        private readonly string _namespace;
+        private string _namespace;
         private bool _isFixed = false;
         private string _name = "";
         private string _contentPath;
 
-        public ServerListManager(ILoggerFactory loggerFactory, IOptions<NacosSdkOptions> optionsAccs)
+        public ServerListManager(NacosSdkOptions options)
         {
-            _logger = loggerFactory.CreateLogger<ServerListManager>();
+            InitServerAddr(options);
+        }
+
+        public ServerListManager(IOptions<NacosSdkOptions> optionsAccs)
+        {
             var options = optionsAccs.Value;
-            _namespace = string.IsNullOrWhiteSpace(options.Namespace) ? Common.Constants.DEFAULT_NAMESPACE_ID : options.Namespace;
-            _contentPath = options.ContextPath;
             InitServerAddr(options);
         }
 
         private void InitServerAddr(NacosSdkOptions options)
         {
+            _namespace = string.IsNullOrWhiteSpace(options.Namespace) ? Common.Constants.DEFAULT_NAMESPACE_ID : options.Namespace;
+            _contentPath = options.ContextPath;
             _endpoint = options.EndPoint;
 
             if (options.ServerAddresses != null && options.ServerAddresses.Any())

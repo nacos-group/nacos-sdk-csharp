@@ -5,6 +5,10 @@
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Nacos;
     using Nacos.Auth;
+    using Nacos.Config;
+    using Nacos.Config.Abst;
+    using Nacos.Config.FilterImpl;
+    using Nacos.Config.Impl;
     using Nacos.Naming.Cache;
     using Nacos.Naming.Event;
     using Nacos.Naming.Remote;
@@ -32,8 +36,13 @@
                 clientBuilder.ConfigureHttpClient(httpClientAction);
             }
 
+            services.TryAddSingleton<IClientAuthService, NacosClientAuthServiceImpl>();
+            services.AddSingleton<IClientWorker, ClientWorker>();
+            services.AddSingleton<IConfigFilterChain, ConfigFilterChainManager>();
+            services.AddSingleton<IConfigTransportClient, ConfigRpcTransportClient>();
+            services.AddSingleton<IServerListFactory, ServerListManager>();
             services.AddSingleton<ISecurityProxy, SecurityProxy>();
-            services.AddSingleton<INacosConfigService, Config.NacosConfigService>();
+            services.AddSingleton<INacosConfigService, NacosConfigService>();
 
             return services;
         }
@@ -52,9 +61,9 @@
                 clientBuilder.ConfigureHttpClient(httpClientAction);
             }
 
-            services.AddSingleton<Config.Abst.IConfigFilterChain, Config.FilterImpl.ConfigFilterChainManager>();
+            services.AddSingleton<IConfigFilterChain, ConfigFilterChainManager>();
 
-            services.AddSingleton<INacosConfigService, Config.NacosConfigService>();
+            services.AddSingleton<INacosConfigService, NacosConfigService>();
 
             return services;
         }

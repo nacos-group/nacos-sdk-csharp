@@ -17,7 +17,7 @@
     using Nacos.Logging;
     using Microsoft.Extensions.Options;
 
-    public class ServerListManager : IServerListManager
+    /*public class ServerListManager : IServerListManager
     {
         private readonly ILogger _logger = NacosLogManager.CreateLogger<ServerListManager>();
 
@@ -268,5 +268,5 @@
             RefreshCurrentServerAddr();
             return _currentServerAddr;
         }
-    }
+    }*/
 }

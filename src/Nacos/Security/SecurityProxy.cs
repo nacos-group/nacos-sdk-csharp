@@ -19,7 +19,8 @@
         public SecurityProxy(NacosSdkOptions options)
         {
             _options = options;
-            _clientAuthServices = null;
+            var clientAuthService = new NacosClientAuthServiceImpl();
+            _clientAuthServices = new List<IClientAuthService> { clientAuthService };
         }
 
         public SecurityProxy(IOptions<NacosSdkOptions> optionsAccs, IEnumerable<IClientAuthService> clientAuthServices)

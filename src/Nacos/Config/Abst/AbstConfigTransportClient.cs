@@ -5,6 +5,7 @@
     using Nacos.Common;
     using Nacos.Config.FilterImpl;
     using Nacos.Config.Impl;
+    using Nacos.Remote;
     using Nacos.Security;
     using Nacos.Utils;
     using System;
@@ -14,7 +15,7 @@
     public abstract class AbstConfigTransportClient : IConfigTransportClient
     {
         protected NacosSdkOptions _options;
-        protected IServerListManager _serverListManager;
+        protected IServerListFactory _serverListFactory;
         protected ISecurityProxy _securityProxy;
         protected string _accessKey;
         protected string _secretKey;

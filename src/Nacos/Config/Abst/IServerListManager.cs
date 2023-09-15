@@ -3,7 +3,7 @@
     using System;
     using System.Collections.Generic;
 
-    public interface IServerListManager : IDisposable
+   /* public interface IServerListManager : IDisposable
     {
         List<string> GetServerUrls();
 
@@ -22,5 +22,5 @@
         string GetContentPath();
 
         string GetNextServerAddr();
-    }
+    }*/
 }

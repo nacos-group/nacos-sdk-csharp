@@ -14,14 +14,24 @@
 
         private readonly NacosSdkOptions _options;
 
+        public ConfigFilterChainManager(NacosSdkOptions options)
+        {
+            _options = options;
+            InitConfigFilters();
+        }
+
         public ConfigFilterChainManager(IOptions<NacosSdkOptions> optionAccs)
         {
             _options = optionAccs.Value;
+            InitConfigFilters();
+        }
 
+        private void InitConfigFilters()
+        {
             List<IConfigFilter> configFilters =
-                GetAssemblies(_options).SelectMany(item => item.GetTypes())
-                                .Where(item => item.GetInterfaces().Contains(typeof(IConfigFilter)))
-                                .Select(type => (IConfigFilter)System.Activator.CreateInstance(type)).ToList();
+                 GetAssemblies(_options).SelectMany(item => item.GetTypes())
+                          .Where(item => item.GetInterfaces().Contains(typeof(IConfigFilter)))
+                          .Select(type => (IConfigFilter)System.Activator.CreateInstance(type)).ToList();
 
             foreach (var configFilter in configFilters)
             {
