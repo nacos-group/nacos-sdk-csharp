@@ -1,8 +1,6 @@
 ﻿namespace Nacos.Config.Impl
 {
     using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Options;
-    using Nacos.Auth;
     using Nacos.Common;
     using Nacos.Config;
     using Nacos.Config.Abst;
@@ -19,10 +17,10 @@
     public class ClientWorker : IClientWorker
     {
         private readonly ILogger _logger = NacosLogManager.CreateLogger<ClientWorker>();
-        private ConcurrentDictionary<string, CacheData> _cacheMap = new();
         private readonly IConfigFilterChain _configFilterChainManager;
+        private readonly IConfigTransportClient _agent;
 
-        private IConfigTransportClient _agent;
+        private ConcurrentDictionary<string, CacheData> _cacheMap = new();
 
         public ClientWorker(
             IConfigFilterChain configFilterChainManager,

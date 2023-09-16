@@ -3,7 +3,6 @@
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Nacos;
-    using Nacos.Auth;
     using Nacos.Common;
     using Nacos.Config.Abst;
     using Nacos.Config.Common;
@@ -25,16 +24,18 @@
 
     public class ConfigRpcTransportClient : AbstConfigTransportClient
     {
-        private readonly ILogger _logger = NacosLogManager.CreateLogger<ConfigRpcTransportClient>();
         private static readonly string RPC_AGENT_NAME = "config_rpc_client";
         private static object _obj = new();
+
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<ConfigRpcTransportClient>();
         private readonly BlockingCollection<object> _listenExecutebell = new(boundedCapacity: 1);
+
         private object _bellItem = new();
+
+        // TODO: Assignment cacheMap
         private ConcurrentDictionary<string, CacheData> _cacheMap;
         private string uuid = Guid.NewGuid().ToString();
-
         private Timer _loginTimer;
-
         private long _securityInfoRefreshIntervalMills = 5000;
 
         public ConfigRpcTransportClient(NacosSdkOptions options)
@@ -42,10 +43,8 @@
             _options = options;
             _accessKey = _options.AccessKey;
             _secretKey = _options.SecretKey;
-
             _serverListFactory = new ServerListManager(_options);
             _securityProxy = new SecurityProxy(_options);
-            _cacheMap = new ConcurrentDictionary<string, CacheData>();
 
             StartInner();
         }
@@ -60,8 +59,6 @@
             _accessKey = _options.AccessKey;
             _secretKey = _options.SecretKey;
             _securityProxy = securityProxy;
-
-            _cacheMap = new ConcurrentDictionary<string, CacheData>();
 
             StartInner();
         }

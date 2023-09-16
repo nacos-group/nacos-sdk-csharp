@@ -4,7 +4,6 @@
     using Nacos.Auth;
     using Nacos.Common;
     using Nacos.Config.FilterImpl;
-    using Nacos.Config.Impl;
     using Nacos.Remote;
     using Nacos.Security;
     using Nacos.Utils;
