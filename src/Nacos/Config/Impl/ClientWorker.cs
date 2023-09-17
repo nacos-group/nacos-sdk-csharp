@@ -20,8 +20,6 @@
         private readonly IConfigFilterChain _configFilterChainManager;
         private readonly IConfigTransportClient _agent;
 
-        private ConcurrentDictionary<string, CacheData> _cacheMap = new();
-
         public ClientWorker(
             IConfigFilterChain configFilterChainManager,
             IConfigTransportClient agent)
@@ -103,11 +101,11 @@
             {
                 cache = new CacheData(_configFilterChainManager, _agent.GetName(), dataId, group, tenant);
 
-                int taskId = _cacheMap.Count / CacheData.PerTaskConfigSize;
+                int taskId = _agent.GetCacheCount() / CacheData.PerTaskConfigSize;
                 cache.TaskId = taskId;
             }
 
-            _cacheMap.AddOrUpdate(key, cache, (x, y) => cache);
+            _agent.AddOrUpdateCache(key, cache);
 
             _logger?.LogInformation("[{0}] [subscribe] {1}", _agent.GetName(), key);
 
@@ -121,17 +119,10 @@
         {
             if (dataId == null || group == null) throw new ArgumentException();
 
-            return _cacheMap.TryGetValue(GroupKey.GetKeyTenant(dataId, group, tenant), out var cache) ? cache : null;
+            return _agent.TryGetCache(GroupKey.GetKeyTenant(dataId, group, tenant), out var cache) ? cache : null;
         }
 
-        public void RemoveCache(string dataId, string group, string tenant = null)
-        {
-            string groupKey = tenant == null ? GroupKey.GetKey(dataId, group) : GroupKey.GetKeyTenant(dataId, group, tenant);
-
-            _cacheMap.TryRemove(groupKey, out _);
-
-            _logger?.LogInformation("[{0}] [unsubscribe] {1}", _agent.GetName(), groupKey);
-        }
+        public void RemoveCache(string dataId, string group, string tenant = null) => _agent.RemoveCacheAsync(dataId, group).ConfigureAwait(false).GetAwaiter().GetResult();
 
         public async Task<bool> RemoveConfig(string dataId, string group, string tenant, string tag)
             => await _agent.RemoveConfigAsync(dataId, group, tenant, tag).ConfigureAwait(false);

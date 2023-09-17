@@ -33,7 +33,7 @@
         private object _bellItem = new();
 
         // TODO: Assignment cacheMap
-        private ConcurrentDictionary<string, CacheData> _cacheMap;
+        // private ConcurrentDictionary<string, CacheData> _cacheMap;
         private string uuid = Guid.NewGuid().ToString();
         private Timer _loginTimer;
         private long _securityInfoRefreshIntervalMills = 5000;
@@ -312,17 +312,6 @@
 
         private RpcClient GetOneRunningClient() => EnsureRpcClient("0");
 
-        protected override Task RemoveCache(string dataId, string group)
-        {
-            var groupKey = GroupKey.GetKey(dataId, group);
-
-            _cacheMap.TryRemove(groupKey, out _);
-
-            _logger?.LogInformation("[{0}] [unsubscribe] {1}", GetNameInner(), groupKey);
-
-            return Task.CompletedTask;
-        }
-
         protected async override Task ExecuteConfigListen()
         {
             var listenCachesMap = new Dictionary<string, List<CacheData>>();
@@ -476,15 +465,6 @@
             if (group.IsNullOrWhiteSpace()) group = Constants.DEFAULT_GROUP;
 
             return await QueryConfig(dataId, group, tenant, readTimeout, notify).ConfigureAwait(false);
-        }
-
-        private void RemoveCache(string dataId, string group, string tenant)
-        {
-            var groupKey = GroupKey.GetKeyTenant(dataId, group, tenant);
-
-            _cacheMap.TryRemove(groupKey, out _);
-
-            _logger?.LogInformation("[{0}] [unsubscribe] {1}", GetNameInner(), groupKey);
         }
 
         protected override Task NotifyListenConfig()

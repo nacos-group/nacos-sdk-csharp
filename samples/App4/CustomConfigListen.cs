@@ -1,6 +1,6 @@
 ﻿namespace App4
 {
-    public class CusConfigListen : Nacos.Config.IListener
+    public class CustomConfigListen : Nacos.Config.IListener
     {
         public void ReceiveConfigInfo(string configInfo)
         {

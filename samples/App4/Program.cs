@@ -4,7 +4,7 @@ using Nacos.Config;
 
 Console.WriteLine("begin");
 
-CusConfigListen configListen = new CusConfigListen();
+CustomConfigListen configListen = new CustomConfigListen();
 
 var svc = new NacosConfigService(new Nacos.NacosSdkOptions
 {
@@ -15,7 +15,7 @@ var svc = new NacosConfigService(new Nacos.NacosSdkOptions
     Password = "nacos",
 
     // this sample will add the filter to encrypt the config with AES.
-    ConfigFilterAssemblies = new System.Collections.Generic.List<string> { "App4" },
+    // ConfigFilterAssemblies = new System.Collections.Generic.List<string> { "App4" },
     TLSConfig = null,
 
     // swich to use http or rpc
