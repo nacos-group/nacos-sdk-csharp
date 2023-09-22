@@ -43,7 +43,11 @@
         public Task<bool> RemoveConfigAsync(string dataId, string group, string tenat, string tag)
             => RemoveConfig(dataId, group, tenat, tag);
 
-        public Task RemoveCacheAsync(string dataId, string group) => Task.Run(() => RemoveCache(dataId, group));
+        public Task RemoveCacheAsync(string dataId, string group)
+        {
+            RemoveCache(dataId, group);
+            return Task.CompletedTask;
+        }
 
         public CacheData AddOrUpdateCache(string key, CacheData value) => _cacheMap.AddOrUpdate(key, value, (x, y) => value);
 
