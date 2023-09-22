@@ -1,20 +1,28 @@
 ﻿namespace Nacos.Config.Abst
 {
+    using Microsoft.Extensions.Logging;
     using Nacos;
     using Nacos.Auth;
     using Nacos.Common;
+    using Nacos.Config.Common;
     using Nacos.Config.FilterImpl;
     using Nacos.Config.Impl;
+    using Nacos.Logging;
+    using Nacos.Remote;
     using Nacos.Security;
     using Nacos.Utils;
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
     public abstract class AbstConfigTransportClient : IConfigTransportClient
     {
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<ConfigRpcTransportClient>();
+
+        protected ConcurrentDictionary<string, CacheData> _cacheMap = new();
         protected NacosSdkOptions _options;
-        protected IServerListManager _serverListManager;
+        protected IServerListFactory _serverListFactory;
         protected ISecurityProxy _securityProxy;
         protected string _accessKey;
         protected string _secretKey;
@@ -35,6 +43,24 @@
         public Task<bool> RemoveConfigAsync(string dataId, string group, string tenat, string tag)
             => RemoveConfig(dataId, group, tenat, tag);
 
+        public Task RemoveCacheAsync(string dataId, string group)
+        {
+            RemoveCache(dataId, group);
+            return Task.CompletedTask;
+        }
+
+        public CacheData AddOrUpdateCache(string key, CacheData value) => _cacheMap.AddOrUpdate(key, value, (x, y) => value);
+
+        public bool TryGetCache(string key, out CacheData value) => _cacheMap.TryGetValue(key, out value);
+
+        public int GetCacheCount() => _cacheMap.Count;
+
+        public Task ExecuteConfigListenAsync() => ExecuteConfigListen();
+
+        public Task NotifyListenConfigAsync() => NotifyListenConfig();
+
+        public bool GetIsHealthServer() => _isHealthServer;
+
         public void Start() => StartInner();
 
         protected abstract string GetNameInner();
@@ -49,15 +75,18 @@
 
         protected abstract Task<ConfigResponse> QueryConfig(string dataId, string group, string tenat, long readTimeous, bool notify);
 
-        protected abstract Task RemoveCache(string dataId, string group);
-
         protected abstract void StartInner();
 
-        public Task RemoveCacheAsync(string dataId, string group) => RemoveCache(dataId, group);
+        protected void RemoveCache(string dataId, string group, string tenant = null)
+        {
+            string groupKey = tenant == null ? GroupKey.GetKey(dataId, group) : GroupKey.GetKeyTenant(dataId, group, tenant);
+
+            _cacheMap.TryRemove(groupKey, out _);
+
+            _logger?.LogInformation("[{0}] [unsubscribe] {1}", GetNameInner(), groupKey);
+        }
 
         protected abstract Task ExecuteConfigListen();
-
-        public Task ExecuteConfigListenAsync() => ExecuteConfigListen();
 
         protected abstract Task NotifyListenConfig();
 
@@ -146,9 +175,5 @@
 
             return header;
         }
-
-        public Task NotifyListenConfigAsync() => NotifyListenConfig();
-
-        public bool GetIsHealthServer() => _isHealthServer;
     }
 }

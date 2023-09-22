@@ -2,7 +2,7 @@
 
 var builder = WebApplication.CreateBuilder(args);
 
-/*builder.Services.AddNacosV2Config(x =>
+builder.Services.AddNacosV2Config(x =>
 {
     x.ServerAddresses = new System.Collections.Generic.List<string> { "http://localhost:8848/" };
     x.EndPoint = "";
@@ -16,7 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 
     // swich to use http or rpc
     x.ConfigUseRpc = true;
-});*/
+});
 
 builder.Services.AddNacosV2Naming(x =>
 {

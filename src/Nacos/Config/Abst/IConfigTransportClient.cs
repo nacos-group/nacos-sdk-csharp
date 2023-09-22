@@ -1,6 +1,7 @@
 ﻿namespace Nacos.Config.Abst
 {
     using Nacos.Config.FilterImpl;
+    using Nacos.Config.Impl;
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
@@ -33,6 +34,12 @@
         Task<ConfigResponse> QueryConfigAsync(string dataId, string group, string tenat, long readTimeous, bool notify);
 
         Task RemoveCacheAsync(string dataId, string group);
+
+        CacheData AddOrUpdateCache(string key, CacheData value);
+
+        bool TryGetCache(string key, out CacheData value);
+
+        int GetCacheCount();
 
         Task ExecuteConfigListenAsync();
 

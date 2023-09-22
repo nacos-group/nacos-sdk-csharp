@@ -3,12 +3,14 @@
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Nacos;
+    using Nacos.Auth;
     using Nacos.Config.Abst;
     using Nacos.Config.FilterImpl;
     using Nacos.Config.Impl;
     using Nacos.Config.Utils;
     using Nacos.Exceptions;
     using Nacos.Logging;
+    using Nacos.Remote;
     using Nacos.Security;
     using System.Collections.Generic;
     using System.Threading.Tasks;
@@ -24,15 +26,23 @@
         private readonly IClientWorker _worker;
         private string _namespace;
 
+        public NacosConfigService(NacosSdkOptions options)
+        {
+            _options = options;
+            _configFilterChainManager = new ConfigFilterChainManager(_options);
+            var agent = new ConfigRpcTransportClient(_options);
+            _worker = new ClientWorker(_configFilterChainManager, agent);
+            _namespace = _options.Namespace;
+        }
+
         public NacosConfigService(
-            IOptions<NacosSdkOptions> optionsAccs,
-            ISecurityProxy securityProxy)
+            IConfigFilterChain configFilterChain,
+            IClientWorker worker,
+            IOptions<NacosSdkOptions> optionsAccs)
         {
             _options = optionsAccs.Value;
-            _configFilterChainManager = new ConfigFilterChainManager(optionsAccs);
-            IServerListManager serverListManager = new ServerListManager(optionsAccs);
-            ConfigRpcTransportClient agent = new ConfigRpcTransportClient(optionsAccs, serverListManager, securityProxy);
-            _worker = new ClientWorker(_configFilterChainManager, agent);
+            _configFilterChainManager = configFilterChain;
+            _worker = worker;
             _namespace = _options.Namespace;
         }
 

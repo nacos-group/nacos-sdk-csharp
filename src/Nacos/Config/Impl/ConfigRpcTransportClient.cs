@@ -24,30 +24,41 @@
 
     public class ConfigRpcTransportClient : AbstConfigTransportClient
     {
-        private readonly ILogger _logger = NacosLogManager.CreateLogger<ConfigRpcTransportClient>();
         private static readonly string RPC_AGENT_NAME = "config_rpc_client";
         private static object _obj = new();
+
+        private readonly ILogger _logger = NacosLogManager.CreateLogger<ConfigRpcTransportClient>();
         private readonly BlockingCollection<object> _listenExecutebell = new(boundedCapacity: 1);
+
         private object _bellItem = new();
-        private ConcurrentDictionary<string, CacheData> _cacheMap;
+
+        // TODO: Assignment cacheMap
+        // private ConcurrentDictionary<string, CacheData> _cacheMap;
         private string uuid = Guid.NewGuid().ToString();
-
         private Timer _loginTimer;
-
         private long _securityInfoRefreshIntervalMills = 5000;
+
+        public ConfigRpcTransportClient(NacosSdkOptions options)
+        {
+            _options = options;
+            _accessKey = _options.AccessKey;
+            _secretKey = _options.SecretKey;
+            _serverListFactory = new ServerListManager(_options);
+            _securityProxy = new SecurityProxy(_options);
+
+            StartInner();
+        }
 
         public ConfigRpcTransportClient(
             IOptions<NacosSdkOptions> optionAccs,
-            IServerListManager serverListManager,
+            IServerListFactory serverListManager,
             ISecurityProxy securityProxy)
         {
             _options = optionAccs.Value;
-            _serverListManager = serverListManager;
+            _serverListFactory = serverListManager;
             _accessKey = _options.AccessKey;
             _secretKey = _options.SecretKey;
             _securityProxy = securityProxy;
-
-            _cacheMap = new ConcurrentDictionary<string, CacheData>();
 
             StartInner();
         }
@@ -178,11 +189,11 @@
             _loginTimer = new Timer(
                 async x =>
                 {
-                    await _securityProxy.LoginAsync(_serverListManager.GetServerUrls()).ConfigureAwait(false);
+                    await _securityProxy.LoginAsync(_serverListFactory.GetServerList()).ConfigureAwait(false);
                 }, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(_securityInfoRefreshIntervalMills));
 
             // init should wait the result.
-            _securityProxy.LoginAsync(_serverListManager.GetServerUrls()).Wait();
+            _securityProxy.LoginAsync(_serverListFactory.GetServerList()).Wait();
         }
 
         protected override void StartInner()
@@ -251,7 +262,7 @@
             rpcClientInner.RegisterServerPushResponseHandler(new ConfigRpcServerRequestHandler(_cacheMap, NotifyListenConfig));
             rpcClientInner.RegisterConnectionListener(new ConfigRpcConnectionEventListener(rpcClientInner, _cacheMap, _listenExecutebell));
 
-            rpcClientInner.Init(new ConfigRpcServerListFactory(_serverListManager));
+            rpcClientInner.Init(new ConfigRpcServerListFactory(_serverListFactory));
         }
 
         private Dictionary<string, string> GetLabels()
@@ -300,17 +311,6 @@
         }
 
         private RpcClient GetOneRunningClient() => EnsureRpcClient("0");
-
-        protected override Task RemoveCache(string dataId, string group)
-        {
-            var groupKey = GroupKey.GetKey(dataId, group);
-
-            _cacheMap.TryRemove(groupKey, out _);
-
-            _logger?.LogInformation("[{0}] [unsubscribe] {1}", GetNameInner(), groupKey);
-
-            return Task.CompletedTask;
-        }
 
         protected async override Task ExecuteConfigListen()
         {
@@ -465,15 +465,6 @@
             if (group.IsNullOrWhiteSpace()) group = Constants.DEFAULT_GROUP;
 
             return await QueryConfig(dataId, group, tenant, readTimeout, notify).ConfigureAwait(false);
-        }
-
-        private void RemoveCache(string dataId, string group, string tenant)
-        {
-            var groupKey = GroupKey.GetKeyTenant(dataId, group, tenant);
-
-            _cacheMap.TryRemove(groupKey, out _);
-
-            _logger?.LogInformation("[{0}] [unsubscribe] {1}", GetNameInner(), groupKey);
         }
 
         protected override Task NotifyListenConfig()

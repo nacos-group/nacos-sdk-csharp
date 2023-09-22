@@ -1,11 +1,13 @@
 ﻿namespace Nacos.Config.Http
 {
+    using Google.Protobuf.WellKnownTypes;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
     using Nacos;
     using Nacos.Common;
-    using Nacos.Config.Abst;
-    using Nacos.Config.Impl;
     using Nacos.Logging;
+    using Nacos.Remote;
+    using Nacos.Utils;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -16,12 +18,19 @@
     public class ServerHttpAgent : IHttpAgent
     {
         private readonly ILogger _logger = NacosLogManager.CreateLogger<ServerHttpAgent>();
-        private IServerListManager _serverListMgr;
+        private IServerListFactory _serverListMgr;
         private HttpClient _httpClient = new HttpClient();
+        private readonly string _namespace;
+        private readonly string _tenant;
+        private readonly string _contentPath;
 
-        public ServerHttpAgent(IServerListManager serverListManager)
+        public ServerHttpAgent(IOptions<NacosSdkOptions> optionsAccs, IServerListFactory serverListManager)
         {
+            var options = optionsAccs.Value;
             _serverListMgr = serverListManager;
+            _namespace = string.IsNullOrWhiteSpace(options.Namespace) ? Constants.DEFAULT_NAMESPACE_ID : options.Namespace;
+            _tenant = string.IsNullOrWhiteSpace(options.EndPoint) ? _namespace : $"{options.EndPoint}-{_namespace}";
+            _contentPath = options.ContextPath;
         }
 
         public void Dispose()
@@ -33,9 +42,9 @@
 
         public string GetName() => _serverListMgr.GetName();
 
-        public string GetNamespace() => _serverListMgr.GetNamespace();
+        public string GetNamespace() => _namespace;
 
-        public string GetTenant() => _serverListMgr.GetTenant();
+        public string GetTenant() => _tenant;
 
         public async Task<HttpResponseMessage> HttpDelete(string path, Dictionary<string, string> headers, Dictionary<string, string> paramValues, string encoding, long readTimeoutMs)
             => await HttpRequest(path, headers, paramValues, encoding, readTimeoutMs, HttpMethod.Delete).ConfigureAwait(false);
@@ -50,7 +59,7 @@
         {
             long endTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() + readTimeoutMs;
 
-            string currentServerAddr = _serverListMgr.GetCurrentServerAddr();
+            string currentServerAddr = _serverListMgr.GetCurrentServer();
             int maxRetry = Constants.MAX_RETRY;
 
             var requestUrl = GetUrl(currentServerAddr, path);
@@ -87,7 +96,8 @@
                     }
                     else
                     {
-                        _serverListMgr.UpdateCurrentServerAddr(currentServerAddr);
+                        // TODO: impl update server
+                        // _serverListMgr.UpdateCurrentServerAddr(currentServerAddr);
                         return resp;
                     }
                 }
@@ -103,7 +113,7 @@
                             $"[NACOS HTTP-{method.Method}] The maximum number of tolerable server reconnection errors has been reached");
                 }
 
-                _serverListMgr.RefreshCurrentServerAddr();
+                _serverListMgr.GenNextServer();
             }
             while (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() <= endTime);
 
@@ -113,7 +123,7 @@
 
         public Task Start() => Task.CompletedTask;
 
-        private string GetUrl(string serverAddr, string relativePath) => $"{serverAddr.TrimEnd('/')}/{_serverListMgr.GetContentPath()}{relativePath}";
+        private string GetUrl(string serverAddr, string relativePath) => $"{serverAddr.TrimEnd('/')}/{_contentPath}{relativePath}";
 
         private string InitParams(Dictionary<string, string> dict)
         {
