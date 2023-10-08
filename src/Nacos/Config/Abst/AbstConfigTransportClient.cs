@@ -26,7 +26,6 @@
         protected ISecurityProxy _securityProxy;
         protected string _accessKey;
         protected string _secretKey;
-        protected bool _isHealthServer;
 
         public string GetName() => GetNameInner();
 
@@ -37,15 +36,15 @@
         public Task<bool> PublishConfigAsync(string dataId, string group, string tenant, string appName, string tag, string betaIps, string content, string encryptedDataKey, string casMd5, string type)
             => PublishConfig(dataId, group, tenant, appName, tag, betaIps, content, encryptedDataKey, casMd5, type);
 
-        public Task<ConfigResponse> QueryConfigAsync(string dataId, string group, string tenat, long readTimeous, bool notify)
-            => QueryConfig(dataId, group, tenat, readTimeous, notify);
+        public Task<ConfigResponse> QueryConfigAsync(string dataId, string group, string tenant, long readTimeous, bool notify)
+            => QueryConfig(dataId, group, tenant, readTimeous, notify);
 
-        public Task<bool> RemoveConfigAsync(string dataId, string group, string tenat, string tag)
-            => RemoveConfig(dataId, group, tenat, tag);
+        public Task<bool> RemoveConfigAsync(string dataId, string group, string tenant, string tag)
+            => RemoveConfig(dataId, group, tenant, tag);
 
-        public Task RemoveCacheAsync(string dataId, string group)
+        public Task RemoveCacheAsync(string dataId, string group, string tenant)
         {
-            RemoveCache(dataId, group);
+            RemoveCache(dataId, group, tenant);
             return Task.CompletedTask;
         }
 
@@ -59,7 +58,7 @@
 
         public Task NotifyListenConfigAsync() => NotifyListenConfig();
 
-        public bool GetIsHealthServer() => _isHealthServer;
+        public bool GetIsHealthServer() => IsHealthServer();
 
         public void Start() => StartInner();
 
@@ -71,9 +70,9 @@
 
         protected abstract Task<bool> PublishConfig(string dataId, string group, string tenant, string appName, string tag, string betaIps, string content, string encryptedDataKey, string casMd5, string type);
 
-        protected abstract Task<bool> RemoveConfig(string dataId, string group, string tenat, string tag);
+        protected abstract Task<bool> RemoveConfig(string dataId, string group, string tenant, string tag);
 
-        protected abstract Task<ConfigResponse> QueryConfig(string dataId, string group, string tenat, long readTimeous, bool notify);
+        protected abstract Task<ConfigResponse> QueryConfig(string dataId, string group, string tenant, long readTimeous, bool notify);
 
         protected abstract void StartInner();
 
@@ -89,6 +88,8 @@
         protected abstract Task ExecuteConfigListen();
 
         protected abstract Task NotifyListenConfig();
+
+        protected abstract bool IsHealthServer();
 
         protected Dictionary<string, string> GetSpasHeaders()
         {
