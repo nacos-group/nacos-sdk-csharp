@@ -74,7 +74,7 @@
                 cache.RemoveListener(listener);
                 if ((cache.GetListeners()?.Count ?? 0) > 0)
                 {
-                    await _agent.RemoveCacheAsync(dataId, group).ConfigureAwait(false);
+                    await _agent.RemoveCacheAsync(dataId, group, tenant).ConfigureAwait(false);
                 }
             }
         }
@@ -85,26 +85,11 @@
 
             if (cache != null) return cache;
 
+            cache = new CacheData(_configFilterChainManager, _agent.GetName(), dataId, group, tenant);
+            int taskId = _agent.GetCacheCount() / CacheData.PerTaskConfigSize;
+            cache.TaskId = taskId;
+
             string key = GroupKey.GetKey(dataId, group, tenant);
-            CacheData cacheFromMap = GetCache(dataId, group, tenant);
-
-            // multiple listeners on the same dataid+group and race condition,so double check again
-            // other listener thread beat me to set to cacheMap
-            if (cacheFromMap != null)
-            {
-                cache = cacheFromMap;
-
-                // reset so that server not hang this check
-                cache.IsInitializing = true;
-            }
-            else
-            {
-                cache = new CacheData(_configFilterChainManager, _agent.GetName(), dataId, group, tenant);
-
-                int taskId = _agent.GetCacheCount() / CacheData.PerTaskConfigSize;
-                cache.TaskId = taskId;
-            }
-
             _agent.AddOrUpdateCache(key, cache);
 
             _logger?.LogInformation("[{0}] [subscribe] {1}", _agent.GetName(), key);
@@ -122,7 +107,8 @@
             return _agent.TryGetCache(GroupKey.GetKeyTenant(dataId, group, tenant), out var cache) ? cache : null;
         }
 
-        public void RemoveCache(string dataId, string group, string tenant = null) => _agent.RemoveCacheAsync(dataId, group).ConfigureAwait(false).GetAwaiter().GetResult();
+        public void RemoveCache(string dataId, string group, string tenant = null)
+            => _agent.RemoveCacheAsync(dataId, group, tenant).ConfigureAwait(false).GetAwaiter().GetResult();
 
         public async Task<bool> RemoveConfig(string dataId, string group, string tenant, string tag)
             => await _agent.RemoveConfigAsync(dataId, group, tenant, tag).ConfigureAwait(false);

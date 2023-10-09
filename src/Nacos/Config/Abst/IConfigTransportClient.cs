@@ -29,11 +29,11 @@
 
         Task<bool> PublishConfigAsync(string dataId, string group, string tenant, string appName, string tag, string betaIps, string content, string encryptedDataKey, string casMd5, string type);
 
-        Task<bool> RemoveConfigAsync(string dataId, string group, string tenat, string tag);
+        Task<bool> RemoveConfigAsync(string dataId, string group, string tenant, string tag);
 
-        Task<ConfigResponse> QueryConfigAsync(string dataId, string group, string tenat, long readTimeous, bool notify);
+        Task<ConfigResponse> QueryConfigAsync(string dataId, string group, string tenant, long readTimeous, bool notify);
 
-        Task RemoveCacheAsync(string dataId, string group);
+        Task RemoveCacheAsync(string dataId, string group, string tenant);
 
         CacheData AddOrUpdateCache(string key, CacheData value);
 

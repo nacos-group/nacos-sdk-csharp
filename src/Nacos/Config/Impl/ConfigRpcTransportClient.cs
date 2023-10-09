@@ -19,6 +19,7 @@
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Runtime.InteropServices.ComTypes;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -471,6 +472,20 @@
         {
             _listenExecutebell.Add(_bellItem);
             return Task.CompletedTask;
+        }
+
+        protected override bool IsHealthServer()
+        {
+            try
+            {
+                var rpcClient = GetOneRunningClient();
+                return rpcClient.IsRunning();
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "[ get server health by rpc ] [get rpc client] exception: {0}", ex.Message);
+                return false;
+            }
         }
     }
 }
