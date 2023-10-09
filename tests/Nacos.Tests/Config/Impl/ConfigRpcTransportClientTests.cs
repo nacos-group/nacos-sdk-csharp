@@ -60,15 +60,14 @@
         {
             var dataId = "t";
             var group = "g";
+            var tenant = "te";
 
-            // TODO: 待分支合并，即可传入tentant
-            // var tenant = "te";
             string key = GroupKey.GetKey(dataId, group, null);
             var cache = new CacheData(new ConfigFilterChainManager(new NacosSdkOptions()), _agent.GetName(), dataId, group, null);
             _agent.AddOrUpdateCache(key, cache);
             Assert.Equal(1, _agent.GetCacheCount());
 
-            _agent.RemoveCacheAsync(dataId, group);
+            _agent.RemoveCacheAsync(dataId, group, tenant);
             Assert.Equal(0, _agent.GetCacheCount());
         }
     }
