@@ -484,7 +484,7 @@
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "[ get server health by rpc ] [get rpc client] exception: {0}", ex.Message);
-                throw;
+                return false;
             }
         }
     }
