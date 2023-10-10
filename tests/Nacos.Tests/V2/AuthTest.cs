@@ -3,6 +3,7 @@
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using Nacos;
+    using Nacos.Common;
     using Nacos.DependencyInjection;
     using Nacos.Utils;
     using System;
@@ -61,7 +62,7 @@
         protected virtual async Task Config_Should_Succeed()
         {
             var dataId = $"get-{Guid.NewGuid().ToString()}";
-            var group = Common.Constants.DEFAULT_GROUP;
+            var group = Constants.DEFAULT_GROUP;
 
             var config = await _configSvc.GetConfig(dataId, group, 10000L).ConfigureAwait(false);
             _output.WriteLine($"Config_Should_Succeed, GetConfig {dataId} return {config}");

@@ -1,6 +1,7 @@
 ﻿namespace Nacos.Tests.V2
 {
     using Nacos;
+    using Nacos.Common;
     using System;
     using System.Threading.Tasks;
     using Xunit;
@@ -16,7 +17,7 @@
         protected virtual async Task PublishConfig_Should_Succeed()
         {
             var dataId = $"pub-{Guid.NewGuid().ToString()}";
-            var group = Common.Constants.DEFAULT_GROUP;
+            var group = Constants.DEFAULT_GROUP;
             var val = "test-value";
 
             var pubFlag = await _configSvc.PublishConfig(dataId, group, val).ConfigureAwait(false);
@@ -28,7 +29,7 @@
         protected virtual async Task Iss116_Should_Succeed()
         {
             var dataId = $"pub-{Guid.NewGuid().ToString()}";
-            var group = Common.Constants.DEFAULT_GROUP;
+            var group = Constants.DEFAULT_GROUP;
             var val = @"{
     ""NacosConfig"": {
         ""ConfigFilterExtInfo"": ""{\""JsonPaths\"":[\""ConnectionStrings.Default\""],\""Other\"":\""xxxxxx\""}""
@@ -44,7 +45,7 @@
         protected virtual async Task GetConfig_Should_Succeed()
         {
             var dataId = $"get-{Guid.NewGuid().ToString()}";
-            var group = Common.Constants.DEFAULT_GROUP;
+            var group = Constants.DEFAULT_GROUP;
             var val = "test-value";
 
             var pubFlag = await _configSvc.PublishConfig(dataId, group, val).ConfigureAwait(false);
@@ -62,7 +63,7 @@
         protected virtual async Task DeleteConfig_Should_Succeed()
         {
             var dataId = $"del-{Guid.NewGuid().ToString()}";
-            var group = Common.Constants.DEFAULT_GROUP;
+            var group = Constants.DEFAULT_GROUP;
             var val = "test-value";
 
             var pubFlag = await _configSvc.PublishConfig(dataId, group, val).ConfigureAwait(false);
@@ -90,7 +91,7 @@
         protected virtual async Task ListenConfig_Should_Succeed()
         {
             var dataId = $"lis-{Guid.NewGuid().ToString()}";
-            var group = Common.Constants.DEFAULT_GROUP;
+            var group = Constants.DEFAULT_GROUP;
             var val = "test-value";
 
             var pubFlag = await _configSvc.PublishConfig(dataId, group, val).ConfigureAwait(false);
