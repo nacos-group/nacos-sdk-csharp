@@ -1,4 +1,4 @@
-﻿namespace Nacos.Tests.Base
+﻿namespace Nacos.Tests.Common
 {
     public class TestConfigListen : Nacos.Config.IListener
     {

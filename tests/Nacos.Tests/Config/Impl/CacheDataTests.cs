@@ -2,7 +2,7 @@
 {
     using Nacos.Config.FilterImpl;
     using Nacos.Config.Impl;
-    using Nacos.Tests.Base;
+    using Nacos.Tests.Common;
     using System.Collections.Generic;
     using System.Linq;
     using Xunit;

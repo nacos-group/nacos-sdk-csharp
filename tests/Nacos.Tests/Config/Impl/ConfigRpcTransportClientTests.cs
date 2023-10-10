@@ -70,5 +70,11 @@
             _agent.RemoveCacheAsync(dataId, group, tenant);
             Assert.Equal(0, _agent.GetCacheCount());
         }
+
+        [Fact]
+        public void Execute_Config_Listen_Shuold_Succeed()
+        {
+            // TODO：code test
+        }
     }
 }

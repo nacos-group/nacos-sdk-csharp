@@ -3,7 +3,7 @@
     using Nacos.Config.Abst;
     using Nacos.Config.FilterImpl;
     using Nacos.Config.Impl;
-    using Nacos.Tests.Base;
+    using Nacos.Tests.Common;
     using System;
     using System.Collections.Generic;
     using System.Linq;
