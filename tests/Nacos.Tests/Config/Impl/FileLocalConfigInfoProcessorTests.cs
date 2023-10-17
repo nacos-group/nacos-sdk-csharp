@@ -46,7 +46,7 @@
             var config = @"this is encrypt data key config content";
             await WriteToTestFailoverFileAsync(TENANT, true, config).ConfigureAwait(false);
 
-            var getConfig = await FileLocalConfigInfoProcessor.GetEncryptDataKeyFailover(SERVER_NAME, DATA_ID, GROUP, TENANT).ConfigureAwait(false);
+            var getConfig = await FileLocalConfigInfoProcessor.GetEncryptDataKeyFailoverAsync(SERVER_NAME, DATA_ID, GROUP, TENANT).ConfigureAwait(false);
 
             Assert.Equal(config, getConfig);
         }
@@ -57,7 +57,7 @@
             var config = @"this is encrypt data key config content and no tenant";
             await WriteToTestFailoverFileAsync(string.Empty, true, config).ConfigureAwait(false);
 
-            var getConfig = await FileLocalConfigInfoProcessor.GetEncryptDataKeyFailover(SERVER_NAME, DATA_ID, GROUP, string.Empty).ConfigureAwait(false);
+            var getConfig = await FileLocalConfigInfoProcessor.GetEncryptDataKeyFailoverAsync(SERVER_NAME, DATA_ID, GROUP, string.Empty).ConfigureAwait(false);
 
             Assert.Equal(config, getConfig);
         }
@@ -68,7 +68,7 @@
             var config = @"this is config content";
             await FileLocalConfigInfoProcessor.SaveSnapshotAsync(SERVER_NAME, DATA_ID, GROUP, TENANT, config).ConfigureAwait(false);
 
-            var getConfig = await FileLocalConfigInfoProcessor.GetSnapshotAync(SERVER_NAME, DATA_ID, GROUP, TENANT).ConfigureAwait(false);
+            var getConfig = await FileLocalConfigInfoProcessor.GetSnapshotAsync(SERVER_NAME, DATA_ID, GROUP, TENANT).ConfigureAwait(false);
 
             Assert.Equal(config, getConfig);
         }
@@ -79,7 +79,7 @@
             var config = @"this is config content and no tenant";
             await FileLocalConfigInfoProcessor.SaveSnapshotAsync(SERVER_NAME, DATA_ID, GROUP, string.Empty, config).ConfigureAwait(false);
 
-            var getConfig = await FileLocalConfigInfoProcessor.GetSnapshotAync(SERVER_NAME, DATA_ID, GROUP, string.Empty).ConfigureAwait(false);
+            var getConfig = await FileLocalConfigInfoProcessor.GetSnapshotAsync(SERVER_NAME, DATA_ID, GROUP, string.Empty).ConfigureAwait(false);
 
             Assert.Equal(config, getConfig);
         }
@@ -88,9 +88,9 @@
         public async Task Save_And_Get_Encrypt_Data_Key_Snapshot_Should_Succeed()
         {
             var config = @"this is encrypt data key config content";
-            await FileLocalConfigInfoProcessor.SaveEncryptDataKeySnapshot(SERVER_NAME, DATA_ID, GROUP, TENANT, config).ConfigureAwait(false);
+            await FileLocalConfigInfoProcessor.SaveEncryptDataKeySnapshotAsync(SERVER_NAME, DATA_ID, GROUP, TENANT, config).ConfigureAwait(false);
 
-            var getConfig = await FileLocalConfigInfoProcessor.GetEncryptDataKeySnapshot(SERVER_NAME, DATA_ID, GROUP, TENANT).ConfigureAwait(false);
+            var getConfig = await FileLocalConfigInfoProcessor.GetEncryptDataKeySnapshotAsync(SERVER_NAME, DATA_ID, GROUP, TENANT).ConfigureAwait(false);
 
             Assert.Equal(config, getConfig);
         }
@@ -99,9 +99,9 @@
         public async Task Save_And_Get_Encrypt_Data_Key_Snapshot_No_Tenant_Should_Succeed()
         {
             var config = @"this is encrypt data key config content and no tenant";
-            await FileLocalConfigInfoProcessor.SaveEncryptDataKeySnapshot(SERVER_NAME, DATA_ID, GROUP, string.Empty, config).ConfigureAwait(false);
+            await FileLocalConfigInfoProcessor.SaveEncryptDataKeySnapshotAsync(SERVER_NAME, DATA_ID, GROUP, string.Empty, config).ConfigureAwait(false);
 
-            var getConfig = await FileLocalConfigInfoProcessor.GetEncryptDataKeySnapshot(SERVER_NAME, DATA_ID, GROUP, string.Empty).ConfigureAwait(false);
+            var getConfig = await FileLocalConfigInfoProcessor.GetEncryptDataKeySnapshotAsync(SERVER_NAME, DATA_ID, GROUP, string.Empty).ConfigureAwait(false);
 
             Assert.Equal(config, getConfig);
         }
