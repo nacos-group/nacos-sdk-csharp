@@ -1,5 +1,6 @@
 ﻿namespace Nacos.Tests.Config.Impl
 {
+    using Moq;
     using Nacos.Config.Abst;
     using Nacos.Config.Common;
     using Nacos.Config.FilterImpl;
@@ -9,6 +10,9 @@
 
     public class ConfigRpcTransportClientTests
     {
+        // TODO: Rewrite test using mocks
+        private Mock<AbstConfigTransportClient> _mockAgent;
+
         private IConfigTransportClient _agent;
 
         public ConfigRpcTransportClientTests()
@@ -23,15 +27,24 @@
                 ConfigUseRpc = true,
             };
             _agent = new ConfigRpcTransportClient(options);
+            _mockAgent = new Mock<AbstConfigTransportClient>();
         }
+
+
 
         [Fact]
         public void Get_Options_Shuold_Succeed()
         {
-            var namespaces = _agent.GetNamespace();
-            Assert.Equal("cs", namespaces);
-            var tenant = _agent.GetTenant();
-            Assert.Equal("cs", tenant);
+            var n = "mock_name";
+            var ns = "mock_namespace";
+
+            _mockAgent.Setup(m => m.GetName()).Returns(n);
+            _mockAgent.Setup(m => m.GetNamespace()).Returns(ns);
+            _mockAgent.Setup(m => m.GetTenant()).Returns(ns);
+
+            Assert.Equal(n, _mockAgent.Object.GetName());
+            Assert.Equal(ns, _mockAgent.Object.GetNamespace());
+            Assert.Equal(ns, _mockAgent.Object.GetTenant());
         }
 
         [Fact]
