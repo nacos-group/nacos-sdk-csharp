@@ -83,8 +83,8 @@
         public async Task<ListView<string>> GetServiceList(int pageNo, int pageSize, string groupName, AbstractSelector selector)
             => await grpcClientProxy.GetServiceList(pageNo, pageSize, groupName, selector).ConfigureAwait(false);
 
-        public async Task<ServiceInfo> QueryInstancesOfService(string serviceName, string groupName, string clusters, int udpPort, bool healthyOnly)
-            => await grpcClientProxy.QueryInstancesOfService(serviceName, groupName, clusters, udpPort, healthyOnly).ConfigureAwait(false);
+        public async Task<ServiceInfo> QueryInstancesOfService(string serviceName, string groupName, string clusters, bool healthyOnly)
+            => await grpcClientProxy.QueryInstancesOfService(serviceName, groupName, clusters, healthyOnly).ConfigureAwait(false);
 
         public Task<Service> QueryService(string serviceName, string groupName) => Task.FromResult<Service>(null);
 
@@ -115,9 +115,6 @@
             await grpcClientProxy.Unsubscribe(serviceName, groupName, clusters).ConfigureAwait(false);
         }
 
-        public async Task UpdateBeatInfo(List<Instance> modifiedInstances)
-            => await httpClientProxy.UpdateBeatInfo(modifiedInstances).ConfigureAwait(false);
-
         public Task UpdateInstance(string serviceName, string groupName, Instance instance) => Task.CompletedTask;
 
         public Task UpdateService(Service service, AbstractSelector selector) => Task.CompletedTask;
@@ -132,6 +129,11 @@
             if (instances == null || !instances.Any()) await Task.Yield();
 
             await grpcClientProxy.BatchRegisterServiceAsync(serviceName, groupName, instances).ConfigureAwait(false);
+        }
+
+        public async Task BatchDeregisterServiceAsync(string serviceName, string groupName, List<Instance> instances)
+        {
+            await grpcClientProxy.BatchDeregisterServiceAsync(serviceName, groupName, instances).ConfigureAwait(false);
         }
     }
 }
