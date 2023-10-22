@@ -12,5 +12,11 @@
 
         public static bool IsNotNullOrWhiteSpace(this string str)
             => !string.IsNullOrWhiteSpace(str);
+
+        public static string ToEncoded(this string str)
+            => System.Net.WebUtility.UrlEncode(str);
+
+        public static string ToDecode(this string str)
+            => System.Net.WebUtility.UrlDecode(str);
     }
 }
