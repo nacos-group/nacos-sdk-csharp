@@ -1,9 +1,8 @@
-﻿namespace Nacos.Config.FilterImpl
+﻿namespace Nacos.Config.Filter
 {
     using Microsoft.Extensions.DependencyModel;
     using Microsoft.Extensions.Options;
     using Nacos;
-    using Nacos.Config.Abst;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;

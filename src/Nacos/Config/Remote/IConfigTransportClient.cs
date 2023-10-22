@@ -1,9 +1,7 @@
-﻿namespace Nacos.Config.Abst
+﻿namespace Nacos.Config.Remote
 {
-    using Nacos.Config.FilterImpl;
-    using Nacos.Config.Impl;
-    using System;
-    using System.Collections.Generic;
+    using Nacos.Config.Cache;
+    using Nacos.Config.Filter;
     using System.Threading.Tasks;
 
     public interface IConfigTransportClient

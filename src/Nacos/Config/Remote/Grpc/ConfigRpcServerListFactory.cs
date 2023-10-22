@@ -1,4 +1,4 @@
-﻿namespace Nacos.Config.Impl
+﻿namespace Nacos.Config.Remote.Grpc
 {
     using Nacos.Remote;
     using System.Collections.Generic;

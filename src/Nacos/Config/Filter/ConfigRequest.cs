@@ -1,6 +1,5 @@
-﻿namespace Nacos.Config.FilterImpl
+﻿namespace Nacos.Config.Filter
 {
-    using Nacos.Config.Abst;
     using Nacos.Config.Common;
     using Nacos.Utils;
 

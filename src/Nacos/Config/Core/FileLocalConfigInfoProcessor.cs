@@ -1,4 +1,4 @@
-﻿namespace Nacos.Config.Impl
+﻿namespace Nacos.Config.Utils
 {
     using System;
     using System.IO;

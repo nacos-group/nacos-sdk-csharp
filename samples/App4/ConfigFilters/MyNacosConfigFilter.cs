@@ -1,7 +1,7 @@
 ﻿namespace App4.ConfigFilters
 {
     using Nacos;
-    using Nacos.Config.Abst;
+    using Nacos.Config.Filter;
     using System;
     using System.IO;
     using System.Security.Cryptography;

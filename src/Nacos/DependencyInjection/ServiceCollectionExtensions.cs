@@ -6,9 +6,10 @@
     using Nacos;
     using Nacos.Auth;
     using Nacos.Config;
-    using Nacos.Config.Abst;
-    using Nacos.Config.FilterImpl;
-    using Nacos.Config.Impl;
+    using Nacos.Config.Core;
+    using Nacos.Config.Filter;
+    using Nacos.Config.Remote;
+    using Nacos.Config.Remote.Grpc;
     using Nacos.Naming.Cache;
     using Nacos.Naming.Event;
     using Nacos.Naming.Remote;

@@ -1,7 +1,5 @@
-﻿namespace Nacos.Config.FilterImpl
+﻿namespace Nacos.Config.Filter
 {
-    using Nacos.Config.Abst;
-
     public class ConfigContext : IConfigContext
     {
         private System.Collections.Generic.Dictionary<string, object> param = new System.Collections.Generic.Dictionary<string, object>();

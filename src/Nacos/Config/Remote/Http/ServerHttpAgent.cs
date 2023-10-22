@@ -1,4 +1,4 @@
-﻿namespace Nacos.Config.Http
+﻿namespace Nacos.Config.Remote.Http
 {
     using Google.Protobuf.WellKnownTypes;
     using Microsoft.Extensions.Logging;

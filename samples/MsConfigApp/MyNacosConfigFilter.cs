@@ -1,7 +1,7 @@
 ﻿namespace MsConfigApp
 {
     using Nacos;
-    using Nacos.Config.Abst;
+    using Nacos.Config.Filter;
     using Newtonsoft.Json.Linq;
     using System;
     using System.Collections.Generic;

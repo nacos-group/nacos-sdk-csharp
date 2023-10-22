@@ -1,7 +1,6 @@
 ﻿namespace Nacos.Tests.Config.FilterImpl
 {
-    using Nacos.Config.Abst;
-    using Nacos.Config.FilterImpl;
+    using Nacos.Config.Filter;
     using Nacos;
     using System.Collections.Generic;
     using Xunit;

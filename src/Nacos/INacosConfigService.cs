@@ -2,7 +2,7 @@
 {
     using System.Threading.Tasks;
     using Nacos.Config;
-    using Nacos.Config.Abst;
+    using Nacos.Config.Filter;
 
     public interface INacosConfigService
     {

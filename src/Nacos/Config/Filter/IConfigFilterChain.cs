@@ -1,4 +1,4 @@
-﻿namespace Nacos.Config.Abst
+﻿namespace Nacos.Config.Filter
 {
     public interface IConfigFilterChain
     {

@@ -1,12 +1,13 @@
-﻿namespace Nacos.Config.Impl
+﻿namespace Nacos.Config.Remote.Grpc
 {
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Nacos;
     using Nacos.Common;
-    using Nacos.Config.Abst;
+    using Nacos.Config.Cache;
     using Nacos.Config.Common;
-    using Nacos.Config.FilterImpl;
+    using Nacos.Config.Filter;
+    using Nacos.Config.Remote;
     using Nacos.Config.Utils;
     using Nacos.Exceptions;
     using Nacos.Logging;
@@ -19,7 +20,6 @@
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Runtime.InteropServices.ComTypes;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -297,7 +297,7 @@
             request.PutAllHeader(commonHeaders);
         }
 
-        private Nacos.Auth.RequestResource ResourceBuild(CommonRequest request)
+        private Auth.RequestResource ResourceBuild(CommonRequest request)
         {
             if (request is ConfigQueryRequest cqReq)
                 return new Auth.RequestResource("config", cqReq.Tenant, cqReq.Group, cqReq.DataId);

@@ -1,16 +1,16 @@
-﻿namespace Nacos.Config.Impl
+﻿namespace Nacos.Config.Core
 {
     using Microsoft.Extensions.Logging;
     using Nacos.Common;
     using Nacos.Config;
-    using Nacos.Config.Abst;
+    using Nacos.Config.Cache;
     using Nacos.Config.Common;
-    using Nacos.Config.FilterImpl;
+    using Nacos.Config.Filter;
+    using Nacos.Config.Remote;
     using Nacos.Config.Utils;
     using Nacos.Logging;
     using Nacos.Utils;
     using System;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Threading.Tasks;
 

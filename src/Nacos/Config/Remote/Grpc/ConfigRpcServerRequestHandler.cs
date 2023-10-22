@@ -1,4 +1,4 @@
-﻿namespace Nacos.Config.Impl
+﻿namespace Nacos.Config.Remote.Grpc
 {
     using Microsoft.Extensions.Logging;
     using Nacos.Config.Common;
@@ -9,8 +9,8 @@
     using System;
     using System.Collections.Concurrent;
     using System.Threading.Tasks;
-    using Nacos.Common;
     using Nacos.Logging;
+    using Nacos.Config.Cache;
 
     public class ConfigRpcServerRequestHandler : IServerRequestHandler
     {

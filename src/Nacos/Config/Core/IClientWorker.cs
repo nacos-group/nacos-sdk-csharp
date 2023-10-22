@@ -1,7 +1,7 @@
-﻿namespace Nacos.Config.Abst
+﻿namespace Nacos.Config.Core
 {
-    using Nacos.Config.FilterImpl;
-    using Nacos.Config.Impl;
+    using Nacos.Config.Cache;
+    using Nacos.Config.Filter;
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;

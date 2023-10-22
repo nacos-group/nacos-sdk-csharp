@@ -1,7 +1,8 @@
-﻿namespace Nacos.Config.Impl
+﻿namespace Nacos.Config.Remote.Grpc
 {
     using Microsoft.Extensions.Logging;
     using Nacos.Common;
+    using Nacos.Config.Cache;
     using Nacos.Logging;
     using Nacos.Remote;
     using System;

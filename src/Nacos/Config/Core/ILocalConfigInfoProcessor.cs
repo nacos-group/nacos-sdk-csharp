@@ -1,4 +1,4 @@
-﻿namespace Nacos.Config.Abst
+﻿namespace Nacos.Config.Core
 {
     using System.Threading.Tasks;
 

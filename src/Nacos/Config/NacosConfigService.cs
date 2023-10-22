@@ -3,15 +3,12 @@
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Nacos;
-    using Nacos.Auth;
-    using Nacos.Config.Abst;
-    using Nacos.Config.FilterImpl;
-    using Nacos.Config.Impl;
+    using Nacos.Config.Core;
+    using Nacos.Config.Filter;
+    using Nacos.Config.Remote.Grpc;
     using Nacos.Config.Utils;
     using Nacos.Exceptions;
     using Nacos.Logging;
-    using Nacos.Remote;
-    using Nacos.Security;
     using System.Collections.Generic;
     using System.Threading.Tasks;
 

@@ -1,9 +1,9 @@
-﻿namespace Nacos.Config.Impl
+﻿namespace Nacos.Config.Cache
 {
     using Nacos.Common;
     using Nacos.Config;
-    using Nacos.Config.Abst;
-    using Nacos.Config.FilterImpl;
+    using Nacos.Config.Filter;
+    using Nacos.Config.Utils;
     using Nacos.Utils;
     using System;
     using System.Collections.Generic;
