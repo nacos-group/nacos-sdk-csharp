@@ -63,7 +63,7 @@
 
                     if (!_serviceInfoHolder.GetServiceInfoMap().TryGetValue(state.ServiceKey, out var serviceObj))
                     {
-                        serviceObj = await _namingClientProxy.QueryInstancesOfService(state.ServiceName, state.GroupName, state.Clusters, 0, false).ConfigureAwait(false);
+                        serviceObj = await _namingClientProxy.QueryInstancesOfService(state.ServiceName, state.GroupName, state.Clusters, false).ConfigureAwait(false);
 
                         _serviceInfoHolder.ProcessServiceInfo(serviceObj);
                         delayTime = DEFAULT_DELAY;
@@ -73,7 +73,7 @@
 
                     if (serviceObj.LastRefTime <= state.LastRefTime)
                     {
-                        serviceObj = await _namingClientProxy.QueryInstancesOfService(serviceName, groupName, clusters, 0, false).ConfigureAwait(false);
+                        serviceObj = await _namingClientProxy.QueryInstancesOfService(serviceName, groupName, clusters, false).ConfigureAwait(false);
                         _serviceInfoHolder.ProcessServiceInfo(serviceObj);
                     }
 

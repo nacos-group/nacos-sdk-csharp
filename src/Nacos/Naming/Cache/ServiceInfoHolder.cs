@@ -12,7 +12,6 @@
     using Nacos.Utils;
     using Nacos;
     using Microsoft.Extensions.Options;
-    using System.Xml.Linq;
     using Nacos.Common;
     using Nacos.Logging;
 
@@ -92,13 +91,16 @@
 
         internal Dtos.ServiceInfo ProcessServiceInfo(Dtos.ServiceInfo serviceInfo)
         {
-            if (serviceInfo.GetKey().IsNullOrWhiteSpace()) return null;
+            var serviceKey = serviceInfo.GetKey();
 
-            _serviceInfoMap.TryGetValue(serviceInfo.GetKey(), out var oldService);
+            if (serviceKey.IsNullOrWhiteSpace()) return null;
 
+            _serviceInfoMap.TryGetValue(serviceKey, out var oldService);
+
+            // empty or error push, just ignore
             if (IsEmptyOrErrorPush(serviceInfo)) return oldService;
 
-            _serviceInfoMap.AddOrUpdate(serviceInfo.GetKey(), serviceInfo, (x, y) => serviceInfo);
+            _serviceInfoMap.AddOrUpdate(serviceKey, serviceInfo, (x, y) => serviceInfo);
 
             bool changed = IsChangedServiceInfo(oldService, serviceInfo);
 
@@ -164,7 +166,7 @@
                     newHosts.ToJsonString());
             }
 
-            if (removeHosts.Count() > 0)
+            if (removeHosts.Count > 0)
             {
                 changed = true;
                 _logger?.LogInformation(
@@ -174,7 +176,7 @@
                   removeHosts.ToJsonString());
             }
 
-            if (modHosts.Count() > 0)
+            if (modHosts.Count > 0)
             {
                 changed = true;
                 _logger?.LogInformation(
@@ -199,23 +201,24 @@
                 namingCacheRegistryDir = options.NamingCacheRegistryDir;
             }
 
-            if (!string.IsNullOrWhiteSpace(jmSnapshotPath))
+            if (jmSnapshotPath.IsNotNullOrWhiteSpace())
             {
-                cacheDir = Path.Combine(jmSnapshotPath, FILE_PATH_NACOS, FILE_PATH_NAMING, @namespace);
+                cacheDir = Path.Combine(jmSnapshotPath, FILE_PATH_NACOS, namingCacheRegistryDir, FILE_PATH_NAMING, @namespace);
             }
             else
             {
-                cacheDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), FILE_PATH_NACOS, FILE_PATH_NAMING, @namespace);
+                cacheDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), FILE_PATH_NACOS, namingCacheRegistryDir, FILE_PATH_NAMING, @namespace);
             }
         }
 
         internal Dtos.ServiceInfo GetServiceInfo(string serviceName, string groupName, string clusters)
         {
-            _logger?.LogDebug("failover-mode:{0}", _failoverReactor.IsFailoverSwitch());
+            var flag = _failoverReactor.IsFailoverSwitch();
+            _logger?.LogDebug("failover-mode:{0}", flag);
             string groupedServiceName = NamingUtils.GetGroupedName(serviceName, groupName);
             string key = ServiceInfo.GetKey(groupedServiceName, clusters);
 
-            if (_failoverReactor.IsFailoverSwitch())
+            if (flag)
             {
                 return _failoverReactor.GetService(key);
             }

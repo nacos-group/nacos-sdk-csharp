@@ -44,9 +44,6 @@
             _serviceInfoHolder = serviceInfoHolder;
 
             _namespace = string.IsNullOrWhiteSpace(_options.Namespace) ? Constants.DEFAULT_NAMESPACE_ID : _options.Namespace;
-
-            // _serviceInfoHolder = new ServiceInfoHolder(_namespace, _options, _changeNotifier);
-            // _clientProxy = new NamingClientProxyDelegate(_namespace, _serviceInfoHolder, _options, _changeNotifier, clientFactory);
         }
 
         public async Task DeregisterInstance(string serviceName, string ip, int port)
@@ -111,7 +108,7 @@
             }
             else
             {
-                serviceInfo = await _clientProxy.QueryInstancesOfService(serviceName, groupName, clusterString, 0, false).ConfigureAwait(false);
+                serviceInfo = await _clientProxy.QueryInstancesOfService(serviceName, groupName, clusterString, false).ConfigureAwait(false);
             }
 
             List<Instance> list = serviceInfo.Hosts;
@@ -204,7 +201,7 @@
             }
             else
             {
-                serviceInfo = await _clientProxy.QueryInstancesOfService(serviceName, groupName, clusterString, 0, false).ConfigureAwait(false);
+                serviceInfo = await _clientProxy.QueryInstancesOfService(serviceName, groupName, clusterString, false).ConfigureAwait(false);
             }
 
             return SelectInstances(serviceInfo, healthy);
@@ -257,7 +254,7 @@
             else
             {
                 ServiceInfo serviceInfo = await _clientProxy
-                        .QueryInstancesOfService(serviceName, groupName, clusterString, 0, false).ConfigureAwait(false);
+                        .QueryInstancesOfService(serviceName, groupName, clusterString, false).ConfigureAwait(false);
 
                 return Balancer.GetHostByRandom(serviceInfo?.Hosts);
             }
