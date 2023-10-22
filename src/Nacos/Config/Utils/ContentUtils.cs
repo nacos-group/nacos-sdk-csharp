@@ -34,7 +34,7 @@
 
         public static string GetContentIdentity(string content)
         {
-            int index = content.IndexOf(Constants.WORD_SEPARATOR);
+            int index = content.IndexOf(Constants.WORD_SEPARATOR[0]);
             if (index == -1)
             {
                 throw new ArgumentException("content does not contain separator");
@@ -45,7 +45,7 @@
 
         public static string GetContent(string content)
         {
-            int index = content.IndexOf(Constants.WORD_SEPARATOR);
+            int index = content.IndexOf(Constants.WORD_SEPARATOR[0]);
             if (index == -1)
             {
                 throw new ArgumentException("content does not contain separator");
