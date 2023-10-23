@@ -32,28 +32,6 @@
             }
         }
 
-        public static string GetContentIdentity(string content)
-        {
-            int index = content.IndexOf(Constants.WORD_SEPARATOR);
-            if (index == -1)
-            {
-                throw new ArgumentException("content does not contain separator");
-            }
-
-            return content.Substring(0, index);
-        }
-
-        public static string GetContent(string content)
-        {
-            int index = content.IndexOf(Constants.WORD_SEPARATOR);
-            if (index == -1)
-            {
-                throw new ArgumentException("content does not contain separator");
-            }
-
-            return content.Substring(index + 1);
-        }
-
         /// <summary>
         /// Truncate content.
         /// </summary>
