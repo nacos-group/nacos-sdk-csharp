@@ -62,15 +62,9 @@
         {
             CheckTenant(tenant);
 
-            if (dataId.IsNullOrWhiteSpace() || !IsValid(dataId))
-            {
-                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, DATAID_INVALID_MSG);
-            }
+            CheckDataIds(new List<string> { dataId });
 
-            if (group.IsNullOrWhiteSpace() || !IsValid(group))
-            {
-                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, GROUP_INVALID_MSG);
-            }
+            CheckGroup(group);
         }
 
         /// <summary>
@@ -80,15 +74,9 @@
         /// <param name="group">group</param>
         public static void CheckKeyParam(string dataId, string group)
         {
-            if (dataId.IsNullOrWhiteSpace() || !IsValid(dataId))
-            {
-                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, DATAID_INVALID_MSG);
-            }
+            CheckDataIds(new List<string> { dataId });
 
-            if (group.IsNullOrWhiteSpace() || !IsValid(group))
-            {
-                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, GROUP_INVALID_MSG);
-            }
+            CheckGroup(group);
         }
 
         /// <summary>
@@ -99,20 +87,11 @@
         /// <param name="datumId">datumId</param>
         public static void CheckKeyParam(string dataId, string group, string datumId)
         {
-            if (dataId.IsNullOrWhiteSpace() || !IsValid(dataId))
-            {
-                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, DATAID_INVALID_MSG);
-            }
+            CheckDataIds(new List<string> { dataId });
 
-            if (group.IsNullOrWhiteSpace() || !IsValid(group))
-            {
-                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, GROUP_INVALID_MSG);
-            }
+            CheckGroup(group);
 
-            if (datumId.IsNullOrWhiteSpace() || !IsValid(datumId))
-            {
-                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, DATUMID_INVALID_MSG);
-            }
+            CheckDatumId(datumId);
         }
 
         /// <summary>
@@ -121,6 +100,56 @@
         /// <param name="dataIds">dataIds</param>
         /// <param name="group">group</param>
         public static void CheckKeyParam(List<string> dataIds, string group)
+        {
+            CheckDataIds(dataIds);
+
+            CheckGroup(group);
+        }
+
+        /// <summary>
+        /// Check parameter.
+        /// </summary>
+        /// <param name="dataId">dataId</param>
+        /// <param name="group">group</param>
+        /// <param name="content">content</param>
+        public static void CheckParam(string dataId, string group, string content)
+        {
+            CheckKeyParam(dataId, group);
+
+            CheckContent(content);
+        }
+
+        /// <summary>
+        /// Check parameter.
+        /// </summary>
+        /// <param name="dataId">dataId</param>
+        /// <param name="group">group</param>
+        /// <param name="datumId">datumId</param>
+        /// <param name="content">content</param>
+        public static void CheckParam(string dataId, string group, string datumId, string content)
+        {
+            CheckKeyParam(dataId, group, datumId);
+
+            CheckContent(content);
+        }
+
+        /// <summary>
+        /// Check tenant.
+        /// </summary>
+        /// <param name="tenant">tenant</param>
+        public static void CheckTenant(string tenant)
+        {
+            if (tenant.IsNullOrWhiteSpace() || !IsValid(tenant))
+            {
+                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, TENANT_INVALID_MSG);
+            }
+        }
+
+        /// <summary>
+        /// Check dataId list.
+        /// </summary>
+        /// <param name="dataIds">dataId list</param>
+        public static void CheckDataIds(List<string> dataIds)
         {
             if (dataIds == null || !dataIds.Any())
             {
@@ -134,7 +163,14 @@
                     throw new NacosException(NacosException.CLIENT_INVALID_PARAM, DATAID_INVALID_MSG);
                 }
             }
+        }
 
+        /// <summary>
+        /// Check group.
+        /// </summary>
+        /// <param name="group">group</param>
+        public static void CheckGroup(string group)
+        {
             if (group.IsNullOrWhiteSpace() || !IsValid(group))
             {
                 throw new NacosException(NacosException.CLIENT_INVALID_PARAM, GROUP_INVALID_MSG);
@@ -142,45 +178,14 @@
         }
 
         /// <summary>
-        /// Check parameter.
+        /// Check datumId.
         /// </summary>
-        /// <param name="dataId">dataId</param>
-        /// <param name="group">group</param>
-        /// <param name="content">content</param>
-        public static void CheckParam(string dataId, string group, string content)
-        {
-            CheckKeyParam(dataId, group);
-            if (content.IsNullOrWhiteSpace())
-            {
-                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, CONTENT_INVALID_MSG);
-            }
-        }
-
-        /// <summary>
-        /// Check parameter.
-        /// </summary>
-        /// <param name="dataId">dataId</param>
-        /// <param name="group">group</param>
         /// <param name="datumId">datumId</param>
-        /// <param name="content">content</param>
-        public static void CheckParam(string dataId, string group, string datumId, string content)
+        public static void CheckDatumId(string datumId)
         {
-            CheckKeyParam(dataId, group, datumId);
-            if (content.IsNullOrWhiteSpace())
+            if (datumId.IsNullOrWhiteSpace() || !IsValid(datumId))
             {
-                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, CONTENT_INVALID_MSG);
-            }
-        }
-
-        /// <summary>
-        /// Check Tenant.
-        /// </summary>
-        /// <param name="tenant">tenant</param>
-        public static void CheckTenant(string tenant)
-        {
-            if (tenant.IsNullOrWhiteSpace() || !IsValid(tenant))
-            {
-                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, TENANT_INVALID_MSG);
+                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, DATUMID_INVALID_MSG);
             }
         }
 

@@ -15,9 +15,9 @@
             LOCAL_SNAPSHOT_PATH = Path.Combine(basePath, "nacos", "config");
         }
 
-        public static async Task<string> GetFailoverAsync(string serverName, string dataId, string group, string tenant)
+        public static async Task<string> GetFailoverAsync(string envName, string dataId, string group, string tenant)
         {
-            FileInfo file = GetFailoverFile(serverName, dataId, group, tenant);
+            FileInfo file = GetFailoverFile(envName, dataId, group, tenant);
 
             if (!file.Exists) return null;
 
@@ -32,10 +32,10 @@
             }
         }
 
-        internal static FileInfo GetFailoverFile(string serverName, string dataId, string group, string tenant)
+        internal static FileInfo GetFailoverFile(string envName, string dataId, string group, string tenant)
         {
             string failoverFile;
-            failoverFile = Path.Combine(LOCAL_SNAPSHOT_PATH, serverName + "_nacos");
+            failoverFile = Path.Combine(LOCAL_SNAPSHOT_PATH, envName + "_nacos");
 
             failoverFile = !string.IsNullOrEmpty(tenant)
                 ? Path.Combine(failoverFile, "config-data-tenant", tenant, group, dataId)
@@ -45,9 +45,9 @@
             return file;
         }
 
-        public static async Task<string> GetSnapshotAync(string name, string dataId, string group, string tenant)
+        public static async Task<string> GetSnapshotAsync(string envName, string dataId, string group, string tenant)
         {
-            FileInfo file = GetSnapshotFile(name, dataId, group, tenant);
+            FileInfo file = GetSnapshotFile(envName, dataId, group, tenant);
 
             if (!file.Exists) return null;
 
@@ -129,7 +129,7 @@
         /// <param name="group">group</param>
         /// <param name="tenant">tenant</param>
         /// <returns>EncryptedDataKey</returns>
-        public static async Task<string> GetEncryptDataKeyFailover(string envName, string dataId, string group, string tenant)
+        public static async Task<string> GetEncryptDataKeyFailoverAsync(string envName, string dataId, string group, string tenant)
         {
             FileInfo file = GetEncryptDataKeyFailoverFile(envName, dataId, group, tenant);
 
@@ -147,14 +147,14 @@
 
         private static FileInfo GetEncryptDataKeyFailoverFile(string envName, string dataId, string group, string tenant)
         {
-            string snapshotFile;
-            snapshotFile = Path.Combine(LOCAL_SNAPSHOT_PATH, envName + "_nacos", "encrypted-data-key");
+            string failoverFile;
+            failoverFile = Path.Combine(LOCAL_SNAPSHOT_PATH, envName + "_nacos", "encrypted-data-key");
 
-            snapshotFile = !string.IsNullOrEmpty(tenant)
-                ? Path.Combine(snapshotFile, "failover-tenant", tenant, group, dataId)
-                : Path.Combine(snapshotFile, "failover", group, dataId);
+            failoverFile = !string.IsNullOrEmpty(tenant)
+                ? Path.Combine(failoverFile, "failover-tenant", tenant, group, dataId)
+                : Path.Combine(failoverFile, "failover", group, dataId);
 
-            var file = new FileInfo(snapshotFile);
+            var file = new FileInfo(failoverFile);
             return file;
         }
 
@@ -180,7 +180,7 @@
         /// <param name="tenant">tenant</param>
         /// <param name="encryptDataKey">encryptDataKey</param>
         /// <returns>Task</returns>
-        public static async Task SaveEncryptDataKeySnapshot(string envName, string dataId, string group, string tenant, string encryptDataKey)
+        public static async Task SaveEncryptDataKeySnapshotAsync(string envName, string dataId, string group, string tenant, string encryptDataKey)
         {
             /*if (!SnapShotSwitch.getIsSnapShot())
             {
@@ -227,7 +227,7 @@
         /// <param name="group">group</param>
         /// <param name="tenant">tenant</param>
         /// <returns>EncryptedDataKey</returns>
-        public static async Task<string> GetEncryptDataKeySnapshot(string envName, string dataId, string group, string tenant)
+        public static async Task<string> GetEncryptDataKeySnapshotAsync(string envName, string dataId, string group, string tenant)
         {
             /*if (!SnapShotSwitch.getIsSnapShot())
             {

@@ -18,6 +18,7 @@
     using Nacos.Utils;
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
 
     public class NamingGrpcClientProxy : INamingGrpcClientProxy
@@ -101,13 +102,12 @@
             return result;
         }
 
-        public async Task<ServiceInfo> QueryInstancesOfService(string serviceName, string groupName, string clusters, int udpPort, bool healthyOnly)
+        public async Task<ServiceInfo> QueryInstancesOfService(string serviceName, string groupName, string clusters, bool healthyOnly)
         {
             var request = new ServiceQueryRequest(namespaceId, serviceName, groupName)
             {
                 Cluster = clusters,
-                HealthyOnly = healthyOnly,
-                UdpPort = udpPort
+                HealthyOnly = healthyOnly
             };
 
             var response = await RequestToServer<QueryServiceResponse>(request).ConfigureAwait(false);
@@ -128,6 +128,41 @@
         {
             _redoService.CacheInstanceForRedo(serviceName, groupName, instances);
             await DoBatchRegisterService(serviceName, groupName, instances).ConfigureAwait(false);
+        }
+
+        public async Task BatchDeregisterServiceAsync(string serviceName, string groupName, List<Instance> instances)
+        {
+            if (instances == null || !instances.Any())
+            {
+                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "[Batch deRegistration] need deRegister instance is empty.");
+            }
+
+            var combinedServiceName = NamingUtils.GetGroupedName(serviceName, groupName);
+            var instanceRedoData = _redoService.GetRegisteredInstancesByKey(combinedServiceName);
+            if (instanceRedoData is not BatchInstanceRedoData)
+            {
+                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, "[Batch deRegistration] batch deRegister is not BatchInstanceRedoData type.");
+            }
+
+            var batchInstanceRedoData = instanceRedoData as BatchInstanceRedoData;
+
+            var allInstances = batchInstanceRedoData.Instances;
+            if (allInstances == null || !allInstances.Any())
+            {
+                throw new NacosException(NacosException.CLIENT_INVALID_PARAM, $"[Batch deRegistration] not found all registerInstance , serviceName：{serviceName} , groupName: {groupName}");
+            }
+
+            var retainInstances = new List<Instance>();
+
+            foreach (var instance in allInstances)
+            {
+                if (!instances.Contains(instance))
+                {
+                    retainInstances.Add(instance);
+                }
+            }
+
+            await BatchRegisterServiceAsync(serviceName, groupName, retainInstances).ConfigureAwait(false);
         }
 
         private async Task DoBatchRegisterService(string serviceName, string groupName, List<Instance> instances)
@@ -174,8 +209,6 @@
             await RequestToServer<SubscribeServiceResponse>(request).ConfigureAwait(false);
             _redoService.RemoveSubscriberForRedo(serviceName, groupName, clusters);
         }
-
-        public Task UpdateBeatInfo(List<Instance> modifiedInstances) => Task.CompletedTask;
 
         public Task UpdateInstance(string serviceName, string groupName, Instance instance) => Task.CompletedTask;
 

@@ -186,18 +186,18 @@
                 .ConfigureAwait(false).GetAwaiter().GetResult();
             content = content != null
                 ? content
-                : FileLocalConfigInfoProcessor.GetSnapshotAync(name, dataId, group, tenant).ConfigureAwait(false).GetAwaiter().GetResult();
+                : FileLocalConfigInfoProcessor.GetSnapshotAsync(name, dataId, group, tenant).ConfigureAwait(false).GetAwaiter().GetResult();
 
             return content;
         }
 
         private string LoadEncryptedDataKeyFromDiskLocal(string name, string dataId, string group, string tenant)
         {
-            var encryptedDataKey = FileLocalConfigInfoProcessor.GetEncryptDataKeyFailover(name, dataId, group, tenant).ConfigureAwait(false).GetAwaiter().GetResult();
+            var encryptedDataKey = FileLocalConfigInfoProcessor.GetEncryptDataKeyFailoverAsync(name, dataId, group, tenant).ConfigureAwait(false).GetAwaiter().GetResult();
 
             encryptedDataKey = encryptedDataKey != null
                 ? encryptedDataKey
-                : FileLocalConfigInfoProcessor.GetEncryptDataKeySnapshot(name, dataId, group, tenant).ConfigureAwait(false).GetAwaiter().GetResult();
+                : FileLocalConfigInfoProcessor.GetEncryptDataKeySnapshotAsync(name, dataId, group, tenant).ConfigureAwait(false).GetAwaiter().GetResult();
 
             return encryptedDataKey;
         }

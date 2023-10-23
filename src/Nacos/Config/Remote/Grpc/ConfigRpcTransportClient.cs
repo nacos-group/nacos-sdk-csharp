@@ -133,7 +133,7 @@
 
                     string encryptedDataKey = response.EncryptedDataKey;
 
-                    await FileLocalConfigInfoProcessor.SaveEncryptDataKeySnapshot(GetName(), dataId, group, tenant, encryptedDataKey).ConfigureAwait(false);
+                    await FileLocalConfigInfoProcessor.SaveEncryptDataKeySnapshotAsync(GetName(), dataId, group, tenant, encryptedDataKey).ConfigureAwait(false);
                     configResponse.SetEncryptedDataKey(encryptedDataKey);
 
                     return configResponse;
@@ -141,7 +141,7 @@
                 else if (response.ErrorCode.Equals(ConfigQueryResponse.CONFIG_NOT_FOUND))
                 {
                     await FileLocalConfigInfoProcessor.SaveSnapshotAsync(GetName(), dataId, group, tenant, null).ConfigureAwait(false);
-                    await FileLocalConfigInfoProcessor.SaveEncryptDataKeySnapshot(GetName(), dataId, group, tenant, null).ConfigureAwait(false);
+                    await FileLocalConfigInfoProcessor.SaveEncryptDataKeySnapshotAsync(GetName(), dataId, group, tenant, null).ConfigureAwait(false);
 
                     return configResponse;
                 }

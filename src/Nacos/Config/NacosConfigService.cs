@@ -111,7 +111,7 @@
 
                 cr.SetContent(content);
 
-                encryptedDataKey = await FileLocalConfigInfoProcessor.GetEncryptDataKeyFailover(_worker.GetAgentName(), dataId, group, tenant).ConfigureAwait(false);
+                encryptedDataKey = await FileLocalConfigInfoProcessor.GetEncryptDataKeyFailoverAsync(_worker.GetAgentName(), dataId, group, tenant).ConfigureAwait(false);
                 cr.SetEncryptedDataKey(encryptedDataKey);
 
                 _configFilterChainManager.DoFilter(null, cr);
@@ -143,10 +143,10 @@
                  "[{0}] [get-config] get snapshot ok, dataId={1}, group={2}, tenant={3}, config={4}",
                  _worker.GetAgentName(), dataId, group, tenant, ContentUtils.TruncateContent(content));
 
-            content = await FileLocalConfigInfoProcessor.GetSnapshotAync(_worker.GetAgentName(), dataId, group, tenant).ConfigureAwait(false);
+            content = await FileLocalConfigInfoProcessor.GetSnapshotAsync(_worker.GetAgentName(), dataId, group, tenant).ConfigureAwait(false);
             cr.SetContent(content);
 
-            encryptedDataKey = await FileLocalConfigInfoProcessor.GetEncryptDataKeyFailover(_worker.GetAgentName(), dataId, group, tenant).ConfigureAwait(false);
+            encryptedDataKey = await FileLocalConfigInfoProcessor.GetEncryptDataKeyFailoverAsync(_worker.GetAgentName(), dataId, group, tenant).ConfigureAwait(false);
             cr.SetEncryptedDataKey(encryptedDataKey);
 
             _configFilterChainManager.DoFilter(null, cr);
