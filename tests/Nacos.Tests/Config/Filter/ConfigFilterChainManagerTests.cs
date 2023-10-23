@@ -1,4 +1,4 @@
-﻿namespace Nacos.Tests.Config.FilterImpl
+﻿namespace Nacos.Tests.Config.Filter
 {
     using Nacos.Config.Filter;
     using Nacos;
