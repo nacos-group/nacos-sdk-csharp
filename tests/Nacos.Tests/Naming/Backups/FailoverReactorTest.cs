@@ -8,6 +8,7 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Text;
     using System.Threading.Tasks;
     using Xunit;
     using static Nacos.Tests.Naming.Cache.ServiceInfoHolderTests;
@@ -16,12 +17,12 @@
     {
         private static readonly string FILE_PATH_NACOS = "nacos";
         private static readonly string FILE_PATH_NAMING = "naming";
+        private string @namespace = string.Empty;
         private ServiceInfo serviceInfo;
         private FailoverReactor failoverReactor;
 
         public FailoverReactorTest()
         {
-            var @namespace = string.Empty;
             InstancesChangeNotifier notifier = new InstancesChangeNotifier();
             serviceInfo = new ServiceInfo
             {
@@ -68,6 +69,20 @@
             Assert.NotEmpty(getServiceInfo.Hosts);
         }
 
+        [Fact]
+        public async Task RunSwitchRefresh_Should_Succeed()
+        {
+            var path = GetCacheDir(@namespace);
+            var switchFile = new FileInfo(Path.Combine(path, "failover", "00-00---000-VIPSRV_FAILOVER_SWITCH-000---00-00"));
+            await WriteAsync("1", switchFile.FullName).ConfigureAwait(false);
+            await Task.Delay(5500).ConfigureAwait(false);
+            Assert.True(failoverReactor.IsFailoverSwitch());
+
+            await WriteAsync("0", switchFile.FullName).ConfigureAwait(false);
+            await Task.Delay(5500).ConfigureAwait(false);
+            Assert.False(failoverReactor.IsFailoverSwitch());
+        }
+
         private string GetCacheDir(string @namespace)
         {
             var jmSnapshotPath = EnvUtil.GetEnvValue("JM.SNAPSHOT.PATH");
@@ -82,6 +97,22 @@
             }
 
             return cacheDir;
+        }
+
+        private async Task WriteAsync(string content, string path)
+        {
+            try
+            {
+                using FileStream fs = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
+                byte[] bytes = Encoding.UTF8.GetBytes(content);
+                fs.SetLength(bytes.Length);
+                await fs.WriteAsync(bytes, 0, bytes.Length).ConfigureAwait(false);
+                fs.Close();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
         }
     }
 }

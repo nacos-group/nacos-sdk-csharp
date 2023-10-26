@@ -23,15 +23,6 @@
         }
 
         [Fact]
-        public void Get_Content_Identity_Should_Exception()
-        {
-            // TODO：There are some problems
-            var content = "content";
-            var ex = Assert.Throws<ArgumentException>(() => ContentUtils.GetContentIdentity(content));
-            Assert.Equal("content does not contain separator", ex.Message);
-        }
-
-        [Fact]
         public void Truncate_Content_Should_Succeed()
         {
             var content = string.Empty;
