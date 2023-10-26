@@ -7,16 +7,12 @@
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
-    using System.Xml.Linq;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Nacos;
     using Nacos.Common;
     using Nacos.Exceptions;
     using Nacos.Logging;
-    using Nacos.Naming.Beat;
-    using Nacos.Naming.Cache;
-    using Nacos.Naming.Core;
     using Nacos.Naming.Dtos;
     using Nacos.Naming.Remote;
     using Nacos.Naming.Utils;
@@ -40,10 +36,6 @@
 
         private IServerListFactory serverListManager;
 
-        private BeatReactor beatReactor;
-
-        private ServiceInfoHolder serviceInfoHolder;
-
         private int serverPort = DEFAULT_SERVER_PORT;
 
         private NacosSdkOptions _options;
@@ -53,7 +45,6 @@
             ISecurityProxy securityProxy,
             IServerListFactory serverListManager,
             IOptions<NacosSdkOptions> optionsAccs,
-            ServiceInfoHolder serviceInfoHolder,
             IHttpClientFactory clientFactory)
         {
             _clientFactory = clientFactory;
@@ -62,28 +53,6 @@
             _options = optionsAccs.Value;
             SetServerPort(DEFAULT_SERVER_PORT);
             this.namespaceId = string.IsNullOrWhiteSpace(_options.Namespace) ? Constants.DEFAULT_NAMESPACE_ID : _options.Namespace;
-            beatReactor = new BeatReactor(this, _options);
-
-            this.serviceInfoHolder = serviceInfoHolder;
-        }
-
-        internal async Task<System.Text.Json.Nodes.JsonObject> SendBeat(BeatInfo beatInfo, bool lightBeatEnabled)
-        {
-            var parameters = new Dictionary<string, string>()
-            {
-                { CommonParams.NAMESPACE_ID, namespaceId },
-                { CommonParams.SERVICE_NAME, beatInfo.ServiceName },
-                { CommonParams.CLUSTER_NAME, beatInfo.Cluster },
-                { CommonParams.IP_PARAM, beatInfo.Ip.ToString() },
-                { CommonParams.PORT_PARAM, beatInfo.Port.ToString() },
-            };
-
-            var body = new Dictionary<string, string>();
-
-            if (!lightBeatEnabled) body["beat"] = beatInfo.ToJsonString();
-
-            var result = await ReqApi(UtilAndComs.NacosUrlBase + "/instance/beat", parameters, body, HttpMethod.Put).ConfigureAwait(false);
-            return System.Text.Json.Nodes.JsonNode.Parse(result).AsObject();
         }
 
         private void SetServerPort(int serverPort)
@@ -138,7 +107,7 @@
 
             if (instance.Ephemeral)
             {
-                beatReactor.RemoveBeatInfo(groupedServiceName, instance.Ip, instance.Port);
+                return;
             }
 
             var paramters = new Dictionary<string, string>()
@@ -180,27 +149,9 @@
             return listView;
         }
 
-        public async Task<ServiceInfo> QueryInstancesOfService(string serviceName, string groupName, string clusters, int udpPort, bool healthyOnly)
+        public Task<ServiceInfo> QueryInstancesOfService(string serviceName, string groupName, string clusters, bool healthyOnly)
         {
-            string groupedServiceName = NamingUtils.GetGroupedName(serviceName, groupName);
-
-            var paramters = new Dictionary<string, string>()
-            {
-                { CommonParams.NAMESPACE_ID, namespaceId },
-                { CommonParams.SERVICE_NAME, groupedServiceName },
-                { CommonParams.CLUSTERS_PARAM, clusters },
-                { CommonParams.UDP_PORT_PARAM, udpPort.ToString() },
-                { CommonParams.CLIENT_IP_PARAM, NetUtils.LocalIP() },
-                { CommonParams.HEALTHY_ONLY_PARAM, healthyOnly.ToString() },
-            };
-
-            var result = await ReqApi(UtilAndComs.NacosUrlBase + "/instance/list", paramters, HttpMethod.Get).ConfigureAwait(false);
-            if (!string.IsNullOrWhiteSpace(result))
-            {
-                return result.ToObj<ServiceInfo>();
-            }
-
-            return new ServiceInfo(groupedServiceName, clusters);
+            throw new NotSupportedException("Do not support query instance by http client,please use gRPC replaced.");
         }
 
         public async Task<Service> QueryService(string serviceName, string groupName)
@@ -225,8 +176,7 @@
             string groupedServiceName = NamingUtils.GetGroupedName(serviceName, groupName);
             if (instance.Ephemeral)
             {
-                BeatInfo beatInfo = beatReactor.BuildBeatInfo(groupedServiceName, instance);
-                beatReactor.AddBeatInfo(groupedServiceName, beatInfo);
+                throw new NotSupportedException("Do not support register ephemeral instances by HTTP, please use gRPC replaced.");
             }
 
             var paramters = new Dictionary<string, string>()
@@ -407,22 +357,6 @@
             return Task.CompletedTask;
         }
 
-        public Task UpdateBeatInfo(List<Instance> modifiedInstances)
-        {
-            foreach (var instance in modifiedInstances)
-            {
-                string key = beatReactor.BuildKey(instance.ServiceName, instance.Ip, instance.Port);
-
-                if (beatReactor._dom2Beat.ContainsKey(key) && instance.Ephemeral)
-                {
-                    BeatInfo beatInfo = beatReactor.BuildBeatInfo(instance);
-                    beatReactor.AddBeatInfo(instance.ServiceName, beatInfo);
-                }
-            }
-
-            return Task.CompletedTask;
-        }
-
         public async Task UpdateInstance(string serviceName, string groupName, Instance instance)
         {
             _logger?.LogInformation("[UPDATE-SERVICE] {0} update service {1} with instance: {2}", namespaceId, serviceName, instance);
@@ -492,7 +426,11 @@
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+        }
+
+        public Task BatchDeregisterServiceAsync(string serviceName, string groupName, List<Instance> instances)
+        {
+            throw new NotImplementedException("Do not support persistent instances to perform batch de registration methods.");
         }
     }
 }

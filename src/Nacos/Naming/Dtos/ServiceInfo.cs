@@ -43,6 +43,8 @@
             int serviceNameIndex = 1;
             int groupIndex = 0;
 
+            key = key.ToDecode();
+
             var keys = key.SplitByString(Constants.SERVICE_INFO_SPLITER);
             if (keys.Length >= maxIndex + 1)
             {
@@ -79,7 +81,7 @@
         [System.Text.Json.Serialization.JsonIgnore]
         public string JsonFromServer { get; set; }
 
-        public string GetKeyEncoded() => GetKey(System.Net.WebUtility.UrlEncode(GetGroupedServiceName()), Clusters);
+        public string GetKeyEncoded() => GetKey(GetGroupedServiceName().ToEncoded(), Clusters);
 
         public bool Validate()
         {
