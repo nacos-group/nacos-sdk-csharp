@@ -56,12 +56,16 @@
             var value = instance.GetInstanceHeartBeatInterval();
             Assert.Equal(Constants.DEFAULT_HEART_BEAT_INTERVAL, value);
 
-            // get set value
+            // get value of set long
             var metaValue = 10;
             instance.AddMetadata(PreservedMetadataKeys.HEART_BEAT_INTERVAL, metaValue.ToString());
-
             value = instance.GetInstanceHeartBeatInterval();
             Assert.Equal(metaValue, value);
+
+            // get value of set char
+            instance.Metadata[PreservedMetadataKeys.HEART_BEAT_INTERVAL] = "12345qq";
+            value = instance.GetInstanceHeartBeatInterval();
+            Assert.Equal(Constants.DEFAULT_HEART_BEAT_INTERVAL, value);
         }
 
         [Fact]
