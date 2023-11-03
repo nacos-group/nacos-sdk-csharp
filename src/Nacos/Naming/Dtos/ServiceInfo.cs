@@ -81,22 +81,13 @@
         [System.Text.Json.Serialization.JsonIgnore]
         public string JsonFromServer { get; set; }
 
-        public string GetKeyEncoded() => GetKey(GetGroupedServiceName().ToEncoded(), Clusters);
+        public string GetKeyEncoded() => GetKey(GetGroupedServiceName(), Clusters).ToEncoded();
 
         public bool Validate()
         {
             if (AllIPs) return true;
 
-            var validHosts = new List<Instance>();
-            foreach (var host in Hosts)
-            {
-                if (!host.Healthy) continue;
-
-                for (int i = 0; i < host.Weight; i++) validHosts.Add(host);
-            }
-
-            // No valid hosts, return false.
-            return validHosts.Any();
+            return Hosts.Any(h => h.Healthy && h.Weight > 0);
         }
 
         private string GetGroupedServiceName()
