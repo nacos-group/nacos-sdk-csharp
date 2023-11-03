@@ -36,7 +36,7 @@
                 tmp = EnvUtil.GetEnvValue("ans.namespace");
             }
 
-            return tmp;
+            return tmp ?? string.Empty;
         }
     }
 }
