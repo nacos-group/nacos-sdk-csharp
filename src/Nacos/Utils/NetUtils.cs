@@ -12,9 +12,9 @@
         private static readonly string CLIENT_LOCAL_IP_PROPERTY = "com.alibaba.nacos.client.local.ip";
         private static string localIp;
 
-        public static string LocalIP()
+        public static string LocalIP(bool isOverload = false)
         {
-            if (localIp.IsNotNullOrWhiteSpace()) return localIp;
+            if (localIp.IsNotNullOrWhiteSpace() && !isOverload) return localIp;
 
             var val = EnvUtil.GetEnvValue(CLIENT_LOCAL_IP_PROPERTY);
 
