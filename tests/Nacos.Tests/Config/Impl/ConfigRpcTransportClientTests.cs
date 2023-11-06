@@ -1,23 +1,27 @@
 ﻿namespace Nacos.Tests.Config.Impl
 {
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Options;
     using Moq;
     using Nacos.Config.Abst;
     using Nacos.Config.Common;
     using Nacos.Config.FilterImpl;
     using Nacos.Config.Impl;
+    using Nacos.Remote;
+    using Nacos.Security;
     using System.Collections.Generic;
     using Xunit;
 
     public class ConfigRpcTransportClientTests
     {
-        // TODO: Rewrite test using mocks
-        private Mock<AbstConfigTransportClient> _mockAgent;
-
+        private Mock<IOptions<NacosSdkOptions>> _mockOption = new Mock<IOptions<NacosSdkOptions>>();
+        private Mock<IServerListFactory> _mockServerListFactory = new Mock<IServerListFactory>();
+        private Mock<ISecurityProxy> _mockSecurityProxy = new Mock<ISecurityProxy>();
         private IConfigTransportClient _agent;
 
         public ConfigRpcTransportClientTests()
         {
-            var options = new NacosSdkOptions
+            _mockOption.Setup(o => o.Value).Returns(new NacosSdkOptions
             {
                 ServerAddresses = new List<string> { "http://localhost:8848/" },
                 EndPoint = "",
@@ -25,9 +29,16 @@
                 UserName = "nacos",
                 Password = "nacos",
                 ConfigUseRpc = true,
-            };
-            _agent = new ConfigRpcTransportClient(options);
-            _mockAgent = new Mock<AbstConfigTransportClient>();
+            });
+
+            var services = new ServiceCollection();
+            services.AddSingleton(_mockOption.Object);
+            services.AddSingleton(_mockServerListFactory.Object);
+            services.AddSingleton(_mockSecurityProxy.Object);
+
+            services.AddSingleton<IConfigTransportClient, ConfigRpcTransportClient>();
+            var provider = services.BuildServiceProvider();
+            _agent = provider.GetRequiredService<IConfigTransportClient>();
         }
 
 
@@ -35,16 +46,9 @@
         [Fact]
         public void Get_Options_Shuold_Succeed()
         {
-            var n = "mock_name";
-            var ns = "mock_namespace";
-
-            _mockAgent.Setup(m => m.GetName()).Returns(n);
-            _mockAgent.Setup(m => m.GetNamespace()).Returns(ns);
-            _mockAgent.Setup(m => m.GetTenant()).Returns(ns);
-
-            Assert.Equal(n, _mockAgent.Object.GetName());
-            Assert.Equal(ns, _mockAgent.Object.GetNamespace());
-            Assert.Equal(ns, _mockAgent.Object.GetTenant());
+            Assert.Equal("config_rpc_client", _agent.GetName());
+            Assert.Equal("cs", _agent.GetNamespace());
+            Assert.Equal("cs", _agent.GetTenant());
         }
 
         [Fact]
@@ -75,8 +79,8 @@
             var group = "g";
             var tenant = "te";
 
-            string key = GroupKey.GetKey(dataId, group, null);
-            var cache = new CacheData(new ConfigFilterChainManager(new NacosSdkOptions()), _agent.GetName(), dataId, group, null);
+            string key = GroupKey.GetKeyTenant(dataId, group, tenant);
+            var cache = new CacheData(new ConfigFilterChainManager(new NacosSdkOptions()), _agent.GetName(), dataId, group, tenant);
             _agent.AddOrUpdateCache(key, cache);
             Assert.Equal(1, _agent.GetCacheCount());
 
