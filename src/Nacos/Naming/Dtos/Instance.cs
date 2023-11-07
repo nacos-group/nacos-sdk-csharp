@@ -87,23 +87,33 @@
 
         private long GetMetaDataByKeyWithDefault(string key, long defaultValue)
         {
-            if (Metadata == null || !Metadata.Any()) return defaultValue;
-
-            if (Metadata.TryGetValue(key, out var value)
-                && !string.IsNullOrWhiteSpace(value)
-                && int.TryParse(value, out _))
-            {
-                return long.Parse(value);
-            }
+            var exist = GetMetaDataByKey(key, out string value);
+            if (exist && long.TryParse(value, out _)) return long.Parse(value);
 
             return defaultValue;
         }
 
         private string GetMetaDataByKeyWithDefault(string key, string defaultValue)
         {
-            if (Metadata == null || !Metadata.Any()) return defaultValue;
+            var exist = GetMetaDataByKey(key, out string value);
+            if (exist) return value;
 
-            return Metadata[key];
+            return defaultValue;
+        }
+
+        private bool GetMetaDataByKey(string key, out string vaule)
+        {
+            vaule = string.Empty;
+            if (Metadata == null || !Metadata.Any()) return false;
+
+            if (Metadata.TryGetValue(key, out var val)
+                && !string.IsNullOrWhiteSpace(val))
+            {
+                vaule = val;
+                return true;
+            }
+
+            return false;
         }
 
         public override string ToString()
