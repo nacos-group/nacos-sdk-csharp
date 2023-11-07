@@ -17,6 +17,7 @@
             Assert.Equal("127.0.0.1", ip);
 
             Environment.SetEnvironmentVariable("java.net.preferIPv6Addresses", bool.TrueString);
+            IPUtil.PREFER_IPV6_ADDRESSES = bool.Parse(Environment.GetEnvironmentVariable("java.net.preferIPv6Addresses"));
             ip = IPUtil.LocalHostIP();
             Assert.Equal("[::1]", ip);
 
