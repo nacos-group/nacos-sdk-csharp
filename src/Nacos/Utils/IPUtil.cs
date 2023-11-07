@@ -1,11 +1,12 @@
 ﻿namespace Nacos.Utils
 {
     using System;
+    using System.Collections.Generic;
     using System.Text;
 
     public class IPUtil
     {
-        public static bool PREFER_IPV6_ADDRESSES = bool.Parse(Environment.GetEnvironmentVariable("java.net.preferIPv6Addresses"));
+        public static bool PREFER_IPV6_ADDRESSES = bool.Parse(Environment.GetEnvironmentVariable("java.net.preferIPv6Addresses") ?? bool.FalseString);
 
         public static string IPV6_START_MARK = "[";
 
@@ -77,9 +78,14 @@
                 }
                 else
                 {
-                    serverAddrArr = new string[2];
-                    serverAddrArr[0] = str.Substring(0, str.IndexOf(IPV6_END_MARK) + 1);
-                    serverAddrArr[1] = str.Substring(str.IndexOf(IPV6_END_MARK) + 2);
+                    var temp = new List<string>
+                    {
+                        str.Substring(0, str.IndexOf(IPV6_END_MARK) + 1)
+                    };
+                    var port = str.Substring(str.IndexOf(IPV6_END_MARK) + 2);
+                    if (port.IsNotNullOrWhiteSpace())
+                        temp.Add(port);
+                    serverAddrArr = temp.ToArray();
                 }
 
                 if (!IsIPv6(serverAddrArr[0]))
@@ -89,7 +95,7 @@
             }
             else
             {
-                serverAddrArr = str.Split(':');
+                serverAddrArr = str.SplitByString(":");
                 if (serverAddrArr.Length > SPLIT_IP_PORT_RESULT_LENGTH)
                 {
                     throw new ArgumentException("The IP address(\"" + str
