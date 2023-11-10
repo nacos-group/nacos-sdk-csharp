@@ -61,8 +61,12 @@
                 clientBuilder.ConfigureHttpClient(httpClientAction);
             }
 
+            services.TryAddSingleton<IClientAuthService, NacosClientAuthServiceImpl>();
+            services.AddSingleton<IClientWorker, ClientWorker>();
             services.AddSingleton<IConfigFilterChain, ConfigFilterChainManager>();
-
+            services.AddSingleton<IConfigTransportClient, ConfigRpcTransportClient>();
+            services.AddSingleton<IServerListFactory, ServerListManager>();
+            services.AddSingleton<ISecurityProxy, SecurityProxy>();
             services.AddSingleton<INacosConfigService, NacosConfigService>();
 
             return services;
