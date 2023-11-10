@@ -69,19 +69,19 @@
             Assert.NotEmpty(getServiceInfo.Hosts);
         }
 
-        //[Fact]
-        //public async Task RunSwitchRefresh_Should_Succeed()
-        //{
-        //    var path = GetCacheDir(@namespace);
-        //    var switchFile = new FileInfo(Path.Combine(path, "failover", "00-00---000-VIPSRV_FAILOVER_SWITCH-000---00-00"));
-        //    await WriteAsync("1", switchFile.FullName).ConfigureAwait(false);
-        //    await Task.Delay(5500).ConfigureAwait(false);
-        //    Assert.True(failoverReactor.IsFailoverSwitch());
+        /*[Fact]
+        public async Task RunSwitchRefresh_Should_Succeed()
+        {
+            var path = GetCacheDir(@namespace);
+            var switchFile = new FileInfo(Path.Combine(path, "failover", "00-00---000-VIPSRV_FAILOVER_SWITCH-000---00-00"));
+            await WriteAsync("1", switchFile.FullName).ConfigureAwait(false);
+            await Task.Delay(5500).ConfigureAwait(false);
+            Assert.True(failoverReactor.IsFailoverSwitch());
 
-        //    await WriteAsync("0", switchFile.FullName).ConfigureAwait(false);
-        //    await Task.Delay(5500).ConfigureAwait(false);
-        //    Assert.False(failoverReactor.IsFailoverSwitch());
-        //}
+            await WriteAsync("0", switchFile.FullName).ConfigureAwait(false);
+            await Task.Delay(5500).ConfigureAwait(false);
+            Assert.False(failoverReactor.IsFailoverSwitch());
+        }*/
 
         private string GetCacheDir(string @namespace)
         {
