@@ -45,6 +45,7 @@
   <ItemGroup>
     <PackageReference Include="Google.Protobuf" Version="3.24.2" />
     <PackageReference Include="Grpc.Net.Client" Version="2.56.0" />
+    <PackageReference Include="System.Threading.RateLimiting" Version="7.0.1" />
     <!--<PackageReference Include="Grpc.Net.Client" Version="2.33.1" />-->
     <!--<Protobuf Include="V2\protos\nacos_grpc_service.proto" GrpcServices="Client" />-->
     <!--<PackageReference Include="Grpc.Tools" Version="2.36.1" PrivateAssets="All" />-->
