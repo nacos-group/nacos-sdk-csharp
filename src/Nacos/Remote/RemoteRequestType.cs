@@ -36,6 +36,8 @@
 
         public static readonly string Req_ServerCheck = "ServerCheckRequest";
 
+        public static readonly string Req_SetupAck = "SetupAckRequest";
+
         public static readonly string Req_Config_ReSync = "ConfigReSyncRequest";
 
         public static readonly string Resp_Config_Pubish_Alpha2 = "ConfigPublishResponse";
@@ -67,6 +69,8 @@
         public static readonly string Resp_Error = "ErrorResponse";
 
         public static readonly string Resp_ServerCheck = "ServerCheckResponse";
+
+        public static readonly string Resp_SetupAck = "SetupAckResponse";
 
         public static readonly string Req_PushAck = "PushAckRequest";
 
@@ -113,6 +117,8 @@
             { Resp_Naming_NotifySubscriber, typeof(NotifySubscriberResponse) },
             { Req_Naming_BatchInstance, typeof(BatchInstanceRequest) },
             { Resp_Naming_BatchInstance, typeof(BatchInstanceResponse) },
+            { Req_SetupAck, typeof(SetupAckRequest) },
+            { Resp_SetupAck, typeof(SetupAckResponse) },
         };
     }
 }
