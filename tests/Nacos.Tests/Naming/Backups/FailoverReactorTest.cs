@@ -11,7 +11,6 @@
     using System.Text;
     using System.Threading.Tasks;
     using Xunit;
-    using static Nacos.Tests.Naming.Cache.ServiceInfoHolderTests;
 
     public class FailoverReactorTest
     {
