@@ -1,6 +1,8 @@
 ﻿namespace Nacos.Tests.V2
 {
     using Nacos;
+    using Nacos.Common;
+    using Nacos.Tests.V2.Filters;
     using System;
     using System.Threading.Tasks;
     using Xunit;
@@ -12,11 +14,13 @@
 
         protected ITestOutputHelper _output;
 
+        protected abstract INacosConfigService BuildConfigService();
+
         [Fact]
         protected virtual async Task PublishConfig_Should_Succeed()
         {
             var dataId = $"pub-{Guid.NewGuid().ToString()}";
-            var group = Common.Constants.DEFAULT_GROUP;
+            var group = Constants.DEFAULT_GROUP;
             var val = "test-value";
 
             var pubFlag = await _configSvc.PublishConfig(dataId, group, val).ConfigureAwait(false);
@@ -28,7 +32,7 @@
         protected virtual async Task Iss116_Should_Succeed()
         {
             var dataId = $"pub-{Guid.NewGuid().ToString()}";
-            var group = Common.Constants.DEFAULT_GROUP;
+            var group = Constants.DEFAULT_GROUP;
             var val = @"{
     ""NacosConfig"": {
         ""ConfigFilterExtInfo"": ""{\""JsonPaths\"":[\""ConnectionStrings.Default\""],\""Other\"":\""xxxxxx\""}""
@@ -44,7 +48,7 @@
         protected virtual async Task GetConfig_Should_Succeed()
         {
             var dataId = $"get-{Guid.NewGuid().ToString()}";
-            var group = Common.Constants.DEFAULT_GROUP;
+            var group = Constants.DEFAULT_GROUP;
             var val = "test-value";
 
             var pubFlag = await _configSvc.PublishConfig(dataId, group, val).ConfigureAwait(false);
@@ -59,10 +63,59 @@
         }
 
         [Fact]
+        protected virtual async Task AddConfigFilter_Should_Succeed()
+        {
+            var dataId = $"get-{Guid.NewGuid().ToString()}";
+            var group = Constants.DEFAULT_GROUP;
+            var val = "test-value";
+
+            var configSvc = BuildConfigService();
+
+            await configSvc.AddConfigFilter(new ConfigBaseTestFilter()).ConfigureAwait(false);
+
+            var pubFlag = await configSvc.PublishConfig(dataId, group, val).ConfigureAwait(false);
+            _output.WriteLine($"AddConfigFilter_Should_Succeed, PublishConfig {dataId} return {pubFlag}");
+            Assert.True(pubFlag);
+
+            await Task.Delay(500).ConfigureAwait(false);
+
+            var config = await configSvc.GetConfig(dataId, group, 10000L).ConfigureAwait(false);
+            _output.WriteLine($"AddConfigFilter_Should_Succeed, GetConfig {dataId} return {pubFlag}");
+            Assert.Equal(val + "-request-response", config);
+        }
+
+        [Fact]
+        protected virtual async Task GetConfig_And_Sign_Listener_Should_Succeed()
+        {
+            var dataId = $"get-and-sign-listener-{Guid.NewGuid().ToString()}";
+            var group = Constants.DEFAULT_GROUP;
+            var val = "test-value";
+
+            var pubFlag = await _configSvc.PublishConfig(dataId, group, val).ConfigureAwait(false);
+            _output.WriteLine($"GetConfig_And_Sign_Listener_Should_Succeed, PublishConfig {dataId} return {pubFlag}");
+            Assert.True(pubFlag);
+
+            await Task.Delay(500).ConfigureAwait(false);
+
+            var listener = new TestListener();
+            var config = await _configSvc.GetConfigAndSignListener(dataId, group, 10000L, listener).ConfigureAwait(false);
+            _output.WriteLine($"GetConfig_And_Sign_Listener_Should_Succeed, GetConfig {dataId} return {pubFlag}");
+            Assert.Equal(val, config);
+        }
+
+        [Fact]
+        protected virtual async Task GetServerStatus_Should_Succeed()
+        {
+            var status = await _configSvc.GetServerStatus().ConfigureAwait(false);
+
+            Assert.Equal("UP", status);
+        }
+
+        [Fact]
         protected virtual async Task DeleteConfig_Should_Succeed()
         {
             var dataId = $"del-{Guid.NewGuid().ToString()}";
-            var group = Common.Constants.DEFAULT_GROUP;
+            var group = Constants.DEFAULT_GROUP;
             var val = "test-value";
 
             var pubFlag = await _configSvc.PublishConfig(dataId, group, val).ConfigureAwait(false);
@@ -90,7 +143,7 @@
         protected virtual async Task ListenConfig_Should_Succeed()
         {
             var dataId = $"lis-{Guid.NewGuid().ToString()}";
-            var group = Common.Constants.DEFAULT_GROUP;
+            var group = Constants.DEFAULT_GROUP;
             var val = "test-value";
 
             var pubFlag = await _configSvc.PublishConfig(dataId, group, val).ConfigureAwait(false);

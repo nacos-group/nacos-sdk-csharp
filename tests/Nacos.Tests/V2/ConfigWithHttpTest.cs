@@ -16,6 +16,13 @@
         {
             _output = output;
 
+            _output.WriteLine($"{nameof(ConfigWithHttpTest)} BuildServiceProvider");
+            _configSvc = BuildConfigService();
+            _output.WriteLine($"{nameof(ConfigWithHttpTest)} Get INacosConfigService");
+        }
+
+        protected override INacosConfigService BuildConfigService()
+        {
             IServiceCollection services = new ServiceCollection();
 
             services.AddNacosV2Config(x =>
@@ -34,9 +41,7 @@
             services.AddLogging(builder => { builder.AddConsole(); });
 
             IServiceProvider serviceProvider = services.BuildServiceProvider();
-            _output.WriteLine($"{nameof(ConfigWithHttpTest)} BuildServiceProvider");
-            _configSvc = serviceProvider.GetService<INacosConfigService>();
-            _output.WriteLine($"{nameof(ConfigWithHttpTest)} Get INacosConfigService");
+            return serviceProvider.GetService<INacosConfigService>();
         }
     }
 }

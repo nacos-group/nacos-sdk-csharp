@@ -8,7 +8,7 @@ CustomConfigListen configListen = new CustomConfigListen();
 
 var svc = new NacosConfigService(new Nacos.NacosSdkOptions
 {
-    ServerAddresses = new System.Collections.Generic.List<string> { "http://localhost:18848/" },
+    ServerAddresses = new System.Collections.Generic.List<string> { "http://localhost:8848/" },
     EndPoint = "",
     Namespace = "cs",
     UserName = "nacos",
