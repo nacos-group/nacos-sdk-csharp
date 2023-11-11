@@ -17,14 +17,14 @@
 
         private static ConcurrentDictionary<string, RateLimiter> _cache = new ConcurrentDictionary<string, RateLimiter>();
 
-        public static bool IsLimit(string accessKeyID)
+        public static async Task<bool> IsLimitAsync(string accessKeyID)
         {
             var exist = _cache.TryGetValue(accessKeyID, out var rateLimiter);
 
             RateLimitLease lease = null;
             if (exist)
             {
-                lease = rateLimiter.AttemptAcquire();
+                lease = await rateLimiter.AcquireAsync().ConfigureAwait(false);
             }
             else
             {
@@ -32,17 +32,18 @@
                 {
                     ReplenishmentPeriod = TimeSpan.FromMilliseconds(LIMIT_TIME),
                     TokensPerPeriod = 5,
-                    TokenLimit = _limit
+                    TokenLimit = _limit,
+                    QueueLimit = _limit,
                 };
                 rateLimiter = new TokenBucketRateLimiter(rlOption);
-                lease = rateLimiter.AttemptAcquire();
+                lease = await rateLimiter.AcquireAsync().ConfigureAwait(false);
                 _cache.TryAdd(accessKeyID, rateLimiter);
             }
 
-            var isLimit = lease.IsAcquired;
+            var isLimit = !lease.IsAcquired;
             lease.Dispose();
 
-            if (!isLimit)
+            if (isLimit)
                 _logger.LogError("access_key_id:{} limited", accessKeyID);
 
             return isLimit;
