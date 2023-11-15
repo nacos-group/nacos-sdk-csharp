@@ -1,8 +1,8 @@
 ﻿namespace Nacos.Tests.Config.Impl
 {
-    using Nacos.Config.Impl;
     using System;
     using System.Threading.Tasks;
+    using Nacos.Config.Impl;
     using Xunit;
     using Xunit.Abstractions;
 

@@ -1,11 +1,11 @@
 ﻿namespace Nacos.Config.Impl
 {
-    using Microsoft.Extensions.Logging;
-    using Nacos.Logging;
     using System;
     using System.Collections.Concurrent;
-    using System.Threading.RateLimiting;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.Logging;
+    using Nacos.Config.Impl.RateLimiter;
+    using Nacos.Logging;
 
     public class Limiter
     {
@@ -15,13 +15,13 @@
 
         private static int _limit = 5;
 
-        private static ConcurrentDictionary<string, RateLimiter> _cache = new ConcurrentDictionary<string, RateLimiter>();
+        private static ConcurrentDictionary<string, TokenBucketRateLimiter> _cache = new ConcurrentDictionary<string, TokenBucketRateLimiter>();
 
         public static async Task<bool> IsLimitAsync(string accessKeyID)
         {
             var exist = _cache.TryGetValue(accessKeyID, out var rateLimiter);
 
-            RateLimitLease lease = null;
+            TokenBucketLease lease = null;
             if (exist)
             {
                 lease = await rateLimiter.AcquireAsync().ConfigureAwait(false);
@@ -33,7 +33,6 @@
                     ReplenishmentPeriod = TimeSpan.FromMilliseconds(LIMIT_TIME),
                     TokensPerPeriod = 5,
                     TokenLimit = _limit,
-                    QueueLimit = _limit,
                 };
                 rateLimiter = new TokenBucketRateLimiter(rlOption);
                 lease = await rateLimiter.AcquireAsync().ConfigureAwait(false);
