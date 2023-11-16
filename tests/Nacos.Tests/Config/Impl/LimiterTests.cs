@@ -26,7 +26,7 @@
             for (int j = 0; j < 5; j++)
             {
                 Assert.False(await Limiter.IsLimitAsync(accessKeyID).ConfigureAwait(false));
-                _output.WriteLine($"index: {j}, time: {(DateTime.Now - begin).TotalMilliseconds}");
+                _output.WriteLine($"index: {j}, time: {sw.Elapsed.TotalMilliseconds}");
             }
 
             sw.Stop();
