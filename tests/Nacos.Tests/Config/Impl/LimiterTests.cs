@@ -1,6 +1,7 @@
 ﻿namespace Nacos.Tests.Config.Impl
 {
     using System;
+    using System.Diagnostics;
     using System.Threading.Tasks;
     using Nacos.Config.Impl;
     using Xunit;
@@ -21,15 +22,15 @@
             var accessKeyID = "a";
             Assert.False(await Limiter.IsLimitAsync(accessKeyID).ConfigureAwait(false));
 
-            var begin = DateTime.Now;
-
+            var sw = Stopwatch.StartNew();
             for (int j = 0; j < 5; j++)
             {
                 Assert.False(await Limiter.IsLimitAsync(accessKeyID).ConfigureAwait(false));
                 _output.WriteLine($"index: {j}, time: {(DateTime.Now - begin).TotalMilliseconds}");
             }
 
-            var elapse = (DateTime.Now - begin).TotalMilliseconds;
+            sw.Stop();
+            var elapse = sw.Elapsed.TotalMilliseconds;
 
             _output.WriteLine($"elapse: {elapse}");
             Assert.True(elapse > 980);
