@@ -6,6 +6,7 @@
     using System.Threading;
     using System.Threading.Tasks;
 
+    // This logic is borrowed from https://github.com/dotnet/runtime/blob/479df4792daa147e9b51757b0fabc248df21264f/src/libraries/System.Threading.RateLimiting/src/System/Threading/RateLimiting/TokenBucketRateLimiter.cs
     public class TokenBucketRateLimiter : IAsyncDisposable, IDisposable
     {
         private double _tokenCount;
