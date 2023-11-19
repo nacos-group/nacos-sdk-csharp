@@ -20,6 +20,8 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Runtime.InteropServices.ComTypes;
+    using System.Text.Json;
+    using System.Text.Json.Nodes;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -283,7 +285,14 @@
         {
             BuildRequestHeader(request);
 
-            // TODO: 1. limiter
+            var reqJson = JsonSerializer.Serialize(request);
+            var reqJsonObj = JsonNode.Parse(reqJson).AsObject();
+            reqJsonObj.Remove(nameof(CommonRequest.Headers));
+            reqJsonObj.Remove(nameof(CommonRequest.RequestId));
+            var limit = await Limiter.IsLimitAsync($"{nameof(request)}-{reqJsonObj.ToJsonString()}").ConfigureAwait(false);
+            if (limit)
+                throw new NacosException(NacosException.CLIENT_OVER_THRESHOLD, "More than client-side current limit threshold");
+
             return await rpcClientInner.Request(request, timeout).ConfigureAwait(false);
         }
 
