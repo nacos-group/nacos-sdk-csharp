@@ -44,7 +44,7 @@ https://nacos-sdk-csharp.readthedocs.io/en/latest/
 // v1.3.3 版本之后, 可以用 UseNacosConfig 来简化
 public static IHostBuilder CreateHostBuilder(string[] args) =>
     Host.CreateDefaultBuilder(args)
-        .UseNacosConfig(section: "NacosConfig", parser: null logAction: null)
+        .UseNacosConfig(section: "NacosConfig", parser: null, logAction: null)
         // .UseNacosConfig(section: "NacosConfig", parser: Nacos.YamlParser.YamlConfigurationStringParser.Instance logAction: null)
         // .UseNacosConfig(section: "NacosConfig", parser: Nacos.IniParser.IniConfigurationStringParser.Instance logAction: null)       
         .ConfigureWebHostDefaults(webBuilder =>
