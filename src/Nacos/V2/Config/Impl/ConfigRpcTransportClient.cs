@@ -334,6 +334,7 @@
         {
             var listenCachesMap = new Dictionary<string, List<CacheData>>();
             var removeListenCachesMap = new Dictionary<string, List<CacheData>>();
+            var hasChangedKeys = false;
 
             // TODO: should update logic here.....
             foreach (var item in _cacheMap.Values)
@@ -392,6 +393,7 @@
 
                                 if (configChangeBatchListenResponse.ChangedConfigs != null && configChangeBatchListenResponse.ChangedConfigs.Any())
                                 {
+                                    hasChangedKeys = true;
                                     foreach (var item in configChangeBatchListenResponse.ChangedConfigs)
                                     {
                                         var changeKey = GroupKey.GetKeyTenant(item.DataId, item.Group, item.Tenant);
@@ -450,6 +452,9 @@
                     }
                 }
             }
+
+            if (hasChangedKeys)
+               await NotifyListenConfig().ConfigureAwait(false);
         }
 
         private async Task RefreshContentAndCheck(string groupKey, bool notify)
