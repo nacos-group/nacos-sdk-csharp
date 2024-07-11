@@ -493,7 +493,7 @@
             {
                 foreach (var item in dict)
                 {
-                    builder.Append($"{item.Key}={item.Value}&");
+                    builder.Append($"{item.Key}={item.Value.UrlEncode()}&");
                 }
             }
 
@@ -501,7 +501,7 @@
             {
                 foreach (var item in body)
                 {
-                    builder.Append($"{item.Key}={item.Value}&");
+                    builder.Append($"{item.Key}={item.Value.UrlEncode()}&");
                 }
             }
 
