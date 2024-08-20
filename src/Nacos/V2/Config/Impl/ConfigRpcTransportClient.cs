@@ -454,7 +454,7 @@
             }
 
             if (hasChangedKeys)
-               await NotifyListenConfig().ConfigureAwait(false);
+                await NotifyListenConfig().ConfigureAwait(false);
         }
 
         private async Task RefreshContentAndCheck(string groupKey, bool notify)
@@ -501,8 +501,13 @@
 
         protected override Task NotifyListenConfig()
         {
-            _listenExecutebell.Add(_bellItem);
-            return Task.CompletedTask;
+            return Task.Factory.StartNew(async () =>
+            {
+                while (!_listenExecutebell.TryAdd(_bellItem))
+                {
+                    await Task.Delay(500).ConfigureAwait(false);
+                }
+            });
         }
     }
 }
