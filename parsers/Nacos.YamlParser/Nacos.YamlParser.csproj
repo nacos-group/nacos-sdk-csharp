@@ -2,7 +2,7 @@
   <Import Project="../../build/version.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net5.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net6.0;net8.0</TargetFrameworks>
     <PackageId>nacos-sdk-csharp.YamlParser</PackageId>
     <VersionPrefix>$(NugetVersion)</VersionPrefix>
     <VersionSuffix></VersionSuffix>
@@ -32,8 +32,8 @@
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
