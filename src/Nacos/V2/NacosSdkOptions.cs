@@ -72,5 +72,10 @@
         /// Specify some extension info of IConfigFilter.
         /// </summary>
         public string ConfigFilterExtInfo { get; set; }
+
+        /// <summary>
+        /// TLS config
+        /// </summary>
+        public TLSConfig TLSConfig { get; set; }
     }
 }

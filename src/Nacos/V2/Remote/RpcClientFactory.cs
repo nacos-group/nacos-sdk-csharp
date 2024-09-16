@@ -9,7 +9,7 @@
     {
         public static ConcurrentDictionary<string, RpcClient> ClientMap = new ConcurrentDictionary<string, RpcClient>();
 
-        public static RpcClient CreateClient(string clientName, RemoteConnectionType connectionType, Dictionary<string, string> labels)
+        public static RpcClient CreateClient(string clientName, RemoteConnectionType connectionType, Dictionary<string, string> labels, TLSConfig tlsConfig = null)
         {
             string clientNameInner = clientName;
 
@@ -19,7 +19,7 @@
 
                 if (connectionType.Equals(RemoteConnectionType.GRPC))
                 {
-                    moduleClient = new GrpcClient(clientNameInner);
+                    moduleClient = new GrpcClient(clientNameInner, tlsConfig);
                 }
 
                 if (moduleClient == null)
