@@ -5,16 +5,16 @@
 
     public class InstancesChangeEvent : IEvent
     {
-        [Newtonsoft.Json.JsonProperty("serviceName")]
+        [System.Text.Json.Serialization.JsonPropertyName("serviceName")]
         public string ServiceName { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("groupName")]
+        [System.Text.Json.Serialization.JsonPropertyName("groupName")]
         public string GroupName { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("clusters")]
+        [System.Text.Json.Serialization.JsonPropertyName("clusters")]
         public string Clusters { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("hosts")]
+        [System.Text.Json.Serialization.JsonPropertyName("hosts")]
         public List<Instance> Hosts { get; set; }
 
         public InstancesChangeEvent(string serviceName, string groupName, string clusters, List<Instance> hosts)

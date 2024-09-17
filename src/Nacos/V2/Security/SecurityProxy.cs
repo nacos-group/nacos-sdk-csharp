@@ -146,12 +146,12 @@
 
                     var content = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-                    var obj = Newtonsoft.Json.Linq.JObject.Parse(content);
+                    var obj = System.Text.Json.Nodes.JsonNode.Parse(content).AsObject();
 
                     if (obj.ContainsKey(Nacos.V2.Common.Constants.ACCESS_TOKEN))
                     {
-                        _accessToken = obj.Value<string>(Nacos.V2.Common.Constants.ACCESS_TOKEN);
-                        _tokenTtl = obj.Value<long>(Nacos.V2.Common.Constants.TOKEN_TTL);
+                        _accessToken = obj[Nacos.V2.Common.Constants.ACCESS_TOKEN].GetValue<string>();
+                        _tokenTtl = obj[Nacos.V2.Common.Constants.TOKEN_TTL].GetValue<long>();
                         _tokenRefreshWindow = _tokenTtl / 10;
                     }
                 }

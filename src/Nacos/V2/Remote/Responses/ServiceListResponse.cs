@@ -4,10 +4,10 @@
 
     public class ServiceListResponse : CommonResponse
     {
-        [Newtonsoft.Json.JsonProperty("count")]
+        [System.Text.Json.Serialization.JsonPropertyName("count")]
         public int Count { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("serviceNames")]
+        [System.Text.Json.Serialization.JsonPropertyName("serviceNames")]
         public List<string> ServiceNames { get; set; }
 
         public override string GetRemoteType() => RemoteRequestType.Resp_Naming_ServiceList;

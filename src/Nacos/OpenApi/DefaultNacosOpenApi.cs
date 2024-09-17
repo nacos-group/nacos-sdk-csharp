@@ -97,9 +97,9 @@
             if (resp.IsSuccessStatusCode)
             {
                 var res = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
-                var jobj = Newtonsoft.Json.Linq.JObject.Parse(res);
+                var jobj = System.Text.Json.Nodes.JsonNode.Parse(res).AsObject();
 
-                if (jobj.TryGetValue("data", System.StringComparison.OrdinalIgnoreCase, out var val))
+                if (jobj.TryGetPropertyValue("data", out var val))
                 {
                     return val.ToString().ToObj<List<NacosNamespace>>();
                 }

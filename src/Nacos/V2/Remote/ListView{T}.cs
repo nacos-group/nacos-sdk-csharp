@@ -10,10 +10,10 @@
             this.Data = data;
         }
 
-        [Newtonsoft.Json.JsonProperty("count")]
+        [System.Text.Json.Serialization.JsonPropertyName("count")]
         public int Count { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("data")]
+        [System.Text.Json.Serialization.JsonPropertyName("data")]
         public List<T> Data { get; set; }
 
         public override string ToString() => "ListView{" + "data=" + Data + ", count=" + Count + '}';

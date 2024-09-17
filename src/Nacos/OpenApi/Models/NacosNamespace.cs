@@ -2,22 +2,22 @@
 {
     public class NacosNamespace
     {
-        [Newtonsoft.Json.JsonProperty("namespace")]
+        [System.Text.Json.Serialization.JsonPropertyName("namespace")]
         public string Namespace { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("namespaceShowName")]
+        [System.Text.Json.Serialization.JsonPropertyName("namespaceShowName")]
         public string NamespaceShowName { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("namespaceDesc")]
+        [System.Text.Json.Serialization.JsonPropertyName("namespaceDesc")]
         public string NamespaceDesc { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("quota")]
+        [System.Text.Json.Serialization.JsonPropertyName("quota")]
         public int Quota { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("configCount")]
+        [System.Text.Json.Serialization.JsonPropertyName("configCount")]
         public int ConfigCount { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("type")]
+        [System.Text.Json.Serialization.JsonPropertyName("type")]
         public int Type { get; set; }
     }
 }
