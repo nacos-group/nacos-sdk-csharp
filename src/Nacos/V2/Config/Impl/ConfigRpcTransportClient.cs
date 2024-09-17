@@ -225,7 +225,7 @@
                 newlabels["taskId"] = taskId;
 
                 RpcClient rpcClient = RpcClientFactory
-                        .CreateClient($"{uuid}_config-{taskId}", RemoteConnectionType.GRPC, newlabels);
+                        .CreateClient($"{uuid}_config-{taskId}", RemoteConnectionType.GRPC, newlabels, _options.TLSConfig);
 
                 if (rpcClient.IsWaitInited())
                 {
