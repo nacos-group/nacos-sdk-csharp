@@ -149,6 +149,12 @@
                        {
                            try
                            {
+                               if (request is SetupAckRequest)
+                               {
+                                   // there is no connection ready this time
+                                   return;
+                               }
+
                                var response = HandleServerRequest(request);
                                response.RequestId = request.RequestId;
                                await call.RequestStream.WriteAsync(GrpcUtils.Convert(response)).ConfigureAwait(false);

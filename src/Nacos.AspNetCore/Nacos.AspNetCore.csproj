@@ -2,7 +2,7 @@
   <Import Project="../../build/version.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;net6.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
     <PackageId>nacos-sdk-csharp.AspNetCore</PackageId>
     <VersionPrefix>$(NugetVersion)</VersionPrefix>
     <VersionSuffix></VersionSuffix>
@@ -14,7 +14,7 @@
     <ProjectUrl>https://github.com/nacos-group/nacos-sdk-csharp</ProjectUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageReleaseNotes>      
+    <PackageReleaseNotes>
     </PackageReleaseNotes>
   </PropertyGroup>
 
