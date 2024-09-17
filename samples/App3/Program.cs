@@ -35,6 +35,25 @@ builder.Services.AddNacosOpenApi(x =>
     x.Namespace = "cs";
 });
 
+// Microsoft.Extensions.ServiceDiscovery
+builder.Services.AddServiceDiscovery(o =>
+{
+    o.RefreshPeriod = TimeSpan.FromSeconds(60);
+})
+.AddConfigurationServiceEndpointProvider()
+.AddNacosSrvServiceEndpointProvider();
+
+builder.Services.ConfigureHttpClientDefaults(static http =>
+{
+    http.AddServiceDiscovery();
+});
+
+// 使用IHttpClientFactory
+builder.Services.AddHttpClient("app1", cfg =>
+{
+    cfg.BaseAddress = new Uri("http://app1");
+});
+
 builder.Services.AddControllers();
 
 var app = builder.Build();
@@ -46,9 +65,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseRouting();
 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-});
+app.MapControllers();
 
 app.Run("http://*:9632");
