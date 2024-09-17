@@ -2,10 +2,10 @@
 {
     public class InstanceRequest : AbstractNamingRequest
     {
-        [Newtonsoft.Json.JsonProperty("type")]
+        [System.Text.Json.Serialization.JsonPropertyName("type")]
         public string Type { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("instance")]
+        [System.Text.Json.Serialization.JsonPropertyName("instance")]
         public Nacos.V2.Naming.Dtos.Instance Instance { get; set; }
 
         public InstanceRequest(string @namespace, string serviceName, string groupName, string type, Nacos.V2.Naming.Dtos.Instance instance)

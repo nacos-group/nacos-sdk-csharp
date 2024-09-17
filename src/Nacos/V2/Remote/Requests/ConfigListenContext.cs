@@ -10,16 +10,16 @@
             this.Md5 = md5;
         }
 
-        [Newtonsoft.Json.JsonProperty("group")]
+        [System.Text.Json.Serialization.JsonPropertyName("group")]
         public string Group { get; private set; }
 
-        [Newtonsoft.Json.JsonProperty("md5")]
+        [System.Text.Json.Serialization.JsonPropertyName("md5")]
         public string Md5 { get; private set; }
 
-        [Newtonsoft.Json.JsonProperty("dataId")]
+        [System.Text.Json.Serialization.JsonPropertyName("dataId")]
         public string DataId { get; private set; }
 
-        [Newtonsoft.Json.JsonProperty("tenant")]
+        [System.Text.Json.Serialization.JsonPropertyName("tenant")]
         public string Tenant { get; private set; }
     }
 }

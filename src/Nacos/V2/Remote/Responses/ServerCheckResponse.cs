@@ -2,7 +2,7 @@
 {
     public class ServerCheckResponse : CommonResponse
     {
-        [Newtonsoft.Json.JsonProperty("connectionId")]
+        [System.Text.Json.Serialization.JsonPropertyName("connectionId")]
         public string ConnectionId { get; set; }
 
         public override string GetRemoteType() => RemoteRequestType.Resp_ServerCheck;

@@ -2,13 +2,13 @@
 {
     public class ConfigContext
     {
-        [Newtonsoft.Json.JsonProperty("group")]
+        [System.Text.Json.Serialization.JsonPropertyName("group")]
         public string Group { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("dataId")]
+        [System.Text.Json.Serialization.JsonPropertyName("dataId")]
         public string DataId { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("tenant")]
+        [System.Text.Json.Serialization.JsonPropertyName("tenant")]
         public string Tenant { get; set; }
     }
 }
