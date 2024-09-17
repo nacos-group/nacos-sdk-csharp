@@ -10,34 +10,34 @@
         /// <summary>
         /// The tenant, corresponding to the namespace field of Nacos
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("tenant")]
+        [System.Text.Json.Serialization.JsonPropertyName("tenant")]
         public string Tenant { get; set; }
 
         /// <summary>
         /// Configuration ID
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("dataId")]
+        [System.Text.Json.Serialization.JsonPropertyName("dataId")]
         public string DataId { get; set; }
 
         /// <summary>
         /// Configuration group
         /// </summary>
-        [Newtonsoft.Json.JsonProperty("group")]
+        [System.Text.Json.Serialization.JsonPropertyName("group")]
         public string Group { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("beta")]
+        [System.Text.Json.Serialization.JsonPropertyName("beta")]
         public bool Beta { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("contentPush")]
+        [System.Text.Json.Serialization.JsonPropertyName("contentPush")]
         public bool ContentPush { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("lastModifiedTs")]
+        [System.Text.Json.Serialization.JsonPropertyName("lastModifiedTs")]
         public long LastModifiedTs { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("content")]
+        [System.Text.Json.Serialization.JsonPropertyName("content")]
         public string Content { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("type")]
+        [System.Text.Json.Serialization.JsonPropertyName("type")]
         public string Type { get; set; }
 
         public override string GetRemoteType() => RemoteRequestType.Resp_Config_ChangeNotify;

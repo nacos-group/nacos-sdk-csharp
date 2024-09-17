@@ -2,49 +2,49 @@
 {
     public class NacosMetrics
     {
-        [Newtonsoft.Json.JsonProperty("status")]
+        [System.Text.Json.Serialization.JsonPropertyName("status")]
         public string Status { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("serviceCount")]
+        [System.Text.Json.Serialization.JsonPropertyName("serviceCount")]
         public int ServiceCount { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("instanceCount")]
+        [System.Text.Json.Serialization.JsonPropertyName("instanceCount")]
         public int InstanceCount { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("subscribeCount")]
+        [System.Text.Json.Serialization.JsonPropertyName("subscribeCount")]
         public int SubscribeCount { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("raftNotifyTaskCount")]
+        [System.Text.Json.Serialization.JsonPropertyName("raftNotifyTaskCount")]
         public int RaftNotifyTaskCount { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("responsibleServiceCount")]
+        [System.Text.Json.Serialization.JsonPropertyName("responsibleServiceCount")]
         public int ResponsibleServiceCount { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("responsibleInstanceCount")]
+        [System.Text.Json.Serialization.JsonPropertyName("responsibleInstanceCount")]
         public int ResponsibleInstanceCount { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("clientCount")]
+        [System.Text.Json.Serialization.JsonPropertyName("clientCount")]
         public int ClientCount { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("connectionBasedClientCount")]
+        [System.Text.Json.Serialization.JsonPropertyName("connectionBasedClientCount")]
         public int ConnectionBasedClientCount { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("ephemeralIpPortClientCount")]
+        [System.Text.Json.Serialization.JsonPropertyName("ephemeralIpPortClientCount")]
         public int EphemeralIpPortClientCount { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("persistentIpPortClientCount")]
+        [System.Text.Json.Serialization.JsonPropertyName("persistentIpPortClientCount")]
         public int PersistentIpPortClientCount { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("responsibleClientCount")]
+        [System.Text.Json.Serialization.JsonPropertyName("responsibleClientCount")]
         public int ResponsibleClientCount { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("cpu")]
+        [System.Text.Json.Serialization.JsonPropertyName("cpu")]
         public float Cpu { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("load")]
+        [System.Text.Json.Serialization.JsonPropertyName("load")]
         public float Load { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("mem")]
+        [System.Text.Json.Serialization.JsonPropertyName("mem")]
         public float Mem { get; set; }
     }
 }

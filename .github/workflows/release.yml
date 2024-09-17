@@ -11,11 +11,14 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Setup .NET Core
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: |
+          8.0.x
+          7.0.x
+          6.0.x
     - name: Build with dotnet
       run: |
         dotnet build --configuration Release --source https://api.nuget.org/v3/index.json src/Nacos/Nacos.csproj
@@ -34,7 +37,7 @@ jobs:
         dotnet pack parsers/Nacos.YamlParser/Nacos.YamlParser.csproj --version-suffix $ver -o /home/runner/work/nugetpkgs -c Release --no-build
         dotnet msbuild -p:Configuration=Release -t:pack -p:PackageOutputPath=/home/runner/work/nugetpkgs -p:VersionSuffix=$ver src/Nacos.System.Configuration/Nacos.System.Configuration.csproj
     - name: Upload artifact
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v3
       with:
         name: nugetpkgs
         path: /home/runner/work/nugetpkgs  
@@ -46,9 +49,10 @@ jobs:
   
       steps:
         - name: Download build artifacts
-          uses: actions/download-artifact@v1
+          uses: actions/download-artifact@v3
           with:
             name: nugetpkgs
+            path: nugetpkgs
         - name: list nugetpkgs
           run: ls nugetpkgs
         - name: Release

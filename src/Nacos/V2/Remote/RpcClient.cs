@@ -31,6 +31,7 @@ namespace Nacos.V2.Remote
         private readonly BlockingCollection<ConnectionEvent> _eventLinkedBlockingQueue = new BlockingCollection<ConnectionEvent>();
 
         protected ILogger logger;
+        protected TLSConfig _tlsConfig;
 
         protected Dictionary<string, string> labels = new Dictionary<string, string>();
 
@@ -50,7 +51,11 @@ namespace Nacos.V2.Remote
         /// </summary>
         protected List<IServerRequestHandler> serverRequestHandlers = new List<IServerRequestHandler>();
 
-        public RpcClient(string name) => this._name = name;
+        public RpcClient(string name, TLSConfig tlsConfig)
+        {
+            _name = name;
+            _tlsConfig = tlsConfig;
+        }
 
         public RpcClient(IServerListFactory serverListFactory)
         {
@@ -61,13 +66,13 @@ namespace Nacos.V2.Remote
             logger?.LogInformation("RpcClient init in constructor , ServerListFactory ={0}", this._serverListFactory?.GetType()?.Name);
         }
 
-        public RpcClient(string name, IServerListFactory serverListFactory)
-            : this(name)
+        public RpcClient(string name, TLSConfig tlsConfig, IServerListFactory serverListFactory)
+           : this(name, tlsConfig)
         {
-            this._serverListFactory = serverListFactory;
+            _serverListFactory = serverListFactory;
             Interlocked.CompareExchange(ref rpcClientStatus, RpcClientStatus.INITIALIZED, RpcClientStatus.WAIT_INIT);
 
-            logger?.LogInformation("RpcClient init in constructor , ServerListFactory ={0}", this._serverListFactory?.GetType()?.Name);
+            logger?.LogInformation("RpcClient init in constructor , ServerListFactory ={0}", _serverListFactory?.GetType()?.Name);
         }
 
         protected CommonRequestMeta BuildMeta(string type)

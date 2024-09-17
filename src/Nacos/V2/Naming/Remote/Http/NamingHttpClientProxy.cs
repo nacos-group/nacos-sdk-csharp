@@ -72,7 +72,7 @@
             this.serviceInfoHolder = serviceInfoHolder;
         }
 
-        internal async Task<Newtonsoft.Json.Linq.JObject> SendBeat(BeatInfo beatInfo, bool lightBeatEnabled)
+        internal async Task<System.Text.Json.Nodes.JsonObject> SendBeat(BeatInfo beatInfo, bool lightBeatEnabled)
         {
             var parameters = new Dictionary<string, string>()
             {
@@ -88,7 +88,7 @@
             if (!lightBeatEnabled) body["beat"] = beatInfo.ToJsonString();
 
             var result = await ReqApi(UtilAndComs.NacosUrlBase + "/instance/beat", parameters, body, HttpMethod.Put).ConfigureAwait(false);
-            return Newtonsoft.Json.Linq.JObject.Parse(result);
+            return System.Text.Json.Nodes.JsonNode.Parse(result).AsObject();
         }
 
         private void SetServerPort(int serverPort)
@@ -177,9 +177,9 @@
 
             var result = await ReqApi(UtilAndComs.NacosUrlBase + "/service/list", paramters, HttpMethod.Get).ConfigureAwait(false);
 
-            var json = Newtonsoft.Json.Linq.JObject.Parse(result);
-            var count = json.GetValue("count")?.ToObject<int>() ?? 0;
-            var data = json.GetValue("doms")?.ToObject<List<string>>() ?? new List<string>();
+            var json = System.Text.Json.Nodes.JsonNode.Parse(result).AsObject();
+            var count = json["count"]?.GetValue<int>() ?? 0;
+            var data = json["doms"]?.GetValue<List<string>>() ?? new List<string>();
 
             ListView<string> listView = new ListView<string>(count, data);
             return listView;
@@ -411,9 +411,9 @@
                 string result = ReqApi(UtilAndComs.NacosUrlBase + "/operator/metrics", new Dictionary<string, string>(),
                         HttpMethod.Get).ConfigureAwait(false).GetAwaiter().GetResult();
 
-                var json = Newtonsoft.Json.Linq.JObject.Parse(result);
+                var json = System.Text.Json.Nodes.JsonNode.Parse(result).AsObject();
 
-                string serverStatus = json.GetValue("status")?.ToString();
+                string serverStatus = json["status"]?.GetValue<string>();
                 return "UP".Equals(serverStatus);
             }
             catch

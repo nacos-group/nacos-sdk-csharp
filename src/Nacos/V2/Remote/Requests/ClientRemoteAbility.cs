@@ -2,7 +2,7 @@
 {
     public class ClientRemoteAbility
     {
-        [Newtonsoft.Json.JsonProperty("supportRemoteConnection")]
+        [System.Text.Json.Serialization.JsonPropertyName("supportRemoteConnection")]
         public bool SupportRemoteConnection { get; set; }
     }
 }
