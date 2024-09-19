@@ -1,7 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
-#pragma warning disable SA1200
+﻿#pragma warning disable SA1200
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Extensions.ServiceDiscovery;
@@ -10,7 +7,7 @@ using Microsoft.Extensions.ServiceDiscovery;
 namespace Nacos.Microsoft.Extensions.ServiceDiscovery;
 
 /// <summary>
-/// A service end point provider that uses DNS to resolve the service end points.
+/// A service end point provider that uses Nacos to resolve the service end points.
 /// </summary>
 internal abstract partial class NacosServiceEndpointProviderBase : IServiceEndpointProvider
 {

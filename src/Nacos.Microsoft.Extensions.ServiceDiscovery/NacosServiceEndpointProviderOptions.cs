@@ -14,7 +14,7 @@ namespace Nacos.Microsoft.Extensions.ServiceDiscovery;
 public class NacosServiceEndpointProviderOptions
 {
     /// <summary>
-    /// Gets or sets the default refresh period for endpoints resolved from DNS.
+    /// Gets or sets the default refresh period for endpoints resolved from Nacos.
     /// </summary>
     public TimeSpan DefaultRefreshPeriod { get; set; } = TimeSpan.FromMinutes(1);
 
