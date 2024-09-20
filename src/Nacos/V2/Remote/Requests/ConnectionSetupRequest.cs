@@ -4,16 +4,16 @@
 
     public class ConnectionSetupRequest : CommonRequest
     {
-        [Newtonsoft.Json.JsonProperty("clientVersion")]
+        [System.Text.Json.Serialization.JsonPropertyName("clientVersion")]
         public string ClientVersion { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("abilities")]
+        [System.Text.Json.Serialization.JsonPropertyName("abilities")]
         public ClientAbilities Abilities { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("tenant")]
+        [System.Text.Json.Serialization.JsonPropertyName("tenant")]
         public string Tenant { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("labels")]
+        [System.Text.Json.Serialization.JsonPropertyName("labels")]
         public Dictionary<string, string> Labels = new Dictionary<string, string>();
 
         public override string GetRemoteType() => RemoteRequestType.Req_ConnectionSetup;

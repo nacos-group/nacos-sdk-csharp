@@ -2,10 +2,10 @@
 {
     public class ConnectResetRequest : CommonRequest
     {
-        [Newtonsoft.Json.JsonProperty("serverIp")]
+        [System.Text.Json.Serialization.JsonPropertyName("serverIp")]
         public string ServerIp { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("serverPort")]
+        [System.Text.Json.Serialization.JsonPropertyName("serverPort")]
         public string ServerPort { get; set; }
 
         public override string GetRemoteType() => RemoteRequestType.Req_ConnectReset;

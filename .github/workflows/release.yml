@@ -11,15 +11,19 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Setup .NET Core
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: |
+          8.0.x
+          7.0.x
+          6.0.x
     - name: Build with dotnet
       run: |
         dotnet build --configuration Release --source https://api.nuget.org/v3/index.json src/Nacos/Nacos.csproj
         dotnet build --configuration Release --source https://api.nuget.org/v3/index.json src/Nacos.AspNetCore/Nacos.AspNetCore.csproj
+        dotnet build --configuration Release --source https://api.nuget.org/v3/index.json src/Nacos.Microsoft.Extensions.ServiceDiscovery/Nacos.Microsoft.Extensions.ServiceDiscovery.csproj
         dotnet build --configuration Release --source https://api.nuget.org/v3/index.json src/Nacos.Microsoft.Extensions.Configuration/Nacos.Microsoft.Extensions.Configuration.csproj
         dotnet build --configuration Release --source https://api.nuget.org/v3/index.json parsers/Nacos.IniParser/Nacos.IniParser.csproj        
         dotnet build --configuration Release --source https://api.nuget.org/v3/index.json parsers/Nacos.YamlParser/Nacos.YamlParser.csproj                
@@ -29,12 +33,13 @@ jobs:
         ver=alpha`date +%Y%m%d%H%M%S`
         dotnet pack src/Nacos/Nacos.csproj --version-suffix $ver -o /home/runner/work/nugetpkgs -c Release --no-build
         dotnet pack src/Nacos.AspNetCore/Nacos.AspNetCore.csproj --version-suffix $ver -o /home/runner/work/nugetpkgs -c Release --no-build
+        dotnet pack src/Nacos.Microsoft.Extensions.ServiceDiscovery/Nacos.Microsoft.Extensions.ServiceDiscovery.csproj --version-suffix $ver -o /home/runner/work/nugetpkgs -c Release --no-build
         dotnet pack src/Nacos.Microsoft.Extensions.Configuration/Nacos.Microsoft.Extensions.Configuration.csproj --version-suffix $ver -o /home/runner/work/nugetpkgs -c Release --no-build
         dotnet pack parsers/Nacos.IniParser/Nacos.IniParser.csproj --version-suffix $ver -o /home/runner/work/nugetpkgs -c Release --no-build
         dotnet pack parsers/Nacos.YamlParser/Nacos.YamlParser.csproj --version-suffix $ver -o /home/runner/work/nugetpkgs -c Release --no-build
         dotnet msbuild -p:Configuration=Release -t:pack -p:PackageOutputPath=/home/runner/work/nugetpkgs -p:VersionSuffix=$ver src/Nacos.System.Configuration/Nacos.System.Configuration.csproj
     - name: Upload artifact
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v3
       with:
         name: nugetpkgs
         path: /home/runner/work/nugetpkgs  
@@ -46,9 +51,10 @@ jobs:
   
       steps:
         - name: Download build artifacts
-          uses: actions/download-artifact@v1
+          uses: actions/download-artifact@v3
           with:
             name: nugetpkgs
+            path: nugetpkgs
         - name: list nugetpkgs
           run: ls nugetpkgs
         - name: Release

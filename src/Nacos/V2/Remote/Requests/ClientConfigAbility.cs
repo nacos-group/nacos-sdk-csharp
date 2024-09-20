@@ -2,7 +2,7 @@
 {
     public class ClientConfigAbility
     {
-        [Newtonsoft.Json.JsonProperty("supportRemoteMetrics")]
+        [System.Text.Json.Serialization.JsonPropertyName("supportRemoteMetrics")]
         public bool SupportRemoteMetrics { get; set; }
     }
 }
