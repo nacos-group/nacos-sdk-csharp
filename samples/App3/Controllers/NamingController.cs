@@ -9,10 +9,12 @@
     public class NamingController : ControllerBase
     {
         private readonly Nacos.V2.INacosNamingService _client;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public NamingController(Nacos.V2.INacosNamingService client)
+        public NamingController(Nacos.V2.INacosNamingService client, IHttpClientFactory httpClientFactory)
         {
             _client = client;
+            _httpClientFactory = httpClientFactory;
         }
 
         // GET n/g
@@ -100,6 +102,17 @@
             var res = list.ToJsonString();
 
             return res ?? "GetServicesOfServer";
+        }
+
+        // GET n/sd
+        [HttpGet("sd")]
+        public async Task<string> ServiceDiscovery()
+        {
+            var client = _httpClientFactory.CreateClient("app1");
+            var response = await client.GetAsync("/api/values").ConfigureAwait(false);
+            var res = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+            return res;
         }
 
         // GET n/sub
