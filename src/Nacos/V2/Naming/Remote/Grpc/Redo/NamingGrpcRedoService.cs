@@ -100,6 +100,7 @@
             if (_registeredInstances.TryGetValue(key, out var data))
             {
                 data.Unregistering = true;
+                data.ExpectedRegistered = false;
             }
         }
 
@@ -125,7 +126,10 @@
         {
             string key = NamingUtils.GetGroupedName(serviceName, groupName);
 
-            _registeredInstances.TryRemove(key, out _);
+            if (_registeredInstances.TryGetValue(key, out var data) && data != null && !data.ExpectedRegistered)
+            {
+                _registeredInstances.TryRemove(key, out _);
+            }
         }
 
         /// <summary>
@@ -190,6 +194,7 @@
             if (_subscribes.TryGetValue(key, out var data))
             {
                 data.Unregistering = true;
+                data.ExpectedRegistered = false;
             }
         }
 
@@ -203,7 +208,10 @@
         {
             string key = ServiceInfo.GetKey(NamingUtils.GetGroupedName(serviceName, groupName), cluster);
 
-            _subscribes.TryRemove(key, out _);
+            if (_subscribes.TryGetValue(key, out var data) && data != null && !data.ExpectedRegistered)
+            {
+                _subscribes.TryRemove(key, out _);
+            }
         }
 
         /// <summary>
