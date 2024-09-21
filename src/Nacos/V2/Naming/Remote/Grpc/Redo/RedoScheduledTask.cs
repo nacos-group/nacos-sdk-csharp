@@ -66,6 +66,11 @@
                 case RedoType.REGISTER:
                     if (IsClientDisabled()) return;
 
+                    if (redoData is BatchInstanceRedoData batchInstanceRedoData)
+                    {
+                        await _clientProxy.BatchRegisterServiceAsync(serviceName, groupName, batchInstanceRedoData.Instances).ConfigureAwait(false);
+                    }
+
                     await _clientProxy.DoRegisterService(serviceName, groupName, redoData.Data).ConfigureAwait(false);
                     break;
                 case RedoType.UNREGISTER:
