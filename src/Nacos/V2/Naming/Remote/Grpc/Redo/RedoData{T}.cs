@@ -7,11 +7,14 @@
         {
             this.ServiceName = serviceName;
             this.GroupName = groupName;
+            this.ExpectedRegistered = true;
         }
 
         public string ServiceName { get; private set; }
 
         public string GroupName { get; private set; }
+
+        public bool ExpectedRegistered { get; set; }
 
         public T Data { get; set; }
 
