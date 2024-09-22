@@ -8,7 +8,12 @@ namespace Microsoft.Extensions.Hosting;
 
 public static class NacosServiceDiscoveryExtensions
 {
-    public static IServiceCollection AddNacosSrvServiceEndpointProvider(this IServiceCollection services)
+    /// <summary>
+    /// Configures a service discovery endpoint provider which uses <see cref="T:Nacos.V2.INacosNamingService" /> to resolve endpoints.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <returns>The service collection.</returns>
+    public static IServiceCollection AddNacosServiceEndpointProvider(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
 
