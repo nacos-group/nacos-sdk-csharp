@@ -8,7 +8,7 @@ builder.Services.AddServiceDiscovery(o =>
     o.RefreshPeriod = TimeSpan.FromSeconds(60);
 })
 .AddConfigurationServiceEndpointProvider()
-.AddNacosSrvServiceEndpointProvider();
+.AddNacosServiceEndpointProvider();
 ```
 
 ## Links
