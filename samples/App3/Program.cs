@@ -41,14 +41,14 @@ builder.Services.AddServiceDiscovery(o =>
     o.RefreshPeriod = TimeSpan.FromSeconds(60);
 })
 .AddConfigurationServiceEndpointProvider()
-.AddNacosSrvServiceEndpointProvider();
+.AddNacosServiceEndpointProvider();
 
 builder.Services.ConfigureHttpClientDefaults(static http =>
 {
     http.AddServiceDiscovery();
 });
 
-// 使用IHttpClientFactory
+// use IHttpClientFactory
 builder.Services.AddHttpClient("app1", cfg =>
 {
     cfg.BaseAddress = new Uri("http://app1");
