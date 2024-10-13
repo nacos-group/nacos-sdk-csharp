@@ -16,5 +16,10 @@
         /// Configuration group
         /// </summary>
         public string Group { get; set; }
+
+        /// <summary>
+        /// Configuration format
+        /// </summary>
+        public string Format { get; set; }
     }
 }

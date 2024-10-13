@@ -29,6 +29,12 @@
         /// </summary>
         public INacosConfigurationParser NacosConfigurationParser { get; set; }
 
+        public Dictionary<string, INacosConfigurationParser> NacosConfigurationParsers { get; } =
+            new Dictionary<string, INacosConfigurationParser>()
+            {
+                { "json", DefaultJsonConfigurationStringParser.Instance }
+            };
+
         public NacosV2ConfigurationSource(INacosConfigService client, ILoggerFactory loggerFactory)
         {
             Client = client;
