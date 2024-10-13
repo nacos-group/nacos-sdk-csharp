@@ -14,6 +14,16 @@
         Task<string> GetConfig(string dataId, string group, long timeoutMs);
 
         /// <summary>
+        /// Get config.
+        /// </summary>
+        /// <param name="dataId">dataId</param>
+        /// <param name="group">group</param>
+        /// <param name="tenant">namespace</param>
+        /// <param name="timeoutMs">read timeout</param>
+        /// <returns>config value</returns>
+        Task<string> GetConfig(string dataId, string group, string tenant, long timeoutMs);
+
+        /// <summary>
         /// Get config and register Listener.
         /// If you want to pull it yourself when the program starts to get the configuration for the first time, and the
         /// registered Listener is used for future configuration updates, you can keep the original code unchanged, just add
@@ -37,6 +47,18 @@
         /// <param name="group">group</param>
         /// <param name="listener">Listener</param>
         Task AddListener(string dataId, string group, IListener listener);
+
+        /// <summary>
+        /// Add a listener to the configuration, after the server modified the configuration, the client will use the
+        /// incoming listener callback. Recommended asynchronous processing, the application can implement the getExecutor
+        /// method in the ManagerListener, provide a thread pool of execution. If provided, use the main thread callback, May
+        /// block other configurations or be blocked by other configurations.
+        /// </summary>
+        /// <param name="dataId">dataId</param>
+        /// <param name="group">group</param>
+        /// <param name="tenant">namespace</param>
+        /// <param name="listener">Listener</param>
+        Task AddListener(string dataId, string group, string tenant, IListener listener);
 
         /// <summary>
         /// Publish config.
@@ -93,6 +115,15 @@
         /// <param name="group">group</param>
         /// <param name="listener">listener</param>
         Task RemoveListener(string dataId, string group, IListener listener);
+
+        /// <summary>
+        /// Remove listener.
+        /// </summary>
+        /// <param name="dataId">dataId</param>
+        /// <param name="group">group</param>
+        /// <param name="tenant">tenant</param>
+        /// <param name="listener">listener</param>
+        Task RemoveListener(string dataId, string group, string tenant, IListener listener);
 
         /// <summary>
         /// Get server status.

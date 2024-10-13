@@ -3,6 +3,7 @@
     using global::Microsoft.Extensions.Configuration;
     using global::Microsoft.Extensions.Logging;
     using Nacos.V2;
+    using Nacos.V2.Utils;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
@@ -39,11 +40,13 @@
 
                 foreach (var item in configurationSource.Listeners)
                 {
-                    var listener = new MsConfigListener(item.DataId, item.Group, item.Optional, this, _logger);
+                    var listener = new MsConfigListener(item, this, _logger);
 
-                    tasks.Add(_client.AddListener(item.DataId, item.Group, listener));
+                    tasks.Add(item.Namespace.IsNullOrWhiteSpace()
+                        ? _client.AddListener(item.DataId, item.Group, listener)
+                        : _client.AddListener(item.DataId, item.Group, item.Namespace, listener));
 
-                    _listenerDict.Add($"{item.DataId}#{item.Group}", listener);
+                    _listenerDict.Add($"{item.DataId}#{item.Group}#{item.Namespace}", listener);
                 }
 
                 Task.WaitAll(tasks.ToArray());
@@ -66,8 +69,11 @@
                 var arr = item.Key.Split('#');
                 var dataId = arr[0];
                 var group = arr[1];
+                var tenant = arr[2];
 
-                tasks.Add(_client.RemoveListener(dataId, group, item.Value));
+                tasks.Add(tenant.IsNullOrWhiteSpace()
+                    ? _client.RemoveListener(dataId, group, item.Value)
+                    : _client.RemoveListener(dataId, group, tenant, item.Value));
             }
 
             Task.WaitAll(tasks.ToArray());
@@ -87,10 +93,12 @@
                     {
                         try
                         {
-                            var config = _client.GetConfig(listener.DataId, listener.Group, 3000)
+                            var config = (listener.Namespace.IsNullOrWhiteSpace()
+                                    ? _client.GetConfig(listener.DataId, listener.Group, 3000)
+                                    : _client.GetConfig(listener.DataId, listener.Group, listener.Namespace, 3000))
                                 .ConfigureAwait(false).GetAwaiter().GetResult();
 
-                            _configDict.AddOrUpdate($"{_configurationSource.GetNamespace()}#{listener.Group}#{listener.DataId}", config, (x, y) => config);
+                            _configDict.AddOrUpdate(GetCacheKey(listener), config, (x, y) => config);
 
                             var data = _parser.Parse(config);
 
@@ -123,6 +131,9 @@
             }
         }
 
+        private string GetCacheKey(ConfigListener listener)
+            => $"{(listener.Namespace.IsNullOrWhiteSpace() ? _configurationSource.GetNamespace() : listener.Namespace)}#{listener.Group}#{listener.DataId}";
+
         // for test
         internal void SetListener(string key, MsConfigListener listener)
         {
@@ -131,21 +142,17 @@
 
         internal class MsConfigListener : IListener
         {
-            private string _dataId;
-            private string _group;
             private bool _optional;
             private NacosV2ConfigurationProvider _provider;
             private string _key;
             private ILogger _logger;
 
-            internal MsConfigListener(string dataId, string group, bool optional, NacosV2ConfigurationProvider provider, ILogger logger)
+            internal MsConfigListener(ConfigListener listener, NacosV2ConfigurationProvider provider, ILogger logger)
             {
-                this._dataId = dataId;
-                this._group = group;
-                this._optional = optional;
+                this._optional = listener.Optional;
                 this._provider = provider;
                 this._logger = logger;
-                _key = $"{provider._configurationSource.GetNamespace()}#{_group}#{_dataId}";
+                _key = provider.GetCacheKey(listener);
             }
 
 
@@ -160,7 +167,7 @@
 
                     foreach (var listener in _provider._configurationSource.Listeners)
                     {
-                        var key = $"{_provider._configurationSource.GetNamespace()}#{listener.Group}#{listener.DataId}";
+                        var key = _provider.GetCacheKey(listener);
 
                         if (!_provider._configDict.TryGetValue(key, out var config))
                         {
