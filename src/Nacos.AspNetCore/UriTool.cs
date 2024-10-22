@@ -1,4 +1,6 @@
-﻿[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Nacos.AspNetCore.Tests")]
+﻿using System.Text.RegularExpressions;
+
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Nacos.AspNetCore.Tests")]
 
 namespace Nacos.AspNetCore
 {
@@ -140,9 +142,11 @@ namespace Nacos.AspNetCore
                 // 获取所有可用网卡IP信息
                 var ipCollection = nics?.Select(x => x.GetIPProperties())?.SelectMany(x => x.UnicastAddresses);
 
+                var preferredNetworksArr = preferredNetworks.Split(",");
                 foreach (var ipadd in ipCollection)
                 {
-                    if (!IPAddress.IsLoopback(ipadd.Address) && ipadd.Address.AddressFamily == AddressFamily.InterNetwork)
+                    if (!IPAddress.IsLoopback(ipadd.Address) &&
+                        ipadd.Address.AddressFamily == AddressFamily.InterNetwork)
                     {
                         if (string.IsNullOrEmpty(preferredNetworks))
                         {
@@ -150,7 +154,9 @@ namespace Nacos.AspNetCore
                             break;
                         }
 
-                        if (!ipadd.Address.ToString().StartsWith(preferredNetworks)) continue;
+                        if (!preferredNetworksArr.Any(preferredNetwork =>
+                                ipadd.Address.ToString().StartsWith(preferredNetwork)
+                                || Regex.IsMatch(ipadd.Address.ToString(), preferredNetwork))) continue;
                         instanceIp = ipadd.Address.ToString();
                         break;
                     }

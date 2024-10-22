@@ -57,5 +57,15 @@
             Assert.True(System.Net.IPAddress.TryParse(uri.Host, out _));
             Assert.Equal(80, uri.Port);
         }
+
+        [Fact]
+        public void GetUri_With_Multiple_And_Regex_PreferredNetworks_Should_Succeed()
+        {
+            var preferredNetworks = @"192.168.,10.0.,172\.16\.\d+\.\d+";
+            var uris = UriTool.GetUri(null, "", 0, preferredNetworks);
+            Assert.Single(uris);
+            var uri = uris.First();
+            Assert.Matches(@"(192\.168\.\d+\.\d+|10\.0\.\d+\.\d+|172\.16\.\d+\.\d+)", uri.Host);
+        }
     }
 }
