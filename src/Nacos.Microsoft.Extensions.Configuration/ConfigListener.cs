@@ -16,5 +16,10 @@
         /// Configuration group
         /// </summary>
         public string Group { get; set; }
+
+        /// <summary>
+        /// Configuration namespace
+        /// </summary>
+        public string Namespace { get; set; }
     }
 }

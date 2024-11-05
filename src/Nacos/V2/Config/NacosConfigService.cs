@@ -6,6 +6,7 @@
     using Nacos.V2.Config.Impl;
     using Nacos.V2.Config.Utils;
     using Nacos.V2.Exceptions;
+    using Nacos.V2.Utils;
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
@@ -28,8 +29,16 @@
         public Task AddListener(string dataId, string group, IListener listener)
             => _worker.AddTenantListeners(dataId, group, new List<IListener> { listener });
 
+        public Task AddListener(string dataId, string group, string tenant, IListener listener)
+            => tenant.IsNullOrWhiteSpace()
+                ? _worker.AddTenantListeners(dataId, group, new List<IListener> { listener })
+                : _worker.AddTenantListeners(dataId, group, tenant, new List<IListener> { listener });
+
         public async Task<string> GetConfig(string dataId, string group, long timeoutMs)
             => await GetConfigInner(_namespace, dataId, group, timeoutMs).ConfigureAwait(false);
+
+        public Task<string> GetConfig(string dataId, string group, string tenant, long timeoutMs)
+            => GetConfigInner(tenant.IsNullOrWhiteSpace() ? _namespace : tenant, dataId, group, timeoutMs);
 
         public async Task<string> GetConfigAndSignListener(string dataId, string group, long timeoutMs, IListener listener)
         {
@@ -58,6 +67,11 @@
 
         public Task RemoveListener(string dataId, string group, IListener listener)
             => _worker.RemoveTenantListener(dataId, group, listener);
+
+        public Task RemoveListener(string dataId, string group, string tenant, IListener listener)
+            => tenant.IsNullOrWhiteSpace()
+                ? _worker.RemoveTenantListener(dataId, group, listener)
+                : _worker.RemoveTenantListener(dataId, group, tenant, listener);
 
         public Task ShutDown() => Task.CompletedTask;
 

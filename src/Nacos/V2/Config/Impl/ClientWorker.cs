@@ -33,10 +33,12 @@
                 : new ConfigHttpTransportClient(logger, options, serverListManager, _cacheMap);
         }
 
-        public async Task AddTenantListeners(string dataId, string group, List<IListener> listeners)
+        public Task AddTenantListeners(string dataId, string group, List<IListener> listeners)
+            => AddTenantListeners(dataId, group, _agent.GetTenant(), listeners);
+
+        public async Task AddTenantListeners(string dataId, string group, string tenant, List<IListener> listeners)
         {
             group = ParamUtils.Null2DefaultGroup(group);
-            string tenant = _agent.GetTenant();
 
             CacheData cache = AddCacheDataIfAbsent(dataId, group, tenant);
             foreach (var listener in listeners)
@@ -68,10 +70,12 @@
             }
         }
 
-        public async Task RemoveTenantListener(string dataId, string group, IListener listener)
+        public Task RemoveTenantListener(string dataId, string group, IListener listener)
+            => RemoveTenantListener(dataId, group, _agent.GetTenant(), listener);
+
+        public async Task RemoveTenantListener(string dataId, string group, string tenant, IListener listener)
         {
             group = ParamUtils.Null2DefaultGroup(group);
-            string tenant = _agent.GetTenant();
 
             CacheData cache = GetCache(dataId, group, tenant);
             if (cache != null)
