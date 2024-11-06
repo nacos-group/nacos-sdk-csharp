@@ -3,6 +3,7 @@
     using global::Microsoft.Extensions.Configuration;
     using global::Microsoft.Extensions.Logging;
     using Nacos.V2;
+    using Nacos.V2.Utils;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
@@ -14,6 +15,7 @@
         private readonly NacosV2ConfigurationSource _configurationSource;
 
         private readonly INacosConfigurationParser _parser;
+        private readonly IReadOnlyDictionary<string, INacosConfigurationParser> _parsers;
 
         private readonly INacosConfigService _client;
 
@@ -27,6 +29,7 @@
         {
             _configurationSource = configurationSource;
             _parser = configurationSource.NacosConfigurationParser;
+            _parsers = configurationSource.NacosConfigurationParsers;
             _configDict = new ConcurrentDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             _listenerDict = new Dictionary<string, MsConfigListener>();
 
@@ -53,6 +56,18 @@
                 // after remove old v1 code, Listeners must be not empty
                 throw new Nacos.V2.Exceptions.NacosException("Listeners is empty!!");
             }
+        }
+
+        private INacosConfigurationParser GetParser(string format)
+        {
+            if (format.IsNullOrWhiteSpace()) return _parser;
+
+            if (_parsers.TryGetValue(format, out var parser))
+            {
+                return parser;
+            }
+
+            throw new InvalidOperationException("Missing parser for format: " + format);
         }
 
         internal IDictionary<string, string> GetData() => Data;
@@ -92,7 +107,7 @@
 
                             _configDict.AddOrUpdate($"{_configurationSource.GetNamespace()}#{listener.Group}#{listener.DataId}", config, (x, y) => config);
 
-                            var data = _parser.Parse(config);
+                            var data = GetParser(listener.Format).Parse(config);
 
                             foreach (var item in data)
                             {
@@ -167,7 +182,7 @@
                             continue;
                         }
 
-                        var data = _provider._parser.Parse(config);
+                        var data = _provider.GetParser(listener.Format).Parse(config);
 
                         foreach (var item in data)
                         {
