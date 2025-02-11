@@ -659,7 +659,7 @@
 
                     inInitializingCacheList.Clear();
 
-                    if (_longPollingMap.TryGetValue(selfTaskId, out var t)) t.Change(1, Timeout.Infinite);
+                    if (_longPollingMap.TryGetValue(selfTaskId, out var t)) t.Change(Math.Max(1, _options.ListenInterval), Timeout.Infinite);
                 }
                 catch (Exception ex)
                 {
