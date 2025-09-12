@@ -30,7 +30,11 @@
 
                 if (_tlsConfig != null && _tlsConfig.Enabled)
                 {
+#if NET9_0
+                    var clientCertificate = X509CertificateLoader.LoadPkcs12FromFile(_tlsConfig.PfxFile, _tlsConfig.Password);
+#else
                     var clientCertificate = new X509Certificate2(_tlsConfig.PfxFile, _tlsConfig.Password);
+#endif
 
 #if !NETSTANDARD2_0
                     var httpClientHandler = new SocketsHttpHandler();

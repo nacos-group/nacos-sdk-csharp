@@ -143,7 +143,7 @@ namespace Nacos.AspNetCore
                 var ipCollection = nics?.Select(x => x.GetIPProperties())?.SelectMany(x => x.UnicastAddresses);
 
                 var preferredNetworksArr = string.IsNullOrEmpty(preferredNetworks)
-                    ? new string[0] : preferredNetworks.Split(",");
+                     ? new string[0] : preferredNetworks.Split(",");
                 foreach (var ipadd in ipCollection)
                 {
                     if (!IPAddress.IsLoopback(ipadd.Address) &&

@@ -1,5 +1,8 @@
 ﻿namespace Microsoft.Extensions.Configuration
 {
+#if NET5_0_OR_GREATER
+    using Microsoft.AspNetCore.Hosting;
+#endif
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
@@ -84,6 +87,7 @@
             return builder.Add(source);
         }
 
+#if !NET9_0
         /// <summary>
         /// Use nacos config combine IHostBuilder and ConfigureAppConfiguration
         /// </summary>
@@ -103,6 +107,7 @@
 
             return builder;
         }
+#endif
 
 #if NET5_0_OR_GREATER
         /// <summary>
@@ -113,7 +118,7 @@
         /// <param name="parser">The parser.</param>
         /// <param name="logAction">The logAction.</param>
         /// <returns>IHostBuilder</returns>
-        public static AspNetCore.Hosting.IWebHostBuilder UseNacosConfig(this AspNetCore.Hosting.IWebHostBuilder builder, string section, INacosConfigurationParser parser = null, Action<ILoggingBuilder> logAction = null)
+        public static IWebHostBuilder UseNacosConfig(this IWebHostBuilder builder, string section, INacosConfigurationParser parser = null, Action<ILoggingBuilder> logAction = null)
         {
             builder.ConfigureAppConfiguration((_, cfb) =>
             {
@@ -138,7 +143,8 @@
 
                 var sdkAction = source.GetNacosSdkOptions();
                 serviceCollection.AddNacosV2Config(sdkAction);
-                serviceCollection.AddLogging(logAction ?? (x => x.AddConsole()));
+                logAction ??= (x) => x.AddConsole();
+                serviceCollection.AddLogging(logAction);
 
                 var serviceProvider = serviceCollection.BuildServiceProvider();
 
